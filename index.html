@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Programme Musculation & Calisthénie - Suivi Graphique</title>
+    <title>Programme Musculation & Calisthénie - Suivi avec SQLite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-asm.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -27,23 +28,56 @@
         .accordion-toggle.open svg, .exercise-graph-toggle.open svg {
             transform: rotate(180deg);
         }
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
+
+    <!-- Indicateur de chargement -->
+    <div id="loader">
+        <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-4 text-lg font-semibold text-gray-700">Chargement de l'application...</p>
+    </div>
 
     <div class="container mx-auto p-4 md:p-8">
         <header class="text-center mb-8">
             <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Votre Programme Hebdomadaire</h1>
             <p class="text-xl text-blue-600 mt-2">Format 3 Jours : Tirage / Poussée / Jambes</p>
+            <p id="db-status" class="text-sm text-gray-500 mt-2 italic"></p>
+            <!-- Boutons pour importer/exporter la BDD -->
+            <div class="flex justify-center items-center space-x-4 mt-4">
+                <button id="import-db-btn" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition hidden">
+                    Importer BDD
+                </button>
+                <input type="file" id="db-importer" class="hidden" accept=".db,.sqlite,.sqlite3">
+                <button id="export-db-btn" class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transition hidden">
+                    Exporter BDD
+                </button>
+            </div>
         </header>
 
         <main class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
             <!-- Tabs de navigation -->
             <div class="mb-6 border-b border-gray-200">
                 <nav class="flex flex-wrap -mb-px" id="tabs">
-                    <button class="tab-btn active text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2" data-tab="tirage">Tirage</button>
-                    <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2" data-tab="poussee">Poussée</button>
-                    <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg" data-tab="jambes">Jambes</button>
+                    <button class="tab-btn active text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2" data-tab="Tirage">Tirage</button>
+                    <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2" data-tab="Poussée">Poussée</button>
+                    <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg" data-tab="Jambes">Jambes</button>
                     <div class="ml-auto flex flex-wrap">
                         <button class="tab-btn dernier text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2 border border-yellow-500 text-yellow-600 hover:bg-yellow-50" data-tab="dernieres-seances">Dernières Séances</button>
                         <button class="tab-btn suivi text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg border border-green-500 text-green-600 hover:bg-green-50" data-tab="suivi">Suivi Graphique</button>
@@ -53,465 +87,51 @@
 
             <!-- Contenu des jours et du suivi -->
             <div id="tab-contents">
-                <!-- SÉANCE TIRAGE -->
-                <div id="tirage" class="tab-content active">
+                <div id="Tirage" class="tab-content active">
                     <h3 class="text-3xl font-bold mb-4 text-gray-900">Séance 1 : Tirage (Dos, Biceps)</h3>
-                     <div id="tirage-exercises" class="space-y-6">
-                        <!-- Les exercices sont maintenant générés par JavaScript -->
-                     </div>
+                     <div id="Tirage-exercises" class="space-y-6"></div>
                 </div>
-
-                <!-- SÉANCE POUSSÉE -->
-                <div id="poussee" class="tab-content">
+                <div id="Poussée" class="tab-content">
                      <h3 class="text-3xl font-bold mb-4">Séance 2 : Poussée</h3>
-                     <div id="poussee-exercises" class="space-y-6">
-                        <!-- Les exercices sont maintenant générés par JavaScript -->
-                     </div>
+                     <div id="Poussée-exercises" class="space-y-6"></div>
                 </div>
-
-                <!-- SÉANCE JAMBES -->
-                <div id="jambes" class="tab-content">
+                <div id="Jambes" class="tab-content">
                      <h3 class="text-3xl font-bold mb-4">Séance 3 : Jambes & Core</h3>
-                     <div id="jambes-exercises" class="space-y-6">
-                        <!-- Les exercices sont maintenant générés par JavaScript -->
-                     </div>
+                     <div id="Jambes-exercises" class="space-y-6"></div>
                 </div>
-                
-                <!-- Onglet Dernières Séances -->
                 <div id="dernieres-seances" class="tab-content">
                     <h3 class="text-3xl font-bold mb-4 text-yellow-700">Détail des Dernières Séances</h3>
-                    <div id="dernieres-seances-content" class="space-y-8">
-                        <!-- Le contenu sera généré par JS -->
-                    </div>
+                    <div id="dernieres-seances-content" class="space-y-8"></div>
                 </div>
-
-                <!-- Onglet Suivi Graphique -->
                 <div id="suivi" class="tab-content">
                     <h3 class="text-3xl font-bold mb-4 text-green-700">Suivi Graphique de Progression</h3>
                     <p class="mb-6 text-gray-600">Cliquez sur un type de séance pour voir les exercices, puis sur un exercice pour afficher son graphique.</p>
-                    <div id="suivi-graphs-content" class="space-y-4">
-                        <!-- Les accordéons de graphiques seront générés par JS -->
-                    </div>
+                    <div id="suivi-graphs-content" class="space-y-4"></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Charger le fichier de base de données AVANT le script principal -->
-    <script src="database.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-        // --- GESTION DES DONNÉES ---
-        // MODIFIÉ: On utilise directement les objets, plus besoin de la fonction loadData
-        let data = mockData;
-        const chartInstances = {};
-
-        // --- GESTION DU MODAL ---
-        const modal = document.getElementById('performance-modal');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const savePerfBtn = document.getElementById('save-performance-btn');
-        const modalTitle = document.getElementById('modal-title');
-        const modalExoName = document.getElementById('modal-exercise-name');
-        const modalRepsInput = document.getElementById('modal-reps');
-        const modalWeightInput = document.getElementById('modal-weight');
-        const modalWorkoutTypeInput = document.getElementById('modal-workout-type');
-
-        // NOUVEAU: Fonction pour ouvrir le modal
-        function openPerformanceModal(exerciseName, workoutType) {
-            modalExoName.textContent = exerciseName;
-            modalTitle.textContent = `Ajouter Performance pour ${exerciseName}`;
-            modalWorkoutTypeInput.value = workoutType; // Stocke le type de séance
-            modal.classList.remove('hidden');
-        }
-
-        // NOUVEAU: Fonction pour fermer le modal
-        function closePerformanceModal() {
-            modal.classList.add('hidden');
-            modalRepsInput.value = '';
-            modalWeightInput.value = '0';
-        }
-        
-        // NOUVEAU: Fonction pour sauvegarder la performance d'un exercice (temporairement)
-        function saveExercisePerformance() {
-            const exerciseName = modalExoName.textContent;
-            const workoutType = modalWorkoutTypeInput.value;
-            
-            const reps = modalRepsInput.value.split(',').map(r => parseInt(r.trim())).filter(r => !isNaN(r));
-            const weight = parseFloat(modalWeightInput.value);
-
-            if (reps.length === 0) {
-                alert("Veuillez entrer au moins une répétition valide.");
-                return;
-            }
-
-            const newPerformance = {
-                name: exerciseName,
-                sets: reps.length,
-                reps: reps,
-                weight: weight
-            };
-            
-            // On cherche si l'exercice a déjà été enregistré dans la séance en cours pour le remplacer
-            const existingIndex = currentSession[workoutType].findIndex(ex => ex.name === exerciseName);
-            if(existingIndex > -1) {
-                currentSession[workoutType][existingIndex] = newPerformance;
-            } else {
-                currentSession[workoutType].push(newPerformance);
-            }
-
-            console.log("Séance en cours:", currentSession);
-            alert(`Performance pour "${exerciseName}" ajoutée à la séance en cours !`);
-            closePerformanceModal();
-        }
-        
-        // NOUVEAU: Fonction pour finaliser et enregistrer la séance
-        function finalizeAndSaveSession(workoutType) {
-            if (currentSession[workoutType].length === 0) {
-                alert("Aucune performance n'a été ajoutée pour cette séance.");
-                return;
-            }
-
-            const newSession = {
-                date: new Date().toISOString().split('T')[0], // Date du jour
-                type: workoutType,
-                exercises: currentSession[workoutType]
-            };
-
-            data.workout_log.push(newSession);
-
-            // Réinitialiser la séance en cours
-            currentSession[workoutType] = [];
-
-            // Mettre à jour toute l'interface
-            renderProgram();
-            renderLastSessions();
-            renderGraphs();
-
-            alert(`Séance de ${workoutType} enregistrée avec succès !`);
-            
-            // Proposer l'export
-            showExportModal();
-        }
-        
-        // NOUVEAU: Fonction pour afficher le modal d'exportation
-        function showExportModal() {
-            const exportTextarea = document.getElementById('export-textarea');
-            // On doit reconstruire le code complet du fichier database.js
-            const newDbContent = `const program = ${JSON.stringify(program, null, 4)};\n\nconst mockData = ${JSON.stringify(data, null, 4)};\n\nlet currentSession = {\n    "Tirage": [],\n    "Poussée": [],\n    "Jambes": []\n};`;
-            exportTextarea.value = newDbContent;
-            document.getElementById('export-modal').classList.remove('hidden');
-        }
-
-
-        // --- AFFICHAGE ---
-
-        // MODIFIÉ: renderProgram pour ajouter le bouton "Ajouter performance"
-        function renderProgram() {
-            const workoutTypes = {
-                "tirage": "Tirage",
-                "poussee": "Poussée",
-                "jambes": "Jambes"
-            };
-
-            function getLastPerformance(exerciseName) {
-                const history = data.workout_log
-                    .flatMap(session => session.exercises.map(ex => ({ ...ex, date: session.date })))
-                    .filter(ex => ex.name === exerciseName)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date));
-                return history.length > 0 ? history[0] : null;
-            }
-
-            for (const [typeKey, typeName] of Object.entries(workoutTypes)) {
-                const container = document.getElementById(`${typeKey}-exercises`);
-                if (!container) continue;
-                container.innerHTML = ''; 
-
-                program[typeKey].forEach(exercise => {
-                    const lastPerf = getLastPerformance(exercise.name);
-                    let lastPerfHtml = '<p class="text-sm text-gray-500 italic mt-2">Aucune donnée précédente.</p>';
-
-                    if (lastPerf) {
-                        if (lastPerf.weight > 0) {
-                            lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${lastPerf.weight} kg</p>`;
-                        } else {
-                            const repsStr = lastPerf.reps.join(' - ');
-                            lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${lastPerf.sets} séries de [${repsStr}] reps</p>`;
-                        }
-                    }
-
-                    // MODIFIÉ: Ajout du bouton d'ajout de performance
-                    const exerciseHtml = `
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-bold text-lg">${exercise.name}</h4>
-                                    <p class="font-semibold mt-1">${exercise.sets} séries de ${exercise.reps} répétitions</p>
-                                </div>
-                                <span class="text-xs font-medium text-gray-600 bg-gray-200 px-2 py-1 rounded-full whitespace-nowrap">${exercise.rest_time}</span>
-                            </div>
-                            ${lastPerfHtml}
-                            <button class="add-performance-btn mt-3 w-full text-sm font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 py-2 px-4 rounded-md transition"
-                                    data-exercise-name="${exercise.name}" data-workout-type="${typeName}">
-                                Ajouter la performance du jour
-                            </button>
-                        </div>
-                    `;
-                    container.innerHTML += exerciseHtml;
-                });
-                
-                // NOUVEAU: Ajout du bouton pour finaliser la séance
-                container.innerHTML += `
-                    <div class="mt-8">
-                        <button class="finalize-session-btn w-full py-3 px-4 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition"
-                                data-workout-type="${typeName}">
-                            Terminer et Enregistrer la Séance ${typeName}
-                        </button>
-                    </div>
-                `;
-            }
-        }
-
-        function renderLastSessions() {
-            const container = document.getElementById('dernieres-seances-content');
-            container.innerHTML = '';
-            const workoutTypes = ['Tirage', 'Poussée', 'Jambes'];
-
-            workoutTypes.forEach(type => {
-                const sessionsOfType = data.workout_log.filter(s => s.type === type)
-                                                .sort((a,b) => new Date(b.date) - new Date(a.date));
-
-                const div = document.createElement('div');
-                let content = `<h4 class="text-2xl font-semibold border-b pb-2 mb-3">${type}</h4>`;
-
-                if (sessionsOfType.length > 0) {
-                    const lastSession = sessionsOfType[0];
-                    content += `
-                        <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                            <p class="font-bold text-yellow-800">Dernière séance le ${new Date(lastSession.date).toLocaleDateString('fr-FR')}</p>
-                            <ul class="list-disc list-inside mt-2 text-gray-700">`;
-                    
-                    lastSession.exercises.forEach(ex => {
-                        const repsStr = ex.reps.join(', ');
-                        const weightStr = ex.weight > 0 ? `à ${ex.weight} kg` : `(Poids du corps)`;
-                        content += `<li><strong>${ex.name}:</strong> ${ex.sets} séries de [${repsStr}] reps ${weightStr}</li>`;
-                    });
-
-                    content += `</ul></div>`;
-                } else {
-                    content += `<div class="text-gray-500 italic">Aucune séance de type "${type}" enregistrée.</div>`;
-                }
-                div.innerHTML = content;
-                container.appendChild(div);
-            });
-        }
-
-        function renderGraphs() {
-            const container = document.getElementById('suivi-graphs-content');
-            container.innerHTML = '';
-            // Détruire les anciens graphiques pour éviter les fuites de mémoire
-            for (const chartId in chartInstances) {
-                if (chartInstances[chartId]) {
-                    chartInstances[chartId].destroy();
-                    delete chartInstances[chartId];
-                }
-            }
-            
-            const workoutTypes = ['Tirage', 'Poussée', 'Jambes'];
-
-            workoutTypes.forEach(type => {
-                const accordion = document.createElement('div');
-                accordion.className = 'border border-gray-200 rounded-lg';
-                
-                const exercisesForType = [...new Set(
-                    data.workout_log
-                        .filter(session => session.type === type)
-                        .flatMap(session => session.exercises.map(ex => ex.name))
-                )];
-
-                if (exercisesForType.length === 0) return;
-
-                let exercisesHtml = '<div class="space-y-2">';
-                exercisesForType.forEach(exerciseName => {
-                    const chartId = `chart-${exerciseName.replace(/[^a-zA-Z0-9]/g, '-')}`;
-                    exercisesHtml += `
-                        <div>
-                            <button class="exercise-graph-toggle w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out flex justify-between items-center" data-exercise="${exerciseName}" data-chart-id="${chartId}">
-                                <span class="font-semibold text-gray-700">${exerciseName}</span>
-                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </button>
-                            <div id="wrapper-${chartId}" class="chart-wrapper hidden mt-2 pl-4 pr-4 pb-2">
-                                <div class="chart-container bg-white p-2 rounded-md">
-                                    <canvas id="${chartId}"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                exercisesHtml += '</div>';
-
-                accordion.innerHTML = `
-                    <button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-100 hover:bg-gray-200 rounded-t-lg">
-                        <span class="text-xl font-bold text-gray-800">${type}</span>
-                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div class="accordion-content hidden p-4 border-t border-gray-200">
-                        ${exercisesHtml}
-                    </div>
-                `;
-                container.appendChild(accordion);
-            });
-        }
-
-        function createChart(exerciseName, chartId) {
-            if (chartInstances[chartId]) {
-                chartInstances[chartId].destroy(); // Détruire l'ancien graphique s'il existe
-            }
-
-            const exerciseHistory = data.workout_log
-                .flatMap(session => session.exercises.map(ex => ({...ex, date: session.date})))
-                .filter(ex => ex.name === exerciseName)
-                .sort((a,b) => new Date(a.date) - new Date(b.date));
-
-            if (exerciseHistory.length < 2) {
-                const wrapper = document.getElementById(`wrapper-${chartId}`);
-                wrapper.innerHTML = '<p class="text-center text-gray-500">Pas assez de données pour afficher un graphique.</p>';
-                return;
-            };
-
-            const labels = exerciseHistory.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
-            const isBodyweight = exerciseHistory.every(ex => ex.weight === 0);
-            
-            let chartData;
-            let chartLabel;
-
-            if (isBodyweight) {
-                chartLabel = 'Répétitions totales';
-                chartData = exerciseHistory.map(ex => ex.reps.reduce((total, rep) => total + rep, 0));
-            } else {
-                chartLabel = 'Poids (kg)';
-                chartData = exerciseHistory.map(ex => ex.weight);
-            }
-
-            const ctx = document.getElementById(chartId).getContext('2d');
-            chartInstances[chartId] = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: chartLabel,
-                        data: chartData,
-                        borderColor: '#16a34a',
-                        backgroundColor: 'rgba(22, 163, 74, 0.1)',
-                        fill: true,
-                        tension: 0.2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { 
-                        y: { 
-                            beginAtZero: false,
-                            title: { display: true, text: chartLabel }
-                        } 
-                    }
-                }
-            });
-        }
-
-        // --- GESTION DES ÉVÉNEMENTS ---
-
-        // MODIFIÉ: event listener global pour les boutons créés dynamiquement
-        document.body.addEventListener('click', (e) => {
-            // Clic sur "Ajouter la performance du jour"
-            if (e.target.classList.contains('add-performance-btn')) {
-                const exerciseName = e.target.dataset.exerciseName;
-                const workoutType = e.target.dataset.workoutType;
-                openPerformanceModal(exerciseName, workoutType);
-            }
-            
-            // Clic sur "Terminer et Enregistrer la Séance"
-            if (e.target.classList.contains('finalize-session-btn')) {
-                const workoutType = e.target.dataset.workoutType;
-                finalizeAndSaveSession(workoutType);
-            }
-        });
-
-        closeModalBtn.addEventListener('click', closePerformanceModal);
-        savePerfBtn.addEventListener('click', saveExercisePerformance);
-
-        document.getElementById('suivi-graphs-content').addEventListener('click', (e) => {
-            const accordionToggle = e.target.closest('.accordion-toggle');
-            if (accordionToggle) {
-                accordionToggle.classList.toggle('open');
-                const content = accordionToggle.nextElementSibling;
-                content.classList.toggle('hidden');
-                return;
-            }
-
-            const exerciseToggle = e.target.closest('.exercise-graph-toggle');
-            if (exerciseToggle) {
-                exerciseToggle.classList.toggle('open');
-                const exerciseName = exerciseToggle.dataset.exercise;
-                const chartId = exerciseToggle.dataset.chartId;
-                const wrapper = document.getElementById(`wrapper-${chartId}`);
-                
-                // On s'assure que le contenu du wrapper est bien un canvas avant de créer le chart
-                if (!wrapper.querySelector('canvas')) {
-                    wrapper.querySelector('.chart-container').innerHTML = `<canvas id="${chartId}"></canvas>`;
-                }
-                createChart(exerciseName, chartId);
-                
-                wrapper.classList.toggle('hidden');
-            }
-        });
-
-        const tabs = document.getElementById('tabs');
-        const tabContents = document.getElementById('tab-contents');
-
-        tabs.addEventListener('click', (e) => {
-            const target = e.target;
-            if (target.classList.contains('tab-btn')) {
-                tabs.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                tabContents.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-                target.classList.add('active');
-                const tabId = target.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
-            }
-        });
-
-        // --- INITIALISATION ---
-        renderProgram();
-        renderLastSessions();
-        renderGraphs();
-    });
-    </script>
-
-    <div id="performance-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+    <!-- Modal pour ajouter une performance -->
+    <div id="performance-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
         <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
                 <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Ajouter Performance</h3>
                 <div class="mt-2 px-7 py-3">
                     <p class="text-sm text-gray-500 mb-4" id="modal-exercise-name"></p>
-                    
-                    <input type="hidden" id="modal-workout-type">
-
+                    <input type="hidden" id="modal-exercise-id">
                     <div class="mb-4">
                         <label for="modal-reps" class="text-left block text-sm font-medium text-gray-700">Répétitions par série (séparées par des virgules)</label>
                         <input type="text" id="modal-reps" placeholder="ex: 12, 10, 8, 8" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
-
                     <div class="mb-4">
                         <label for="modal-weight" class="text-left block text-sm font-medium text-gray-700">Poids (en kg) - Laissez à 0 pour le poids du corps</label>
                         <input type="number" id="modal-weight" value="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
-
                 </div>
                 <div class="items-center px-4 py-3">
                     <button id="save-performance-btn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                        Enregistrer la performance
+                        Enregistrer la Performance
                     </button>
                     <button id="close-modal-btn" class="mt-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none">
                         Annuler
@@ -521,13 +141,375 @@
         </div>
     </div>
 
-    <div id="export-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-        <div class="relative mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
-             <h3 class="text-lg leading-6 font-medium text-gray-900">Copiez vos nouvelles données</h3>
-             <p class="text-sm text-gray-600 mt-2 mb-4">Remplacez le contenu de votre fichier `database.js` par le code ci-dessous pour sauvegarder vos nouvelles séances.</p>
-             <textarea id="export-textarea" readonly class="w-full h-64 font-mono text-xs bg-gray-100 p-2 border rounded"></textarea>
-             <button onclick="document.getElementById('export-modal').classList.add('hidden')" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full">Fermer</button>
-        </div>
-    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loader = document.getElementById('loader');
+            const dbStatus = document.getElementById('db-status');
+            let db;
+            let SQL;
+
+            // --- GESTION DE LA BASE DE DONNÉES ---
+
+            const dbManager = {
+                // Initialise SQL.js et charge la BDD depuis localStorage ou en crée une nouvelle.
+                initDB: async function() {
+                    try {
+                        SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}` });
+                        const savedDb = localStorage.getItem('sqlitedb');
+                        
+                        if (savedDb) {
+                            try {
+                                const Uints = savedDb.split(',').map(Number);
+                                db = new SQL.Database(new Uint8Array(Uints));
+                                db.exec("SELECT id FROM programs LIMIT 1"); // Test si la BDD est valide
+                                return { db, status: 'Base de données chargée depuis la sauvegarde automatique.' };
+                            } catch (e) {
+                                console.warn("Impossible de charger la BDD depuis localStorage, re-création.", e);
+                                localStorage.removeItem('sqlitedb');
+                            }
+                        }
+
+                        db = new SQL.Database();
+                        this.createSchemaAndSeed(db);
+                        this.saveDBToLocalStorage();
+                        return { db, status: 'Nouvelle base de données créée.' };
+
+                    } catch (err) {
+                        console.error("Erreur d'initialisation de SQL.js:", err);
+                        return { db: null, status: "Erreur: Impossible de charger le moteur SQL." };
+                    }
+                },
+                
+                // Crée le schéma et insère les données de base.
+                createSchemaAndSeed: function(database) {
+                    const schema = `
+                        CREATE TABLE programs (id INTEGER PRIMARY KEY, name TEXT UNIQUE);
+                        CREATE TABLE exercises (id INTEGER PRIMARY KEY, program_id INTEGER, name TEXT NOT NULL, sets_goal TEXT, reps_goal TEXT, rest_time TEXT, FOREIGN KEY (program_id) REFERENCES programs (id));
+                        CREATE TABLE workout_logs (id INTEGER PRIMARY KEY, exercise_id INTEGER, date TEXT, reps TEXT, weight REAL, FOREIGN KEY (exercise_id) REFERENCES exercises (id));
+                    `;
+                    database.run(schema);
+
+                    const initialProgram = {
+                        "Tirage": [{ name: "Tractions Normales", sets: "5", reps: "3-6", rest_time: "2 min" }, { name: "Rowing à la machine", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { name: "Tirage Vertical Prise Large", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { name: "Curl Biceps à la barre EZ", sets: "3", reps: "10-12", rest_time: "1 min" }],
+                        "Poussée": [{ name: "Dips au poids du corps", sets: "4", reps: "Jusqu'à l'échec", rest_time: "2 min" }, { name: "Développé Couché (Haltères)", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { name: "Développé Militaire", sets: "3", reps: "8-10", rest_time: "1 min 30" }, { name: "Pompes", sets: "3", reps: "Jusqu'à l'échec", rest_time: "1 min" }],
+                        "Jambes": [{ name: "Squat à la barre", sets: "4", reps: "8-10", rest_time: "2 min 30" }, { name: "Soulevé de Terre Roumain", sets: "4", reps: "10-12", rest_time: "2 min" }, { name: "Fentes Marchées", sets: "3", reps: "12-15 par jambe", rest_time: "1 min 30" }, { name: "Relevés de jambes suspendu", sets: "4", reps: "10-15", rest_time: "1 min" }, { name: "Gainage", sets: "3", reps: "Temps maximum", rest_time: "1 min" }]
+                    };
+
+                    for (const [programName, exercises] of Object.entries(initialProgram)) {
+                        database.run("INSERT INTO programs (name) VALUES (?)", [programName]);
+                        const programId = database.exec("SELECT last_insert_rowid()")[0].values[0][0];
+                        exercises.forEach(ex => database.run("INSERT INTO exercises (program_id, name, sets_goal, reps_goal, rest_time) VALUES (?, ?, ?, ?, ?)", [programId, ex.name, ex.sets, ex.reps, ex.rest_time]));
+                    }
+                },
+
+                // Sauvegarde la BDD dans le localStorage.
+                saveDBToLocalStorage: function() {
+                    if (!db) return;
+                    try {
+                        const data = db.export();
+                        localStorage.setItem('sqlitedb', data.join(','));
+                        console.log('Base de données sauvegardée dans le localStorage.');
+                    } catch(e) { console.error("Sauvegarde de la DB échouée:", e); }
+                },
+                
+                // Charge une BDD depuis un fichier.
+                loadDBFromFile: async function(file) {
+                    if (!SQL) throw new Error("SQL.js non initialisé.");
+                    const buffer = await file.arrayBuffer();
+                    db = new SQL.Database(new Uint8Array(buffer));
+                    return db;
+                },
+
+                // Exporte la BDD vers un fichier.
+                exportDB: function() {
+                    if (!db) return console.error("La base de données n'est pas initialisée.");
+                    const data = db.export();
+                    const blob = new Blob([data], { type: "application/octet-stream" });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "workout.db";
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                }
+            };
+
+            // --- LOGIQUE DE L'APPLICATION ---
+            
+            const chartInstances = {};
+
+            // Fonction principale d'initialisation
+            async function main() {
+                const dbResult = await dbManager.initDB();
+                db = dbResult.db;
+                dbStatus.textContent = dbResult.status;
+
+                if (!db) {
+                    loader.innerHTML = `<p class="text-lg font-semibold text-red-600">${dbResult.status}</p>`;
+                    return;
+                }
+
+                setupEventListeners();
+                await renderAll();
+                loader.style.display = 'none';
+                document.getElementById('import-db-btn').classList.remove('hidden');
+                document.getElementById('export-db-btn').classList.remove('hidden');
+            }
+
+            // Rafraîchit tous les composants de l'interface
+            async function renderAll() {
+                await renderProgram();
+                await renderLastSessions();
+                await renderGraphs();
+            }
+
+            // Récupère les exercices pour un programme donné
+            async function getExercisesByProgram(programName) {
+                const stmt = db.prepare("SELECT e.id, e.name, e.sets_goal, e.reps_goal, e.rest_time FROM exercises e JOIN programs p ON e.program_id = p.id WHERE p.name = :programName");
+                stmt.bind({ ':programName': programName });
+                const exercises = [];
+                while (stmt.step()) {
+                    const row = stmt.getAsObject();
+                    const lastPerfStmt = db.prepare("SELECT reps, weight, date FROM workout_logs WHERE exercise_id = :exerciseId ORDER BY date DESC LIMIT 1");
+                    lastPerfStmt.bind({ ':exerciseId': row.id });
+                    row.lastPerf = lastPerfStmt.step() ? lastPerfStmt.getAsObject() : null;
+                    lastPerfStmt.free();
+                    exercises.push(row);
+                }
+                stmt.free();
+                return exercises;
+            }
+
+            // Construit et affiche les cartes d'exercices
+            async function renderProgram() {
+                const workoutTypes = ["Tirage", "Poussée", "Jambes"];
+                for (const typeName of workoutTypes) {
+                    const exercises = await getExercisesByProgram(typeName);
+                    const container = document.getElementById(`${typeName}-exercises`);
+                    if (!container) continue;
+                    
+                    container.innerHTML = exercises.map(exercise => {
+                        let lastPerfHtml = '<p class="text-sm text-gray-500 italic mt-2">Aucune donnée précédente.</p>';
+                        if (exercise.lastPerf) {
+                            const repsArray = JSON.parse(exercise.lastPerf.reps);
+                            lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${repsArray.length}x[${repsArray.join('-')}] @ ${exercise.lastPerf.weight} kg</p>`;
+                        }
+                        return `
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-lg">${exercise.name}</h4>
+                                        <p class="font-semibold mt-1">${exercise.sets_goal} séries de ${exercise.reps_goal} répétitions</p>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-600 bg-gray-200 px-2 py-1 rounded-full whitespace-nowrap">${exercise.rest_time}</span>
+                                </div>
+                                ${lastPerfHtml}
+                                <button class="add-performance-btn mt-3 w-full text-sm font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 py-2 px-4 rounded-md transition"
+                                        data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">
+                                    Ajouter une performance
+                                </button>
+                            </div>`;
+                    }).join('');
+                }
+            }
+            
+            // Affiche les dernières séances enregistrées
+            async function renderLastSessions() {
+                const container = document.getElementById('dernieres-seances-content');
+                const results = db.exec(`
+                    SELECT p.name as program_name, e.name as exercise_name, l.date, l.reps, l.weight
+                    FROM workout_logs l
+                    JOIN exercises e ON l.exercise_id = e.id
+                    JOIN programs p ON e.program_id = p.id
+                    WHERE l.id IN (SELECT MAX(id) FROM workout_logs GROUP BY exercise_id)
+                    ORDER BY p.name, e.name;
+                `);
+                
+                container.innerHTML = '';
+                const sessions = {};
+                if (results.length > 0) {
+                    results[0].values.forEach(([programName, exerciseName, date, reps, weight]) => {
+                        if (!sessions[programName]) sessions[programName] = { date: null, exercises: [] };
+                        if (!sessions[programName].date || new Date(date) > new Date(sessions[programName].date)) sessions[programName].date = date;
+                        sessions[programName].exercises.push({ name: exerciseName, reps: JSON.parse(reps), weight });
+                    });
+                }
+
+                ['Tirage', 'Poussée', 'Jambes'].forEach(type => {
+                    const session = sessions[type];
+                    const div = document.createElement('div');
+                    let content = `<h4 class="text-2xl font-semibold border-b pb-2 mb-3">${type}</h4>`;
+                    if (session) {
+                        content += `<div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <p class="font-bold text-yellow-800">Dernière séance le ${new Date(session.date).toLocaleDateString('fr-FR')}</p>
+                            <ul class="list-disc list-inside mt-2 text-gray-700">
+                                ${session.exercises.map(ex => `<li><strong>${ex.name}:</strong> ${ex.reps.length}x[${ex.reps.join(',')}] @ ${ex.weight} kg</li>`).join('')}
+                            </ul></div>`;
+                    } else {
+                        content += `<div class="text-gray-500 italic">Aucune séance de type "${type}" enregistrée.</div>`;
+                    }
+                    div.innerHTML = content;
+                    container.appendChild(div);
+                });
+            }
+            
+            // Construit les accordéons pour les graphiques
+            async function renderGraphs() {
+                const container = document.getElementById('suivi-graphs-content');
+                container.innerHTML = '';
+                Object.values(chartInstances).forEach(chart => chart.destroy());
+
+                const results = db.exec("SELECT DISTINCT p.name as program_name, e.name as exercise_name FROM exercises e JOIN programs p ON e.program_id = p.id JOIN workout_logs l ON l.exercise_id = e.id ORDER BY p.name, e.name");
+                if (!results.length) return;
+
+                const groupedExercises = {};
+                results[0].values.forEach(([programName, exerciseName]) => {
+                    if (!groupedExercises[programName]) groupedExercises[programName] = [];
+                    groupedExercises[programName].push(exerciseName);
+                });
+
+                for (const [programName, exercises] of Object.entries(groupedExercises)) {
+                    const accordion = document.createElement('div');
+                    accordion.className = 'border border-gray-200 rounded-lg';
+                    accordion.innerHTML = `
+                        <button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-100 hover:bg-gray-200 rounded-t-lg">
+                            <span class="text-xl font-bold text-gray-800">${programName}</span>
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content hidden p-4 border-t border-gray-200">
+                            ${exercises.map(exerciseName => `
+                                <div>
+                                    <button class="exercise-graph-toggle w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-gray-100 focus:outline-none transition flex justify-between items-center" data-exercise-name="${exerciseName}" data-chart-id="chart-${exerciseName.replace(/[^a-zA-Z0-9]/g, '-')}">
+                                        <span class="font-semibold text-gray-700">${exerciseName}</span>
+                                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </button>
+                                    <div id="wrapper-chart-${exerciseName.replace(/[^a-zA-Z0-9]/g, '-')}" class="chart-wrapper hidden mt-2 pl-4 pr-4 pb-2">
+                                        <div class="chart-container bg-white p-2 rounded-md"><canvas id="chart-${exerciseName.replace(/[^a-zA-Z0-9]/g, '-')}"></canvas></div>
+                                    </div>
+                                </div>`).join('')}
+                        </div>`;
+                    container.appendChild(accordion);
+                }
+            }
+
+            // Crée un graphique pour un exercice
+            async function createChart(exerciseName, chartId) {
+                if (chartInstances[chartId]) chartInstances[chartId].destroy();
+                const history = db.exec(`SELECT date, reps, weight FROM workout_logs l JOIN exercises e ON l.exercise_id = e.id WHERE e.name = '${exerciseName.replace(/'/g, "''")}' ORDER BY l.date ASC`);
+                
+                const wrapper = document.getElementById(`wrapper-${chartId}`);
+                if (!history.length || history[0].values.length < 2) {
+                    wrapper.innerHTML = '<p class="text-center text-gray-500">Pas assez de données pour un graphique.</p>';
+                    return;
+                }
+                
+                const data = history[0].values.map(([date, reps, weight]) => ({ date, reps: JSON.parse(reps), weight }));
+                const labels = data.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
+                const isBodyweight = data.every(ex => ex.weight === 0);
+                const chartData = isBodyweight ? data.map(ex => ex.reps.reduce((a, b) => a + b, 0)) : data.map(ex => ex.weight);
+                const chartLabel = isBodyweight ? 'Répétitions totales' : 'Poids (kg)';
+
+                const ctx = document.getElementById(chartId).getContext('2d');
+                chartInstances[chartId] = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels, datasets: [{ label: chartLabel, data: chartData, borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', fill: true, tension: 0.2 }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, title: { display: true, text: chartLabel } } } }
+                });
+            }
+
+            // Gère tous les écouteurs d'événements
+            function setupEventListeners() {
+                document.body.addEventListener('click', (e) => {
+                    const addBtn = e.target.closest('.add-performance-btn');
+                    if (addBtn) openPerformanceModal(addBtn.dataset.exerciseId, addBtn.dataset.exerciseName);
+                });
+
+                document.getElementById('close-modal-btn').addEventListener('click', closePerformanceModal);
+                document.getElementById('save-performance-btn').addEventListener('click', savePerformance);
+                
+                document.getElementById('suivi-graphs-content').addEventListener('click', (e) => {
+                    const accordionToggle = e.target.closest('.accordion-toggle');
+                    if (accordionToggle) {
+                        accordionToggle.classList.toggle('open');
+                        accordionToggle.nextElementSibling.classList.toggle('hidden');
+                    }
+
+                    const exerciseToggle = e.target.closest('.exercise-graph-toggle');
+                    if (exerciseToggle) {
+                        const wrapper = exerciseToggle.nextElementSibling;
+                        wrapper.classList.toggle('hidden');
+                        if (!wrapper.classList.contains('hidden')) createChart(exerciseToggle.dataset.exerciseName, exerciseToggle.dataset.chartId);
+                    }
+                });
+
+                document.getElementById('tabs').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('tab-btn')) {
+                        document.querySelectorAll('#tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+                        document.querySelectorAll('#tab-contents .tab-content').forEach(content => content.classList.remove('active'));
+                        e.target.classList.add('active');
+                        document.getElementById(e.target.dataset.tab).classList.add('active');
+                    }
+                });
+                
+                document.getElementById('export-db-btn').addEventListener('click', () => dbManager.exportDB());
+                document.getElementById('import-db-btn').addEventListener('click', () => document.getElementById('db-importer').click());
+                document.getElementById('db-importer').addEventListener('change', async (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    loader.style.display = 'flex';
+                    try {
+                        db = await dbManager.loadDBFromFile(file);
+                        dbStatus.textContent = `Base de données '${file.name}' chargée.`;
+                        dbManager.saveDBToLocalStorage();
+                        await renderAll();
+                    } catch (e) {
+                        alert("Le fichier sélectionné n'est pas une base de données valide.");
+                    } finally {
+                        loader.style.display = 'none';
+                        event.target.value = '';
+                    }
+                });
+            }
+
+            // Fonctions du modal
+            function openPerformanceModal(exerciseId, exerciseName) {
+                document.getElementById('modal-exercise-id').value = exerciseId;
+                document.getElementById('modal-exercise-name').textContent = exerciseName;
+                document.getElementById('modal-title').textContent = `Ajouter Performance pour ${exerciseName}`;
+                document.getElementById('performance-modal').classList.remove('hidden');
+            }
+            function closePerformanceModal() {
+                document.getElementById('performance-modal').classList.add('hidden');
+                document.getElementById('modal-reps').value = '';
+                document.getElementById('modal-weight').value = '0';
+            }
+            
+            // Enregistre une performance dans la BDD
+            async function savePerformance() {
+                const exerciseId = document.getElementById('modal-exercise-id').value;
+                const reps = document.getElementById('modal-reps').value.split(',').map(r => parseInt(r.trim())).filter(r => !isNaN(r));
+                const weight = parseFloat(document.getElementById('modal-weight').value);
+
+                if (reps.length === 0) return alert("Veuillez entrer au moins une répétition valide.");
+
+                const today = new Date().toISOString().split('T')[0];
+                try {
+                    db.run("INSERT INTO workout_logs (exercise_id, date, reps, weight) VALUES (?, ?, ?, ?)", [exerciseId, today, JSON.stringify(reps), weight]);
+                    dbManager.saveDBToLocalStorage(); // Sauvegarde automatique
+                    alert('Performance enregistrée avec succès !');
+                    closePerformanceModal();
+                    await renderAll(); // Rafraîchit l'interface
+                } catch (e) { 
+                    console.error("Erreur lors de l'enregistrement:", e);
+                    alert("Une erreur est survenue."); 
+                }
+            }
+
+            // Lancement de l'application
+            main();
+        });
+    </script>
 </body>
 </html>
