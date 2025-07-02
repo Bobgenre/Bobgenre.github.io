@@ -15,8 +15,8 @@
         .tab-btn.suivi.active { background-color: #16a34a; color: white; }
         .tab-btn.dernier.active { background-color: #ca8a04; color: white; }
         .chart-container { position: relative; height: 250px; width: 100%; }
-        .accordion-toggle svg { transition: transform 0.2s ease-in-out; }
-        .accordion-toggle.open svg { transform: rotate(180deg); }
+        .accordion-toggle svg, .exercise-graph-toggle svg { transition: transform 0.2s ease-in-out; }
+        .accordion-toggle.open svg, .exercise-graph-toggle.open svg { transform: rotate(180deg); }
         #loader, #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(255, 255, 255, 0.95);
@@ -35,6 +35,24 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin-top: -10px;
+            margin-left: -10px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
         }
     </style>
 </head>
@@ -116,11 +134,11 @@
                 <div class="mt-2 px-7 py-3">
                     <div class="mb-4">
                         <label for="modal-reps" class="text-left block text-sm font-medium text-gray-700">Répétitions par série (séparées par des virgules)</label>
-                        <input type="text" id="modal-reps" placeholder="ex: 12, 10, 8, 8" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                        <input type="text" id="modal-reps" placeholder="ex: 12, 10, 8, 8" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
                     </div>
                     <div class="mb-4">
                         <label for="modal-weight" class="text-left block text-sm font-medium text-gray-700">Poids (en kg)</label>
-                        <input type="number" id="modal-weight" value="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                        <input type="number" id="modal-weight" value="0" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
                     </div>
                 </div>
                 <div class="items-center px-4 py-3">
@@ -154,21 +172,19 @@
         const loader = document.getElementById('loader');
         const authOverlay = document.getElementById('auth-overlay');
         const appContent = document.getElementById('app-content');
-        let unsubscribe; // Variable pour stocker la fonction de désinscription de l'écouteur
+        let unsubscribe;
+        let currentLogs = [];
+        let currentProgramData = {};
 
         // --- AUTHENTIFICATION ---
         onAuthStateChanged(auth, user => {
-            if (unsubscribe) {
-                unsubscribe(); // Se désinscrit de l'écouteur précédent pour éviter les fuites de mémoire
-            }
+            if (unsubscribe) unsubscribe();
             if (user) {
-                // Utilisateur connecté
                 authOverlay.style.display = 'none';
                 appContent.classList.add('hidden');
                 loader.style.display = 'flex';
                 initializeAppLogic(user);
             } else {
-                // Utilisateur non connecté
                 authOverlay.style.display = 'flex';
                 appContent.classList.add('hidden');
                 loader.style.display = 'none';
@@ -177,6 +193,7 @@
 
         // --- LOGIQUE PRINCIPALE DE L'APPLICATION ---
         async function initializeAppLogic(user) {
+            document.getElementById('user-email').textContent = `Connecté : ${user.email}`;
             const programRef = doc(db, "users", user.uid, "program", "main");
             
             try {
@@ -185,15 +202,15 @@
                     await setupInitialProgram(user.uid);
                     programSnap = await getDoc(programRef);
                 }
-                const programData = programSnap.data();
+                currentProgramData = programSnap.data();
 
                 const logsQuery = query(collection(db, "users", user.uid, "workout_logs"));
                 
                 unsubscribe = onSnapshot(logsQuery, (snapshot) => {
                     loader.style.display = 'none';
                     appContent.classList.remove('hidden');
-                    const allLogs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                    renderAll(programData, allLogs);
+                    currentLogs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    renderAll(currentProgramData, currentLogs);
                 });
             } catch (error) {
                 console.error("Erreur critique:", error);
@@ -203,9 +220,9 @@
 
         async function setupInitialProgram(userId) {
             const initialProgram = {
-                "Tirage": [{ id: "exo1", name: "Tractions Normales", sets: "5", reps: "3-6", rest_time: "2 min" }, { id: "exo2", name: "Rowing à la machine", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo2", name: "Tirage Vertical", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo4", name: "Curl Biceps bar EZ", sets: "3", reps: "8", rest_time: "1 mim" }],
-                "Poussée": [{ id: "exo5", name: "Dips au poids du corps", sets: "4", reps: "Jusqu'à l'échec", rest_time: "2 min" }, { id: "exo6", name: "Développé Couché", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo7", name: "Développé Militaire", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo8", name: "Pompes", sets: "3", reps: "Jusqu'à l'échec", rest_time: "1 min" }],
-                "Jambes": [{ id: "exo9", name: "Squat à la barre", sets: "4", reps: "8-10", rest_time: "2 min 30" }, { id: "exo10", name: "Soulevé de Terre Roumain", sets: "4", reps: "10-12", rest_time: "2 min" }, { id: "exo11", name: "Fentes Marchées", sets: "3", reps: "8-12", rest_time: "1 min 30" }, { id: "exo12", name: "Gainage", sets: "3", reps: "Jusqu'a l'échec", rest_time: "1 min 30" }]
+                "Tirage": [{ id: "exo1", name: "Tractions Normales", sets: "5", reps: "3-6", rest_time: "2 min" }, { id: "exo2", name: "Rowing à la machine", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo3", name: "Tirage Vertical Prise Large", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo4", name: "Curl Biceps à la barre EZ", sets: "3", reps: "10-12", rest_time: "1 min" }],
+                "Poussée": [{ id: "exo5", name: "Dips au poids du corps", sets: "4", reps: "Jusqu'à l'échec", rest_time: "2 min" }, { id: "exo6", name: "Développé Couché (Haltères)", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo7", name: "Développé Militaire", sets: "3", reps: "8-10", rest_time: "1 min 30" }, { id: "exo8", name: "Pompes", sets: "3", reps: "Jusqu'à l'échec", rest_time: "1 min" }],
+                "Jambes": [{ id: "exo9", name: "Squat à la barre", sets: "4", reps: "8-10", rest_time: "2 min 30" }, { id: "exo10", name: "Soulevé de Terre Roumain", sets: "4", reps: "10-12", rest_time: "2 min" }, { id: "exo11", name: "Fentes Marchées", sets: "3", reps: "12-15 par jambe", rest_time: "1 min 30" }, { id: "exo12", name: "Relevés de jambes suspendu", sets: "4", reps: "10-15", rest_time: "1 min" }, { id: "exo13", name: "Gainage", sets: "3", reps: "Temps maximum", rest_time: "1 min" }]
             };
             await setDoc(doc(db, "users", userId, "program", "main"), initialProgram);
         }
@@ -215,7 +232,6 @@
             renderProgram(programData, allLogs);
             renderLastSessions(programData, allLogs);
             renderGraphs(programData, allLogs);
-            setupEventListeners();
         }
 
         function renderProgram(programData, allLogs) {
@@ -283,7 +299,7 @@
             for (const [programType, exercises] of Object.entries(groupedExercises)) {
                 const accordion = document.createElement('div');
                 accordion.className = 'border border-gray-200 rounded-lg';
-                accordion.innerHTML = `<button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-100 hover:bg-gray-200 rounded-t-lg"><span class="text-xl font-bold text-gray-800">${programType}</span><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content hidden p-4 border-t border-gray-200">${exercises.map(ex => `<div><button class="exercise-graph-toggle w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-gray-100" data-exercise-id="${ex.id}"><span class="font-semibold text-gray-700">${ex.name}</span></button><div id="wrapper-chart-${ex.id}" class="chart-wrapper hidden mt-2"><div class="chart-container"><canvas id="chart-${ex.id}"></canvas></div></div></div>`).join('')}</div>`;
+                accordion.innerHTML = `<button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-100 hover:bg-gray-200 rounded-t-lg"><span class="text-xl font-bold text-gray-800">${programType}</span><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content hidden p-4 border-t border-gray-200">${exercises.map(ex => `<div><button class="exercise-graph-toggle flex justify-between items-center w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-gray-100" data-exercise-id="${ex.id}"><span class="font-semibold text-gray-700">${ex.name}</span><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div id="wrapper-chart-${ex.id}" class="chart-wrapper hidden mt-2"><div class="chart-container"><canvas id="chart-${ex.id}"></canvas></div></div></div>`).join('')}</div>`;
                 container.appendChild(accordion);
             }
         }
@@ -315,14 +331,18 @@
             document.getElementById('save-performance-btn').addEventListener('click', savePerformance);
             document.getElementById('suivi-graphs-content').addEventListener('click', e => {
                 const accordionToggle = e.target.closest('.accordion-toggle');
-                if (accordionToggle) accordionToggle.nextElementSibling.classList.toggle('hidden');
+                if (accordionToggle) {
+                    accordionToggle.classList.toggle('open');
+                    accordionToggle.nextElementSibling.classList.toggle('hidden');
+                    return;
+                }
                 const exerciseToggle = e.target.closest('.exercise-graph-toggle');
                 if (exerciseToggle) {
+                    exerciseToggle.classList.toggle('open');
                     const wrapper = exerciseToggle.nextElementSibling;
                     wrapper.classList.toggle('hidden');
                     if (!wrapper.classList.contains('hidden')) {
-                        const logsQuery = query(collection(db, "users", auth.currentUser.uid, "workout_logs"));
-                        onSnapshot(logsQuery, snapshot => createChart(exerciseToggle.dataset.exerciseId, snapshot.docs.map(d => d.data())));
+                        createChart(exerciseToggle.dataset.exerciseId, currentLogs);
                     }
                 }
             });
@@ -383,25 +403,36 @@
 
         async function handleLogin(e) {
             e.preventDefault();
+            const button = e.target.querySelector('button[type="submit"]');
+            button.classList.add('btn-loading');
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
                 handleAuthError(error);
+            } finally {
+                button.classList.remove('btn-loading');
             }
         }
 
         async function handleSignup(e) {
             e.preventDefault();
+            const button = e.target.querySelector('button[type="submit"]');
+            button.classList.add('btn-loading');
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
             try {
                 await createUserWithEmailAndPassword(auth, email, password);
             } catch (error) {
                 handleAuthError(error);
+            } finally {
+                button.classList.remove('btn-loading');
             }
         }
+        
+        // On attache les écouteurs d'événements une seule fois au chargement du script
+        setupEventListeners();
     </script>
 </body>
 </html>
