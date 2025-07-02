@@ -203,9 +203,9 @@
 
         async function setupInitialProgram(userId) {
             const initialProgram = {
-                "Tirage": [{ id: "exo1", name: "Tractions Normales", sets: "5", reps: "3-6", rest_time: "2 min" }, { id: "exo2", name: "Rowing à la machine", sets: "4", reps: "8-12", rest_time: "1 min 30" }],
-                "Poussée": [{ id: "exo5", name: "Dips au poids du corps", sets: "4", reps: "Jusqu'à l'échec", rest_time: "2 min" }, { id: "exo6", name: "Développé Couché (Haltères)", sets: "4", reps: "8-12", rest_time: "1 min 30" }],
-                "Jambes": [{ id: "exo9", name: "Squat à la barre", sets: "4", reps: "8-10", rest_time: "2 min 30" }, { id: "exo10", name: "Soulevé de Terre Roumain", sets: "4", reps: "10-12", rest_time: "2 min" }]
+                "Tirage": [{ id: "exo1", name: "Tractions Normales", sets: "5", reps: "3-6", rest_time: "2 min" }, { id: "exo2", name: "Rowing à la machine", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo2", name: "Tirage Vertical", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo4", name: "Curl Biceps bar EZ", sets: "3", reps: "8", rest_time: "1 mim" }],
+                "Poussée": [{ id: "exo5", name: "Dips au poids du corps", sets: "4", reps: "Jusqu'à l'échec", rest_time: "2 min" }, { id: "exo6", name: "Développé Couché", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo7", name: "Développé Militaire", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo8", name: "Pompes", sets: "3", reps: "Jusqu'à l'échec", rest_time: "1 min" }],
+                "Jambes": [{ id: "exo9", name: "Squat à la barre", sets: "4", reps: "8-10", rest_time: "2 min 30" }, { id: "exo10", name: "Soulevé de Terre Roumain", sets: "4", reps: "10-12", rest_time: "2 min" }, { id: "exo11", name: "Fentes Marchées", sets: "3", reps: "8-12", rest_time: "1 min 30" }, { id: "exo12", name: "Gainage", sets: "3", reps: "Jusqu'a l'échec", rest_time: "1 min 30" }]
             };
             await setDoc(doc(db, "users", userId, "program", "main"), initialProgram);
         }
