@@ -17,58 +17,94 @@
         .chart-container { position: relative; height: 250px; width: 100%; }
         .accordion-toggle svg { transition: transform 0.2s ease-in-out; }
         .accordion-toggle.open svg { transform: rotate(180deg); }
-        #loader {
+        #loader, #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             display: flex; justify-content: center; align-items: center;
             z-index: 9999; flex-direction: column;
+            transition: opacity 0.3s;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #3b82f6;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <!-- Indicateur de chargement -->
-    <div id="loader">
-        <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p id="loader-text" class="mt-4 text-lg font-semibold text-gray-700">Connexion à la base de données...</p>
+    <!-- Écran de Connexion / Inscription -->
+    <div id="auth-overlay">
+        <div class="w-full max-w-sm p-8 bg-white rounded-2xl shadow-xl">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Connexion</h2>
+            <p class="text-center text-gray-500 mb-6">Connectez-vous pour synchroniser vos données.</p>
+            <div id="auth-error" class="text-red-500 text-sm text-center mb-4 min-h-[20px]"></div>
+            <!-- Formulaire de Connexion -->
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="login-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">Se connecter</button>
+            </form>
+            <div class="my-4 flex items-center">
+                <hr class="w-full border-gray-300"><span class="p-2 text-gray-400 text-sm">OU</span><hr class="w-full border-gray-300">
+            </div>
+            <!-- Formulaire d'Inscription -->
+            <form id="signup-form" class="space-y-4">
+                <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                <input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                <button type="submit" class="w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition">Créer un compte</button>
+            </form>
+        </div>
     </div>
 
-    <div class="container mx-auto p-4 md:p-8">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Votre Programme Hebdomadaire</h1>
-            <p class="text-xl text-blue-600 mt-2">Format 3 Jours : Tirage / Poussée / Jambes</p>
-            <div id="auth-info" class="mt-4 p-2 bg-gray-200 rounded-lg inline-block hidden">
-                <p class="text-sm text-gray-700">Votre ID de synchronisation :</p>
-                <p id="user-id" class="font-mono text-xs text-purple-800 cursor-pointer" title="Cliquez pour copier"></p>
-            </div>
-        </header>
+    <!-- Indicateur de chargement -->
+    <div id="loader" class="hidden">
+        <div class="spinner"></div>
+        <p id="loader-text" class="mt-4 text-lg font-semibold text-gray-700">Chargement des données...</p>
+    </div>
 
-        <main class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-            <!-- Tabs de navigation -->
-            <div class="mb-6 border-b border-gray-200">
-                <nav class="flex flex-wrap -mb-px" id="tabs">
-                    <button class="tab-btn active text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2" data-tab="Tirage">Tirage</button>
-                    <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2" data-tab="Poussée">Poussée</button>
-                    <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg" data-tab="Jambes">Jambes</button>
-                    <div class="ml-auto flex flex-wrap">
-                        <button class="tab-btn dernier text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2 border border-yellow-500 text-yellow-600 hover:bg-yellow-50" data-tab="dernieres-seances">Dernières Séances</button>
-                        <button class="tab-btn suivi text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg border border-green-500 text-green-600 hover:bg-green-50" data-tab="suivi">Suivi Graphique</button>
-                    </div>
-                </nav>
-            </div>
+    <div id="app-content" class="hidden">
+        <div class="container mx-auto p-4 md:p-8">
+            <header class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Votre Programme Hebdomadaire</h1>
+                <p class="text-xl text-blue-600 mt-2">Format 3 Jours : Tirage / Poussée / Jambes</p>
+                <div id="auth-info" class="mt-4 p-2 bg-gray-200 rounded-lg inline-block">
+                    <p id="user-email" class="text-sm text-gray-700"></p>
+                    <button id="logout-btn" class="text-xs text-red-600 font-bold hover:underline">Déconnexion</button>
+                </div>
+            </header>
 
-            <!-- Contenu des jours et du suivi -->
-            <div id="tab-contents">
-                <div id="Tirage" class="tab-content active"><div id="Tirage-exercises" class="space-y-6"></div></div>
-                <div id="Poussée" class="tab-content"><div id="Poussée-exercises" class="space-y-6"></div></div>
-                <div id="Jambes" class="tab-content"><div id="Jambes-exercises" class="space-y-6"></div></div>
-                <div id="dernieres-seances" class="tab-content"><div id="dernieres-seances-content" class="space-y-8"></div></div>
-                <div id="suivi" class="tab-content"><div id="suivi-graphs-content" class="space-y-4"></div></div>
-            </div>
-        </main>
+            <main class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <!-- Tabs de navigation -->
+                <div class="mb-6 border-b border-gray-200">
+                    <nav class="flex flex-wrap -mb-px" id="tabs">
+                        <button class="tab-btn active text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2" data-tab="Tirage">Tirage</button>
+                        <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2" data-tab="Poussée">Poussée</button>
+                        <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg" data-tab="Jambes">Jambes</button>
+                        <div class="ml-auto flex flex-wrap">
+                            <button class="tab-btn dernier text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2 border border-yellow-500 text-yellow-600 hover:bg-yellow-50" data-tab="dernieres-seances">Dernières Séances</button>
+                            <button class="tab-btn suivi text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg border border-green-500 text-green-600 hover:bg-green-50" data-tab="suivi">Suivi Graphique</button>
+                        </div>
+                    </nav>
+                </div>
+
+                <!-- Contenu des jours et du suivi -->
+                <div id="tab-contents">
+                    <div id="Tirage" class="tab-content active"><div id="Tirage-exercises" class="space-y-6"></div></div>
+                    <div id="Poussée" class="tab-content"><div id="Poussée-exercises" class="space-y-6"></div></div>
+                    <div id="Jambes" class="tab-content"><div id="Jambes-exercises" class="space-y-6"></div></div>
+                    <div id="dernieres-seances" class="tab-content"><div id="dernieres-seances-content" class="space-y-8"></div></div>
+                    <div id="suivi" class="tab-content"><div id="suivi-graphs-content" class="space-y-4"></div></div>
+                </div>
+            </main>
+        </div>
     </div>
 
     <!-- Modal pour ajouter une performance -->
@@ -97,12 +133,10 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import des fonctions Firebase nécessaires (versions mises à jour)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // VOS CLÉS PERSONNELLES SONT INTÉGRÉES ICI
         const firebaseConfig = {
             apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
             authDomain: "muscu-5e40c.firebaseapp.com",
@@ -112,69 +146,66 @@
             appId: "1:561788112947:web:7f2b7c7d74ff328f2b1346"
         };
 
-        // Initialisation de Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
         const db = getFirestore(app);
 
         const chartInstances = {};
+        const loader = document.getElementById('loader');
+        const authOverlay = document.getElementById('auth-overlay');
+        const appContent = document.getElementById('app-content');
+        let unsubscribe; // Variable pour stocker la fonction de désinscription de l'écouteur
 
         // --- AUTHENTIFICATION ---
         onAuthStateChanged(auth, user => {
+            if (unsubscribe) {
+                unsubscribe(); // Se désinscrit de l'écouteur précédent pour éviter les fuites de mémoire
+            }
             if (user) {
-                document.getElementById('user-id').textContent = user.uid;
-                document.getElementById('auth-info').classList.remove('hidden');
-                initializeAppLogic(user.uid);
+                // Utilisateur connecté
+                authOverlay.style.display = 'none';
+                appContent.classList.add('hidden');
+                loader.style.display = 'flex';
+                initializeAppLogic(user);
             } else {
-                signInAnonymously(auth).catch(error => {
-                    console.error("Erreur de connexion anonyme:", error);
-                    const loaderText = document.getElementById('loader-text');
-                    loaderText.textContent = "Erreur de connexion. Vérifiez la console (F12) pour les détails.";
-                    loaderText.classList.add('text-red-500');
-                });
+                // Utilisateur non connecté
+                authOverlay.style.display = 'flex';
+                appContent.classList.add('hidden');
+                loader.style.display = 'none';
             }
         });
 
         // --- LOGIQUE PRINCIPALE DE L'APPLICATION ---
-        async function initializeAppLogic(userId) {
-            const programRef = doc(db, "users", userId, "program", "main");
+        async function initializeAppLogic(user) {
+            const programRef = doc(db, "users", user.uid, "program", "main");
             
             try {
                 let programSnap = await getDoc(programRef);
-
                 if (!programSnap.exists()) {
-                    await setupInitialProgram(userId);
-                    programSnap = await getDoc(programRef); // Re-fetch after creation
+                    await setupInitialProgram(user.uid);
+                    programSnap = await getDoc(programRef);
                 }
-                
                 const programData = programSnap.data();
 
-                const logsQuery = query(collection(db, "users", userId, "workout_logs"));
+                const logsQuery = query(collection(db, "users", user.uid, "workout_logs"));
                 
-                onSnapshot(logsQuery, (snapshot) => {
-                    document.getElementById('loader').style.display = 'none';
+                unsubscribe = onSnapshot(logsQuery, (snapshot) => {
+                    loader.style.display = 'none';
+                    appContent.classList.remove('hidden');
                     const allLogs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                     renderAll(programData, allLogs);
-                }, (error) => {
-                    console.error("Erreur d'écoute Firestore: ", error);
-                    document.getElementById('loader').style.display = 'none';
-                    alert("Erreur de connexion à la base de données. Vérifiez vos règles de sécurité.");
                 });
-
             } catch (error) {
-                 console.error("Erreur critique lors de l'initialisation:", error);
-                 const loaderText = document.getElementById('loader-text');
-                 loaderText.textContent = "Erreur critique. Avez-vous activé Firestore dans votre projet Firebase ?";
-                 loaderText.classList.add('text-red-500');
+                console.error("Erreur critique:", error);
+                loader.innerHTML = '<p class="text-red-500">Erreur de chargement des données.</p>';
             }
         }
 
-        // Crée le programme de base pour un nouvel utilisateur
         async function setupInitialProgram(userId) {
             const initialProgram = {
-                "Tirage": [{ id: "exo1", name: "Tractions Normales", sets: "5", reps: "3-6", rest_time: "2 min" }, { id: "exo2", name: "Rowing à la machine", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo3", name: "Tirage Vertical Prise Large", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo4", name: "Curl Biceps à la barre EZ", sets: "3", reps: "10-12", rest_time: "1 min" }],
-                "Poussée": [{ id: "exo5", name: "Dips au poids du corps", sets: "4", reps: "Jusqu'à l'échec", rest_time: "2 min" }, { id: "exo6", name: "Développé Couché (Haltères)", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo7", name: "Développé Militaire", sets: "3", reps: "8-10", rest_time: "1 min 30" }, { id: "exo8", name: "Pompes", sets: "3", reps: "Jusqu'à l'échec", rest_time: "1 min" }],
-                "Jambes": [{ id: "exo9", name: "Squat à la barre", sets: "4", reps: "8-10", rest_time: "2 min 30" }, { id: "exo10", name: "Soulevé de Terre Roumain", sets: "4", reps: "10-12", rest_time: "2 min" }, { id: "exo11", name: "Fentes Marchées", sets: "3", reps: "12-15 par jambe", rest_time: "1 min 30" }, { id: "exo12", name: "Relevés de jambes suspendu", sets: "4", reps: "10-15", rest_time: "1 min" }, { id: "exo13", name: "Gainage", sets: "3", reps: "Temps maximum", rest_time: "1 min" }]
+                "Tirage": [{ id: "exo1", name: "Tractions Normales", sets: "5", reps: "3-6", rest_time: "2 min" }, { id: "exo2", name: "Rowing à la machine", sets: "4", reps: "8-12", rest_time: "1 min 30" }],
+                "Poussée": [{ id: "exo5", name: "Dips au poids du corps", sets: "4", reps: "Jusqu'à l'échec", rest_time: "2 min" }, { id: "exo6", name: "Développé Couché (Haltères)", sets: "4", reps: "8-12", rest_time: "1 min 30" }],
+                "Jambes": [{ id: "exo9", name: "Squat à la barre", sets: "4", reps: "8-10", rest_time: "2 min 30" }, { id: "exo10", name: "Soulevé de Terre Roumain", sets: "4", reps: "10-12", rest_time: "2 min" }]
             };
             await setDoc(doc(db, "users", userId, "program", "main"), initialProgram);
         }
@@ -184,56 +215,34 @@
             renderProgram(programData, allLogs);
             renderLastSessions(programData, allLogs);
             renderGraphs(programData, allLogs);
-            setupEventListeners(); // Re-attach event listeners after every render
+            setupEventListeners();
         }
 
         function renderProgram(programData, allLogs) {
             for (const [type, exercises] of Object.entries(programData)) {
                 const container = document.getElementById(`${type}-exercises`);
                 if (!container) continue;
-
                 container.innerHTML = exercises.map(exercise => {
-                    const lastPerf = allLogs
-                        .filter(log => log.exerciseId === exercise.id)
-                        .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                    
+                    const lastPerf = allLogs.filter(log => log.exerciseId === exercise.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
                     let lastPerfHtml = '<p class="text-sm text-gray-500 italic mt-2">Aucune donnée précédente.</p>';
                     if (lastPerf) {
                         lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${lastPerf.reps.length}x[${lastPerf.reps.join('-')}] @ ${lastPerf.weight} kg</p>`;
                     }
-
-                    return `
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-bold text-lg">${exercise.name}</h4>
-                                    <p class="font-semibold mt-1">${exercise.sets} séries de ${exercise.reps} répétitions</p>
-                                </div>
-                                <span class="text-xs font-medium text-gray-600 bg-gray-200 px-2 py-1 rounded-full">${exercise.rest_time}</span>
-                            </div>
-                            ${lastPerfHtml}
-                            <button class="add-performance-btn mt-3 w-full text-sm font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 py-2 px-4 rounded-md transition"
-                                    data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">
-                                Ajouter une performance
-                            </button>
-                        </div>`;
+                    return `<div class="p-4 bg-gray-50 rounded-lg"><div class="flex justify-between items-start"><div><h4 class="font-bold text-lg">${exercise.name}</h4><p class="font-semibold mt-1">${exercise.sets} séries de ${exercise.reps} répétitions</p></div><span class="text-xs font-medium text-gray-600 bg-gray-200 px-2 py-1 rounded-full">${exercise.rest_time}</span></div>${lastPerfHtml}<button class="add-performance-btn mt-3 w-full text-sm font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 py-2 px-4 rounded-md transition" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Ajouter une performance</button></div>`;
                 }).join('');
             }
         }
 
         function renderLastSessions(programData, allLogs) {
-            const container = document.getElementById('dernieres-seances-content');
+             const container = document.getElementById('dernieres-seances-content');
             container.innerHTML = '';
-            
             const sessions = {};
             allLogs.forEach(log => {
                 const programType = Object.keys(programData).find(type => programData[type].some(ex => ex.id === log.exerciseId));
                 if (!programType) return;
-                
                 const exercise = programData[programType].find(ex => ex.id === log.exerciseId);
                 if (!sessions[programType]) sessions[programType] = { date: null, exercises: [] };
                 if (!sessions[programType].date || new Date(log.date) > new Date(sessions[programType].date)) sessions[programType].date = log.date;
-                
                 const existingExIndex = sessions[programType].exercises.findIndex(ex => ex.name === exercise.name);
                 if (existingExIndex > -1) {
                     if (new Date(log.date) > new Date(sessions[programType].exercises[existingExIndex].date)) {
@@ -243,17 +252,12 @@
                     sessions[programType].exercises.push({ ...log, name: exercise.name });
                 }
             });
-
             ['Tirage', 'Poussée', 'Jambes'].forEach(type => {
                 const session = sessions[type];
                 const div = document.createElement('div');
                 let content = `<h4 class="text-2xl font-semibold border-b pb-2 mb-3">${type}</h4>`;
                 if (session) {
-                    content += `<div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <p class="font-bold text-yellow-800">Dernière séance le ${new Date(session.date).toLocaleDateString('fr-FR')}</p>
-                        <ul class="list-disc list-inside mt-2 text-gray-700">
-                            ${session.exercises.map(ex => `<li><strong>${ex.name}:</strong> ${ex.reps.length}x[${ex.reps.join(',')}] @ ${ex.weight} kg</li>`).join('')}
-                        </ul></div>`;
+                    content += `<div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200"><p class="font-bold text-yellow-800">Dernière séance le ${new Date(session.date).toLocaleDateString('fr-FR')}</p><ul class="list-disc list-inside mt-2 text-gray-700">${session.exercises.map(ex => `<li><strong>${ex.name}:</strong> ${ex.reps.length}x[${ex.reps.join(',')}] @ ${ex.weight} kg</li>`).join('')}</ul></div>`;
                 } else {
                     content += `<div class="text-gray-500 italic">Aucune séance de type "${type}" enregistrée.</div>`;
                 }
@@ -266,9 +270,7 @@
             const container = document.getElementById('suivi-graphs-content');
             container.innerHTML = '';
             Object.values(chartInstances).forEach(chart => chart.destroy());
-
             const exercisesWithLogs = [...new Set(allLogs.map(log => log.exerciseId))];
-            
             const groupedExercises = {};
             exercisesWithLogs.forEach(exerciseId => {
                 const programType = Object.keys(programData).find(type => programData[type].some(ex => ex.id === exerciseId));
@@ -278,24 +280,10 @@
                     groupedExercises[programType].push(exercise);
                 }
             });
-
             for (const [programType, exercises] of Object.entries(groupedExercises)) {
                 const accordion = document.createElement('div');
                 accordion.className = 'border border-gray-200 rounded-lg';
-                accordion.innerHTML = `
-                    <button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-100 hover:bg-gray-200 rounded-t-lg">
-                        <span class="text-xl font-bold text-gray-800">${programType}</span>
-                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div class="accordion-content hidden p-4 border-t border-gray-200">
-                        ${exercises.map(ex => `
-                            <div>
-                                <button class="exercise-graph-toggle w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-gray-100" data-exercise-id="${ex.id}" data-exercise-name="${ex.name}">
-                                    <span class="font-semibold text-gray-700">${ex.name}</span>
-                                </button>
-                                <div id="wrapper-chart-${ex.id}" class="chart-wrapper hidden mt-2"><div class="chart-container"><canvas id="chart-${ex.id}"></canvas></div></div>
-                            </div>`).join('')}
-                    </div>`;
+                accordion.innerHTML = `<button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-100 hover:bg-gray-200 rounded-t-lg"><span class="text-xl font-bold text-gray-800">${programType}</span><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content hidden p-4 border-t border-gray-200">${exercises.map(ex => `<div><button class="exercise-graph-toggle w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-gray-100" data-exercise-id="${ex.id}"><span class="font-semibold text-gray-700">${ex.name}</span></button><div id="wrapper-chart-${ex.id}" class="chart-wrapper hidden mt-2"><div class="chart-container"><canvas id="chart-${ex.id}"></canvas></div></div></div>`).join('')}</div>`;
                 container.appendChild(accordion);
             }
         }
@@ -303,25 +291,18 @@
         function createChart(exerciseId, allLogs) {
             const chartId = `chart-${exerciseId}`;
             if (chartInstances[chartId]) chartInstances[chartId].destroy();
-
             const history = allLogs.filter(log => log.exerciseId === exerciseId).sort((a,b) => new Date(a.date) - new Date(b.date));
             const wrapper = document.getElementById(`wrapper-chart-${chartId}`);
             if (history.length < 2) {
                 wrapper.innerHTML = '<p class="text-center text-gray-500 p-4">Pas assez de données pour un graphique.</p>';
                 return;
             }
-            
             const labels = history.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
             const isBodyweight = history.every(ex => ex.weight === 0);
             const chartData = isBodyweight ? history.map(ex => ex.reps.reduce((a, b) => a + b, 0)) : history.map(ex => ex.weight);
             const chartLabel = isBodyweight ? 'Répétitions totales' : 'Poids (kg)';
-
             const ctx = document.getElementById(chartId).getContext('2d');
-            chartInstances[chartId] = new Chart(ctx, {
-                type: 'line',
-                data: { labels, datasets: [{ label: chartLabel, data: chartData, borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', fill: true, tension: 0.2 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, title: { display: true, text: chartLabel } } } }
-            });
+            chartInstances[chartId] = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: chartLabel, data: chartData, borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', fill: true, tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, title: { display: true, text: chartLabel } } } } });
         }
         
         // --- ÉVÉNEMENTS ---
@@ -330,28 +311,21 @@
                 const addBtn = e.target.closest('.add-performance-btn');
                 if (addBtn) openPerformanceModal(addBtn.dataset.exerciseId, addBtn.dataset.exerciseName);
             });
-
             document.getElementById('close-modal-btn').addEventListener('click', closePerformanceModal);
             document.getElementById('save-performance-btn').addEventListener('click', savePerformance);
-            
             document.getElementById('suivi-graphs-content').addEventListener('click', e => {
                 const accordionToggle = e.target.closest('.accordion-toggle');
                 if (accordionToggle) accordionToggle.nextElementSibling.classList.toggle('hidden');
-
                 const exerciseToggle = e.target.closest('.exercise-graph-toggle');
                 if (exerciseToggle) {
                     const wrapper = exerciseToggle.nextElementSibling;
                     wrapper.classList.toggle('hidden');
                     if (!wrapper.classList.contains('hidden')) {
-                         const logsQuery = query(collection(db, "users", auth.currentUser.uid, "workout_logs"));
-                         onSnapshot(logsQuery, snapshot => {
-                            const allLogs = snapshot.docs.map(d => d.data());
-                            createChart(exerciseToggle.dataset.exerciseId, allLogs);
-                         });
+                        const logsQuery = query(collection(db, "users", auth.currentUser.uid, "workout_logs"));
+                        onSnapshot(logsQuery, snapshot => createChart(exerciseToggle.dataset.exerciseId, snapshot.docs.map(d => d.data())));
                     }
                 }
             });
-
             document.getElementById('tabs').addEventListener('click', e => {
                 if (e.target.classList.contains('tab-btn')) {
                     document.querySelectorAll('#tabs .tab-btn, #tab-contents .tab-content').forEach(el => el.classList.remove('active'));
@@ -359,10 +333,9 @@
                     document.getElementById(e.target.dataset.tab).classList.add('active');
                 }
             });
-            
-            document.getElementById('user-id').addEventListener('click', e => {
-                navigator.clipboard.writeText(e.target.textContent).then(() => alert('ID copié !'));
-            });
+            document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('signup-form').addEventListener('submit', handleSignup);
         }
 
         function openPerformanceModal(exerciseId, exerciseName) {
@@ -381,19 +354,10 @@
             const exerciseId = document.getElementById('modal-exercise-id').value;
             const reps = document.getElementById('modal-reps').value.split(',').map(r => parseInt(r.trim())).filter(r => !isNaN(r));
             const weight = parseFloat(document.getElementById('modal-weight').value);
-
             if (reps.length === 0) return alert("Veuillez entrer au moins une répétition valide.");
-
-            const log = {
-                exerciseId,
-                reps,
-                weight,
-                date: new Date().toISOString().split('T')[0]
-            };
-            
+            const log = { exerciseId, reps, weight, date: new Date().toISOString().split('T')[0] };
             try {
-                const logsCollection = collection(db, "users", auth.currentUser.uid, "workout_logs");
-                await addDoc(logsCollection, log);
+                await addDoc(collection(db, "users", auth.currentUser.uid, "workout_logs"), log);
                 alert('Performance enregistrée avec succès !');
                 closePerformanceModal();
             } catch (e) {
@@ -402,6 +366,42 @@
             }
         }
 
+        function handleAuthError(error) {
+            const errorElement = document.getElementById('auth-error');
+            if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                errorElement.textContent = 'Mot de passe ou e-mail incorrect.';
+            } else if (error.code === 'auth/user-not-found') {
+                errorElement.textContent = 'Aucun compte trouvé pour cet e-mail.';
+            } else if (error.code === 'auth/weak-password') {
+                errorElement.textContent = 'Le mot de passe doit faire au moins 6 caractères.';
+            } else if (error.code === 'auth/email-already-in-use') {
+                errorElement.textContent = 'Cette adresse e-mail est déjà utilisée.';
+            } else {
+                errorElement.textContent = 'Une erreur est survenue.';
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
     </script>
 </body>
 </html>
