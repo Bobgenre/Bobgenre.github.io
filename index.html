@@ -229,9 +229,14 @@
                 container.innerHTML = exercises.map(exercise => {
                     const lastPerf = allLogs.filter(log => log.exerciseId === exercise.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
                     let lastPerfHtml = '<p class="text-sm text-gray-500 italic mt-2">Aucune donnée précédente.</p>';
-                    if (lastPerf && lastPerf.sets) {
-                        const setsSummary = lastPerf.sets.map(set => `${set.reps}x${set.weight}kg`).join(', ');
-                        lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${setsSummary}</p>`;
+                    // CORRIGÉ : Gère l'ancien et le nouveau format de données
+                    if (lastPerf) {
+                        if (lastPerf.sets) { // Nouveau format
+                            const setsSummary = lastPerf.sets.map(set => `${set.reps}x${set.weight}kg`).join(', ');
+                            lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${setsSummary}</p>`;
+                        } else if (lastPerf.reps) { // Ancien format
+                            lastPerfHtml = `<p class="text-sm text-gray-600 font-semibold mt-2">Ancienne séance : ${lastPerf.reps.length}x[${lastPerf.reps.join('-')}] @ ${lastPerf.weight} kg</p>`;
+                        }
                     }
                     return `<div class="p-4 bg-gray-50 rounded-lg"><div class="flex justify-between items-start"><div><h4 class="font-bold text-lg">${exercise.name}</h4><p class="font-semibold mt-1">${exercise.sets} séries de ${exercise.reps} répétitions</p></div><span class="text-xs font-medium text-gray-600 bg-gray-200 px-2 py-1 rounded-full">${exercise.rest_time}</span></div>${lastPerfHtml}<button class="add-performance-btn mt-3 w-full text-sm font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 py-2 px-4 rounded-md transition" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Ajouter une performance</button></div>`;
                 }).join('');
@@ -276,7 +281,13 @@
             }
             
             const labels = history.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
-            const chartData = history.map(log => Math.max(...log.sets.map(set => set.weight)));
+            // CORRIGÉ : Gère l'ancien et le nouveau format de données pour le graphique
+            const chartData = history.map(log => {
+                if (log.sets) { // Nouveau format
+                    return Math.max(...log.sets.map(set => set.weight));
+                }
+                return log.weight || 0; // Ancien format
+            });
             const chartLabel = 'Poids max (kg)';
             const ctx = document.getElementById(chartId).getContext('2d');
             chartInstances[chartId] = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: chartLabel, data: chartData, borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', fill: true, tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, title: { display: true, text: chartLabel } } } } });
@@ -297,7 +308,6 @@
                 }
             });
 
-            // CORRIGÉ: On utilise la délégation d'événements sur un parent statique
             appContent.addEventListener('click', e => {
                 const addBtn = e.target.closest('.add-performance-btn');
                 if (addBtn) {
