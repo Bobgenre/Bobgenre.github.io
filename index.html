@@ -64,7 +64,6 @@
             <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Connexion</h2>
             <p class="text-center text-gray-500 mb-6">Connectez-vous pour synchroniser vos données.</p>
             <div id="auth-error" class="text-red-500 text-sm text-center mb-4 min-h-[20px]"></div>
-            <!-- Formulaire de Connexion -->
             <form id="login-form" class="space-y-4">
                 <input type="email" id="login-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -73,7 +72,6 @@
             <div class="my-4 flex items-center">
                 <hr class="w-full border-gray-300"><span class="p-2 text-gray-400 text-sm">OU</span><hr class="w-full border-gray-300">
             </div>
-            <!-- Formulaire d'Inscription -->
             <form id="signup-form" class="space-y-4">
                 <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
                 <input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -100,7 +98,6 @@
             </header>
 
             <main class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-                <!-- Tabs de navigation -->
                 <div class="mb-6 border-b border-gray-200">
                     <nav class="flex flex-wrap -mb-px" id="tabs">
                         <button class="tab-btn active text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2" data-tab="Tirage">Tirage</button>
@@ -113,7 +110,6 @@
                     </nav>
                 </div>
 
-                <!-- Contenu des jours et du suivi -->
                 <div id="tab-contents">
                     <div id="Tirage" class="tab-content active"><div id="Tirage-exercises" class="space-y-6"></div></div>
                     <div id="Poussée" class="tab-content"><div id="Poussée-exercises" class="space-y-6"></div></div>
@@ -232,6 +228,7 @@
             renderProgram(programData, allLogs);
             renderLastSessions(programData, allLogs);
             renderGraphs(programData, allLogs);
+            setupDynamicEventListeners(); // CORRIGÉ: On attache les écouteurs pour le contenu dynamique ici
         }
 
         function renderProgram(programData, allLogs) {
@@ -309,10 +306,17 @@
             if (chartInstances[chartId]) chartInstances[chartId].destroy();
             const history = allLogs.filter(log => log.exerciseId === exerciseId).sort((a,b) => new Date(a.date) - new Date(b.date));
             const wrapper = document.getElementById(`wrapper-chart-${chartId}`);
+            const chartContainer = wrapper.querySelector('.chart-container');
+
             if (history.length < 2) {
-                wrapper.innerHTML = '<p class="text-center text-gray-500 p-4">Pas assez de données pour un graphique.</p>';
+                chartContainer.innerHTML = '<p class="text-center text-gray-500 p-4">Pas assez de données pour afficher un graphique.</p>';
                 return;
             }
+            // CORRIGÉ: S'assurer que le canvas est présent avant de créer le graphique
+            if (!chartContainer.querySelector('canvas')) {
+                chartContainer.innerHTML = `<canvas id="${chartId}"></canvas>`;
+            }
+            
             const labels = history.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
             const isBodyweight = history.every(ex => ex.weight === 0);
             const chartData = isBodyweight ? history.map(ex => ex.reps.reduce((a, b) => a + b, 0)) : history.map(ex => ex.weight);
@@ -322,13 +326,21 @@
         }
         
         // --- ÉVÉNEMENTS ---
-        function setupEventListeners() {
+        // CORRIGÉ: On sépare les écouteurs statiques des écouteurs dynamiques
+        function setupStaticEventListeners() {
+            document.getElementById('close-modal-btn').addEventListener('click', closePerformanceModal);
+            document.getElementById('save-performance-btn').addEventListener('click', savePerformance);
+            document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('signup-form').addEventListener('submit', handleSignup);
+        }
+
+        function setupDynamicEventListeners() {
             document.body.addEventListener('click', e => {
                 const addBtn = e.target.closest('.add-performance-btn');
                 if (addBtn) openPerformanceModal(addBtn.dataset.exerciseId, addBtn.dataset.exerciseName);
             });
-            document.getElementById('close-modal-btn').addEventListener('click', closePerformanceModal);
-            document.getElementById('save-performance-btn').addEventListener('click', savePerformance);
+            
             document.getElementById('suivi-graphs-content').addEventListener('click', e => {
                 const accordionToggle = e.target.closest('.accordion-toggle');
                 if (accordionToggle) {
@@ -353,9 +365,6 @@
                     document.getElementById(e.target.dataset.tab).classList.add('active');
                 }
             });
-            document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-            document.getElementById('login-form').addEventListener('submit', handleLogin);
-            document.getElementById('signup-form').addEventListener('submit', handleSignup);
         }
 
         function openPerformanceModal(exerciseId, exerciseName) {
@@ -431,8 +440,8 @@
             }
         }
         
-        // On attache les écouteurs d'événements une seule fois au chargement du script
-        setupEventListeners();
+        // On attache les écouteurs d'événements statiques une seule fois
+        setupStaticEventListeners();
     </script>
 </body>
 </html>
