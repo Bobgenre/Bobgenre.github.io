@@ -33,7 +33,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <p class="mt-4 text-lg font-semibold text-gray-700">Connexion à la base de données...</p>
+        <p id="loader-text" class="mt-4 text-lg font-semibold text-gray-700">Connexion à la base de données...</p>
     </div>
 
     <div class="container mx-auto p-4 md:p-8">
@@ -97,20 +97,20 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Configuration Firebase (remplacer par vos propres clés)
+        // Import des fonctions Firebase nécessaires (versions mises à jour)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // VOS CLÉS PERSONNELLES SONT INTÉGRÉES ICI
         const firebaseConfig = {
             apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
             authDomain: "muscu-5e40c.firebaseapp.com",
             projectId: "muscu-5e40c",
-            storageBucket: "muscu-5e40c.firebasestorage.app",
+            storageBucket: "muscu-5e40c.appspot.com",
             messagingSenderId: "561788112947",
             appId: "1:561788112947:web:7f2b7c7d74ff328f2b1346"
         };
-
-        // Import des fonctions Firebase nécessaires
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         // Initialisation de Firebase
         const app = initializeApp(firebaseConfig);
@@ -122,16 +122,15 @@
         // --- AUTHENTIFICATION ---
         onAuthStateChanged(auth, user => {
             if (user) {
-                // L'utilisateur est connecté
                 document.getElementById('user-id').textContent = user.uid;
                 document.getElementById('auth-info').classList.remove('hidden');
-                document.getElementById('loader').style.display = 'none';
                 initializeAppLogic(user.uid);
             } else {
-                // L'utilisateur n'est pas connecté, on le connecte anonymement
                 signInAnonymously(auth).catch(error => {
-                    console.error("Erreur de connexion anonyme", error);
-                    document.getElementById('loader').innerHTML = '<p class="text-red-500">Erreur de connexion</p>';
+                    console.error("Erreur de connexion anonyme:", error);
+                    const loaderText = document.getElementById('loader-text');
+                    loaderText.textContent = "Erreur de connexion. Vérifiez la console (F12) pour les détails.";
+                    loaderText.classList.add('text-red-500');
                 });
             }
         });
@@ -139,18 +138,35 @@
         // --- LOGIQUE PRINCIPALE DE L'APPLICATION ---
         async function initializeAppLogic(userId) {
             const programRef = doc(db, "users", userId, "program", "main");
-            const programSnap = await getDoc(programRef);
+            
+            try {
+                let programSnap = await getDoc(programRef);
 
-            if (!programSnap.exists()) {
-                await setupInitialProgram(userId);
+                if (!programSnap.exists()) {
+                    await setupInitialProgram(userId);
+                    programSnap = await getDoc(programRef); // Re-fetch after creation
+                }
+                
+                const programData = programSnap.data();
+
+                const logsQuery = query(collection(db, "users", userId, "workout_logs"));
+                
+                onSnapshot(logsQuery, (snapshot) => {
+                    document.getElementById('loader').style.display = 'none';
+                    const allLogs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    renderAll(programData, allLogs);
+                }, (error) => {
+                    console.error("Erreur d'écoute Firestore: ", error);
+                    document.getElementById('loader').style.display = 'none';
+                    alert("Erreur de connexion à la base de données. Vérifiez vos règles de sécurité.");
+                });
+
+            } catch (error) {
+                 console.error("Erreur critique lors de l'initialisation:", error);
+                 const loaderText = document.getElementById('loader-text');
+                 loaderText.textContent = "Erreur critique. Avez-vous activé Firestore dans votre projet Firebase ?";
+                 loaderText.classList.add('text-red-500');
             }
-
-            // Écoute des changements sur les logs pour mettre à jour l'UI en temps réel
-            const logsQuery = query(collection(db, "users", userId, "workout_logs"));
-            onSnapshot(logsQuery, (snapshot) => {
-                const allLogs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderAll(userId, allLogs);
-            });
         }
 
         // Crée le programme de base pour un nouvel utilisateur
@@ -164,14 +180,11 @@
         }
 
         // --- AFFICHAGE ---
-        async function renderAll(userId, allLogs) {
-            const programRef = doc(db, "users", userId, "program", "main");
-            const programSnap = await getDoc(programRef);
-            const programData = programSnap.data();
-
+        function renderAll(programData, allLogs) {
             renderProgram(programData, allLogs);
             renderLastSessions(programData, allLogs);
             renderGraphs(programData, allLogs);
+            setupEventListeners(); // Re-attach event listeners after every render
         }
 
         function renderProgram(programData, allLogs) {
@@ -221,7 +234,6 @@
                 if (!sessions[programType]) sessions[programType] = { date: null, exercises: [] };
                 if (!sessions[programType].date || new Date(log.date) > new Date(sessions[programType].date)) sessions[programType].date = log.date;
                 
-                // On s'assure de n'afficher que la dernière performance de chaque exercice
                 const existingExIndex = sessions[programType].exercises.findIndex(ex => ex.name === exercise.name);
                 if (existingExIndex > -1) {
                     if (new Date(log.date) > new Date(sessions[programType].exercises[existingExIndex].date)) {
@@ -288,12 +300,12 @@
             }
         }
 
-        function createChart(exerciseId, exerciseName, allLogs) {
+        function createChart(exerciseId, allLogs) {
             const chartId = `chart-${exerciseId}`;
             if (chartInstances[chartId]) chartInstances[chartId].destroy();
 
             const history = allLogs.filter(log => log.exerciseId === exerciseId).sort((a,b) => new Date(a.date) - new Date(b.date));
-            const wrapper = document.getElementById(`wrapper-${chartId}`);
+            const wrapper = document.getElementById(`wrapper-chart-${chartId}`);
             if (history.length < 2) {
                 wrapper.innerHTML = '<p class="text-center text-gray-500 p-4">Pas assez de données pour un graphique.</p>';
                 return;
@@ -332,9 +344,9 @@
                     wrapper.classList.toggle('hidden');
                     if (!wrapper.classList.contains('hidden')) {
                          const logsQuery = query(collection(db, "users", auth.currentUser.uid, "workout_logs"));
-                         getDocs(logsQuery).then(snapshot => {
+                         onSnapshot(logsQuery, snapshot => {
                             const allLogs = snapshot.docs.map(d => d.data());
-                            createChart(exerciseToggle.dataset.exerciseId, exerciseToggle.dataset.exerciseName, allLogs);
+                            createChart(exerciseToggle.dataset.exerciseId, allLogs);
                          });
                     }
                 }
@@ -384,7 +396,6 @@
                 await addDoc(logsCollection, log);
                 alert('Performance enregistrée avec succès !');
                 closePerformanceModal();
-                // L'UI se mettra à jour automatiquement grâce à onSnapshot
             } catch (e) {
                 console.error("Erreur d'enregistrement:", e);
                 alert("Une erreur est survenue.");
