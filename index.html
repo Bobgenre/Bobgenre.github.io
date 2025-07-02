@@ -102,246 +102,432 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- GESTION DES DONNÉES ---
-            function loadData() {
-                return mockData;
-            }
+        // --- GESTION DES DONNÉES ---
+        // MODIFIÉ: On utilise directement les objets, plus besoin de la fonction loadData
+        let data = mockData;
+        const chartInstances = {};
+
+        // --- GESTION DU MODAL ---
+        const modal = document.getElementById('performance-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const savePerfBtn = document.getElementById('save-performance-btn');
+        const modalTitle = document.getElementById('modal-title');
+        const modalExoName = document.getElementById('modal-exercise-name');
+        const modalRepsInput = document.getElementById('modal-reps');
+        const modalWeightInput = document.getElementById('modal-weight');
+        const modalWorkoutTypeInput = document.getElementById('modal-workout-type');
+
+        // NOUVEAU: Fonction pour ouvrir le modal
+        function openPerformanceModal(exerciseName, workoutType) {
+            modalExoName.textContent = exerciseName;
+            modalTitle.textContent = `Ajouter Performance pour ${exerciseName}`;
+            modalWorkoutTypeInput.value = workoutType; // Stocke le type de séance
+            modal.classList.remove('hidden');
+        }
+
+        // NOUVEAU: Fonction pour fermer le modal
+        function closePerformanceModal() {
+            modal.classList.add('hidden');
+            modalRepsInput.value = '';
+            modalWeightInput.value = '0';
+        }
+        
+        // NOUVEAU: Fonction pour sauvegarder la performance d'un exercice (temporairement)
+        function saveExercisePerformance() {
+            const exerciseName = modalExoName.textContent;
+            const workoutType = modalWorkoutTypeInput.value;
             
-            const data = loadData();
-            const chartInstances = {}; // Pour garder une trace des graphiques initialisés
+            const reps = modalRepsInput.value.split(',').map(r => parseInt(r.trim())).filter(r => !isNaN(r));
+            const weight = parseFloat(modalWeightInput.value);
 
-            // --- AFFICHAGE ---
-
-            function renderProgram() {
-                const workoutTypes = {
-                    "tirage": "tirage-exercises",
-                    "poussee": "poussee-exercises",
-                    "jambes": "jambes-exercises"
-                };
-
-                // Helper function to find the last performance
-                function getLastPerformance(exerciseName) {
-                    const history = data.workout_log
-                        .flatMap(session => session.exercises.map(ex => ({ ...ex, date: session.date })))
-                        .filter(ex => ex.name === exerciseName)
-                        .sort((a, b) => new Date(b.date) - new Date(a.date));
-                    return history.length > 0 ? history[0] : null;
-                }
-
-                for (const [type, containerId] of Object.entries(workoutTypes)) {
-                    const container = document.getElementById(containerId);
-                    if (!container) continue;
-                    container.innerHTML = ''; // Clear existing content
-
-                    program[type].forEach(exercise => {
-                        const lastPerf = getLastPerformance(exercise.name);
-                        let lastPerfHtml = '<p class="text-sm text-gray-500 italic mt-2">Aucune donnée précédente.</p>';
-
-                        if (lastPerf) {
-                            if (lastPerf.weight > 0) {
-                                lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${lastPerf.weight} kg</p>`;
-                            } else {
-                                const repsStr = lastPerf.reps.join(' - ');
-                                lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${lastPerf.sets} séries de [${repsStr}] reps</p>`;
-                            }
-                        }
-
-                        const exerciseHtml = `
-                            <div class="p-4 bg-gray-50 rounded-lg">
-                                <div class="flex justify-between items-start">
-                                    <h4 class="font-bold text-lg">${exercise.name}</h4>
-                                    <span class="text-xs font-medium text-gray-600 bg-gray-200 px-2 py-1 rounded-full whitespace-nowrap">${exercise.rest_time}</span>
-                                </div>
-                                <p class="font-semibold mt-1">${exercise.sets} séries de ${exercise.reps} répétitions</p>
-                                ${lastPerfHtml}
-                            </div>
-                        `;
-                        container.innerHTML += exerciseHtml;
-                    });
-                }
+            if (reps.length === 0) {
+                alert("Veuillez entrer au moins une répétition valide.");
+                return;
             }
 
-            function renderLastSessions() {
-                const container = document.getElementById('dernieres-seances-content');
-                container.innerHTML = '';
-                const workoutTypes = ['Tirage', 'Poussée', 'Jambes'];
-
-                workoutTypes.forEach(type => {
-                    const sessionsOfType = data.workout_log.filter(s => s.type === type)
-                                             .sort((a,b) => new Date(b.date) - new Date(a.date));
-
-                    const div = document.createElement('div');
-                    let content = `<h4 class="text-2xl font-semibold border-b pb-2 mb-3">${type}</h4>`;
-
-                    if (sessionsOfType.length > 0) {
-                        const lastSession = sessionsOfType[0];
-                        content += `
-                            <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                                <p class="font-bold text-yellow-800">Dernière séance le ${new Date(lastSession.date).toLocaleDateString('fr-FR')}</p>
-                                <ul class="list-disc list-inside mt-2 text-gray-700">`;
-                        
-                        lastSession.exercises.forEach(ex => {
-                            const repsStr = ex.reps.join(', ');
-                            const weightStr = ex.weight > 0 ? `à ${ex.weight} kg` : `(Poids du corps)`;
-                            content += `<li><strong>${ex.name}:</strong> ${ex.sets} séries de [${repsStr}] reps ${weightStr}</li>`;
-                        });
-
-                        content += `</ul></div>`;
-                    } else {
-                        content += `<div class="text-gray-500 italic">Aucune séance de type "${type}" enregistrée.</div>`;
-                    }
-                    div.innerHTML = content;
-                    container.appendChild(div);
-                });
+            const newPerformance = {
+                name: exerciseName,
+                sets: reps.length,
+                reps: reps,
+                weight: weight
+            };
+            
+            // On cherche si l'exercice a déjà été enregistré dans la séance en cours pour le remplacer
+            const existingIndex = currentSession[workoutType].findIndex(ex => ex.name === exerciseName);
+            if(existingIndex > -1) {
+                currentSession[workoutType][existingIndex] = newPerformance;
+            } else {
+                currentSession[workoutType].push(newPerformance);
             }
 
-            function renderGraphs() {
-                const container = document.getElementById('suivi-graphs-content');
-                container.innerHTML = '';
-                const workoutTypes = ['Tirage', 'Poussée', 'Jambes'];
-
-                workoutTypes.forEach(type => {
-                    const accordion = document.createElement('div');
-                    accordion.className = 'border border-gray-200 rounded-lg';
-                    
-                    const exercisesForType = [...new Set(
-                        data.workout_log
-                            .filter(session => session.type === type)
-                            .flatMap(session => session.exercises.map(ex => ex.name))
-                    )];
-
-                    if (exercisesForType.length === 0) return;
-
-                    let exercisesHtml = '<div class="space-y-2">';
-                    exercisesForType.forEach(exerciseName => {
-                        const chartId = `chart-${exerciseName.replace(/[^a-zA-Z0-9]/g, '-')}`;
-                        exercisesHtml += `
-                            <div>
-                                <button class="exercise-graph-toggle w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out flex justify-between items-center" data-exercise="${exerciseName}" data-chart-id="${chartId}">
-                                    <span class="font-semibold text-gray-700">${exerciseName}</span>
-                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </button>
-                                <div id="wrapper-${chartId}" class="chart-wrapper hidden mt-2 pl-4 pr-4 pb-2">
-                                    <div class="chart-container bg-white p-2 rounded-md">
-                                        <canvas id="${chartId}"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    exercisesHtml += '</div>';
-
-                    accordion.innerHTML = `
-                        <button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-100 hover:bg-gray-200 rounded-t-lg">
-                            <span class="text-xl font-bold text-gray-800">${type}</span>
-                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div class="accordion-content hidden p-4 border-t border-gray-200">
-                            ${exercisesHtml}
-                        </div>
-                    `;
-                    container.appendChild(accordion);
-                });
+            console.log("Séance en cours:", currentSession);
+            alert(`Performance pour "${exerciseName}" ajoutée à la séance en cours !`);
+            closePerformanceModal();
+        }
+        
+        // NOUVEAU: Fonction pour finaliser et enregistrer la séance
+        function finalizeAndSaveSession(workoutType) {
+            if (currentSession[workoutType].length === 0) {
+                alert("Aucune performance n'a été ajoutée pour cette séance.");
+                return;
             }
 
-            function createChart(exerciseName, chartId) {
-                if (chartInstances[chartId]) return;
+            const newSession = {
+                date: new Date().toISOString().split('T')[0], // Date du jour
+                type: workoutType,
+                exercises: currentSession[workoutType]
+            };
 
-                const exerciseHistory = data.workout_log
-                    .flatMap(session => session.exercises.map(ex => ({...ex, date: session.date})))
-                    .filter(ex => ex.name === exerciseName)
-                    .sort((a,b) => new Date(a.date) - new Date(b.date));
+            data.workout_log.push(newSession);
 
-                if (exerciseHistory.length < 2) {
-                    const wrapper = document.getElementById(`wrapper-${chartId}`);
-                    wrapper.innerHTML = '<p class="text-center text-gray-500">Pas assez de données pour afficher un graphique.</p>';
-                    return;
-                };
+            // Réinitialiser la séance en cours
+            currentSession[workoutType] = [];
 
-                const labels = exerciseHistory.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
-                const isBodyweight = exerciseHistory.every(ex => ex.weight === 0);
-                
-                let chartData;
-                let chartLabel;
-
-                if (isBodyweight) {
-                    chartLabel = 'Répétitions totales';
-                    chartData = exerciseHistory.map(ex => ex.reps.reduce((total, rep) => total + rep, 0));
-                } else {
-                    chartLabel = 'Poids (kg)';
-                    chartData = exerciseHistory.map(ex => ex.weight);
-                }
-
-                const ctx = document.getElementById(chartId).getContext('2d');
-                chartInstances[chartId] = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: chartLabel,
-                            data: chartData,
-                            borderColor: '#16a34a',
-                            backgroundColor: 'rgba(22, 163, 74, 0.1)',
-                            fill: true,
-                            tension: 0.2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: { 
-                            y: { 
-                                beginAtZero: false,
-                                title: { display: true, text: chartLabel }
-                            } 
-                        }
-                    }
-                });
-            }
-
-            // --- GESTION DES ÉVÉNEMENTS ---
-            document.getElementById('suivi-graphs-content').addEventListener('click', (e) => {
-                const accordionToggle = e.target.closest('.accordion-toggle');
-                if (accordionToggle) {
-                    accordionToggle.classList.toggle('open');
-                    const content = accordionToggle.nextElementSibling;
-                    content.classList.toggle('hidden');
-                    return;
-                }
-
-                const exerciseToggle = e.target.closest('.exercise-graph-toggle');
-                if (exerciseToggle) {
-                    exerciseToggle.classList.toggle('open');
-                    const exerciseName = exerciseToggle.dataset.exercise;
-                    const chartId = exerciseToggle.dataset.chartId;
-                    const wrapper = document.getElementById(`wrapper-${chartId}`);
-                    
-                    createChart(exerciseName, chartId);
-                    
-                    wrapper.classList.toggle('hidden');
-                }
-            });
-
-            const tabs = document.getElementById('tabs');
-            const tabContents = document.getElementById('tab-contents');
-
-            tabs.addEventListener('click', (e) => {
-                const target = e.target;
-                if (target.classList.contains('tab-btn')) {
-                    tabs.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                    tabContents.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-                    target.classList.add('active');
-                    const tabId = target.getAttribute('data-tab');
-                    document.getElementById(tabId).classList.add('active');
-                }
-            });
-
-            // --- INITIALISATION ---
+            // Mettre à jour toute l'interface
             renderProgram();
             renderLastSessions();
             renderGraphs();
+
+            alert(`Séance de ${workoutType} enregistrée avec succès !`);
+            
+            // Proposer l'export
+            showExportModal();
+        }
+        
+        // NOUVEAU: Fonction pour afficher le modal d'exportation
+        function showExportModal() {
+            const exportTextarea = document.getElementById('export-textarea');
+            // On doit reconstruire le code complet du fichier database.js
+            const newDbContent = `const program = ${JSON.stringify(program, null, 4)};\n\nconst mockData = ${JSON.stringify(data, null, 4)};\n\nlet currentSession = {\n    "Tirage": [],\n    "Poussée": [],\n    "Jambes": []\n};`;
+            exportTextarea.value = newDbContent;
+            document.getElementById('export-modal').classList.remove('hidden');
+        }
+
+
+        // --- AFFICHAGE ---
+
+        // MODIFIÉ: renderProgram pour ajouter le bouton "Ajouter performance"
+        function renderProgram() {
+            const workoutTypes = {
+                "tirage": "Tirage",
+                "poussee": "Poussée",
+                "jambes": "Jambes"
+            };
+
+            function getLastPerformance(exerciseName) {
+                const history = data.workout_log
+                    .flatMap(session => session.exercises.map(ex => ({ ...ex, date: session.date })))
+                    .filter(ex => ex.name === exerciseName)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                return history.length > 0 ? history[0] : null;
+            }
+
+            for (const [typeKey, typeName] of Object.entries(workoutTypes)) {
+                const container = document.getElementById(`${typeKey}-exercises`);
+                if (!container) continue;
+                container.innerHTML = ''; 
+
+                program[typeKey].forEach(exercise => {
+                    const lastPerf = getLastPerformance(exercise.name);
+                    let lastPerfHtml = '<p class="text-sm text-gray-500 italic mt-2">Aucune donnée précédente.</p>';
+
+                    if (lastPerf) {
+                        if (lastPerf.weight > 0) {
+                            lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${lastPerf.weight} kg</p>`;
+                        } else {
+                            const repsStr = lastPerf.reps.join(' - ');
+                            lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${lastPerf.sets} séries de [${repsStr}] reps</p>`;
+                        }
+                    }
+
+                    // MODIFIÉ: Ajout du bouton d'ajout de performance
+                    const exerciseHtml = `
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-lg">${exercise.name}</h4>
+                                    <p class="font-semibold mt-1">${exercise.sets} séries de ${exercise.reps} répétitions</p>
+                                </div>
+                                <span class="text-xs font-medium text-gray-600 bg-gray-200 px-2 py-1 rounded-full whitespace-nowrap">${exercise.rest_time}</span>
+                            </div>
+                            ${lastPerfHtml}
+                            <button class="add-performance-btn mt-3 w-full text-sm font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 py-2 px-4 rounded-md transition"
+                                    data-exercise-name="${exercise.name}" data-workout-type="${typeName}">
+                                Ajouter la performance du jour
+                            </button>
+                        </div>
+                    `;
+                    container.innerHTML += exerciseHtml;
+                });
+                
+                // NOUVEAU: Ajout du bouton pour finaliser la séance
+                container.innerHTML += `
+                    <div class="mt-8">
+                        <button class="finalize-session-btn w-full py-3 px-4 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition"
+                                data-workout-type="${typeName}">
+                            Terminer et Enregistrer la Séance ${typeName}
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderLastSessions() {
+            const container = document.getElementById('dernieres-seances-content');
+            container.innerHTML = '';
+            const workoutTypes = ['Tirage', 'Poussée', 'Jambes'];
+
+            workoutTypes.forEach(type => {
+                const sessionsOfType = data.workout_log.filter(s => s.type === type)
+                                                .sort((a,b) => new Date(b.date) - new Date(a.date));
+
+                const div = document.createElement('div');
+                let content = `<h4 class="text-2xl font-semibold border-b pb-2 mb-3">${type}</h4>`;
+
+                if (sessionsOfType.length > 0) {
+                    const lastSession = sessionsOfType[0];
+                    content += `
+                        <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <p class="font-bold text-yellow-800">Dernière séance le ${new Date(lastSession.date).toLocaleDateString('fr-FR')}</p>
+                            <ul class="list-disc list-inside mt-2 text-gray-700">`;
+                    
+                    lastSession.exercises.forEach(ex => {
+                        const repsStr = ex.reps.join(', ');
+                        const weightStr = ex.weight > 0 ? `à ${ex.weight} kg` : `(Poids du corps)`;
+                        content += `<li><strong>${ex.name}:</strong> ${ex.sets} séries de [${repsStr}] reps ${weightStr}</li>`;
+                    });
+
+                    content += `</ul></div>`;
+                } else {
+                    content += `<div class="text-gray-500 italic">Aucune séance de type "${type}" enregistrée.</div>`;
+                }
+                div.innerHTML = content;
+                container.appendChild(div);
+            });
+        }
+
+        function renderGraphs() {
+            const container = document.getElementById('suivi-graphs-content');
+            container.innerHTML = '';
+            // Détruire les anciens graphiques pour éviter les fuites de mémoire
+            for (const chartId in chartInstances) {
+                if (chartInstances[chartId]) {
+                    chartInstances[chartId].destroy();
+                    delete chartInstances[chartId];
+                }
+            }
+            
+            const workoutTypes = ['Tirage', 'Poussée', 'Jambes'];
+
+            workoutTypes.forEach(type => {
+                const accordion = document.createElement('div');
+                accordion.className = 'border border-gray-200 rounded-lg';
+                
+                const exercisesForType = [...new Set(
+                    data.workout_log
+                        .filter(session => session.type === type)
+                        .flatMap(session => session.exercises.map(ex => ex.name))
+                )];
+
+                if (exercisesForType.length === 0) return;
+
+                let exercisesHtml = '<div class="space-y-2">';
+                exercisesForType.forEach(exerciseName => {
+                    const chartId = `chart-${exerciseName.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                    exercisesHtml += `
+                        <div>
+                            <button class="exercise-graph-toggle w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out flex justify-between items-center" data-exercise="${exerciseName}" data-chart-id="${chartId}">
+                                <span class="font-semibold text-gray-700">${exerciseName}</span>
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div id="wrapper-${chartId}" class="chart-wrapper hidden mt-2 pl-4 pr-4 pb-2">
+                                <div class="chart-container bg-white p-2 rounded-md">
+                                    <canvas id="${chartId}"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                exercisesHtml += '</div>';
+
+                accordion.innerHTML = `
+                    <button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-100 hover:bg-gray-200 rounded-t-lg">
+                        <span class="text-xl font-bold text-gray-800">${type}</span>
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content hidden p-4 border-t border-gray-200">
+                        ${exercisesHtml}
+                    </div>
+                `;
+                container.appendChild(accordion);
+            });
+        }
+
+        function createChart(exerciseName, chartId) {
+            if (chartInstances[chartId]) {
+                chartInstances[chartId].destroy(); // Détruire l'ancien graphique s'il existe
+            }
+
+            const exerciseHistory = data.workout_log
+                .flatMap(session => session.exercises.map(ex => ({...ex, date: session.date})))
+                .filter(ex => ex.name === exerciseName)
+                .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+            if (exerciseHistory.length < 2) {
+                const wrapper = document.getElementById(`wrapper-${chartId}`);
+                wrapper.innerHTML = '<p class="text-center text-gray-500">Pas assez de données pour afficher un graphique.</p>';
+                return;
+            };
+
+            const labels = exerciseHistory.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
+            const isBodyweight = exerciseHistory.every(ex => ex.weight === 0);
+            
+            let chartData;
+            let chartLabel;
+
+            if (isBodyweight) {
+                chartLabel = 'Répétitions totales';
+                chartData = exerciseHistory.map(ex => ex.reps.reduce((total, rep) => total + rep, 0));
+            } else {
+                chartLabel = 'Poids (kg)';
+                chartData = exerciseHistory.map(ex => ex.weight);
+            }
+
+            const ctx = document.getElementById(chartId).getContext('2d');
+            chartInstances[chartId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: chartLabel,
+                        data: chartData,
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                        fill: true,
+                        tension: 0.2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { 
+                        y: { 
+                            beginAtZero: false,
+                            title: { display: true, text: chartLabel }
+                        } 
+                    }
+                }
+            });
+        }
+
+        // --- GESTION DES ÉVÉNEMENTS ---
+
+        // MODIFIÉ: event listener global pour les boutons créés dynamiquement
+        document.body.addEventListener('click', (e) => {
+            // Clic sur "Ajouter la performance du jour"
+            if (e.target.classList.contains('add-performance-btn')) {
+                const exerciseName = e.target.dataset.exerciseName;
+                const workoutType = e.target.dataset.workoutType;
+                openPerformanceModal(exerciseName, workoutType);
+            }
+            
+            // Clic sur "Terminer et Enregistrer la Séance"
+            if (e.target.classList.contains('finalize-session-btn')) {
+                const workoutType = e.target.dataset.workoutType;
+                finalizeAndSaveSession(workoutType);
+            }
         });
+
+        closeModalBtn.addEventListener('click', closePerformanceModal);
+        savePerfBtn.addEventListener('click', saveExercisePerformance);
+
+        document.getElementById('suivi-graphs-content').addEventListener('click', (e) => {
+            const accordionToggle = e.target.closest('.accordion-toggle');
+            if (accordionToggle) {
+                accordionToggle.classList.toggle('open');
+                const content = accordionToggle.nextElementSibling;
+                content.classList.toggle('hidden');
+                return;
+            }
+
+            const exerciseToggle = e.target.closest('.exercise-graph-toggle');
+            if (exerciseToggle) {
+                exerciseToggle.classList.toggle('open');
+                const exerciseName = exerciseToggle.dataset.exercise;
+                const chartId = exerciseToggle.dataset.chartId;
+                const wrapper = document.getElementById(`wrapper-${chartId}`);
+                
+                // On s'assure que le contenu du wrapper est bien un canvas avant de créer le chart
+                if (!wrapper.querySelector('canvas')) {
+                    wrapper.querySelector('.chart-container').innerHTML = `<canvas id="${chartId}"></canvas>`;
+                }
+                createChart(exerciseName, chartId);
+                
+                wrapper.classList.toggle('hidden');
+            }
+        });
+
+        const tabs = document.getElementById('tabs');
+        const tabContents = document.getElementById('tab-contents');
+
+        tabs.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.classList.contains('tab-btn')) {
+                tabs.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                tabContents.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+                target.classList.add('active');
+                const tabId = target.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            }
+        });
+
+        // --- INITIALISATION ---
+        renderProgram();
+        renderLastSessions();
+        renderGraphs();
+    });
     </script>
+
+    <div id="performance-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+        <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Ajouter Performance</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500 mb-4" id="modal-exercise-name"></p>
+                    
+                    <input type="hidden" id="modal-workout-type">
+
+                    <div class="mb-4">
+                        <label for="modal-reps" class="text-left block text-sm font-medium text-gray-700">Répétitions par série (séparées par des virgules)</label>
+                        <input type="text" id="modal-reps" placeholder="ex: 12, 10, 8, 8" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="modal-weight" class="text-left block text-sm font-medium text-gray-700">Poids (en kg) - Laissez à 0 pour le poids du corps</label>
+                        <input type="number" id="modal-weight" value="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="save-performance-btn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        Enregistrer la performance
+                    </button>
+                    <button id="close-modal-btn" class="mt-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="export-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+        <div class="relative mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+             <h3 class="text-lg leading-6 font-medium text-gray-900">Copiez vos nouvelles données</h3>
+             <p class="text-sm text-gray-600 mt-2 mb-4">Remplacez le contenu de votre fichier `database.js` par le code ci-dessous pour sauvegarder vos nouvelles séances.</p>
+             <textarea id="export-textarea" readonly class="w-full h-64 font-mono text-xs bg-gray-100 p-2 border rounded"></textarea>
+             <button onclick="document.getElementById('export-modal').classList.add('hidden')" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full">Fermer</button>
+        </div>
+    </div>
 </body>
 </html>

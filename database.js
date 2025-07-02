@@ -1,5 +1,4 @@
 // NOUVEAU : Définition de la structure du programme d'entraînement.
-// C'est ici que vous définissez vos exercices et leur temps de repos.
 const program = {
     "tirage": [
         { "name": "Tractions Normales", "sets": "5", "reps": "3-6", "rest_time": "2 min" },
@@ -22,9 +21,7 @@ const program = {
     ]
 };
 
-
 // Ce fichier agit comme votre base de données locale.
-// Vous pouvez ajouter de nouvelles entrées au tableau "workout_log" pour enregistrer de nouvelles séances.
 const mockData = {
     "workout_log": [
         {
@@ -38,4 +35,11 @@ const mockData = {
             ]
         }
     ]
+};
+
+// NOUVEAU : Objet pour stocker la séance en cours
+let currentSession = {
+    "Tirage": [],
+    "Poussée": [],
+    "Jambes": []
 };
