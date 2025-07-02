@@ -13,7 +13,6 @@
         .tab-content.active { display: block; }
         .tab-btn.active { background-color: #3b82f6; color: white; }
         .tab-btn.suivi.active { background-color: #16a34a; color: white; }
-        .tab-btn.dernier.active { background-color: #ca8a04; color: white; }
         .chart-container { position: relative; height: 250px; width: 100%; }
         .accordion-toggle svg, .exercise-graph-toggle svg { transition: transform 0.2s ease-in-out; }
         .accordion-toggle.open svg, .exercise-graph-toggle.open svg { transform: rotate(180deg); }
@@ -104,7 +103,6 @@
                         <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2" data-tab="Poussée">Poussée</button>
                         <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg" data-tab="Jambes">Jambes</button>
                         <div class="ml-auto flex flex-wrap">
-                            <button class="tab-btn dernier text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2 border border-yellow-500 text-yellow-600 hover:bg-yellow-50" data-tab="dernieres-seances">Dernières Séances</button>
                             <button class="tab-btn suivi text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg border border-green-500 text-green-600 hover:bg-green-50" data-tab="suivi">Suivi Graphique</button>
                         </div>
                     </nav>
@@ -114,7 +112,6 @@
                     <div id="Tirage" class="tab-content active"><div id="Tirage-exercises" class="space-y-6"></div></div>
                     <div id="Poussée" class="tab-content"><div id="Poussée-exercises" class="space-y-6"></div></div>
                     <div id="Jambes" class="tab-content"><div id="Jambes-exercises" class="space-y-6"></div></div>
-                    <div id="dernieres-seances" class="tab-content"><div id="dernieres-seances-content" class="space-y-8"></div></div>
                     <div id="suivi" class="tab-content"><div id="suivi-graphs-content" class="space-y-4"></div></div>
                 </div>
             </main>
@@ -222,9 +219,7 @@
         // --- AFFICHAGE ---
         function renderAll(programData, allLogs) {
             renderProgram(programData, allLogs);
-            renderLastSessions(programData, allLogs);
             renderGraphs(programData, allLogs);
-            setupDynamicEventListeners();
         }
 
         function renderProgram(programData, allLogs) {
@@ -241,43 +236,6 @@
                     return `<div class="p-4 bg-gray-50 rounded-lg"><div class="flex justify-between items-start"><div><h4 class="font-bold text-lg">${exercise.name}</h4><p class="font-semibold mt-1">${exercise.sets} séries de ${exercise.reps} répétitions</p></div><span class="text-xs font-medium text-gray-600 bg-gray-200 px-2 py-1 rounded-full">${exercise.rest_time}</span></div>${lastPerfHtml}<button class="add-performance-btn mt-3 w-full text-sm font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 py-2 px-4 rounded-md transition" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Ajouter une performance</button></div>`;
                 }).join('');
             }
-        }
-
-        function renderLastSessions(programData, allLogs) {
-             const container = document.getElementById('dernieres-seances-content');
-            container.innerHTML = '';
-            const sessions = {};
-            allLogs.forEach(log => {
-                const programType = Object.keys(programData).find(type => programData[type].some(ex => ex.id === log.exerciseId));
-                if (!programType) return;
-                const exercise = programData[programType].find(ex => ex.id === log.exerciseId);
-                if (!sessions[programType]) sessions[programType] = { date: null, exercises: [] };
-                if (!sessions[programType].date || new Date(log.date) > new Date(sessions[programType].date)) sessions[programType].date = log.date;
-                const existingExIndex = sessions[programType].exercises.findIndex(ex => ex.name === exercise.name);
-                if (existingExIndex > -1) {
-                    if (new Date(log.date) > new Date(sessions[programType].exercises[existingExIndex].date)) {
-                        sessions[programType].exercises[existingExIndex] = { ...log, name: exercise.name };
-                    }
-                } else {
-                    sessions[programType].exercises.push({ ...log, name: exercise.name });
-                }
-            });
-            ['Tirage', 'Poussée', 'Jambes'].forEach(type => {
-                const session = sessions[type];
-                const div = document.createElement('div');
-                let content = `<h4 class="text-2xl font-semibold border-b pb-2 mb-3">${type}</h4>`;
-                if (session) {
-                    const setsSummary = session.exercises.map(ex => {
-                        const setsStr = ex.sets.map(s => `${s.reps}x${s.weight}kg`).join(', ');
-                        return `<li><strong>${ex.name}:</strong> ${setsStr}</li>`;
-                    }).join('');
-                    content += `<div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200"><p class="font-bold text-yellow-800">Dernière séance le ${new Date(session.date).toLocaleDateString('fr-FR')}</p><ul class="list-disc list-inside mt-2 text-gray-700">${setsSummary}</ul></div>`;
-                } else {
-                    content += `<div class="text-gray-500 italic">Aucune séance de type "${type}" enregistrée.</div>`;
-                }
-                div.innerHTML = content;
-                container.appendChild(div);
-            });
         }
         
         function renderGraphs(programData, allLogs) {
@@ -318,7 +276,6 @@
             }
             
             const labels = history.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
-            // Pour le graphique, on prend le poids le plus lourd soulevé pendant la séance
             const chartData = history.map(log => Math.max(...log.sets.map(set => set.weight)));
             const chartLabel = 'Poids max (kg)';
             const ctx = document.getElementById(chartId).getContext('2d');
@@ -326,35 +283,35 @@
         }
         
         // --- ÉVÉNEMENTS ---
-        function setupStaticEventListeners() {
+        function setupEventListeners() {
             document.getElementById('close-modal-btn').addEventListener('click', closePerformanceModal);
             document.getElementById('save-performance-btn').addEventListener('click', savePerformance);
             document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('signup-form').addEventListener('submit', handleSignup);
             document.getElementById('add-set-btn').addEventListener('click', addSetRow);
-            // Écouteur pour la touche "Entrée" dans le modal
             document.getElementById('performance-modal').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
-                    e.preventDefault(); // Empêche le comportement par défaut (ex: soumettre un formulaire)
+                    e.preventDefault();
                     savePerformance();
                 }
             });
-        }
 
-        function setupDynamicEventListeners() {
-            document.body.addEventListener('click', e => {
+            // CORRIGÉ: On utilise la délégation d'événements sur un parent statique
+            appContent.addEventListener('click', e => {
                 const addBtn = e.target.closest('.add-performance-btn');
-                if (addBtn) openPerformanceModal(addBtn.dataset.exerciseId, addBtn.dataset.exerciseName);
-            });
-            
-            document.getElementById('suivi-graphs-content').addEventListener('click', e => {
+                if (addBtn) {
+                    openPerformanceModal(addBtn.dataset.exerciseId, addBtn.dataset.exerciseName);
+                    return;
+                }
+
                 const accordionToggle = e.target.closest('.accordion-toggle');
                 if (accordionToggle) {
                     accordionToggle.classList.toggle('open');
                     accordionToggle.nextElementSibling.classList.toggle('hidden');
                     return;
                 }
+
                 const exerciseToggle = e.target.closest('.exercise-graph-toggle');
                 if (exerciseToggle) {
                     exerciseToggle.classList.toggle('open');
@@ -363,13 +320,14 @@
                     if (!wrapper.classList.contains('hidden')) {
                         createChart(exerciseToggle.dataset.exerciseId, currentLogs);
                     }
+                    return;
                 }
-            });
-            document.getElementById('tabs').addEventListener('click', e => {
-                if (e.target.classList.contains('tab-btn')) {
+
+                const tabBtn = e.target.closest('.tab-btn');
+                if(tabBtn) {
                     document.querySelectorAll('#tabs .tab-btn, #tab-contents .tab-content').forEach(el => el.classList.remove('active'));
-                    e.target.classList.add('active');
-                    document.getElementById(e.target.dataset.tab).classList.add('active');
+                    tabBtn.classList.add('active');
+                    document.getElementById(tabBtn.dataset.tab).classList.add('active');
                 }
             });
         }
@@ -390,7 +348,6 @@
             container.appendChild(div);
             div.querySelector('.remove-set-btn').addEventListener('click', () => {
                 div.remove();
-                // Mettre à jour les numéros de série
                 container.querySelectorAll('.flex').forEach((row, index) => {
                     row.querySelector('span').textContent = `${index + 1}.`;
                 });
@@ -400,8 +357,8 @@
         function openPerformanceModal(exerciseId, exerciseName) {
             document.getElementById('modal-exercise-id').value = exerciseId;
             document.getElementById('modal-title').textContent = `Ajouter Performance pour ${exerciseName}`;
-            document.getElementById('sets-container').innerHTML = ''; // Vide le conteneur
-            addSetRow(); // Ajoute la première ligne
+            document.getElementById('sets-container').innerHTML = '';
+            addSetRow();
             document.getElementById('performance-modal').classList.remove('hidden');
         }
 
@@ -480,7 +437,7 @@
             }
         }
         
-        setupStaticEventListeners();
+        setupEventListeners();
     </script>
 </body>
 </html>
