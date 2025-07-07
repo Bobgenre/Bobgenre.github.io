@@ -53,6 +53,9 @@
             border-top-color: transparent;
             animation: spin 0.6s linear infinite;
         }
+        .set-row-btn {
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -144,6 +147,7 @@
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // Mettez vos informations de configuration Firebase ici
         const firebaseConfig = {
             apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
             authDomain: "muscu-5e40c.firebaseapp.com",
@@ -229,14 +233,9 @@
                 container.innerHTML = exercises.map(exercise => {
                     const lastPerf = allLogs.filter(log => log.exerciseId === exercise.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
                     let lastPerfHtml = '<p class="text-sm text-gray-500 italic mt-2">Aucune donnée précédente.</p>';
-                    // CORRIGÉ : Gère l'ancien et le nouveau format de données
-                    if (lastPerf) {
-                        if (lastPerf.sets) { // Nouveau format
-                            const setsSummary = lastPerf.sets.map(set => `${set.reps}x${set.weight}kg`).join(', ');
-                            lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${setsSummary}</p>`;
-                        } else if (lastPerf.reps) { // Ancien format
-                            lastPerfHtml = `<p class="text-sm text-gray-600 font-semibold mt-2">Ancienne séance : ${lastPerf.reps.length}x[${lastPerf.reps.join('-')}] @ ${lastPerf.weight} kg</p>`;
-                        }
+                    if (lastPerf && lastPerf.sets) {
+                        const setsSummary = lastPerf.sets.map(set => `${set.reps}x${set.weight}kg`).join(', ');
+                        lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${setsSummary}</p>`;
                     }
                     return `<div class="p-4 bg-gray-50 rounded-lg"><div class="flex justify-between items-start"><div><h4 class="font-bold text-lg">${exercise.name}</h4><p class="font-semibold mt-1">${exercise.sets} séries de ${exercise.reps} répétitions</p></div><span class="text-xs font-medium text-gray-600 bg-gray-200 px-2 py-1 rounded-full">${exercise.rest_time}</span></div>${lastPerfHtml}<button class="add-performance-btn mt-3 w-full text-sm font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 py-2 px-4 rounded-md transition" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Ajouter une performance</button></div>`;
                 }).join('');
@@ -270,9 +269,9 @@
             if (chartInstances[chartId]) chartInstances[chartId].destroy();
             const history = allLogs.filter(log => log.exerciseId === exerciseId).sort((a,b) => new Date(a.date) - new Date(b.date));
             
-            // CORRECTION APPLIQUÉE ICI
-            // On utilise directement exerciseId pour trouver le bon conteneur
+            // Correction du sélecteur du conteneur
             const wrapper = document.getElementById(`wrapper-chart-${exerciseId}`); 
+            if (!wrapper) return;
             const chartContainer = wrapper.querySelector('.chart-container');
 
             if (history.length < 2) {
@@ -302,11 +301,36 @@
             document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('signup-form').addEventListener('submit', handleSignup);
-            document.getElementById('add-set-btn').addEventListener('click', addSetRow);
+            
+            // NOUVEAU: Appel pour ajouter une série vide
+            document.getElementById('add-set-btn').addEventListener('click', () => addSetRow());
+
             document.getElementById('performance-modal').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
                     e.preventDefault();
-                    savePerformance();
+                    // Optional: move to next input or save
+                }
+            });
+
+            // NOUVEAU: Gestionnaire d'événements délégué pour les boutons de série
+            document.getElementById('sets-container').addEventListener('click', e => {
+                const duplicateBtn = e.target.closest('.duplicate-set-btn');
+                if (duplicateBtn) {
+                    const row = duplicateBtn.closest('.set-row');
+                    const reps = row.querySelector('.set-reps-input').value;
+                    const weight = row.querySelector('.set-weight-input').value;
+                    addSetRow(reps, weight);
+                    return;
+                }
+
+                const removeBtn = e.target.closest('.remove-set-btn');
+                if (removeBtn) {
+                    const row = removeBtn.closest('.set-row');
+                    row.remove();
+                    // Met à jour la numérotation
+                    document.querySelectorAll('#sets-container .set-row').forEach((r, index) => {
+                        r.querySelector('.set-number').textContent = `${index + 1}.`;
+                    });
                 }
             });
 
@@ -344,34 +368,35 @@
             });
         }
 
-        function addSetRow() {
+        // MODIFIÉ: Accepte des valeurs pour pré-remplir la série
+        function addSetRow(reps = '', weight = '0') {
             const container = document.getElementById('sets-container');
             const setIndex = container.children.length + 1;
             const div = document.createElement('div');
-            div.className = 'flex items-center space-x-2';
+            div.className = 'set-row flex items-center space-x-2';
             div.innerHTML = `
-                <span class="font-semibold text-gray-600 w-8">${setIndex}.</span>
-                <input type="number" placeholder="Reps" class="set-reps-input w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm">
+                <span class="set-number font-semibold text-gray-600 w-8 text-right pr-2">${setIndex}.</span>
+                <input type="number" placeholder="Reps" class="set-reps-input w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm" value="${reps}">
                 <span class="text-gray-500">reps à</span>
-                <input type="number" placeholder="Poids" value="0" class="set-weight-input w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm">
+                <input type="number" placeholder="Poids" class="set-weight-input w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm" value="${weight}">
                 <span class="text-gray-500">kg</span>
-                <button class="remove-set-btn text-red-500 hover:text-red-700 font-bold text-xl">&times;</button>
+                <button class="duplicate-set-btn set-row-btn text-blue-500 hover:text-blue-700 p-1" title="Dupliquer cette série">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+                <button class="remove-set-btn set-row-btn text-red-500 hover:text-red-700 p-1" title="Supprimer cette série">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
             `;
             container.appendChild(div);
-            div.querySelector('.remove-set-btn').addEventListener('click', () => {
-                div.remove();
-                container.querySelectorAll('.flex').forEach((row, index) => {
-                    row.querySelector('span').textContent = `${index + 1}.`;
-                });
-            });
         }
 
         function openPerformanceModal(exerciseId, exerciseName) {
             document.getElementById('modal-exercise-id').value = exerciseId;
             document.getElementById('modal-title').textContent = `Ajouter Performance pour ${exerciseName}`;
             document.getElementById('sets-container').innerHTML = '';
-            addSetRow();
+            addSetRow(); // Ajoute la première ligne vide
             document.getElementById('performance-modal').classList.remove('hidden');
+            document.querySelector('#sets-container .set-reps-input').focus();
         }
 
         function closePerformanceModal() {
@@ -381,7 +406,8 @@
         async function savePerformance() {
             const exerciseId = document.getElementById('modal-exercise-id').value;
             const sets = [];
-            const setRows = document.querySelectorAll('#sets-container > div');
+            // MODIFIÉ: Utilise la nouvelle classe pour sélectionner les lignes
+            const setRows = document.querySelectorAll('#sets-container .set-row');
             
             for (const row of setRows) {
                 const reps = parseInt(row.querySelector('.set-reps-input').value);
@@ -406,16 +432,22 @@
 
         function handleAuthError(error) {
             const errorElement = document.getElementById('auth-error');
-            if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                errorElement.textContent = 'Mot de passe ou e-mail incorrect.';
-            } else if (error.code === 'auth/user-not-found') {
-                errorElement.textContent = 'Aucun compte trouvé pour cet e-mail.';
-            } else if (error.code === 'auth/weak-password') {
-                errorElement.textContent = 'Le mot de passe doit faire au moins 6 caractères.';
-            } else if (error.code === 'auth/email-already-in-use') {
-                errorElement.textContent = 'Cette adresse e-mail est déjà utilisée.';
-            } else {
-                errorElement.textContent = 'Une erreur est survenue.';
+            switch (error.code) {
+                case 'auth/wrong-password':
+                case 'auth/invalid-credential':
+                    errorElement.textContent = 'Mot de passe ou e-mail incorrect.';
+                    break;
+                case 'auth/user-not-found':
+                    errorElement.textContent = 'Aucun compte trouvé pour cet e-mail.';
+                    break;
+                case 'auth/weak-password':
+                    errorElement.textContent = 'Le mot de passe doit faire au moins 6 caractères.';
+                    break;
+                case 'auth/email-already-in-use':
+                    errorElement.textContent = 'Cette adresse e-mail est déjà utilisée.';
+                    break;
+                default:
+                    errorElement.textContent = 'Une erreur est survenue.';
             }
         }
 
