@@ -269,7 +269,10 @@
             const chartId = `chart-${exerciseId}`;
             if (chartInstances[chartId]) chartInstances[chartId].destroy();
             const history = allLogs.filter(log => log.exerciseId === exerciseId).sort((a,b) => new Date(a.date) - new Date(b.date));
-            const wrapper = document.getElementById(`wrapper-chart-${chartId}`);
+            
+            // CORRECTION APPLIQUÉE ICI
+            // On utilise directement exerciseId pour trouver le bon conteneur
+            const wrapper = document.getElementById(`wrapper-chart-${exerciseId}`); 
             const chartContainer = wrapper.querySelector('.chart-container');
 
             if (history.length < 2) {
@@ -281,7 +284,6 @@
             }
             
             const labels = history.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
-            // CORRIGÉ : Gère l'ancien et le nouveau format de données pour le graphique
             const chartData = history.map(log => {
                 if (log.sets) { // Nouveau format
                     return Math.max(...log.sets.map(set => set.weight));
