@@ -304,7 +304,6 @@
             for (const [programType, exercises] of Object.entries(groupedExercises)) {
                 const accordion = document.createElement('div');
                 accordion.className = 'border border-gray-700 rounded-lg';
-                // CORRIGÉ: Simplification de la structure des boutons
                 accordion.innerHTML = `<button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-700/60 hover:bg-gray-700 rounded-t-lg"><span class="text-xl font-bold text-gray-100">${programType}</span><svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content hidden p-4 border-t border-gray-700">${exercises.map(ex => `
                     <div class="bg-gray-700/30 rounded-lg mb-2">
                         <div class="flex justify-between items-center p-3">
@@ -387,7 +386,6 @@
                 const accordionToggle = e.target.closest('.accordion-toggle');
                 if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); return; }
                 
-                // CORRIGÉ: Logique simplifiée pour le bouton de graphique
                 const exerciseToggle = e.target.closest('.exercise-graph-toggle');
                 if (exerciseToggle) {
                     const wrapper = exerciseToggle.parentElement.nextElementSibling;
@@ -438,6 +436,7 @@
         }
 
         // --- GESTION DE L'HISTORIQUE ---
+        // CORRIGÉ: Ajout d'une vérification pour les anciens formats de données
         function openHistoryModal(exerciseId, exerciseName) {
             const modal = document.getElementById('history-modal');
             const title = document.getElementById('history-modal-title');
@@ -454,8 +453,13 @@
                 container.innerHTML = '<p class="text-gray-400 text-center">Aucune séance enregistrée pour cet exercice.</p>';
             } else {
                 exerciseLogs.forEach(log => {
-                    const date = new Date(log.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
-                    const setsSummary = log.sets.map(set => `${set.reps}x${set.weight}kg`).join(', ');
+                    const date = log.date ? new Date(log.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Date inconnue';
+                    
+                    // Vérifie si log.sets existe et est un tableau avant d'appeler .map()
+                    const setsSummary = (log.sets && Array.isArray(log.sets))
+                        ? log.sets.map(set => `${set.reps || 0}x${set.weight || 0}kg`).join(', ')
+                        : '<span class="text-yellow-500">Ancien format de données</span>';
+
                     const entryDiv = document.createElement('div');
                     entryDiv.className = 'history-entry flex justify-between items-center p-3 bg-gray-700 rounded-lg';
                     entryDiv.innerHTML = `
