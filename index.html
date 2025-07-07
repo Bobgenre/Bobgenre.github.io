@@ -264,12 +264,14 @@
             }
         }
 
+        // MODIFIÉ: Affiche les répétitions pour les exercices au poids du corps, ou le poids max sinon.
         function createChart(exerciseId, allLogs) {
             const chartId = `chart-${exerciseId}`;
             if (chartInstances[chartId]) chartInstances[chartId].destroy();
-            const history = allLogs.filter(log => log.exerciseId === exerciseId).sort((a,b) => new Date(a.date) - new Date(b.date));
             
-            // Correction du sélecteur du conteneur
+            // Filtrer pour les logs valides et trier par date
+            const history = allLogs.filter(log => log.exerciseId === exerciseId && log.sets && log.sets.length > 0).sort((a,b) => new Date(a.date) - new Date(b.date));
+            
             const wrapper = document.getElementById(`wrapper-chart-${exerciseId}`); 
             if (!wrapper) return;
             const chartContainer = wrapper.querySelector('.chart-container');
@@ -283,15 +285,57 @@
             }
             
             const labels = history.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
-            const chartData = history.map(log => {
-                if (log.sets) { // Nouveau format
-                    return Math.max(...log.sets.map(set => set.weight));
-                }
-                return log.weight || 0; // Ancien format
-            });
-            const chartLabel = 'Poids max (kg)';
+
+            // Déterminer si l'exercice est au poids du corps en vérifiant si tous les poids enregistrés sont à 0
+            const isBodyweight = history.every(log => 
+                log.sets.every(set => set.weight === 0 || set.weight === null)
+            );
+
+            let chartData;
+            let chartLabel;
+
+            if (isBodyweight) {
+                // Si poids du corps, calculer le total des répétitions pour chaque séance
+                chartData = history.map(log => 
+                    log.sets.reduce((totalReps, set) => totalReps + (set.reps || 0), 0)
+                );
+                chartLabel = 'Répétitions totales';
+            } else {
+                // Sinon, calculer le poids maximum pour chaque séance
+                chartData = history.map(log => 
+                    Math.max(...log.sets.map(set => set.weight || 0))
+                );
+                chartLabel = 'Poids max (kg)';
+            }
+
             const ctx = document.getElementById(chartId).getContext('2d');
-            chartInstances[chartId] = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: chartLabel, data: chartData, borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', fill: true, tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, title: { display: true, text: chartLabel } } } } });
+            chartInstances[chartId] = new Chart(ctx, { 
+                type: 'line', 
+                data: { 
+                    labels, 
+                    datasets: [{ 
+                        label: chartLabel, 
+                        data: chartData, 
+                        borderColor: '#16a34a', 
+                        backgroundColor: 'rgba(22, 163, 74, 0.1)', 
+                        fill: true, 
+                        tension: 0.2 
+                    }] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, // Commencer l'axe Y à 0 pour plus de clarté
+                            title: { 
+                                display: true, 
+                                text: chartLabel 
+                            } 
+                        } 
+                    } 
+                } 
+            });
         }
         
         // --- ÉVÉNEMENTS ---
@@ -302,17 +346,14 @@
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('signup-form').addEventListener('submit', handleSignup);
             
-            // NOUVEAU: Appel pour ajouter une série vide
             document.getElementById('add-set-btn').addEventListener('click', () => addSetRow());
 
             document.getElementById('performance-modal').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
                     e.preventDefault();
-                    // Optional: move to next input or save
                 }
             });
 
-            // NOUVEAU: Gestionnaire d'événements délégué pour les boutons de série
             document.getElementById('sets-container').addEventListener('click', e => {
                 const duplicateBtn = e.target.closest('.duplicate-set-btn');
                 if (duplicateBtn) {
@@ -327,7 +368,6 @@
                 if (removeBtn) {
                     const row = removeBtn.closest('.set-row');
                     row.remove();
-                    // Met à jour la numérotation
                     document.querySelectorAll('#sets-container .set-row').forEach((r, index) => {
                         r.querySelector('.set-number').textContent = `${index + 1}.`;
                     });
@@ -368,7 +408,6 @@
             });
         }
 
-        // MODIFIÉ: Accepte des valeurs pour pré-remplir la série
         function addSetRow(reps = '', weight = '0') {
             const container = document.getElementById('sets-container');
             const setIndex = container.children.length + 1;
@@ -406,7 +445,6 @@
         async function savePerformance() {
             const exerciseId = document.getElementById('modal-exercise-id').value;
             const sets = [];
-            // MODIFIÉ: Utilise la nouvelle classe pour sélectionner les lignes
             const setRows = document.querySelectorAll('#sets-container .set-row');
             
             for (const row of setRows) {
