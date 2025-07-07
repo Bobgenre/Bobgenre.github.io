@@ -15,8 +15,8 @@
         .tab-btn.active { background-color: #f97316; color: white; }
         .tab-btn.suivi.active { background-color: #f97316; color: white; }
         .chart-container { position: relative; height: 250px; width: 100%; }
-        .accordion-toggle svg, .exercise-graph-toggle svg { transition: transform 0.2s ease-in-out; }
-        .accordion-toggle.open svg, .exercise-graph-toggle.open svg { transform: rotate(180deg); }
+        .accordion-toggle svg, .chevron-icon { transition: transform 0.2s ease-in-out; }
+        .accordion-toggle.open svg, .rotate-180 { transform: rotate(180deg); }
         #loader, #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(17, 24, 39, 0.95);
@@ -156,12 +156,12 @@
         </div>
     </div>
 
-    <!-- NOUVEAU: Modal pour l'historique des entrées -->
+    <!-- Modal pour l'historique des entrées -->
     <div id="history-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 overflow-y-auto h-full w-full flex items-center justify-center z-50">
         <div class="relative mx-auto p-5 border border-gray-700 w-full max-w-2xl shadow-lg rounded-md bg-gray-800">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg leading-6 font-medium text-gray-100" id="history-modal-title">Historique des séances</h3>
-                <button id="close-history-modal-btn" class="text-gray-400 hover:text-white">&times;</button>
+                <button id="close-history-modal-btn" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
             </div>
             <div id="history-list-container" class="mt-4 space-y-2 px-1 max-h-96 overflow-y-auto"></div>
         </div>
@@ -304,17 +304,16 @@
             for (const [programType, exercises] of Object.entries(groupedExercises)) {
                 const accordion = document.createElement('div');
                 accordion.className = 'border border-gray-700 rounded-lg';
+                // CORRIGÉ: Simplification de la structure des boutons
                 accordion.innerHTML = `<button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-700/60 hover:bg-gray-700 rounded-t-lg"><span class="text-xl font-bold text-gray-100">${programType}</span><svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content hidden p-4 border-t border-gray-700">${exercises.map(ex => `
                     <div class="bg-gray-700/30 rounded-lg mb-2">
                         <div class="flex justify-between items-center p-3">
-                            <button class="exercise-graph-toggle flex-grow text-left" data-exercise-id="${ex.id}">
+                            <button class="exercise-graph-toggle flex-grow text-left flex justify-between items-center" data-exercise-id="${ex.id}">
                                 <span class="font-semibold text-gray-200">${ex.name}</span>
+                                <svg class="chevron-icon w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </button>
-                            <button class="open-history-btn p-2 rounded-full hover:bg-gray-600" title="Voir l'historique" data-exercise-id="${ex.id}" data-exercise-name="${ex.name}">
+                            <button class="open-history-btn p-2 rounded-full hover:bg-gray-600 ml-2 flex-shrink-0" title="Voir l'historique" data-exercise-id="${ex.id}" data-exercise-name="${ex.name}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4h22v4H1zM1 10h22v4H1zM1 16h22v4H1z"/></svg>
-                            </button>
-                            <button class="exercise-graph-toggle p-2" data-exercise-id="${ex.id}">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </button>
                         </div>
                         <div id="wrapper-chart-${ex.id}" class="chart-wrapper hidden mt-2 p-2"><div class="chart-container"><canvas id="chart-${ex.id}"></canvas></div></div>
@@ -388,12 +387,15 @@
                 const accordionToggle = e.target.closest('.accordion-toggle');
                 if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); return; }
                 
+                // CORRIGÉ: Logique simplifiée pour le bouton de graphique
                 const exerciseToggle = e.target.closest('.exercise-graph-toggle');
                 if (exerciseToggle) {
-                    const wrapper = exerciseToggle.closest('.flex').nextElementSibling;
+                    const wrapper = exerciseToggle.parentElement.nextElementSibling;
                     wrapper.classList.toggle('hidden');
-                    exerciseToggle.closest('.flex').querySelector('svg:last-child').classList.toggle('rotate-180');
-                    if (!wrapper.classList.contains('hidden')) { createChart(exerciseToggle.dataset.exerciseId, currentLogs); }
+                    exerciseToggle.querySelector('.chevron-icon').classList.toggle('rotate-180');
+                    if (!wrapper.classList.contains('hidden')) {
+                        createChart(exerciseToggle.dataset.exerciseId, currentLogs);
+                    }
                     return;
                 }
 
@@ -416,11 +418,14 @@
                 if (isArmed) {
                     deleteLogEntry(deleteBtn.dataset.logId);
                 } else {
-                    // Arm the button
+                    document.querySelectorAll('.delete-log-btn[data-armed="true"]').forEach(btn => {
+                         btn.dataset.armed = 'false';
+                         btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+                         btn.classList.remove('bg-red-700');
+                    });
                     deleteBtn.dataset.armed = 'true';
                     deleteBtn.innerHTML = 'Sûr ?';
                     deleteBtn.classList.add('bg-red-700');
-                    // Disarm after a timeout
                     setTimeout(() => {
                         if (deleteBtn.dataset.armed === 'true') {
                             deleteBtn.dataset.armed = 'false';
@@ -459,7 +464,7 @@
                             <p class="text-sm text-gray-400">${setsSummary}</p>
                         </div>
                         <button class="delete-log-btn p-2 rounded-full text-white bg-red-500 hover:bg-red-600 transition" data-log-id="${log.id}" data-armed="false" title="Supprimer cette entrée">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     `;
                     container.appendChild(entryDiv);
@@ -477,12 +482,7 @@
             try {
                 const logRef = doc(db, "users", auth.currentUser.uid, "workout_logs", logId);
                 await deleteDoc(logRef);
-                // The onSnapshot listener will automatically refresh the UI.
-                // For immediate feedback, we can remove the element from the modal.
-                const elementToRemove = document.querySelector(`.delete-log-btn[data-log-id="${logId}"]`);
-                if (elementToRemove) {
-                    elementToRemove.closest('.history-entry').remove();
-                }
+                closeHistoryModal();
             } catch (error) {
                 console.error("Erreur lors de la suppression de l'entrée:", error);
                 alert("Impossible de supprimer l'entrée.");
