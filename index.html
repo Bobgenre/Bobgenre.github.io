@@ -6,6 +6,7 @@
     <title>Programme Musculation - Suivi Multi-Appareils</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -55,6 +56,9 @@
         }
         .set-row-btn {
             flex-shrink: 0;
+        }
+        #timer-progress {
+            transition: width 1s linear;
         }
     </style>
 </head>
@@ -140,6 +144,20 @@
             </div>
         </div>
     </div>
+    
+    <!-- NOUVEAU: Modal pour le minuteur -->
+    <div id="timer-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
+        <div class="relative w-full max-w-sm p-6 bg-white rounded-2xl shadow-2xl text-center">
+            <h3 class="text-xl font-semibold text-gray-500">Temps de repos pour</h3>
+            <p id="timer-exercise-name" class="text-2xl font-bold text-gray-800 mb-4">Exercice</p>
+            <div id="timer-display" class="text-7xl font-bold text-blue-600 my-4 tabular-nums">00:00</div>
+            <div class="w-full bg-gray-200 rounded-full h-4 mb-6 overflow-hidden">
+                <div id="timer-progress" class="bg-blue-600 h-4 rounded-full" style="width: 100%;"></div>
+            </div>
+            <button id="close-timer-modal-btn" class="w-full py-3 bg-gray-300 text-gray-800 font-bold rounded-lg hover:bg-gray-400 transition">Arrêter et fermer</button>
+        </div>
+    </div>
+
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -168,6 +186,7 @@
         let unsubscribe;
         let currentLogs = [];
         let currentProgramData = {};
+        let timerInterval = null; // Pour le minuteur
 
         // --- AUTHENTIFICATION ---
         onAuthStateChanged(auth, user => {
@@ -237,7 +256,21 @@
                         const setsSummary = lastPerf.sets.map(set => `${set.reps}x${set.weight}kg`).join(', ');
                         lastPerfHtml = `<p class="text-sm text-blue-600 font-semibold mt-2">Dernière séance : ${setsSummary}</p>`;
                     }
-                    return `<div class="p-4 bg-gray-50 rounded-lg"><div class="flex justify-between items-start"><div><h4 class="font-bold text-lg">${exercise.name}</h4><p class="font-semibold mt-1">${exercise.sets} séries de ${exercise.reps} répétitions</p></div><span class="text-xs font-medium text-gray-600 bg-gray-200 px-2 py-1 rounded-full">${exercise.rest_time}</span></div>${lastPerfHtml}<button class="add-performance-btn mt-3 w-full text-sm font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 py-2 px-4 rounded-md transition" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Ajouter une performance</button></div>`;
+                    // MODIFIÉ: Le temps de repos est maintenant un bouton pour le minuteur
+                    return `<div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-lg">${exercise.name}</h4>
+                                        <p class="font-semibold mt-1">${exercise.sets} séries de ${exercise.reps} répétitions</p>
+                                    </div>
+                                    <button class="start-timer-btn flex items-center gap-2 text-xs font-medium text-white bg-gray-500 hover:bg-gray-600 px-3 py-2 rounded-full transition-transform duration-200 hover:scale-105" data-rest-time="${exercise.rest_time}" data-exercise-name="${exercise.name}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        <span>${exercise.rest_time}</span>
+                                    </button>
+                                </div>
+                                ${lastPerfHtml}
+                                <button class="add-performance-btn mt-3 w-full text-sm font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 py-2 px-4 rounded-md transition" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Ajouter une performance</button>
+                            </div>`;
                 }).join('');
             }
         }
@@ -264,17 +297,13 @@
             }
         }
 
-        // MODIFIÉ: Affiche le volume total (poids * reps) pour les exercices avec poids.
         function createChart(exerciseId, allLogs) {
             const chartId = `chart-${exerciseId}`;
             if (chartInstances[chartId]) chartInstances[chartId].destroy();
-            
             const history = allLogs.filter(log => log.exerciseId === exerciseId && log.sets && log.sets.length > 0).sort((a,b) => new Date(a.date) - new Date(b.date));
-            
             const wrapper = document.getElementById(`wrapper-chart-${exerciseId}`); 
             if (!wrapper) return;
             const chartContainer = wrapper.querySelector('.chart-container');
-
             if (history.length < 2) {
                 chartContainer.innerHTML = '<p class="text-center text-gray-500 p-4">Pas assez de données pour afficher un graphique.</p>';
                 return;
@@ -282,57 +311,19 @@
             if (!chartContainer.querySelector('canvas')) {
                 chartContainer.innerHTML = `<canvas id="${chartId}"></canvas>`;
             }
-            
             const labels = history.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
-
-            const isBodyweight = history.every(log => 
-                log.sets.every(set => set.weight === 0 || set.weight === null)
-            );
-
+            const isBodyweight = history.every(log => log.sets.every(set => set.weight === 0 || set.weight === null));
             let chartData;
             let chartLabel;
-
             if (isBodyweight) {
-                chartData = history.map(log => 
-                    log.sets.reduce((totalReps, set) => totalReps + (set.reps || 0), 0)
-                );
+                chartData = history.map(log => log.sets.reduce((totalReps, set) => totalReps + (set.reps || 0), 0));
                 chartLabel = 'Répétitions totales';
             } else {
-                // Calculer le volume total (poids * reps) pour chaque séance
-                chartData = history.map(log => 
-                    log.sets.reduce((totalVolume, set) => totalVolume + ((set.reps || 0) * (set.weight || 0)), 0)
-                );
+                chartData = history.map(log => log.sets.reduce((totalVolume, set) => totalVolume + ((set.reps || 0) * (set.weight || 0)), 0));
                 chartLabel = 'Volume total (kg)';
             }
-
             const ctx = document.getElementById(chartId).getContext('2d');
-            chartInstances[chartId] = new Chart(ctx, { 
-                type: 'line', 
-                data: { 
-                    labels, 
-                    datasets: [{ 
-                        label: chartLabel, 
-                        data: chartData, 
-                        borderColor: '#16a34a', 
-                        backgroundColor: 'rgba(22, 163, 74, 0.1)', 
-                        fill: true, 
-                        tension: 0.2 
-                    }] 
-                }, 
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: { 
-                        y: { 
-                            beginAtZero: true,
-                            title: { 
-                                display: true, 
-                                text: chartLabel 
-                            } 
-                        } 
-                    } 
-                } 
-            });
+            chartInstances[chartId] = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: chartLabel, data: chartData, borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', fill: true, tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: chartLabel } } } } });
         }
         
         // --- ÉVÉNEMENTS ---
@@ -342,29 +333,23 @@
             document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('signup-form').addEventListener('submit', handleSignup);
-            
             document.getElementById('add-set-btn').addEventListener('click', () => addSetRow());
+            document.getElementById('close-timer-modal-btn').addEventListener('click', closeTimerModal);
 
             document.getElementById('performance-modal').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
-                    e.preventDefault();
-                }
+                if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.preventDefault();
             });
 
             document.getElementById('sets-container').addEventListener('click', e => {
                 const duplicateBtn = e.target.closest('.duplicate-set-btn');
                 if (duplicateBtn) {
                     const row = duplicateBtn.closest('.set-row');
-                    const reps = row.querySelector('.set-reps-input').value;
-                    const weight = row.querySelector('.set-weight-input').value;
-                    addSetRow(reps, weight);
+                    addSetRow(row.querySelector('.set-reps-input').value, row.querySelector('.set-weight-input').value);
                     return;
                 }
-
                 const removeBtn = e.target.closest('.remove-set-btn');
                 if (removeBtn) {
-                    const row = removeBtn.closest('.set-row');
-                    row.remove();
+                    removeBtn.closest('.set-row').remove();
                     document.querySelectorAll('#sets-container .set-row').forEach((r, index) => {
                         r.querySelector('.set-number').textContent = `${index + 1}.`;
                     });
@@ -377,14 +362,17 @@
                     openPerformanceModal(addBtn.dataset.exerciseId, addBtn.dataset.exerciseName);
                     return;
                 }
-
+                const timerBtn = e.target.closest('.start-timer-btn');
+                if (timerBtn) {
+                    startTimer(timerBtn.dataset.restTime, timerBtn.dataset.exerciseName);
+                    return;
+                }
                 const accordionToggle = e.target.closest('.accordion-toggle');
                 if (accordionToggle) {
                     accordionToggle.classList.toggle('open');
                     accordionToggle.nextElementSibling.classList.toggle('hidden');
                     return;
                 }
-
                 const exerciseToggle = e.target.closest('.exercise-graph-toggle');
                 if (exerciseToggle) {
                     exerciseToggle.classList.toggle('open');
@@ -395,7 +383,6 @@
                     }
                     return;
                 }
-
                 const tabBtn = e.target.closest('.tab-btn');
                 if(tabBtn) {
                     document.querySelectorAll('#tabs .tab-btn, #tab-contents .tab-content').forEach(el => el.classList.remove('active'));
@@ -403,6 +390,76 @@
                     document.getElementById(tabBtn.dataset.tab).classList.add('active');
                 }
             });
+        }
+
+        // --- GESTION DU MINUTEUR ---
+        function parseDuration(durationString) {
+            let totalSeconds = 0;
+            const minMatch = durationString.match(/(\d+)\s*min/);
+            const secMatch = durationString.match(/(\d+)\s*sec/);
+            if (minMatch) totalSeconds += parseInt(minMatch[1]) * 60;
+            if (secMatch) totalSeconds += parseInt(secMatch[1]);
+            // Gère le cas "2 min 30"
+            if (!minMatch && !secMatch && durationString.includes(' ')) {
+                const parts = durationString.split(' ');
+                totalSeconds += (parseInt(parts[0]) * 60) + (parseInt(parts[1]) || 0);
+            }
+            return totalSeconds;
+        }
+
+        function startTimer(durationString, exerciseName) {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            const totalSeconds = parseDuration(durationString);
+            if (totalSeconds === 0) return;
+
+            let secondsRemaining = totalSeconds;
+            const modal = document.getElementById('timer-modal');
+            const display = document.getElementById('timer-display');
+            const progress = document.getElementById('timer-progress');
+            const nameDisplay = document.getElementById('timer-exercise-name');
+            
+            nameDisplay.textContent = exerciseName;
+            modal.classList.remove('hidden');
+
+            timerInterval = setInterval(() => {
+                secondsRemaining--;
+                const minutes = Math.floor(secondsRemaining / 60);
+                const seconds = secondsRemaining % 60;
+                display.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                const progressPercentage = (secondsRemaining / totalSeconds) * 100;
+                progress.style.width = `${progressPercentage}%`;
+
+                if (secondsRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    display.textContent = "FINI !";
+                    progress.style.width = '100%';
+                    progress.classList.remove('bg-blue-600');
+                    progress.classList.add('bg-green-500');
+                    
+                    // Jouer un son
+                    if (typeof Tone !== 'undefined') {
+                        const synth = new Tone.Synth().toDestination();
+                        synth.triggerAttackRelease("C5", "8n", Tone.now());
+                        synth.triggerAttackRelease("G5", "8n", Tone.now() + 0.2);
+                    }
+                }
+            }, 1000);
+        }
+
+        function closeTimerModal() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            const modal = document.getElementById('timer-modal');
+            modal.classList.add('hidden');
+            // Réinitialiser la barre de progression
+            const progress = document.getElementById('timer-progress');
+            progress.classList.remove('bg-green-500');
+            progress.classList.add('bg-blue-600');
         }
 
         function addSetRow(reps = '', weight = '0') {
@@ -430,7 +487,7 @@
             document.getElementById('modal-exercise-id').value = exerciseId;
             document.getElementById('modal-title').textContent = `Ajouter Performance pour ${exerciseName}`;
             document.getElementById('sets-container').innerHTML = '';
-            addSetRow(); // Ajoute la première ligne vide
+            addSetRow();
             document.getElementById('performance-modal').classList.remove('hidden');
             document.querySelector('#sets-container .set-reps-input').focus();
         }
