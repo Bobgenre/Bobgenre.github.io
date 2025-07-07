@@ -264,12 +264,11 @@
             }
         }
 
-        // MODIFIÉ: Affiche les répétitions pour les exercices au poids du corps, ou le poids max sinon.
+        // MODIFIÉ: Affiche le volume total (poids * reps) pour les exercices avec poids.
         function createChart(exerciseId, allLogs) {
             const chartId = `chart-${exerciseId}`;
             if (chartInstances[chartId]) chartInstances[chartId].destroy();
             
-            // Filtrer pour les logs valides et trier par date
             const history = allLogs.filter(log => log.exerciseId === exerciseId && log.sets && log.sets.length > 0).sort((a,b) => new Date(a.date) - new Date(b.date));
             
             const wrapper = document.getElementById(`wrapper-chart-${exerciseId}`); 
@@ -286,7 +285,6 @@
             
             const labels = history.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
 
-            // Déterminer si l'exercice est au poids du corps en vérifiant si tous les poids enregistrés sont à 0
             const isBodyweight = history.every(log => 
                 log.sets.every(set => set.weight === 0 || set.weight === null)
             );
@@ -295,17 +293,16 @@
             let chartLabel;
 
             if (isBodyweight) {
-                // Si poids du corps, calculer le total des répétitions pour chaque séance
                 chartData = history.map(log => 
                     log.sets.reduce((totalReps, set) => totalReps + (set.reps || 0), 0)
                 );
                 chartLabel = 'Répétitions totales';
             } else {
-                // Sinon, calculer le poids maximum pour chaque séance
+                // Calculer le volume total (poids * reps) pour chaque séance
                 chartData = history.map(log => 
-                    Math.max(...log.sets.map(set => set.weight || 0))
+                    log.sets.reduce((totalVolume, set) => totalVolume + ((set.reps || 0) * (set.weight || 0)), 0)
                 );
-                chartLabel = 'Poids max (kg)';
+                chartLabel = 'Volume total (kg)';
             }
 
             const ctx = document.getElementById(chartId).getContext('2d');
@@ -327,7 +324,7 @@
                     maintainAspectRatio: false, 
                     scales: { 
                         y: { 
-                            beginAtZero: true, // Commencer l'axe Y à 0 pour plus de clarté
+                            beginAtZero: true,
                             title: { 
                                 display: true, 
                                 text: chartLabel 
