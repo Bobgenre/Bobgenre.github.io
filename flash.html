@@ -64,9 +64,18 @@
             background-color: #ea580c; /* orange-600 */
             color: white;
         }
+        /* Style pour le défilement horizontal sur mobile */
+        .mobile-deck-nav {
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+        }
+        .mobile-deck-nav::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
     </style>
 </head>
-<body class="bg-gray-900 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-2 md:p-4">
 
     <!-- Écran de Connexion / Inscription -->
     <div id="auth-overlay">
@@ -95,19 +104,20 @@
     </div>
 
     <!-- Contenu de l'application -->
-    <div id="app-content" class="hidden w-full max-w-5xl mx-auto p-4 flex space-x-8">
+    <div id="app-content" class="hidden w-full max-w-6xl mx-auto p-2 md:p-4 flex flex-col md:flex-row md:space-x-8">
         <!-- Barre latérale de navigation des paquets -->
-        <aside class="w-1/4 flex-shrink-0">
+        <aside class="w-full md:w-1/4 flex-shrink-0 mb-6 md:mb-0">
             <h2 class="text-xl font-bold text-gray-300 mb-4">Vos Paquets</h2>
-            <div id="deck-sidebar" class="space-y-2">
-                <!-- Les boutons des paquets seront injectés ici -->
-            </div>
+            <!-- Navigation pour Mobile -->
+            <div id="deck-sidebar-mobile" class="md:hidden flex space-x-2 pb-2 mobile-deck-nav"></div>
+            <!-- Navigation pour Desktop -->
+            <div id="deck-sidebar-desktop" class="hidden md:block space-y-2"></div>
         </aside>
 
         <!-- Contenu principal -->
         <main class="flex-grow">
             <header class="flex justify-between items-start mb-4">
-                <h1 id="deck-title" class="text-3xl font-bold text-orange-400"></h1>
+                <h1 id="deck-title" class="text-2xl md:text-3xl font-bold text-orange-400"></h1>
                 <div id="auth-info" class="text-right flex-shrink-0">
                     <p id="user-email" class="text-sm text-gray-500"></p>
                     <button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button>
@@ -115,12 +125,12 @@
             </header>
 
             <div id="dashboard" class="flex justify-around bg-gray-800 p-3 rounded-lg mb-4 text-center">
-                <div><p class="text-2xl font-bold text-green-500" id="mastered-count">0</p><p class="text-xs text-gray-400">Maîtrisé</p></div>
-                <div><p class="text-2xl font-bold text-amber-500" id="learning-count">0</p><p class="text-xs text-gray-400">En cours</p></div>
-                <div><p class="text-2xl font-bold text-gray-500" id="new-count">0</p><p class="text-xs text-gray-400">Nouveau</p></div>
+                <div><p class="text-xl md:text-2xl font-bold text-green-500" id="mastered-count">0</p><p class="text-xs text-gray-400">Maîtrisé</p></div>
+                <div><p class="text-xl md:text-2xl font-bold text-amber-500" id="learning-count">0</p><p class="text-xs text-gray-400">En cours</p></div>
+                <div><p class="text-xl md:text-2xl font-bold text-gray-500" id="new-count">0</p><p class="text-xs text-gray-400">Nouveau</p></div>
             </div>
 
-            <div class="scene h-64">
+            <div class="scene h-56 md:h-64">
                 <div id="flashcard" class="card rounded-xl">
                     <div id="card-front" class="card__face card__face--front"></div>
                     <div id="card-back" class="card__face card__face--back"></div>
@@ -135,9 +145,9 @@
             </div>
 
             <div class="flex justify-between items-center mt-4">
-                <button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button>
-                <button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition">Mode Révision</button>
-                <button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button>
+                <button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-4 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button>
+                <button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition">Révision</button>
+                <button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-4 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button>
             </div>
         </main>
     </div>
@@ -198,7 +208,8 @@
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const progressText = document.getElementById('progress');
-        const deckSidebar = document.getElementById('deck-sidebar');
+        const deckSidebarDesktop = document.getElementById('deck-sidebar-desktop');
+        const deckSidebarMobile = document.getElementById('deck-sidebar-mobile');
         const deckTitle = document.getElementById('deck-title');
         const reviewModeBtn = document.getElementById('review-mode-btn');
 
@@ -232,10 +243,11 @@
                 const deckRef = collection(db, "users", user.uid, "korean_decks", deckId, "cards");
                 const snapshot = await getDocs(query(deckRef));
                 allUserDecks[deckId] = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                allUserDecks[deckId].sort((a, b) => a.id.localeCompare(b.id));
             }
             
-            populateDeckSidebar();
-            await loadDeck(Object.keys(cardDecks)[0]); // Charger le premier paquet par défaut
+            populateDeckSidebars();
+            await loadDeck(Object.keys(cardDecks)[0]);
             
             loader.style.display = 'none';
             appContent.classList.remove('hidden');
@@ -247,24 +259,32 @@
             isReviewMode = false;
             reviewModeBtn.classList.remove('active');
 
-            // Mettre à jour la classe active dans la barre latérale
             document.querySelectorAll('.deck-btn').forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.querySelector(`.deck-btn[data-deck-id="${deckId}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
+            document.querySelectorAll(`.deck-btn[data-deck-id="${deckId}"]`).forEach(btn => btn.classList.add('active'));
 
             updateVisibleCards();
             updateDashboard();
             updateCardDisplay();
         }
 
-        function populateDeckSidebar() {
-            deckSidebar.innerHTML = '';
+        function populateDeckSidebars() {
+            deckSidebarDesktop.innerHTML = '';
+            deckSidebarMobile.innerHTML = '';
             for (const deckId in cardDecks) {
-                const button = document.createElement('button');
-                button.dataset.deckId = deckId;
-                button.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition';
-                button.textContent = cardDecks[deckId].name;
-                deckSidebar.appendChild(button);
+                const deckName = cardDecks[deckId].name;
+                // Bouton pour desktop
+                const buttonDesktop = document.createElement('button');
+                buttonDesktop.dataset.deckId = deckId;
+                buttonDesktop.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition';
+                buttonDesktop.textContent = deckName;
+                deckSidebarDesktop.appendChild(buttonDesktop);
+
+                // Bouton pour mobile
+                const buttonMobile = document.createElement('button');
+                buttonMobile.dataset.deckId = deckId;
+                buttonMobile.className = 'deck-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm text-gray-300 bg-gray-700 hover:bg-gray-600 transition';
+                buttonMobile.textContent = deckName;
+                deckSidebarMobile.appendChild(buttonMobile);
             }
         }
         
@@ -279,10 +299,10 @@
             const currentDeck = allUserDecks[currentDeckId] || [];
             if (isReviewMode) {
                 visibleCards = currentDeck.filter(c => c.status === 'learning');
+                shuffleArray(visibleCards);
             } else {
                 visibleCards = [...currentDeck];
             }
-            shuffleArray(visibleCards);
             currentCardIndex = 0;
         }
 
@@ -294,33 +314,37 @@
         }
 
         function updateCardDisplay() {
-            if (visibleCards.length === 0) {
-                cardFront.innerHTML = `<h2 class="text-2xl font-bold text-center p-4">${isReviewMode ? 'Aucune carte à réviser !' : 'Paquet vide.'}</h2>`;
-                cardBack.innerHTML = '';
-                progressText.textContent = '0 / 0';
-                card.classList.remove('status-new', 'status-learning', 'status-mastered');
-                prevBtn.disabled = true;
-                nextBtn.disabled = true;
-                return;
-            }
+            const showNavButtons = !isReviewMode;
+            prevBtn.style.visibility = showNavButtons ? 'visible' : 'hidden';
+            nextBtn.style.visibility = showNavButtons ? 'visible' : 'hidden';
 
-            const currentCardData = visibleCards[currentCardIndex];
             card.classList.remove('is-flipped');
             
             setTimeout(() => {
-                cardFront.innerHTML = `<h2 class="text-6xl font-bold korean-font">${currentCardData.hangul}</h2>`;
+                if (visibleCards.length === 0) {
+                    cardFront.innerHTML = `<h2 class="text-xl md:text-2xl font-bold text-center p-4">${isReviewMode ? 'Aucune carte à réviser !' : 'Paquet vide.'}</h2>`;
+                    cardBack.innerHTML = '';
+                    progressText.textContent = '0 / 0';
+                    card.classList.remove('status-new', 'status-learning', 'status-mastered');
+                    prevBtn.disabled = true;
+                    nextBtn.disabled = true;
+                    return;
+                }
+
+                const currentCardData = visibleCards[currentCardIndex];
+                cardFront.innerHTML = `<h2 class="text-4xl md:text-6xl font-bold korean-font">${currentCardData.hangul}</h2>`;
                 cardBack.innerHTML = `
-                    <h3 class="text-5xl font-bold">${currentCardData.french}</h3>
-                    <p class="text-xl mt-2 text-gray-300">${currentCardData.romanization}</p>
+                    <h3 class="text-3xl md:text-5xl font-bold">${currentCardData.french}</h3>
+                    <p class="text-lg md:text-xl mt-2 text-gray-300">${currentCardData.romanization}</p>
                 `;
-            }, 100);
 
-            card.classList.remove('status-new', 'status-learning', 'status-mastered');
-            card.classList.add(`status-${currentCardData.status}`);
+                card.classList.remove('status-new', 'status-learning', 'status-mastered');
+                card.classList.add(`status-${currentCardData.status}`);
 
-            progressText.textContent = `Carte ${currentCardIndex + 1} sur ${visibleCards.length}`;
-            prevBtn.disabled = currentCardIndex === 0;
-            nextBtn.disabled = currentCardIndex === visibleCards.length - 1;
+                progressText.textContent = `Carte ${currentCardIndex + 1} sur ${visibleCards.length}`;
+                prevBtn.disabled = currentCardIndex === 0;
+                nextBtn.disabled = currentCardIndex === visibleCards.length - 1;
+            }, 150);
         }
 
         async function updateCardStatus(newStatus) {
@@ -343,7 +367,26 @@
         }
 
         function setupEventListeners() {
-            card.addEventListener('click', () => card.classList.toggle('is-flipped'));
+            card.addEventListener('click', () => {
+                const isFlipped = card.classList.contains('is-flipped');
+                if (isReviewMode) {
+                    if (isFlipped) {
+                        if (currentCardIndex < visibleCards.length - 1) {
+                            currentCardIndex++;
+                            updateCardDisplay();
+                        } else {
+                            isReviewMode = false;
+                            reviewModeBtn.classList.remove('active');
+                            updateVisibleCards();
+                            updateCardDisplay();
+                        }
+                    } else {
+                        card.classList.add('is-flipped');
+                    }
+                } else {
+                    card.classList.toggle('is-flipped');
+                }
+            });
 
             nextBtn.addEventListener('click', () => {
                 if (currentCardIndex < visibleCards.length - 1) {
@@ -358,11 +401,13 @@
                 }
             });
             
-            deckSidebar.addEventListener('click', (e) => {
-                const deckBtn = e.target.closest('.deck-btn');
-                if (deckBtn) {
-                    loadDeck(deckBtn.dataset.deckId);
-                }
+            [deckSidebarDesktop, deckSidebarMobile].forEach(sidebar => {
+                sidebar.addEventListener('click', (e) => {
+                    const deckBtn = e.target.closest('.deck-btn');
+                    if (deckBtn) {
+                        loadDeck(deckBtn.dataset.deckId);
+                    }
+                });
             });
             
             reviewModeBtn.addEventListener('click', () => {
