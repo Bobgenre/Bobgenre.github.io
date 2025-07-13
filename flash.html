@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards Coréen - Apprentissage Personnalisé</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .korean-font { font-family: 'Nanum Gothic', sans-serif; }
+        .scene { perspective: 1000px; }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.6s, border-color 0.3s;
+            border: 4px solid transparent;
+        }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card__face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .card__face--front { background-color: #1f2937; color: #f9fafb; }
+        .card__face--back { background-color: #374151; color: white; transform: rotateY(180deg); }
+        
+        .status-new { border-color: #6b7280; } /* gray-500 */
+        .status-learning { border-color: #f59e0b; } /* amber-500 */
+        .status-mastered { border-color: #22c55e; } /* green-500 */
+
+        #loader, #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.95);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; flex-direction: column;
+            transition: opacity 0.3s;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #f97316;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .review-mode-btn.active {
+            background-color: #d97706; /* amber-600 */
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+        }
+        .deck-btn.active {
+            background-color: #ea580c; /* orange-600 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Écran de Connexion / Inscription -->
+    <div id="auth-overlay">
+        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl">
+            <h2 class="text-2xl font-bold text-center text-gray-100 mb-2">Flashcards Coréen</h2>
+            <p class="text-center text-gray-400 mb-6">Connectez-vous pour sauvegarder votre progression.</p>
+            <div id="auth-error" class="text-red-500 text-sm text-center mb-4 min-h-[20px]"></div>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="login-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+                <input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+                <button type="submit" class="w-full py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Se connecter</button>
+            </form>
+            <div class="my-4 flex items-center"><hr class="w-full border-gray-600"><span class="p-2 text-gray-500 text-sm">OU</span><hr class="w-full border-gray-600"></div>
+            <form id="signup-form" class="space-y-4">
+                <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+                <input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+                <button type="submit" class="w-full py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Créer un compte</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Indicateur de chargement -->
+    <div id="loader" style="display: none;">
+        <div class="spinner"></div>
+        <p class="mt-4 text-lg font-semibold text-gray-300">Chargement...</p>
+    </div>
+
+    <!-- Contenu de l'application -->
+    <div id="app-content" class="hidden w-full max-w-5xl mx-auto p-4 flex space-x-8">
+        <!-- Barre latérale de navigation des paquets -->
+        <aside class="w-1/4 flex-shrink-0">
+            <h2 class="text-xl font-bold text-gray-300 mb-4">Vos Paquets</h2>
+            <div id="deck-sidebar" class="space-y-2">
+                <!-- Les boutons des paquets seront injectés ici -->
+            </div>
+        </aside>
+
+        <!-- Contenu principal -->
+        <main class="flex-grow">
+            <header class="flex justify-between items-start mb-4">
+                <h1 id="deck-title" class="text-3xl font-bold text-orange-400"></h1>
+                <div id="auth-info" class="text-right flex-shrink-0">
+                    <p id="user-email" class="text-sm text-gray-500"></p>
+                    <button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button>
+                </div>
+            </header>
+
+            <div id="dashboard" class="flex justify-around bg-gray-800 p-3 rounded-lg mb-4 text-center">
+                <div><p class="text-2xl font-bold text-green-500" id="mastered-count">0</p><p class="text-xs text-gray-400">Maîtrisé</p></div>
+                <div><p class="text-2xl font-bold text-amber-500" id="learning-count">0</p><p class="text-xs text-gray-400">En cours</p></div>
+                <div><p class="text-2xl font-bold text-gray-500" id="new-count">0</p><p class="text-xs text-gray-400">Nouveau</p></div>
+            </div>
+
+            <div class="scene h-64">
+                <div id="flashcard" class="card rounded-xl">
+                    <div id="card-front" class="card__face card__face--front"></div>
+                    <div id="card-back" class="card__face card__face--back"></div>
+                </div>
+            </div>
+
+            <p id="progress" class="text-center text-gray-500 mt-4"></p>
+
+            <div id="status-buttons" class="flex justify-center space-x-3 mt-6">
+                <button data-status="learning" class="status-btn flex-1 py-3 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition">À revoir</button>
+                <button data-status="mastered" class="status-btn flex-1 py-3 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Maîtrisé</button>
+            </div>
+
+            <div class="flex justify-between items-center mt-4">
+                <button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button>
+                <button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition">Mode Révision</button>
+                <button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, writeBatch, query, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
+            authDomain: "muscu-5e40c.firebaseapp.com",
+            projectId: "muscu-5e40c",
+            storageBucket: "muscu-5e40c.appspot.com",
+            messagingSenderId: "561788112947",
+            appId: "1:561788112947:web:7f2b7c7d74ff328f2b1346"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore(app);
+
+        const cardDecks = {
+            'days': {
+                name: 'Jours de la semaine',
+                cards: [
+                    { id: 'day1', french: 'Lundi', hangul: '월요일', romanization: 'Woryoil' }, { id: 'day2', french: 'Mardi', hangul: '화요일', romanization: 'Hwayoil' },
+                    { id: 'day3', french: 'Mercredi', hangul: '수요일', romanization: 'Suyoil' }, { id: 'day4', french: 'Jeudi', hangul: '목요일', romanization: 'Mogyoil' },
+                    { id: 'day5', french: 'Vendredi', hangul: '금요일', romanization: 'Geumyoil' }, { id: 'day6', french: 'Samedi', hangul: '토요일', romanization: 'Toyoil' },
+                    { id: 'day7', french: 'Dimanche', hangul: '일요일', romanization: 'Iryoil' }
+                ]
+            },
+            'numbers': {
+                name: 'Chiffres (1-10)',
+                cards: [
+                    { id: 'num1', french: 'Un', hangul: '하나', romanization: 'Hana' }, { id: 'num2', french: 'Deux', hangul: '둘', romanization: 'Dul' },
+                    { id: 'num3', french: 'Trois', hangul: '셋', romanization: 'Set' }, { id: 'num4', french: 'Quatre', hangul: '넷', romanization: 'Net' },
+                    { id: 'num5', french: 'Cinq', hangul: '다섯', romanization: 'Daseot' }, { id: 'num6', french: 'Six', hangul: '여섯', romanization: 'Yeoseot' },
+                    { id: 'num7', french: 'Sept', hangul: '일곱', romanization: 'Ilgop' }, { id: 'num8', french: 'Huit', hangul: '여덟', romanization: 'Yeodeol' },
+                    { id: 'num9', french: 'Neuf', hangul: '아홉', romanization: 'Ahop' }, { id: 'num10', french: 'Dix', hangul: '열', romanization: 'Yeol' }
+                ]
+            }
+        };
+
+        let allUserDecks = {};
+        let currentDeckId = 'days';
+        let currentCardIndex = 0;
+        let isReviewMode = false;
+        let visibleCards = [];
+
+        const loader = document.getElementById('loader');
+        const authOverlay = document.getElementById('auth-overlay');
+        const appContent = document.getElementById('app-content');
+        const card = document.getElementById('flashcard');
+        const cardFront = document.getElementById('card-front');
+        const cardBack = document.getElementById('card-back');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressText = document.getElementById('progress');
+        const deckSidebar = document.getElementById('deck-sidebar');
+        const deckTitle = document.getElementById('deck-title');
+        const reviewModeBtn = document.getElementById('review-mode-btn');
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                authOverlay.style.display = 'none';
+                appContent.classList.add('hidden');
+                loader.style.display = 'flex';
+                initializeAppLogic(user);
+            } else {
+                authOverlay.style.display = 'flex';
+                appContent.classList.add('hidden');
+                loader.style.display = 'none';
+            }
+        });
+
+        async function initializeAppLogic(user) {
+            document.getElementById('user-email').textContent = user.email;
+            
+            const syncBatch = writeBatch(db);
+            for (const deckId in cardDecks) {
+                const baseDeckCards = cardDecks[deckId].cards;
+                for (const cardData of baseDeckCards) {
+                    const cardRef = doc(db, "users", user.uid, "korean_decks", deckId, "cards", cardData.id);
+                    syncBatch.set(cardRef, cardData, { merge: true });
+                }
+            }
+            await syncBatch.commit();
+
+            for (const deckId in cardDecks) {
+                const deckRef = collection(db, "users", user.uid, "korean_decks", deckId, "cards");
+                const snapshot = await getDocs(query(deckRef));
+                allUserDecks[deckId] = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            }
+            
+            populateDeckSidebar();
+            await loadDeck(Object.keys(cardDecks)[0]); // Charger le premier paquet par défaut
+            
+            loader.style.display = 'none';
+            appContent.classList.remove('hidden');
+        }
+        
+        async function loadDeck(deckId) {
+            currentDeckId = deckId;
+            deckTitle.textContent = cardDecks[deckId].name;
+            isReviewMode = false;
+            reviewModeBtn.classList.remove('active');
+
+            // Mettre à jour la classe active dans la barre latérale
+            document.querySelectorAll('.deck-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.querySelector(`.deck-btn[data-deck-id="${deckId}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            updateVisibleCards();
+            updateDashboard();
+            updateCardDisplay();
+        }
+
+        function populateDeckSidebar() {
+            deckSidebar.innerHTML = '';
+            for (const deckId in cardDecks) {
+                const button = document.createElement('button');
+                button.dataset.deckId = deckId;
+                button.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition';
+                button.textContent = cardDecks[deckId].name;
+                deckSidebar.appendChild(button);
+            }
+        }
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function updateVisibleCards() {
+            const currentDeck = allUserDecks[currentDeckId] || [];
+            if (isReviewMode) {
+                visibleCards = currentDeck.filter(c => c.status === 'learning');
+            } else {
+                visibleCards = [...currentDeck];
+            }
+            shuffleArray(visibleCards);
+            currentCardIndex = 0;
+        }
+
+        function updateDashboard() {
+            const currentDeck = allUserDecks[currentDeckId] || [];
+            document.getElementById('mastered-count').textContent = currentDeck.filter(c => c.status === 'mastered').length;
+            document.getElementById('learning-count').textContent = currentDeck.filter(c => c.status === 'learning').length;
+            document.getElementById('new-count').textContent = currentDeck.filter(c => c.status === 'new').length;
+        }
+
+        function updateCardDisplay() {
+            if (visibleCards.length === 0) {
+                cardFront.innerHTML = `<h2 class="text-2xl font-bold text-center p-4">${isReviewMode ? 'Aucune carte à réviser !' : 'Paquet vide.'}</h2>`;
+                cardBack.innerHTML = '';
+                progressText.textContent = '0 / 0';
+                card.classList.remove('status-new', 'status-learning', 'status-mastered');
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+                return;
+            }
+
+            const currentCardData = visibleCards[currentCardIndex];
+            card.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                cardFront.innerHTML = `<h2 class="text-6xl font-bold korean-font">${currentCardData.hangul}</h2>`;
+                cardBack.innerHTML = `
+                    <h3 class="text-5xl font-bold">${currentCardData.french}</h3>
+                    <p class="text-xl mt-2 text-gray-300">${currentCardData.romanization}</p>
+                `;
+            }, 100);
+
+            card.classList.remove('status-new', 'status-learning', 'status-mastered');
+            card.classList.add(`status-${currentCardData.status}`);
+
+            progressText.textContent = `Carte ${currentCardIndex + 1} sur ${visibleCards.length}`;
+            prevBtn.disabled = currentCardIndex === 0;
+            nextBtn.disabled = currentCardIndex === visibleCards.length - 1;
+        }
+
+        async function updateCardStatus(newStatus) {
+            if (!auth.currentUser || visibleCards.length === 0) return;
+            const cardId = visibleCards[currentCardIndex].id;
+            
+            const cardInFullDeck = allUserDecks[currentDeckId].find(c => c.id === cardId);
+            if(cardInFullDeck) cardInFullDeck.status = newStatus;
+            
+            card.classList.remove('status-new', 'status-learning', 'status-mastered');
+            card.classList.add(`status-${newStatus}`);
+            updateDashboard();
+
+            const docRef = doc(db, "users", auth.currentUser.uid, "korean_decks", currentDeckId, "cards", cardId);
+            try {
+                await setDoc(docRef, { status: newStatus }, { merge: true });
+            } catch (error) {
+                console.error("Erreur de mise à jour:", error);
+            }
+        }
+
+        function setupEventListeners() {
+            card.addEventListener('click', () => card.classList.toggle('is-flipped'));
+
+            nextBtn.addEventListener('click', () => {
+                if (currentCardIndex < visibleCards.length - 1) {
+                    currentCardIndex++;
+                    updateCardDisplay();
+                }
+            });
+            prevBtn.addEventListener('click', () => {
+                if (currentCardIndex > 0) {
+                    currentCardIndex--;
+                    updateCardDisplay();
+                }
+            });
+            
+            deckSidebar.addEventListener('click', (e) => {
+                const deckBtn = e.target.closest('.deck-btn');
+                if (deckBtn) {
+                    loadDeck(deckBtn.dataset.deckId);
+                }
+            });
+            
+            reviewModeBtn.addEventListener('click', () => {
+                isReviewMode = !isReviewMode;
+                reviewModeBtn.classList.toggle('active', isReviewMode);
+                updateVisibleCards();
+                updateCardDisplay();
+            });
+
+            document.getElementById('status-buttons').addEventListener('click', (e) => {
+                const statusBtn = e.target.closest('.status-btn');
+                if (statusBtn) updateCardStatus(statusBtn.dataset.status);
+            });
+
+            document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('signup-form').addEventListener('submit', handleSignup);
+        }
+
+        async function handleLogin(e) { e.preventDefault(); try { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value); } catch (error) { handleAuthError(error); } }
+        async function handleSignup(e) { e.preventDefault(); try { await createUserWithEmailAndPassword(auth, document.getElementById('signup-email').value, document.getElementById('signup-password').value); } catch (error) { handleAuthError(error); } }
+        function handleAuthError(error) {
+            const errorElement = document.getElementById('auth-error');
+            switch (error.code) {
+                case 'auth/wrong-password': case 'auth/invalid-credential': errorElement.textContent = 'Mot de passe ou e-mail incorrect.'; break;
+                case 'auth/user-not-found': errorElement.textContent = 'Aucun compte trouvé pour cet e-mail.'; break;
+                case 'auth/weak-password': errorElement.textContent = 'Le mot de passe doit faire au moins 6 caractères.'; break;
+                case 'auth/email-already-in-use': errorElement.textContent = 'Cette adresse e-mail est déjà utilisée.'; break;
+                default: errorElement.textContent = 'Une erreur est survenue.';
+            }
+        }
+        
+        setupEventListeners();
+    </script>
+</body>
+</html>
