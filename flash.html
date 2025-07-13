@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flashcards Coréen - Apprentissage Personnalisé</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .korean-font { font-family: 'Nanum Gothic', sans-serif; }
+        .korean-font { font-family: 'Noto Sans KR', sans-serif; }
         .scene { perspective: 1000px; }
         .card {
             width: 100%;
@@ -35,11 +35,11 @@
         .card__face--front { background-color: #1f2937; color: #f9fafb; }
         .card__face--back { background-color: #374151; color: white; transform: rotateY(180deg); }
         
-        .status-new { border-color: #6b7280; } /* gray-500 */
-        .status-learning { border-color: #f59e0b; } /* amber-500 */
-        .status-mastered { border-color: #22c55e; } /* green-500 */
+        .status-new { border-color: #6b7280; }
+        .status-learning { border-color: #f59e0b; }
+        .status-mastered { border-color: #22c55e; }
 
-        #loader, #auth-overlay {
+        #loader, #auth-overlay, .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(17, 24, 39, 0.95);
             display: flex; justify-content: center; align-items: center;
@@ -57,21 +57,20 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .review-mode-btn.active {
-            background-color: #d97706; /* amber-600 */
+            background-color: #d97706;
             box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
         }
         .deck-btn.active {
-            background-color: #ea580c; /* orange-600 */
+            background-color: #ea580c;
             color: white;
         }
-        /* Style pour le défilement horizontal sur mobile */
         .mobile-deck-nav {
             overflow-x: auto;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
         .mobile-deck-nav::-webkit-scrollbar {
-            display: none; /* Chrome, Safari and Opera */
+            display: none;
         }
     </style>
 </head>
@@ -105,16 +104,15 @@
 
     <!-- Contenu de l'application -->
     <div id="app-content" class="hidden w-full max-w-6xl mx-auto p-2 md:p-4 flex flex-col md:flex-row md:space-x-8">
-        <!-- Barre latérale de navigation des paquets -->
         <aside class="w-full md:w-1/4 flex-shrink-0 mb-6 md:mb-0">
-            <h2 class="text-xl font-bold text-gray-300 mb-4">Vos Paquets</h2>
-            <!-- Navigation pour Mobile -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-300">Vos Paquets</h2>
+                <button id="add-deck-btn" class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-orange-700 transition">+</button>
+            </div>
             <div id="deck-sidebar-mobile" class="md:hidden flex space-x-2 pb-2 mobile-deck-nav"></div>
-            <!-- Navigation pour Desktop -->
             <div id="deck-sidebar-desktop" class="hidden md:block space-y-2"></div>
         </aside>
 
-        <!-- Contenu principal -->
         <main class="flex-grow">
             <header class="flex justify-between items-start mb-4">
                 <h1 id="deck-title" class="text-2xl md:text-3xl font-bold text-orange-400"></h1>
@@ -129,6 +127,7 @@
                 <div><p class="text-xl md:text-2xl font-bold text-amber-500" id="learning-count">0</p><p class="text-xs text-gray-400">En cours</p></div>
                 <div><p class="text-xl md:text-2xl font-bold text-gray-500" id="new-count">0</p><p class="text-xs text-gray-400">Nouveau</p></div>
             </div>
+             <button id="add-card-btn" class="w-full mb-4 py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition">+ Ajouter une carte</button>
 
             <div class="scene h-56 md:h-64">
                 <div id="flashcard" class="card rounded-xl">
@@ -151,12 +150,38 @@
             </div>
         </main>
     </div>
+    
+    <!-- Modal pour ajouter un paquet -->
+    <div id="add-deck-modal" class="modal-overlay hidden">
+        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4">
+            <h3 class="text-xl font-bold text-center text-white">Nouveau Paquet</h3>
+            <input type="text" id="new-deck-name" placeholder="Nom du paquet" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+            <div class="flex space-x-4">
+                <button id="save-deck-btn" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Créer</button>
+                <button id="cancel-deck-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal pour ajouter une carte -->
+    <div id="add-card-modal" class="modal-overlay hidden">
+        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4">
+            <h3 class="text-xl font-bold text-center text-white">Nouvelle Carte</h3>
+            <input type="text" id="new-card-french" placeholder="Français" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+            <input type="text" id="new-card-hangul" placeholder="Coréen (Hangeul)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+            <input type="text" id="new-card-romanization" placeholder="Romanisation" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+            <div class="flex space-x-4">
+                <button id="save-card-btn" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Sauvegarder</button>
+                <button id="cancel-card-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, writeBatch, query, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, writeBatch, query, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
@@ -171,9 +196,9 @@
         const auth = getAuth();
         const db = getFirestore(app);
 
-        const cardDecks = {
+        const defaultDecks = {
             'days': {
-                name: 'Jours de la semaine',
+                name: 'Jours',
                 cards: [
                     { id: 'day1', french: 'Lundi', hangul: '월요일', romanization: 'Woryoil' }, { id: 'day2', french: 'Mardi', hangul: '화요일', romanization: 'Hwayoil' },
                     { id: 'day3', french: 'Mercredi', hangul: '수요일', romanization: 'Suyoil' }, { id: 'day4', french: 'Jeudi', hangul: '목요일', romanization: 'Mogyoil' },
@@ -181,8 +206,8 @@
                     { id: 'day7', french: 'Dimanche', hangul: '일요일', romanization: 'Iryoil' }
                 ]
             },
-            'numbers': {
-                name: 'Chiffres (1-10)',
+            'numbers_1_10': {
+                name: 'Chiffres 1-10',
                 cards: [
                     { id: 'num1', french: 'Un', hangul: '하나', romanization: 'Hana' }, { id: 'num2', french: 'Deux', hangul: '둘', romanization: 'Dul' },
                     { id: 'num3', french: 'Trois', hangul: '셋', romanization: 'Set' }, { id: 'num4', french: 'Quatre', hangul: '넷', romanization: 'Net' },
@@ -190,11 +215,22 @@
                     { id: 'num7', french: 'Sept', hangul: '일곱', romanization: 'Ilgop' }, { id: 'num8', french: 'Huit', hangul: '여덟', romanization: 'Yeodeol' },
                     { id: 'num9', french: 'Neuf', hangul: '아홉', romanization: 'Ahop' }, { id: 'num10', french: 'Dix', hangul: '열', romanization: 'Yeol' }
                 ]
+            },
+            'numbers_key': {
+                name: 'Nombres Clés',
+                cards: [
+                    { id: 'keynum1', french: 'Dix (sino)', hangul: '십', romanization: 'Sip' },
+                    { id: 'keynum2', french: 'Vingt', hangul: '이십', romanization: 'Isip' },
+                    { id: 'keynum3', french: 'Trente', hangul: '삼십', romanization: 'Samsip' },
+                    { id: 'keynum4', french: 'Cent', hangul: '백', romanization: 'Baek' },
+                    { id: 'keynum5', french: 'Mille', hangul: '천', romanization: 'Cheon' },
+                    { id: 'keynum6', french: 'Dix Mille', hangul: '만', romanization: 'Man' }
+                ]
             }
         };
 
-        let allUserDecks = {};
-        let currentDeckId = 'days';
+        let userDecks = {};
+        let currentDeckId = null;
         let currentCardIndex = 0;
         let isReviewMode = false;
         let visibleCards = [];
@@ -212,6 +248,8 @@
         const deckSidebarMobile = document.getElementById('deck-sidebar-mobile');
         const deckTitle = document.getElementById('deck-title');
         const reviewModeBtn = document.getElementById('review-mode-btn');
+        const addDeckModal = document.getElementById('add-deck-modal');
+        const addCardModal = document.getElementById('add-card-modal');
 
         onAuthStateChanged(auth, user => {
             if (user) {
@@ -229,25 +267,44 @@
         async function initializeAppLogic(user) {
             document.getElementById('user-email').textContent = user.email;
             
-            const syncBatch = writeBatch(db);
-            for (const deckId in cardDecks) {
-                const baseDeckCards = cardDecks[deckId].cards;
-                for (const cardData of baseDeckCards) {
-                    const cardRef = doc(db, "users", user.uid, "korean_decks", deckId, "cards", cardData.id);
-                    syncBatch.set(cardRef, cardData, { merge: true });
-                }
-            }
-            await syncBatch.commit();
+            const decksCollectionRef = collection(db, "users", user.uid, "decks");
+            const decksSnapshot = await getDocs(query(decksCollectionRef));
 
-            for (const deckId in cardDecks) {
-                const deckRef = collection(db, "users", user.uid, "korean_decks", deckId, "cards");
-                const snapshot = await getDocs(query(deckRef));
-                allUserDecks[deckId] = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                allUserDecks[deckId].sort((a, b) => a.id.localeCompare(b.id));
+            if (decksSnapshot.empty) {
+                // First time user, create default decks
+                const batch = writeBatch(db);
+                for (const deckId in defaultDecks) {
+                    const deckData = defaultDecks[deckId];
+                    const deckRef = doc(db, "users", user.uid, "decks", deckId);
+                    batch.set(deckRef, { name: deckData.name, isDefault: true });
+                    deckData.cards.forEach(cardData => {
+                        const cardRef = doc(db, "users", user.uid, "decks", deckId, "cards", cardData.id);
+                        batch.set(cardRef, cardData);
+                    });
+                }
+                await batch.commit();
+            }
+
+            // Load all user decks
+            const finalDecksSnapshot = await getDocs(query(decksCollectionRef));
+            userDecks = {};
+            for (const deckDoc of finalDecksSnapshot.docs) {
+                const deckId = deckDoc.id;
+                const cardsCollectionRef = collection(db, "users", user.uid, "decks", deckId, "cards");
+                const cardsSnapshot = await getDocs(query(cardsCollectionRef));
+                userDecks[deckId] = {
+                    ...deckDoc.data(),
+                    id: deckId,
+                    cards: cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+                };
+                userDecks[deckId].cards.sort((a, b) => (a.id || '').localeCompare(b.id || ''));
             }
             
             populateDeckSidebars();
-            await loadDeck(Object.keys(cardDecks)[0]);
+            const firstDeckId = Object.keys(userDecks)[0];
+            if (firstDeckId) {
+                await loadDeck(firstDeckId);
+            }
             
             loader.style.display = 'none';
             appContent.classList.remove('hidden');
@@ -255,7 +312,7 @@
         
         async function loadDeck(deckId) {
             currentDeckId = deckId;
-            deckTitle.textContent = cardDecks[deckId].name;
+            deckTitle.textContent = userDecks[deckId].name;
             isReviewMode = false;
             reviewModeBtn.classList.remove('active');
 
@@ -270,16 +327,18 @@
         function populateDeckSidebars() {
             deckSidebarDesktop.innerHTML = '';
             deckSidebarMobile.innerHTML = '';
-            for (const deckId in cardDecks) {
-                const deckName = cardDecks[deckId].name;
-                // Bouton pour desktop
+            const sortedDecks = Object.values(userDecks).sort((a,b) => a.name.localeCompare(b.name));
+
+            for (const deckData of sortedDecks) {
+                const deckName = deckData.name;
+                const deckId = deckData.id;
+                
                 const buttonDesktop = document.createElement('button');
                 buttonDesktop.dataset.deckId = deckId;
                 buttonDesktop.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition';
                 buttonDesktop.textContent = deckName;
                 deckSidebarDesktop.appendChild(buttonDesktop);
 
-                // Bouton pour mobile
                 const buttonMobile = document.createElement('button');
                 buttonMobile.dataset.deckId = deckId;
                 buttonMobile.className = 'deck-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm text-gray-300 bg-gray-700 hover:bg-gray-600 transition';
@@ -296,21 +355,24 @@
         }
 
         function updateVisibleCards() {
-            const currentDeck = allUserDecks[currentDeckId] || [];
+            const currentDeck = userDecks[currentDeckId];
+            if (!currentDeck) return;
+
             if (isReviewMode) {
-                visibleCards = currentDeck.filter(c => c.status === 'learning');
+                visibleCards = currentDeck.cards.filter(c => c.status === 'learning');
                 shuffleArray(visibleCards);
             } else {
-                visibleCards = [...currentDeck];
+                visibleCards = [...currentDeck.cards];
             }
             currentCardIndex = 0;
         }
 
         function updateDashboard() {
-            const currentDeck = allUserDecks[currentDeckId] || [];
-            document.getElementById('mastered-count').textContent = currentDeck.filter(c => c.status === 'mastered').length;
-            document.getElementById('learning-count').textContent = currentDeck.filter(c => c.status === 'learning').length;
-            document.getElementById('new-count').textContent = currentDeck.filter(c => c.status === 'new').length;
+            const currentDeck = userDecks[currentDeckId];
+            if (!currentDeck) return;
+            document.getElementById('mastered-count').textContent = currentDeck.cards.filter(c => c.status === 'mastered').length;
+            document.getElementById('learning-count').textContent = currentDeck.cards.filter(c => c.status === 'learning').length;
+            document.getElementById('new-count').textContent = currentDeck.cards.filter(c => c.status === 'new' || !c.status).length;
         }
 
         function updateCardDisplay() {
@@ -339,7 +401,7 @@
                 `;
 
                 card.classList.remove('status-new', 'status-learning', 'status-mastered');
-                card.classList.add(`status-${currentCardData.status}`);
+                card.classList.add(`status-${currentCardData.status || 'new'}`);
 
                 progressText.textContent = `Carte ${currentCardIndex + 1} sur ${visibleCards.length}`;
                 prevBtn.disabled = currentCardIndex === 0;
@@ -351,14 +413,14 @@
             if (!auth.currentUser || visibleCards.length === 0) return;
             const cardId = visibleCards[currentCardIndex].id;
             
-            const cardInFullDeck = allUserDecks[currentDeckId].find(c => c.id === cardId);
+            const cardInFullDeck = userDecks[currentDeckId].cards.find(c => c.id === cardId);
             if(cardInFullDeck) cardInFullDeck.status = newStatus;
             
             card.classList.remove('status-new', 'status-learning', 'status-mastered');
             card.classList.add(`status-${newStatus}`);
             updateDashboard();
 
-            const docRef = doc(db, "users", auth.currentUser.uid, "korean_decks", currentDeckId, "cards", cardId);
+            const docRef = doc(db, "users", auth.currentUser.uid, "decks", currentDeckId, "cards", cardId);
             try {
                 await setDoc(docRef, { status: newStatus }, { merge: true });
             } catch (error) {
@@ -421,10 +483,66 @@
                 const statusBtn = e.target.closest('.status-btn');
                 if (statusBtn) updateCardStatus(statusBtn.dataset.status);
             });
+            
+            // --- Modal Listeners ---
+            document.getElementById('add-deck-btn').addEventListener('click', () => addDeckModal.classList.remove('hidden'));
+            document.getElementById('cancel-deck-btn').addEventListener('click', () => addDeckModal.classList.add('hidden'));
+            document.getElementById('save-deck-btn').addEventListener('click', saveNewDeck);
+            
+            document.getElementById('add-card-btn').addEventListener('click', () => addCardModal.classList.remove('hidden'));
+            document.getElementById('cancel-card-btn').addEventListener('click', () => addCardModal.classList.add('hidden'));
+            document.getElementById('save-card-btn').addEventListener('click', saveNewCard);
 
             document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('signup-form').addEventListener('submit', handleSignup);
+        }
+        
+        async function saveNewDeck() {
+            const deckNameInput = document.getElementById('new-deck-name');
+            const deckName = deckNameInput.value.trim();
+            if (!deckName) return;
+            
+            const newDeckRef = doc(collection(db, "users", auth.currentUser.uid, "decks"));
+            await setDoc(newDeckRef, { name: deckName, isDefault: false });
+            
+            userDecks[newDeckRef.id] = { id: newDeckRef.id, name: deckName, isDefault: false, cards: [] };
+            
+            populateDeckSidebars();
+            loadDeck(newDeckRef.id);
+            
+            deckNameInput.value = '';
+            addDeckModal.classList.add('hidden');
+        }
+        
+        async function saveNewCard() {
+            const frenchInput = document.getElementById('new-card-french');
+            const hangulInput = document.getElementById('new-card-hangul');
+            const romanizationInput = document.getElementById('new-card-romanization');
+            
+            const newCard = {
+                french: frenchInput.value.trim(),
+                hangul: hangulInput.value.trim(),
+                romanization: romanizationInput.value.trim(),
+                status: 'new'
+            };
+            
+            if (!newCard.french || !newCard.hangul) return;
+            
+            const cardsCollectionRef = collection(db, "users", auth.currentUser.uid, "decks", currentDeckId, "cards");
+            const newCardRef = await addDoc(cardsCollectionRef, newCard);
+            
+            newCard.id = newCardRef.id;
+            userDecks[currentDeckId].cards.push(newCard);
+            
+            updateVisibleCards();
+            updateDashboard();
+            updateCardDisplay();
+            
+            frenchInput.value = '';
+            hangulInput.value = '';
+            romanizationInput.value = '';
+            addCardModal.classList.add('hidden');
         }
 
         async function handleLogin(e) { e.preventDefault(); try { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value); } catch (error) { handleAuthError(error); } }
