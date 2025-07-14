@@ -312,23 +312,22 @@
         async function initializeAppLogic(user) {
             document.getElementById('user-email').textContent = user.email;
             
-            const decksCollectionRef = collection(db, "users", user.uid, "decks");
-            
-            // Sync default decks
+            // **CORRECTIF : Utilisation de { merge: true } pour ne pas écraser la progression**
             const batch = writeBatch(db);
             for (const deckId in defaultDecks) {
                 const deckData = defaultDecks[deckId];
                 const deckRef = doc(db, "users", user.uid, "decks", deckId);
-                batch.set(deckRef, { name: deckData.name, isDefault: true });
+                batch.set(deckRef, { name: deckData.name, isDefault: true }, { merge: true });
                 deckData.cards.forEach(cardData => {
                     const cardRef = doc(db, "users", user.uid, "decks", deckId, "cards", cardData.id);
-                    batch.set(cardRef, cardData);
+                    batch.set(cardRef, cardData, { merge: true });
                 });
             }
             await batch.commit();
 
 
             // Load all user decks
+            const decksCollectionRef = collection(db, "users", user.uid, "decks");
             const finalDecksSnapshot = await getDocs(query(decksCollectionRef));
             userDecks = {};
             for (const deckDoc of finalDecksSnapshot.docs) {
