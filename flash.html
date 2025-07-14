@@ -6,6 +6,10 @@
     <title>Flashcards Coréen - Apprentissage Personnalisé</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script type="module">
+        import KoreanRomanizer from 'https://esm.sh/korean-romanizer';
+        window.KoreanRomanizer = KoreanRomanizer; // Attach to window to be globally accessible
+    </script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .korean-font { font-family: 'Noto Sans KR', sans-serif; }
@@ -46,13 +50,28 @@
             z-index: 9999; flex-direction: column;
             transition: opacity 0.3s;
         }
-        .spinner {
+        .spinner, .btn-loading::after {
             border: 4px solid rgba(255, 255, 255, 0.1);
             width: 36px;
             height: 36px;
             border-radius: 50%;
             border-left-color: #f97316;
             animation: spin 1s ease infinite;
+        }
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin-top: -10px;
+            margin-left: -10px;
+            border-width: 2px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
@@ -176,12 +195,25 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal de confirmation de suppression -->
+    <div id="delete-deck-modal" class="modal-overlay hidden">
+        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4 text-center">
+            <h3 class="text-xl font-bold text-white">Confirmer la suppression</h3>
+            <p class="text-gray-300">Êtes-vous sûr de vouloir supprimer ce paquet et toutes ses cartes ? Cette action est irréversible.</p>
+            <div class="flex space-x-4">
+                <button id="confirm-delete-deck-btn" class="w-full py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">Supprimer</button>
+                <button id="cancel-delete-deck-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, writeBatch, query, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, writeBatch, query, getDocs, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
@@ -226,6 +258,21 @@
                     { id: 'keynum5', french: 'Mille', hangul: '천', romanization: 'Cheon' },
                     { id: 'keynum6', french: 'Dix Mille', hangul: '만', romanization: 'Man' }
                 ]
+            },
+            'pronouns': {
+                name: 'Pronoms',
+                cards: [
+                    { id: 'pro1', french: 'Je (Informel)', hangul: '나', romanization: 'Na' },
+                    { id: 'pro2', french: 'Je (Formel)', hangul: '저', romanization: 'Jeo' },
+                    { id: 'pro3', french: 'Tu (Informel)', hangul: '너', romanization: 'Neo' },
+                    { id: 'pro4', french: 'Il / Lui', hangul: '그', romanization: 'Geu' },
+                    { id: 'pro5', french: 'Elle', hangul: '그녀', romanization: 'Geunyeo' },
+                    { id: 'pro6', french: 'Nous (Inclusif)', hangul: '우리', romanization: 'Uri' },
+                    { id: 'pro7', french: 'Nous (Formel)', hangul: '저희', romanization: 'Jeohui' },
+                    { id: 'pro8', french: 'Vous (Groupe)', hangul: '여러분', romanization: 'Yeoreobun' },
+                    { id: 'pro9', french: 'Ils / Eux', hangul: '그들', romanization: 'Geudeul' },
+                    { id: 'pro10', french: 'Elles', hangul: '그녀들', romanization: 'Geunyeodeul' }
+                ]
             }
         };
 
@@ -250,6 +297,8 @@
         const reviewModeBtn = document.getElementById('review-mode-btn');
         const addDeckModal = document.getElementById('add-deck-modal');
         const addCardModal = document.getElementById('add-card-modal');
+        const deleteDeckModal = document.getElementById('delete-deck-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-deck-btn');
 
         onAuthStateChanged(auth, user => {
             if (user) {
@@ -270,20 +319,19 @@
             const decksCollectionRef = collection(db, "users", user.uid, "decks");
             const decksSnapshot = await getDocs(query(decksCollectionRef));
 
-            if (decksSnapshot.empty) {
-                // First time user, create default decks
-                const batch = writeBatch(db);
-                for (const deckId in defaultDecks) {
-                    const deckData = defaultDecks[deckId];
-                    const deckRef = doc(db, "users", user.uid, "decks", deckId);
-                    batch.set(deckRef, { name: deckData.name, isDefault: true });
-                    deckData.cards.forEach(cardData => {
-                        const cardRef = doc(db, "users", user.uid, "decks", deckId, "cards", cardData.id);
-                        batch.set(cardRef, cardData);
-                    });
-                }
-                await batch.commit();
+            // Sync default decks
+            const batch = writeBatch(db);
+            for (const deckId in defaultDecks) {
+                const deckData = defaultDecks[deckId];
+                const deckRef = doc(db, "users", user.uid, "decks", deckId);
+                batch.set(deckRef, { name: deckData.name, isDefault: true });
+                deckData.cards.forEach(cardData => {
+                    const cardRef = doc(db, "users", user.uid, "decks", deckId, "cards", cardData.id);
+                    batch.set(cardRef, cardData);
+                });
             }
+            await batch.commit();
+
 
             // Load all user decks
             const finalDecksSnapshot = await getDocs(query(decksCollectionRef));
@@ -333,16 +381,21 @@
                 const deckName = deckData.name;
                 const deckId = deckData.id;
                 
+                const buttonHtml = `
+                    <span class="flex-grow">${deckName}</span>
+                    ${!deckData.isDefault ? `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : ''}
+                `;
+
                 const buttonDesktop = document.createElement('button');
                 buttonDesktop.dataset.deckId = deckId;
-                buttonDesktop.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition';
-                buttonDesktop.textContent = deckName;
+                buttonDesktop.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition flex items-center justify-between';
+                buttonDesktop.innerHTML = buttonHtml;
                 deckSidebarDesktop.appendChild(buttonDesktop);
 
                 const buttonMobile = document.createElement('button');
                 buttonMobile.dataset.deckId = deckId;
-                buttonMobile.className = 'deck-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm text-gray-300 bg-gray-700 hover:bg-gray-600 transition';
-                buttonMobile.textContent = deckName;
+                buttonMobile.className = 'deck-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm text-gray-300 bg-gray-700 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
+                buttonMobile.innerHTML = buttonHtml;
                 deckSidebarMobile.appendChild(buttonMobile);
             }
         }
@@ -369,7 +422,12 @@
 
         function updateDashboard() {
             const currentDeck = userDecks[currentDeckId];
-            if (!currentDeck) return;
+            if (!currentDeck) {
+                document.getElementById('mastered-count').textContent = 0;
+                document.getElementById('learning-count').textContent = 0;
+                document.getElementById('new-count').textContent = 0;
+                return;
+            };
             document.getElementById('mastered-count').textContent = currentDeck.cards.filter(c => c.status === 'mastered').length;
             document.getElementById('learning-count').textContent = currentDeck.cards.filter(c => c.status === 'learning').length;
             document.getElementById('new-count').textContent = currentDeck.cards.filter(c => c.status === 'new' || !c.status).length;
@@ -383,7 +441,7 @@
             card.classList.remove('is-flipped');
             
             setTimeout(() => {
-                if (visibleCards.length === 0) {
+                if (!currentDeckId || !userDecks[currentDeckId] || visibleCards.length === 0) {
                     cardFront.innerHTML = `<h2 class="text-xl md:text-2xl font-bold text-center p-4">${isReviewMode ? 'Aucune carte à réviser !' : 'Paquet vide.'}</h2>`;
                     cardBack.innerHTML = '';
                     progressText.textContent = '0 / 0';
@@ -466,7 +524,13 @@
             [deckSidebarDesktop, deckSidebarMobile].forEach(sidebar => {
                 sidebar.addEventListener('click', (e) => {
                     const deckBtn = e.target.closest('.deck-btn');
-                    if (deckBtn) {
+                    const deleteBtn = e.target.closest('.delete-deck-btn');
+
+                    if (deleteBtn) {
+                        e.stopPropagation();
+                        const deckIdToDelete = deckBtn.dataset.deckId;
+                        openDeleteConfirmation(deckIdToDelete);
+                    } else if (deckBtn) {
                         loadDeck(deckBtn.dataset.deckId);
                     }
                 });
@@ -493,11 +557,53 @@
             document.getElementById('cancel-card-btn').addEventListener('click', () => addCardModal.classList.add('hidden'));
             document.getElementById('save-card-btn').addEventListener('click', saveNewCard);
 
+            document.getElementById('cancel-delete-deck-btn').addEventListener('click', () => deleteDeckModal.classList.add('hidden'));
+            
             document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('signup-form').addEventListener('submit', handleSignup);
         }
         
+        function openDeleteConfirmation(deckId) {
+            deleteDeckModal.classList.remove('hidden');
+            confirmDeleteBtn.onclick = () => deleteDeck(deckId);
+        }
+
+        async function deleteDeck(deckId) {
+            // Delete all cards in the subcollection
+            const cardsRef = collection(db, "users", auth.currentUser.uid, "decks", deckId, "cards");
+            const cardsSnapshot = await getDocs(cardsRef);
+            const batch = writeBatch(db);
+            cardsSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            
+            // Delete the deck document itself
+            const deckRef = doc(db, "users", auth.currentUser.uid, "decks", deckId);
+            batch.delete(deckRef);
+
+            await batch.commit();
+
+            // Update UI
+            delete userDecks[deckId];
+            deleteDeckModal.classList.add('hidden');
+            populateDeckSidebars();
+            
+            // If the deleted deck was the current one, load the first available deck
+            if (currentDeckId === deckId) {
+                const firstDeckId = Object.keys(userDecks)[0];
+                if (firstDeckId) {
+                    loadDeck(firstDeckId);
+                } else {
+                    // Handle case where no decks are left
+                    deckTitle.textContent = "Aucun paquet";
+                    currentDeckId = null;
+                    updateDashboard();
+                    updateCardDisplay();
+                }
+            }
+        }
+
         async function saveNewDeck() {
             const deckNameInput = document.getElementById('new-deck-name');
             const deckName = deckNameInput.value.trim();
@@ -545,8 +651,30 @@
             addCardModal.classList.add('hidden');
         }
 
-        async function handleLogin(e) { e.preventDefault(); try { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value); } catch (error) { handleAuthError(error); } }
-        async function handleSignup(e) { e.preventDefault(); try { await createUserWithEmailAndPassword(auth, document.getElementById('signup-email').value, document.getElementById('signup-password').value); } catch (error) { handleAuthError(error); } }
+        async function handleLogin(e) { 
+            e.preventDefault();
+            const button = e.target.querySelector('button[type="submit"]');
+            button.classList.add('btn-loading');
+            try { 
+                await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value); 
+            } catch (error) { 
+                handleAuthError(error); 
+            } finally {
+                button.classList.remove('btn-loading');
+            }
+        }
+        async function handleSignup(e) { 
+            e.preventDefault(); 
+            const button = e.target.querySelector('button[type="submit"]');
+            button.classList.add('btn-loading');
+            try { 
+                await createUserWithEmailAndPassword(auth, document.getElementById('signup-email').value, document.getElementById('signup-password').value); 
+            } catch (error) { 
+                handleAuthError(error); 
+            } finally {
+                button.classList.remove('btn-loading');
+            }
+        }
         function handleAuthError(error) {
             const errorElement = document.getElementById('auth-error');
             switch (error.code) {

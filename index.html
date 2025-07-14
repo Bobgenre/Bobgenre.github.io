@@ -436,7 +436,6 @@
         }
 
         // --- GESTION DE L'HISTORIQUE ---
-        // CORRIGÉ: Ajout d'une vérification pour les anciens formats de données
         function openHistoryModal(exerciseId, exerciseName) {
             const modal = document.getElementById('history-modal');
             const title = document.getElementById('history-modal-title');
@@ -455,7 +454,6 @@
                 exerciseLogs.forEach(log => {
                     const date = log.date ? new Date(log.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Date inconnue';
                     
-                    // Vérifie si log.sets existe et est un tableau avant d'appeler .map()
                     const setsSummary = (log.sets && Array.isArray(log.sets))
                         ? log.sets.map(set => `${set.reps || 0}x${set.weight || 0}kg`).join(', ')
                         : '<span class="text-yellow-500">Ancien format de données</span>';
@@ -494,18 +492,32 @@
         }
 
         // --- GESTION DU MINUTEUR ---
+        // **CORRECTIF : Fonction de parsing de la durée améliorée**
         function parseDuration(durationString) {
             let totalSeconds = 0;
-            const minMatch = durationString.match(/(\d+)\s*min/);
-            const secMatch = durationString.match(/(\d+)\s*sec/);
-            if (minMatch) totalSeconds += parseInt(minMatch[1]) * 60;
-            if (secMatch) totalSeconds += parseInt(secMatch[1]);
-            if (!minMatch && !secMatch && durationString.includes(' ')) {
-                const parts = durationString.split(' ');
-                totalSeconds += (parseInt(parts[0]) * 60) + (parseInt(parts[1]) || 0);
+            const cleanedString = durationString.replace('sec', '').trim();
+            
+            const minMatch = cleanedString.match(/(\d+(\.\d+)?)\s*min/);
+
+            if (minMatch) {
+                totalSeconds += parseFloat(minMatch[1]) * 60;
+                const remainingString = cleanedString.substring(minMatch[0].length).trim();
+                if (remainingString) {
+                    const trailingSeconds = parseInt(remainingString, 10);
+                    if (!isNaN(trailingSeconds)) {
+                        totalSeconds += trailingSeconds;
+                    }
+                }
+            } else if (cleanedString.includes(' ')) {
+                const parts = cleanedString.split(/\s+/);
+                totalSeconds += (parseInt(parts[0], 10) * 60) + (parseInt(parts[1], 10) || 0);
+            } else if (!isNaN(parseFloat(cleanedString))) {
+                totalSeconds += parseFloat(cleanedString);
             }
+            
             return totalSeconds;
         }
+
 
         function startTimer(durationString, exerciseName) {
             if (timerInterval) clearInterval(timerInterval);
