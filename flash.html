@@ -158,10 +158,10 @@
                 <button data-status="mastered" class="status-btn flex-1 py-3 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Maîtrisé</button>
             </div>
 
-            <div class="flex justify-between items-center mt-4">
-                <button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-4 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button>
-                <button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition">Révision Intelligente</button>
-                <button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-4 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button>
+            <div class="flex justify-between items-center mt-4 space-x-2">
+                <button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button>
+                <button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Révision</button>
+                <button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button>
             </div>
         </main>
     </div>
@@ -250,20 +250,6 @@
                     { id: 'sino_num10', french: 'Dix', hangul: '십', romanization: 'Sip' }
                 ]
             },
-            'numbers_native_1_9': {
-                name: 'Chiffres 1-9 (Natif)',
-                cards: [
-                    { id: 'nat_num1', french: 'Un', hangul: '하나', romanization: 'Hana' },
-                    { id: 'nat_num2', french: 'Deux', hangul: '둘', romanization: 'Dul' },
-                    { id: 'nat_num3', french: 'Trois', hangul: '셋', romanization: 'Set' },
-                    { id: 'nat_num4', french: 'Quatre', hangul: '넷', romanization: 'Net' },
-                    { id: 'nat_num5', french: 'Cinq', hangul: '다섯', romanization: 'Daseot' },
-                    { id: 'nat_num6', french: 'Six', hangul: '여섯', romanization: 'Yeoseot' },
-                    { id: 'nat_num7', french: 'Sept', hangul: '일곱', romanization: 'Ilgop' },
-                    { id: 'nat_num8', french: 'Huit', hangul: '여덟', romanization: 'Yeodeol' },
-                    { id: 'nat_num9', french: 'Neuf', hangul: '아홉', romanization: 'Ahop' }
-                ]
-            },
             'numbers_key': {
                 name: 'Nombres Clés',
                 cards: [
@@ -288,68 +274,6 @@
                     { id: 'pro8', french: 'Vous (Groupe)', hangul: '여러분', romanization: 'Yeoreobun' },
                     { id: 'pro9', french: 'Ils / Eux', hangul: '그들', romanization: 'Geudeul' },
                     { id: 'pro10', french: 'Elles', hangul: '그녀들', romanization: 'Geunyeodeul' }
-                ]
-            },
-            'greetings': {
-                name: 'Salutations',
-                cards: [
-                    { id: 'greet1', french: 'Bonjour (formel)', hangul: '안녕하세요', romanization: 'annyeonghaseyo' },
-                    { id: 'greet2', french: 'Merci', hangul: '감사합니다', romanization: 'gamsahamnida' },
-                    { id: 'greet3', french: 'Au revoir (si vous partez)', hangul: '안녕히 계세요', romanization: 'annyeonghi gyeseyo' },
-                    { id: 'greet4', french: 'Au revoir (si l\'autre part)', hangul: '안녕히 가세요', romanization: 'annyeonghi gaseyo' }
-                ]
-            },
-            'politeness': {
-                name: 'Politesse et Réponses',
-                cards: [
-                    { id: 'polite1', french: 'Oui', hangul: '네', romanization: 'ne' },
-                    { id: 'polite2', french: 'Non', hangul: '아니요', romanization: 'aniyo' },
-                    { id: 'polite3', french: 'S\'il vous plaît', hangul: '주세요', romanization: 'juseyo' },
-                    { id: 'polite4', french: 'Pardon / Excusez-moi', hangul: '죄송합니다', romanization: 'joesonghamnida' }
-                ]
-            },
-            'interrogatives': {
-                name: 'Mots Interrogatifs',
-                cards: [
-                    { id: 'interro1', french: 'Qui ?', hangul: '누구', romanization: 'nugu' },
-                    { id: 'interro2', french: 'Quoi ?', hangul: '뭐', romanization: 'mwo' },
-                    { id: 'interro3', french: 'Où ?', hangul: '어디', romanization: 'eodi' },
-                    { id: 'interro4', french: 'Quand ?', hangul: '언제', romanization: 'eonje' },
-                    { id: 'interro5', french: 'Pourquoi ?', hangul: '왜', romanization: 'wae' },
-                    { id: 'interro6', french: 'Comment ?', hangul: '어떻게', romanization: 'eotteoke' }
-                ]
-            },
-            'common_verbs': {
-                name: 'Verbes Courants',
-                cards: [
-                    { id: 'verb1', french: 'Faire', hangul: '하다', romanization: 'hada' },
-                    { id: 'verb2', french: 'Manger', hangul: '먹다', romanization: 'meokda' },
-                    { id: 'verb3', french: 'Boire', hangul: '마시다', romanization: 'masida' },
-                    { id: 'verb4', french: 'Aller', hangul: '가다', romanization: 'gada' },
-                    { id: 'verb5', french: 'Venir', hangul: '오다', romanization: 'oda' },
-                    { id: 'verb6', french: 'Voir / Regarder', hangul: '보다', romanization: 'boda' },
-                    { id: 'verb7', french: 'Dormir', hangul: '자다', romanization: 'jada' }
-                ]
-            },
-            'essential_nouns': {
-                name: 'Noms Essentiels',
-                cards: [
-                    { id: 'noun1', french: 'Personne', hangul: '사람', romanization: 'saram' },
-                    { id: 'noun2', french: 'Ami', hangul: '친구', romanization: 'chingu' },
-                    { id: 'noun3', french: 'Maison', hangul: '집', romanization: 'jip' },
-                    { id: 'noun4', french: 'École', hangul: '학교', romanization: 'hakgyo' },
-                    { id: 'noun5', french: 'Eau', hangul: '물', romanization: 'mul' },
-                    { id: 'noun6', french: 'Nourriture', hangul: '음식', romanization: 'eumsik' }
-                ]
-            },
-            'basic_adjectives': {
-                name: 'Adjectifs de Base',
-                cards: [
-                    { id: 'adj1', french: 'Grand', hangul: '크다', romanization: 'keuda' },
-                    { id: 'adj2', french: 'Petit', hangul: '작다', romanization: 'jakda' },
-                    { id: 'adj3', french: 'Bon', hangul: '좋다', romanization: 'jota' },
-                    { id: 'adj4', french: 'Mauvais', hangul: '나쁘다', romanization: 'nappeuda' },
-                    { id: 'adj5', french: 'Beau / Joli', hangul: '예쁘다', romanization: 'yeppeuda' }
                 ]
             }
         };
@@ -394,14 +318,6 @@
         async function initializeAppLogic(user) {
             document.getElementById('user-email').textContent = user.email;
             
-            // Cleanup old decks
-            const oldDeckId = 'numbers_1_10';
-            const oldDeckRef = doc(db, "users", user.uid, "decks", oldDeckId);
-            if ((await getDoc(oldDeckRef)).exists()) {
-                await deleteDeck(oldDeckId, false); // Delete without UI updates yet
-            }
-
-            // Sync default decks
             const batch = writeBatch(db);
             for (const deckId in defaultDecks) {
                 const deckData = defaultDecks[deckId];
@@ -465,14 +381,15 @@
                 const deckName = deckData.name;
                 const deckId = deckData.id;
                 
-                const buttonHtml = `
-                    <span class="flex-grow">${deckName}</span>
-                    ${!deckData.isDefault ? `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : ''}
-                `;
+                const allCardsMastered = deckData.cards.length > 0 && deckData.cards.every(c => c.status === 'mastered');
+                const masteredIcon = allCardsMastered ? `<span class="text-green-400" title="Paquet maîtrisé !"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>` : '';
+                const deleteButton = !deckData.isDefault ? `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : '';
+
+                const buttonHtml = `<span class="flex-grow">${deckName}</span> ${masteredIcon} ${deleteButton}`;
 
                 const buttonDesktop = document.createElement('button');
                 buttonDesktop.dataset.deckId = deckId;
-                buttonDesktop.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition flex items-center justify-between';
+                buttonDesktop.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition flex items-center justify-between space-x-2';
                 buttonDesktop.innerHTML = buttonHtml;
                 deckSidebarDesktop.appendChild(buttonDesktop);
 
@@ -509,7 +426,6 @@
                 reviewQuiz = reviewQuiz.concat(mastered.slice(0, masteredCount));
                 reviewQuiz = reviewQuiz.concat(toReview.slice(0, toReviewCount));
                 
-                // Fill up to 20 cards if not enough from the primary selection
                 if (reviewQuiz.length < 20) {
                     const remainingMastered = mastered.slice(masteredCount);
                     const needed = 20 - reviewQuiz.length;
@@ -582,6 +498,7 @@
             card.classList.remove('status-new', 'status-learning', 'status-mastered');
             card.classList.add(`status-${newStatus}`);
             updateDashboard();
+            populateDeckSidebars(); // Refresh sidebar for mastered icon
 
             const docRef = doc(db, "users", auth.currentUser.uid, "decks", currentDeckId, "cards", cardId);
             try {
