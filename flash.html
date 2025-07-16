@@ -95,7 +95,16 @@
         </aside>
 
         <main class="flex-grow">
-            <header class="flex justify-between items-start mb-4"><h1 id="deck-title" class="text-2xl md:text-3xl font-bold text-orange-400"></h1><div id="auth-info" class="text-right flex-shrink-0"><p id="user-email" class="text-sm text-gray-500"></p><button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button></div></header>
+            <header class="flex justify-between items-start mb-4">
+                <h1 id="deck-title" class="text-2xl md:text-3xl font-bold text-orange-400"></h1>
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition text-sm">Appli Muscu</a>
+                    <div id="auth-info" class="text-right flex-shrink-0">
+                        <p id="user-email" class="text-sm text-gray-500"></p>
+                        <button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button>
+                    </div>
+                </div>
+            </header>
 
             <div id="flashcard-view">
                 <div id="dashboard" class="flex justify-around bg-gray-800 p-3 rounded-lg mb-4 text-center"><div><p class="text-xl md:text-2xl font-bold text-green-500" id="mastered-count">0</p><p class="text-xs text-gray-400">Maîtrisé</p></div><div><p class="text-xl md:text-2xl font-bold text-amber-500" id="learning-count">0</p><p class="text-xs text-gray-400">En cours</p></div><div><p class="text-xl md:text-2xl font-bold text-gray-500" id="new-count">0</p><p class="text-xs text-gray-400">Nouveau</p></div></div>
@@ -296,7 +305,6 @@
 
         function startTrainingSession(cards, trainingTitle) {
             if (cards.length === 0) {
-                // In a real app, use a custom modal instead of alert
                 alert("Il n'y a aucune carte à réviser !");
                 return;
             }
@@ -436,8 +444,8 @@
 
         function updateDashboard() {
             const currentDeck = userDecks[currentDeckId];
-            if (!currentDeck) {
-                ['mastered-count', 'learning-count', 'new-count'].forEach(id => document.getElementById(id).textContent = 0);
+            if (!currentDeck || currentDeck.id === 'training_session') {
+                ['mastered-count', 'learning-count', 'new-count'].forEach(id => document.getElementById(id).textContent = '-');
                 return;
             };
             document.getElementById('mastered-count').textContent = currentDeck.cards.filter(c => c.status === 'mastered').length;
@@ -472,7 +480,7 @@
         }
 
         async function updateCardStatus(newStatus) {
-            if (!auth.currentUser || visibleCards.length === 0) return;
+            if (!auth.currentUser || visibleCards.length === 0 || currentDeckId === 'training_session') return;
             const cardId = visibleCards[currentCardIndex].id;
             const cardInFullDeck = userDecks[currentDeckId].cards.find(c => c.id === cardId);
             if(cardInFullDeck) cardInFullDeck.status = newStatus;
@@ -511,7 +519,7 @@
                 else if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); }
                 else if (trainCategoryBtn) {
                     const category = trainCategoryBtn.dataset.category;
-                    const cards = Object.values(userDecks).filter(deck => (deck.category || 'Les Bases du Coréen') === category).flatMap(deck => deck.cards);
+                    const cards = Object.values(userDecks).filter(deck => (deck.category || 'Les Bases du Coréen') === category && deck.id !== 'training_session').flatMap(deck => deck.cards);
                     startTrainingSession(cards, `Entraînement : ${category}`);
                 }
                 else if (trainAllBtn) {
