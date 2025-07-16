@@ -17,7 +17,7 @@
         .chart-container { position: relative; height: 250px; width: 100%; }
         .accordion-toggle svg, .chevron-icon { transition: transform 0.2s ease-in-out; }
         .accordion-toggle.open svg, .rotate-180 { transform: rotate(180deg); }
-        #loader, #auth-overlay {
+        #loader, #auth-overlay, .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(17, 24, 39, 0.95);
             display: flex; justify-content: center; align-items: center;
@@ -32,34 +32,18 @@
             border-left-color: #f97316;
             animation: spin 1s ease infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .btn-loading {
-            position: relative;
-            color: transparent !important;
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn-loading { position: relative; color: transparent !important; }
         .btn-loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            margin-top: -10px;
-            margin-left: -10px;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            border-top-color: transparent;
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 20px; height: 20px; margin-top: -10px; margin-left: -10px;
+            border: 2px solid #fff; border-radius: 50%; border-top-color: transparent;
             animation: spin 0.6s linear infinite;
         }
-        .set-row-btn {
-            flex-shrink: 0;
-        }
-        #timer-progress {
-            transition: width 1s linear;
-        }
+        .set-row-btn { flex-shrink: 0; }
+        #timer-progress { transition: width 1s linear; }
+        .edit-mode-item { display: none; }
+        .edit-mode .edit-mode-item { display: flex; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200">
@@ -75,9 +59,7 @@
                 <input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
                 <button type="submit" class="w-full py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Se connecter</button>
             </form>
-            <div class="my-4 flex items-center">
-                <hr class="w-full border-gray-600"><span class="p-2 text-gray-500 text-sm">OU</span><hr class="w-full border-gray-600">
-            </div>
+            <div class="my-4 flex items-center"><hr class="w-full border-gray-600"><span class="p-2 text-gray-500 text-sm">OU</span><hr class="w-full border-gray-600"></div>
             <form id="signup-form" class="space-y-4">
                 <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
                 <input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
@@ -97,13 +79,16 @@
             <header class="text-center mb-8">
                 <h1 class="text-4xl md:text-5xl font-bold text-gray-100">Votre Programme Hebdomadaire</h1>
                 <p class="text-xl text-orange-500 mt-2">Format 3 Jours : Tirage / Poussée / Jambes</p>
-                <div id="auth-info" class="mt-4 p-2 bg-gray-800 rounded-lg inline-block">
-                    <p id="user-email" class="text-sm text-gray-400"></p>
-                    <button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button>
+                <div class="mt-4 space-y-2">
+                    <button id="toggle-edit-mode-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition">Gérer le programme</button>
+                    <div id="auth-info" class="p-2 bg-gray-800 rounded-lg inline-block">
+                        <p id="user-email" class="text-sm text-gray-400"></p>
+                        <button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button>
+                    </div>
                 </div>
             </header>
 
-            <main class="bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
+            <main id="main-content" class="bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
                 <div class="mb-6 border-b border-gray-700">
                     <nav class="flex flex-wrap -mb-px" id="tabs">
                         <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2 text-gray-400 hover:bg-gray-700" data-tab="Tirage">Tirage</button>
@@ -116,57 +101,66 @@
                 </div>
 
                 <div id="tab-contents">
-                    <div id="Tirage" class="tab-content"><div id="Tirage-exercises" class="space-y-6"></div></div>
-                    <div id="Poussée" class="tab-content"><div id="Poussée-exercises" class="space-y-6"></div></div>
-                    <div id="Jambes" class="tab-content"><div id="Jambes-exercises" class="space-y-6"></div></div>
+                    <div id="Tirage" class="tab-content"><div id="Tirage-exercises" class="space-y-6"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Tirage">+ Ajouter un exercice</button></div>
+                    <div id="Poussée" class="tab-content"><div id="Poussée-exercises" class="space-y-6"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Poussée">+ Ajouter un exercice</button></div>
+                    <div id="Jambes" class="tab-content"><div id="Jambes-exercises" class="space-y-6"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Jambes">+ Ajouter un exercice</button></div>
                     <div id="suivi" class="tab-content"><div id="suivi-graphs-content" class="space-y-4"></div></div>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- Modal pour ajouter une performance -->
-    <div id="performance-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+    <!-- Modals -->
+    <div id="performance-modal" class="modal-overlay hidden flex items-center justify-center">
         <div class="relative mx-auto p-5 border border-gray-700 w-full max-w-lg shadow-lg rounded-md bg-gray-800">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-100" id="modal-title"></h3>
-                <input type="hidden" id="modal-exercise-id">
-                <div id="sets-container" class="mt-4 space-y-3 px-4 max-h-64 overflow-y-auto"></div>
-                <div class="px-4 mt-4">
-                     <button id="add-set-btn" class="w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition">+ Ajouter une série</button>
-                </div>
-                <div class="items-center px-4 py-3 mt-2">
-                    <button id="save-performance-btn" class="px-4 py-2 bg-orange-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-orange-700">Enregistrer</button>
-                    <button id="close-modal-btn" class="mt-2 px-4 py-2 bg-gray-600 text-gray-200 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-500">Annuler</button>
-                </div>
-            </div>
+            <h3 class="text-lg leading-6 font-medium text-gray-100 text-center" id="modal-title"></h3>
+            <input type="hidden" id="modal-exercise-id">
+            <div id="sets-container" class="mt-4 space-y-3 px-4 max-h-64 overflow-y-auto"></div>
+            <div class="px-4 mt-4"><button id="add-set-btn" class="w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition">+ Ajouter une série</button></div>
+            <div class="items-center px-4 py-3 mt-2"><button id="save-performance-btn" class="px-4 py-2 bg-orange-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-orange-700">Enregistrer</button><button id="close-modal-btn" class="mt-2 px-4 py-2 bg-gray-600 text-gray-200 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-500">Annuler</button></div>
         </div>
     </div>
-    
-    <!-- Modal pour le minuteur -->
-    <div id="timer-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div id="timer-modal" class="modal-overlay hidden flex items-center justify-center p-4">
         <div class="relative w-full max-w-sm p-6 bg-gray-800 rounded-2xl shadow-2xl text-center border border-gray-700">
             <h3 class="text-xl font-semibold text-gray-400">Temps de repos pour</h3>
             <p id="timer-exercise-name" class="text-2xl font-bold text-gray-100 mb-4">Exercice</p>
             <div id="timer-display" class="text-7xl font-bold text-orange-500 my-4 tabular-nums">00:00</div>
-            <div class="w-full bg-gray-700 rounded-full h-4 mb-6 overflow-hidden">
-                <div id="timer-progress" class="bg-orange-600 h-4 rounded-full" style="width: 100%;"></div>
-            </div>
+            <div class="w-full bg-gray-700 rounded-full h-4 mb-6 overflow-hidden"><div id="timer-progress" class="bg-orange-600 h-4 rounded-full" style="width: 100%;"></div></div>
             <button id="close-timer-modal-btn" class="w-full py-3 bg-gray-600 text-gray-200 font-bold rounded-lg hover:bg-gray-500 transition">Arrêter et fermer</button>
         </div>
     </div>
-
-    <!-- Modal pour l'historique des entrées -->
-    <div id="history-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+    <div id="history-modal" class="modal-overlay hidden flex items-center justify-center">
         <div class="relative mx-auto p-5 border border-gray-700 w-full max-w-2xl shadow-lg rounded-md bg-gray-800">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg leading-6 font-medium text-gray-100" id="history-modal-title">Historique des séances</h3>
-                <button id="close-history-modal-btn" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
-            </div>
+            <div class="flex justify-between items-center mb-4"><h3 class="text-lg leading-6 font-medium text-gray-100" id="history-modal-title">Historique des séances</h3><button id="close-history-modal-btn" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button></div>
             <div id="history-list-container" class="mt-4 space-y-2 px-1 max-h-96 overflow-y-auto"></div>
         </div>
     </div>
-
+    <div id="exercise-modal" class="modal-overlay hidden flex items-center justify-center">
+        <div class="relative mx-auto p-6 border border-gray-700 w-full max-w-lg shadow-lg rounded-md bg-gray-800">
+            <h3 class="text-xl font-bold text-center text-white mb-6" id="exercise-modal-title"></h3>
+            <form id="exercise-form" class="space-y-4">
+                <input type="hidden" id="exercise-modal-id"><input type="hidden" id="exercise-modal-program-type">
+                <div><label class="text-sm font-medium text-gray-400">Nom de l'exercice</label><input type="text" id="exercise-name" required class="w-full mt-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"></div>
+                <div><label class="text-sm font-medium text-gray-400">Séries (ex: 4)</label><input type="text" id="exercise-sets" required class="w-full mt-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"></div>
+                <div><label class="text-sm font-medium text-gray-400">Répétitions (ex: 8-12)</label><input type="text" id="exercise-reps" required class="w-full mt-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"></div>
+                <div><label class="text-sm font-medium text-gray-400">Temps de repos (ex: 1 min 30)</label><input type="text" id="exercise-rest" required class="w-full mt-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"></div>
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Sauvegarder</button>
+                    <button type="button" id="cancel-exercise-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="delete-confirm-modal" class="modal-overlay hidden flex items-center justify-center">
+        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4 text-center">
+            <h3 class="text-xl font-bold text-white" id="delete-confirm-title">Confirmer la suppression</h3>
+            <p class="text-gray-300" id="delete-confirm-text"></p>
+            <div class="flex space-x-4">
+                <button id="confirm-delete-btn" class="w-full py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">Supprimer</button>
+                <button id="cancel-delete-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -174,7 +168,6 @@
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Mettez vos informations de configuration Firebase ici
         const firebaseConfig = {
             apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
             authDomain: "muscu-5e40c.firebaseapp.com",
@@ -196,6 +189,7 @@
         let currentLogs = [];
         let currentProgramData = {};
         let timerInterval = null;
+        let isEditMode = false;
 
         // --- AUTHENTIFICATION ---
         onAuthStateChanged(auth, user => {
@@ -212,7 +206,7 @@
             }
         });
 
-        // --- LOGIQUE PRINCIPALE DE L'APPLICATION ---
+        // --- LOGIQUE PRINCIPALE ---
         async function initializeAppLogic(user) {
             document.getElementById('user-email').textContent = `Connecté : ${user.email}`;
             const programRef = doc(db, "users", user.uid, "program", "main");
@@ -251,6 +245,12 @@
             };
             await setDoc(doc(db, "users", userId, "program", "main"), initialProgram);
         }
+        
+        async function updateProgramInFirestore() {
+            if (!auth.currentUser) return;
+            const programRef = doc(db, "users", auth.currentUser.uid, "program", "main");
+            await setDoc(programRef, currentProgramData);
+        }
 
         // --- AFFICHAGE ---
         function renderAll(programData, allLogs) {
@@ -259,6 +259,7 @@
         }
 
         function renderProgram(programData, allLogs) {
+            document.getElementById('main-content').classList.toggle('edit-mode', isEditMode);
             for (const [type, exercises] of Object.entries(programData)) {
                 const container = document.getElementById(`${type}-exercises`);
                 if (!container) continue;
@@ -270,19 +271,23 @@
                         lastPerfHtml = `<p class="text-sm text-orange-400 font-semibold mt-2">Dernière séance : ${setsSummary}</p>`;
                     }
                     return `<div class="p-4 bg-gray-700/50 rounded-lg">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <h4 class="font-bold text-lg text-gray-100">${exercise.name}</h4>
-                                        <p class="font-semibold mt-1 text-gray-300">${exercise.sets} séries de ${exercise.reps} répétitions</p>
-                                    </div>
-                                    <button class="start-timer-btn flex items-center justify-center w-32 gap-2 text-xs font-medium text-white bg-gray-600 hover:bg-gray-500 px-3 py-2 rounded-full transition-transform duration-200 hover:scale-105" data-rest-time="${exercise.rest_time}" data-exercise-name="${exercise.name}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                        <span>${exercise.rest_time}</span>
-                                    </button>
-                                </div>
-                                ${lastPerfHtml}
-                                <button class="add-performance-btn mt-3 w-full text-sm font-semibold text-orange-500 bg-orange-900/50 hover:bg-orange-900/70 py-2 px-4 rounded-md transition" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Ajouter une performance</button>
-                            </div>`;
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-lg text-gray-100">${exercise.name}</h4>
+                                <p class="font-semibold mt-1 text-gray-300">${exercise.sets} séries de ${exercise.reps} répétitions</p>
+                            </div>
+                            <button class="start-timer-btn flex items-center justify-center w-32 gap-2 text-xs font-medium text-white bg-gray-600 hover:bg-gray-500 px-3 py-2 rounded-full transition-transform duration-200 hover:scale-105" data-rest-time="${exercise.rest_time}" data-exercise-name="${exercise.name}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <span>${exercise.rest_time}</span>
+                            </button>
+                        </div>
+                        ${lastPerfHtml}
+                        <button class="add-performance-btn mt-3 w-full text-sm font-semibold text-orange-500 bg-orange-900/50 hover:bg-orange-900/70 py-2 px-4 rounded-md transition" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Ajouter une performance</button>
+                        <div class="edit-mode-item mt-3 pt-3 border-t border-gray-600/50 justify-end space-x-2">
+                            <button class="edit-exercise-btn text-sm font-semibold text-blue-400 bg-blue-900/50 hover:bg-blue-900/70 py-1 px-3 rounded-md transition" data-program-type="${type}" data-exercise-id="${exercise.id}">Modifier</button>
+                            <button class="delete-exercise-btn text-sm font-semibold text-red-400 bg-red-900/50 hover:bg-red-900/70 py-1 px-3 rounded-md transition" data-program-type="${type}" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Supprimer</button>
+                        </div>
+                    </div>`;
                 }).join('');
             }
         }
@@ -307,13 +312,8 @@
                 accordion.innerHTML = `<button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-700/60 hover:bg-gray-700 rounded-t-lg"><span class="text-xl font-bold text-gray-100">${programType}</span><svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content hidden p-4 border-t border-gray-700">${exercises.map(ex => `
                     <div class="bg-gray-700/30 rounded-lg mb-2">
                         <div class="flex justify-between items-center p-3">
-                            <button class="exercise-graph-toggle flex-grow text-left flex justify-between items-center" data-exercise-id="${ex.id}">
-                                <span class="font-semibold text-gray-200">${ex.name}</span>
-                                <svg class="chevron-icon w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </button>
-                            <button class="open-history-btn p-2 rounded-full hover:bg-gray-600 ml-2 flex-shrink-0" title="Voir l'historique" data-exercise-id="${ex.id}" data-exercise-name="${ex.name}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4h22v4H1zM1 10h22v4H1zM1 16h22v4H1z"/></svg>
-                            </button>
+                            <button class="exercise-graph-toggle flex-grow text-left flex justify-between items-center" data-exercise-id="${ex.id}"><span class="font-semibold text-gray-200">${ex.name}</span><svg class="chevron-icon w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                            <button class="open-history-btn p-2 rounded-full hover:bg-gray-600 ml-2 flex-shrink-0" title="Voir l'historique" data-exercise-id="${ex.id}" data-exercise-name="${ex.name}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4h22v4H1zM1 10h22v4H1zM1 16h22v4H1z"/></svg></button>
                         </div>
                         <div id="wrapper-chart-${ex.id}" class="chart-wrapper hidden mt-2 p-2"><div class="chart-container"><canvas id="chart-${ex.id}"></canvas></div></div>
                     </div>`).join('')}</div>`;
@@ -332,9 +332,7 @@
                 chartContainer.innerHTML = '<p class="text-center text-gray-400 p-4">Pas assez de données pour afficher un graphique.</p>';
                 return;
             }
-            if (!chartContainer.querySelector('canvas')) {
-                chartContainer.innerHTML = `<canvas id="${chartId}"></canvas>`;
-            }
+            if (!chartContainer.querySelector('canvas')) chartContainer.innerHTML = `<canvas id="${chartId}"></canvas>`;
             const labels = history.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
             const isBodyweight = history.every(log => log.sets.every(set => set.weight === 0 || set.weight === null));
             let chartData, chartLabel;
@@ -359,26 +357,14 @@
             document.getElementById('add-set-btn').addEventListener('click', () => addSetRow());
             document.getElementById('close-timer-modal-btn').addEventListener('click', closeTimerModal);
             document.getElementById('close-history-modal-btn').addEventListener('click', closeHistoryModal);
-
-            document.getElementById('performance-modal').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.preventDefault(); });
-
-            document.getElementById('sets-container').addEventListener('click', e => {
-                const duplicateBtn = e.target.closest('.duplicate-set-btn');
-                if (duplicateBtn) {
-                    const row = duplicateBtn.closest('.set-row');
-                    addSetRow(row.querySelector('.set-reps-input').value, row.querySelector('.set-weight-input').value);
-                    return;
-                }
-                const removeBtn = e.target.closest('.remove-set-btn');
-                if (removeBtn) {
-                    removeBtn.closest('.set-row').remove();
-                    document.querySelectorAll('#sets-container .set-row').forEach((r, index) => { r.querySelector('.set-number').textContent = `${index + 1}.`; });
-                }
-            });
+            document.getElementById('toggle-edit-mode-btn').addEventListener('click', toggleEditMode);
+            document.getElementById('exercise-form').addEventListener('submit', saveExercise);
+            document.getElementById('cancel-exercise-btn').addEventListener('click', closeExerciseModal);
+            document.getElementById('cancel-delete-btn').addEventListener('click', () => document.getElementById('delete-confirm-modal').classList.add('hidden'));
 
             appContent.addEventListener('click', e => {
-                const addBtn = e.target.closest('.add-performance-btn');
-                if (addBtn) { openPerformanceModal(addBtn.dataset.exerciseId, addBtn.dataset.exerciseName); return; }
+                const addPerfBtn = e.target.closest('.add-performance-btn');
+                if (addPerfBtn) { openPerformanceModal(addPerfBtn.dataset.exerciseId, addPerfBtn.dataset.exerciseName); return; }
                 
                 const timerBtn = e.target.closest('.start-timer-btn');
                 if (timerBtn) { startTimer(timerBtn.dataset.restTime, timerBtn.dataset.exerciseName); return; }
@@ -391,9 +377,7 @@
                     const wrapper = exerciseToggle.parentElement.nextElementSibling;
                     wrapper.classList.toggle('hidden');
                     exerciseToggle.querySelector('.chevron-icon').classList.toggle('rotate-180');
-                    if (!wrapper.classList.contains('hidden')) {
-                        createChart(exerciseToggle.dataset.exerciseId, currentLogs);
-                    }
+                    if (!wrapper.classList.contains('hidden')) createChart(exerciseToggle.dataset.exerciseId, currentLogs);
                     return;
                 }
 
@@ -406,33 +390,117 @@
                     tabBtn.classList.add('active');
                     document.getElementById(tabBtn.dataset.tab).classList.add('active');
                 }
-            });
+                
+                const addExoBtn = e.target.closest('.add-exercise-btn');
+                if (addExoBtn) { openExerciseModal(addExoBtn.dataset.programType); return; }
 
+                const editExoBtn = e.target.closest('.edit-exercise-btn');
+                if (editExoBtn) { openExerciseModal(editExoBtn.dataset.programType, editExoBtn.dataset.exerciseId); return; }
+                
+                const deleteExoBtn = e.target.closest('.delete-exercise-btn');
+                if (deleteExoBtn) { openDeleteConfirmModal(deleteExoBtn.dataset.programType, deleteExoBtn.dataset.exerciseId, deleteExoBtn.dataset.exerciseName); return; }
+            });
+            
+            document.getElementById('performance-modal').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.preventDefault(); });
+            document.getElementById('sets-container').addEventListener('click', e => {
+                const duplicateBtn = e.target.closest('.duplicate-set-btn');
+                if (duplicateBtn) { const row = duplicateBtn.closest('.set-row'); addSetRow(row.querySelector('.set-reps-input').value, row.querySelector('.set-weight-input').value); return; }
+                const removeBtn = e.target.closest('.remove-set-btn');
+                if (removeBtn) { removeBtn.closest('.set-row').remove(); document.querySelectorAll('#sets-container .set-row').forEach((r, index) => { r.querySelector('.set-number').textContent = `${index + 1}.`; }); }
+            });
             document.getElementById('history-list-container').addEventListener('click', e => {
                 const deleteBtn = e.target.closest('.delete-log-btn');
                 if (!deleteBtn) return;
-
                 const isArmed = deleteBtn.dataset.armed === 'true';
-                if (isArmed) {
-                    deleteLogEntry(deleteBtn.dataset.logId);
-                } else {
-                    document.querySelectorAll('.delete-log-btn[data-armed="true"]').forEach(btn => {
-                         btn.dataset.armed = 'false';
-                         btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
-                         btn.classList.remove('bg-red-700');
-                    });
-                    deleteBtn.dataset.armed = 'true';
-                    deleteBtn.innerHTML = 'Sûr ?';
-                    deleteBtn.classList.add('bg-red-700');
-                    setTimeout(() => {
-                        if (deleteBtn.dataset.armed === 'true') {
-                            deleteBtn.dataset.armed = 'false';
-                            deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
-                            deleteBtn.classList.remove('bg-red-700');
-                        }
-                    }, 3000);
+                if (isArmed) { deleteLogEntry(deleteBtn.dataset.logId); } else {
+                    document.querySelectorAll('.delete-log-btn[data-armed="true"]').forEach(btn => { btn.dataset.armed = 'false'; btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`; btn.classList.remove('bg-red-700'); });
+                    deleteBtn.dataset.armed = 'true'; deleteBtn.innerHTML = 'Sûr ?'; deleteBtn.classList.add('bg-red-700');
+                    setTimeout(() => { if (deleteBtn.dataset.armed === 'true') { deleteBtn.dataset.armed = 'false'; deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`; deleteBtn.classList.remove('bg-red-700'); } }, 3000);
                 }
             });
+        }
+
+        // --- GESTION DU PROGRAMME (CRUD) ---
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('toggle-edit-mode-btn');
+            btn.textContent = isEditMode ? "Terminer l'édition" : "Gérer le programme";
+            btn.classList.toggle('bg-orange-600', isEditMode);
+            btn.classList.toggle('hover:bg-orange-700', isEditMode);
+            btn.classList.toggle('bg-gray-600', !isEditMode);
+            btn.classList.toggle('hover:bg-gray-500', !isEditMode);
+            renderProgram(currentProgramData, currentLogs);
+        }
+
+        function openExerciseModal(programType, exerciseId = null) {
+            const modal = document.getElementById('exercise-modal');
+            const form = document.getElementById('exercise-form');
+            form.reset();
+            document.getElementById('exercise-modal-program-type').value = programType;
+            if (exerciseId) {
+                // Edit mode
+                const exercise = currentProgramData[programType].find(ex => ex.id === exerciseId);
+                document.getElementById('exercise-modal-title').textContent = "Modifier l'exercice";
+                document.getElementById('exercise-modal-id').value = exerciseId;
+                document.getElementById('exercise-name').value = exercise.name;
+                document.getElementById('exercise-sets').value = exercise.sets;
+                document.getElementById('exercise-reps').value = exercise.reps;
+                document.getElementById('exercise-rest').value = exercise.rest_time;
+            } else {
+                // Add mode
+                document.getElementById('exercise-modal-title').textContent = "Ajouter un exercice";
+                document.getElementById('exercise-modal-id').value = '';
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeExerciseModal() {
+            document.getElementById('exercise-modal').classList.add('hidden');
+        }
+
+        async function saveExercise(e) {
+            e.preventDefault();
+            const exerciseId = document.getElementById('exercise-modal-id').value;
+            const programType = document.getElementById('exercise-modal-program-type').value;
+            const updatedExercise = {
+                name: document.getElementById('exercise-name').value.trim(),
+                sets: document.getElementById('exercise-sets').value.trim(),
+                reps: document.getElementById('exercise-reps').value.trim(),
+                rest_time: document.getElementById('exercise-rest').value.trim()
+            };
+
+            if (!updatedExercise.name || !updatedExercise.sets || !updatedExercise.reps || !updatedExercise.rest_time) {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            if (exerciseId) { // Edit
+                const index = currentProgramData[programType].findIndex(ex => ex.id === exerciseId);
+                currentProgramData[programType][index] = { ...currentProgramData[programType][index], ...updatedExercise };
+            } else { // Add
+                updatedExercise.id = 'exo' + Date.now();
+                currentProgramData[programType].push(updatedExercise);
+            }
+            
+            await updateProgramInFirestore();
+            closeExerciseModal();
+        }
+
+        function openDeleteConfirmModal(programType, exerciseId, exerciseName) {
+            const modal = document.getElementById('delete-confirm-modal');
+            document.getElementById('delete-confirm-text').textContent = `Êtes-vous sûr de vouloir supprimer l'exercice "${exerciseName}" ? Cette action est irréversible.`;
+            const confirmBtn = document.getElementById('confirm-delete-btn');
+            confirmBtn.onclick = () => deleteExercise(programType, exerciseId);
+            modal.classList.remove('hidden');
+        }
+
+        async function deleteExercise(programType, exerciseId) {
+            const index = currentProgramData[programType].findIndex(ex => ex.id === exerciseId);
+            if (index > -1) {
+                currentProgramData[programType].splice(index, 1);
+                await updateProgramInFirestore();
+            }
+            document.getElementById('delete-confirm-modal').classList.add('hidden');
         }
 
         // --- GESTION DE L'HISTORIQUE ---
@@ -474,120 +542,78 @@
             }
             modal.classList.remove('hidden');
         }
-
-        function closeHistoryModal() {
-            document.getElementById('history-modal').classList.add('hidden');
-        }
-
+        function closeHistoryModal() { document.getElementById('history-modal').classList.add('hidden'); }
         async function deleteLogEntry(logId) {
             if (!logId) return;
             try {
-                const logRef = doc(db, "users", auth.currentUser.uid, "workout_logs", logId);
-                await deleteDoc(logRef);
+                await deleteDoc(doc(db, "users", auth.currentUser.uid, "workout_logs", logId));
                 closeHistoryModal();
-            } catch (error) {
-                console.error("Erreur lors de la suppression de l'entrée:", error);
-                alert("Impossible de supprimer l'entrée.");
-            }
+            } catch (error) { console.error("Erreur lors de la suppression:", error); alert("Impossible de supprimer l'entrée."); }
         }
 
         // --- GESTION DU MINUTEUR ---
-        // **CORRECTIF : Fonction de parsing de la durée améliorée**
         function parseDuration(durationString) {
-            let totalSeconds = 0;
-            const cleanedString = durationString.replace('sec', '').trim();
-            
+            let totalSeconds = 0; const cleanedString = durationString.replace('sec', '').trim();
             const minMatch = cleanedString.match(/(\d+(\.\d+)?)\s*min/);
-
             if (minMatch) {
                 totalSeconds += parseFloat(minMatch[1]) * 60;
                 const remainingString = cleanedString.substring(minMatch[0].length).trim();
-                if (remainingString) {
-                    const trailingSeconds = parseInt(remainingString, 10);
-                    if (!isNaN(trailingSeconds)) {
-                        totalSeconds += trailingSeconds;
-                    }
-                }
-            } else if (cleanedString.includes(' ')) {
-                const parts = cleanedString.split(/\s+/);
-                totalSeconds += (parseInt(parts[0], 10) * 60) + (parseInt(parts[1], 10) || 0);
-            } else if (!isNaN(parseFloat(cleanedString))) {
-                totalSeconds += parseFloat(cleanedString);
-            }
-            
+                if (remainingString) { const trailingSeconds = parseInt(remainingString, 10); if (!isNaN(trailingSeconds)) totalSeconds += trailingSeconds; }
+            } else if (cleanedString.includes(' ')) { const parts = cleanedString.split(/\s+/); totalSeconds += (parseInt(parts[0], 10) * 60) + (parseInt(parts[1], 10) || 0);
+            } else if (!isNaN(parseFloat(cleanedString))) { totalSeconds += parseFloat(cleanedString); }
             return totalSeconds;
         }
-
-
         function startTimer(durationString, exerciseName) {
             if (timerInterval) clearInterval(timerInterval);
-            const totalSeconds = parseDuration(durationString);
-            if (totalSeconds === 0) return;
+            const totalSeconds = parseDuration(durationString); if (totalSeconds === 0) return;
             let secondsRemaining = totalSeconds;
             const modal = document.getElementById('timer-modal'), display = document.getElementById('timer-display'), progress = document.getElementById('timer-progress'), nameDisplay = document.getElementById('timer-exercise-name');
-            nameDisplay.textContent = exerciseName;
-            modal.classList.remove('hidden');
+            nameDisplay.textContent = exerciseName; modal.classList.remove('hidden');
             const updateTimer = () => {
                 const minutes = Math.floor(secondsRemaining / 60), seconds = secondsRemaining % 60;
                 display.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 progress.style.width = `${(secondsRemaining / totalSeconds) * 100}%`;
                 if (secondsRemaining <= 0) {
-                    clearInterval(timerInterval); timerInterval = null;
-                    display.textContent = "FINI !";
-                    progress.style.width = '100%';
-                    progress.classList.remove('bg-orange-600'); progress.classList.add('bg-green-500');
+                    clearInterval(timerInterval); timerInterval = null; display.textContent = "FINI !";
+                    progress.style.width = '100%'; progress.classList.remove('bg-orange-600'); progress.classList.add('bg-green-500');
                     if (typeof Tone !== 'undefined') { const synth = new Tone.Synth().toDestination(); synth.triggerAttackRelease("C5", "8n", Tone.now()); synth.triggerAttackRelease("G5", "8n", Tone.now() + 0.2); }
                 }
                 secondsRemaining--;
             };
-            updateTimer();
-            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer(); timerInterval = setInterval(updateTimer, 1000);
         }
-
         function closeTimerModal() {
             if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-            const modal = document.getElementById('timer-modal');
-            modal.classList.add('hidden');
+            document.getElementById('timer-modal').classList.add('hidden');
             const progress = document.getElementById('timer-progress');
             progress.classList.remove('bg-green-500'); progress.classList.add('bg-orange-600');
         }
 
+        // --- GESTION DES PERFORMANCES ---
         function addSetRow(reps = '', weight = '0') {
-            const container = document.getElementById('sets-container');
-            const setIndex = container.children.length + 1;
-            const div = document.createElement('div');
-            div.className = 'set-row flex items-center space-x-2';
-            div.innerHTML = `<span class="set-number font-semibold text-gray-400 w-8 text-right pr-2">${setIndex}.</span><input type="number" placeholder="Reps" class="set-reps-input w-full px-3 py-1 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white" value="${reps}"><span class="text-gray-400">reps à</span><input type="number" placeholder="Poids" class="set-weight-input w-full px-3 py-1 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white" value="${weight}"><span class="text-gray-400">kg</span><button class="duplicate-set-btn set-row-btn text-orange-500 hover:text-orange-400 p-1" title="Dupliquer cette série"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="remove-set-btn set-row-btn text-red-500 hover:text-red-400 p-1" title="Supprimer cette série"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>`;
+            const container = document.getElementById('sets-container'); const setIndex = container.children.length + 1;
+            const div = document.createElement('div'); div.className = 'set-row flex items-center space-x-2';
+            div.innerHTML = `<span class="set-number font-semibold text-gray-400 w-8 text-right pr-2">${setIndex}.</span><input type="number" placeholder="Reps" class="set-reps-input w-full px-3 py-1 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white" value="${reps}"><span class="text-gray-400">reps à</span><input type="number" placeholder="Poids" class="set-weight-input w-full px-3 py-1 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white" value="${weight}"><span class="text-gray-400">kg</span><button class="duplicate-set-btn set-row-btn text-orange-500 hover:text-orange-400 p-1" title="Dupliquer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="remove-set-btn set-row-btn text-red-500 hover:text-red-400 p-1" title="Supprimer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>`;
             container.appendChild(div);
         }
-
         function openPerformanceModal(exerciseId, exerciseName) {
-            document.getElementById('modal-exercise-id').value = exerciseId;
-            document.getElementById('modal-title').textContent = `Ajouter Performance pour ${exerciseName}`;
-            document.getElementById('sets-container').innerHTML = '';
-            addSetRow();
-            document.getElementById('performance-modal').classList.remove('hidden');
-            document.querySelector('#sets-container .set-reps-input').focus();
+            document.getElementById('modal-exercise-id').value = exerciseId; document.getElementById('modal-title').textContent = `Ajouter Performance pour ${exerciseName}`;
+            document.getElementById('sets-container').innerHTML = ''; addSetRow();
+            document.getElementById('performance-modal').classList.remove('hidden'); document.querySelector('#sets-container .set-reps-input').focus();
         }
-
-        function closePerformanceModal() {
-            document.getElementById('performance-modal').classList.add('hidden');
-        }
-
+        function closePerformanceModal() { document.getElementById('performance-modal').classList.add('hidden'); }
         async function savePerformance() {
-            const exerciseId = document.getElementById('modal-exercise-id').value;
-            const sets = [];
-            const setRows = document.querySelectorAll('#sets-container .set-row');
-            for (const row of setRows) {
-                const reps = parseInt(row.querySelector('.set-reps-input').value);
-                const weight = parseFloat(row.querySelector('.set-weight-input').value);
+            const exerciseId = document.getElementById('modal-exercise-id').value; const sets = [];
+            document.querySelectorAll('#sets-container .set-row').forEach(row => {
+                const reps = parseInt(row.querySelector('.set-reps-input').value); const weight = parseFloat(row.querySelector('.set-weight-input').value);
                 if (!isNaN(reps) && reps > 0) { sets.push({ reps, weight: isNaN(weight) ? 0 : weight }); }
-            }
+            });
             if (sets.length === 0) return alert("Veuillez entrer au moins une série valide.");
             const log = { exerciseId, sets, date: new Date().toISOString().split('T')[0] };
-            try { await addDoc(collection(db, "users", auth.currentUser.uid, "workout_logs"), log); closePerformanceModal(); } catch (e) { console.error("Erreur d'enregistrement:", e); alert("Une erreur est survenue."); }
+            try { await addDoc(collection(db, "users", auth.currentUser.uid, "workout_logs"), log); closePerformanceModal(); } catch (e) { console.error("Erreur:", e); alert("Une erreur est survenue."); }
         }
 
+        // --- GESTION AUTH ---
         function handleAuthError(error) {
             const errorElement = document.getElementById('auth-error');
             switch (error.code) {
@@ -598,19 +624,13 @@
                 default: errorElement.textContent = 'Une erreur est survenue.';
             }
         }
-
         async function handleLogin(e) {
-            e.preventDefault();
-            const button = e.target.querySelector('button[type="submit"]'); button.classList.add('btn-loading');
-            const email = document.getElementById('login-email').value, password = document.getElementById('login-password').value;
-            try { await signInWithEmailAndPassword(auth, email, password); } catch (error) { handleAuthError(error); } finally { button.classList.remove('btn-loading'); }
+            e.preventDefault(); const button = e.target.querySelector('button[type="submit"]'); button.classList.add('btn-loading');
+            try { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value); } catch (error) { handleAuthError(error); } finally { button.classList.remove('btn-loading'); }
         }
-
         async function handleSignup(e) {
-            e.preventDefault();
-            const button = e.target.querySelector('button[type="submit"]'); button.classList.add('btn-loading');
-            const email = document.getElementById('signup-email').value, password = document.getElementById('signup-password').value;
-            try { await createUserWithEmailAndPassword(auth, email, password); } catch (error) { handleAuthError(error); } finally { button.classList.remove('btn-loading'); }
+            e.preventDefault(); const button = e.target.querySelector('button[type="submit"]'); button.classList.add('btn-loading');
+            try { await createUserWithEmailAndPassword(auth, document.getElementById('signup-email').value, document.getElementById('signup-password').value); } catch (error) { handleAuthError(error); } finally { button.classList.remove('btn-loading'); }
         }
         
         setupEventListeners();

@@ -54,155 +54,108 @@
             border-left-color: #f97316;
             animation: spin 1s ease infinite;
         }
-        .btn-loading {
-            position: relative;
-            color: transparent !important;
-        }
+        .btn-loading { position: relative; color: transparent !important; }
         .btn-loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            margin-top: -10px;
-            margin-left: -10px;
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 20px; height: 20px; margin-top: -10px; margin-left: -10px;
             border-width: 2px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .review-mode-btn.active {
-            background-color: #d97706;
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
-        }
-        .deck-btn.active {
-            background-color: #ea580c;
-            color: white;
-        }
-        .mobile-deck-nav {
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        .mobile-deck-nav::-webkit-scrollbar {
-            display: none;
-        }
+        .review-mode-btn.active { background-color: #d97706; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+        .deck-btn.active, .lesson-btn.active { background-color: #ea580c; color: white; }
+        .mobile-deck-nav { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+        .mobile-deck-nav::-webkit-scrollbar { display: none; }
+        .accordion-toggle svg { transition: transform 0.2s ease-in-out; }
+        .accordion-toggle.open svg { transform: rotate(180deg); }
+
+        /* Styles for lesson view */
+        #lesson-view h3 { font-size: 1.5rem; font-weight: bold; color: #fb923c; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        #lesson-view h4 { font-size: 1.25rem; font-weight: bold; color: #fdbf6f; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+        #lesson-view p { color: #d1d5db; line-height: 1.6; margin-bottom: 1rem; }
+        #lesson-view ul { list-style-type: disc; margin-left: 1.5rem; color: #d1d5db; margin-bottom: 1rem; }
+        #lesson-view code { background-color: #374151; color: #f9fafb; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: 'Noto Sans KR', sans-serif; }
+        #lesson-view strong { color: #fdba74; }
     </style>
 </head>
 <body class="bg-gray-900 flex items-center justify-center min-h-screen p-2 md:p-4">
 
-    <!-- Écran de Connexion / Inscription -->
-    <div id="auth-overlay">
-        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl">
-            <h2 class="text-2xl font-bold text-center text-gray-100 mb-2">Flashcards Coréen</h2>
-            <p class="text-center text-gray-400 mb-6">Connectez-vous pour sauvegarder votre progression.</p>
-            <div id="auth-error" class="text-red-500 text-sm text-center mb-4 min-h-[20px]"></div>
-            <form id="login-form" class="space-y-4">
-                <input type="email" id="login-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-                <input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-                <button type="submit" class="w-full py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Se connecter</button>
-            </form>
-            <div class="my-4 flex items-center"><hr class="w-full border-gray-600"><span class="p-2 text-gray-500 text-sm">OU</span><hr class="w-full border-gray-600"></div>
-            <form id="signup-form" class="space-y-4">
-                <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-                <input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-                <button type="submit" class="w-full py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Créer un compte</button>
-            </form>
-        </div>
-    </div>
+    <!-- Auth Screen -->
+    <div id="auth-overlay"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl"><h2 class="text-2xl font-bold text-center text-gray-100 mb-2">Flashcards Coréen</h2><p class="text-center text-gray-400 mb-6">Connectez-vous pour sauvegarder votre progression.</p><div id="auth-error" class="text-red-500 text-sm text-center mb-4 min-h-[20px]"></div><form id="login-form" class="space-y-4"><input type="email" id="login-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><button type="submit" class="w-full py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Se connecter</button></form><div class="my-4 flex items-center"><hr class="w-full border-gray-600"><span class="p-2 text-gray-500 text-sm">OU</span><hr class="w-full border-gray-600"></div><form id="signup-form" class="space-y-4"><input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><button type="submit" class="w-full py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Créer un compte</button></form></div></div>
 
-    <!-- Indicateur de chargement -->
-    <div id="loader" style="display: none;">
-        <div class="spinner"></div>
-        <p class="mt-4 text-lg font-semibold text-gray-300">Chargement...</p>
-    </div>
+    <!-- Loader -->
+    <div id="loader" style="display: none;"><div class="spinner"></div><p class="mt-4 text-lg font-semibold text-gray-300">Chargement...</p></div>
 
-    <!-- Contenu de l'application -->
+    <!-- App Content -->
     <div id="app-content" class="hidden w-full max-w-6xl mx-auto p-2 md:p-4 flex flex-col md:flex-row md:space-x-8">
         <aside class="w-full md:w-1/4 flex-shrink-0 mb-6 md:mb-0">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-300">Vos Paquets</h2>
-                <button id="add-deck-btn" class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-orange-700 transition">+</button>
-            </div>
+            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-gray-300">Vos Paquets</h2><button id="add-deck-btn" class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-orange-700 transition">+</button></div>
             <div id="deck-sidebar-mobile" class="md:hidden flex space-x-2 pb-2 mobile-deck-nav"></div>
             <div id="deck-sidebar-desktop" class="hidden md:block space-y-2"></div>
         </aside>
 
         <main class="flex-grow">
-            <header class="flex justify-between items-start mb-4">
-                <h1 id="deck-title" class="text-2xl md:text-3xl font-bold text-orange-400"></h1>
-                <div id="auth-info" class="text-right flex-shrink-0">
-                    <p id="user-email" class="text-sm text-gray-500"></p>
-                    <button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button>
+            <header class="flex justify-between items-start mb-4"><h1 id="deck-title" class="text-2xl md:text-3xl font-bold text-orange-400"></h1><div id="auth-info" class="text-right flex-shrink-0"><p id="user-email" class="text-sm text-gray-500"></p><button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button></div></header>
+
+            <div id="flashcard-view">
+                <div id="dashboard" class="flex justify-around bg-gray-800 p-3 rounded-lg mb-4 text-center"><div><p class="text-xl md:text-2xl font-bold text-green-500" id="mastered-count">0</p><p class="text-xs text-gray-400">Maîtrisé</p></div><div><p class="text-xl md:text-2xl font-bold text-amber-500" id="learning-count">0</p><p class="text-xs text-gray-400">En cours</p></div><div><p class="text-xl md:text-2xl font-bold text-gray-500" id="new-count">0</p><p class="text-xs text-gray-400">Nouveau</p></div></div>
+                <button id="add-card-btn" class="w-full mb-4 py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition">+ Ajouter une carte</button>
+                <div class="scene h-56 md:h-64"><div id="flashcard" class="card rounded-xl"><div id="card-front" class="card__face card__face--front"></div><div id="card-back" class="card__face card__face--back"></div></div></div>
+                <p id="progress" class="text-center text-gray-500 mt-4"></p>
+                <div id="status-buttons" class="flex justify-center space-x-3 mt-6"><button data-status="learning" class="status-btn flex-1 py-3 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition">À revoir</button><button data-status="mastered" class="status-btn flex-1 py-3 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Maîtrisé</button></div>
+                <div class="flex justify-between items-center mt-4 space-x-2"><button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button><button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Révision</button><button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button></div>
+            </div>
+            
+            <div id="lesson-view" class="hidden bg-gray-800 p-6 rounded-lg">
+                <div id="lesson-content-conjugaison" class="lesson-content hidden">
+                    <h3>La Conjugaison de Base</h3>
+                    <p>C'est le cœur de la langue coréenne. Pour former une phrase, vous devez conjuguer le verbe ou l'adjectif. La forme polie standard en <code>–아/어요</code> (-a/eoyo) est la plus utile au quotidien.</p>
+                    <h4>Comment ça marche ?</h4>
+                    <ol class="list-decimal list-inside space-y-2 mb-4 text-gray-300">
+                        <li>Prenez un verbe à l'infinitif (ex: <code>먹다</code>, manger).</li>
+                        <li>Retirez le <code>–다</code> final pour obtenir le <strong>radical</strong> (ex: <code>먹</code>).</li>
+                        <li>Appliquez la règle de conjugaison au radical.</li>
+                    </ol>
+                    <h4>Règles pour le Présent (<code>–아/어요</code>)</h4>
+                    <ul>
+                        <li><strong>Règle 1 :</strong> Si la dernière voyelle du radical est <strong>ㅏ</strong> ou <strong>ㅗ</strong>, on ajoute <code>–아요</code>. <br>Ex: <code>가다</code> → <code>가</code> + <code>아요</code> → <code>가요</code> (Je vais).</li>
+                        <li><strong>Règle 2 :</strong> Pour toutes les autres voyelles, on ajoute <code>–어요</code>. <br>Ex: <code>먹다</code> → <code>먹</code> + <code>어요</code> → <code>먹어요</code> (Je mange).</li>
+                        <li><strong>Règle 3 (Exception) :</strong> Les verbes en <code>하다</code> (faire) deviennent <code>–해요</code>. <br>Ex: <code>공부하다</code> → <code>공부해요</code> (J'étudie).</li>
+                    </ul>
+                    <h4>Règles pour le Passé (<code>–았/었어요</code>)</h4>
+                    <p>La logique est la même que pour le présent.</p>
+                    <ul>
+                        <li>Si la dernière voyelle du radical est <strong>ㅏ</strong> ou <strong>ㅗ</strong>, on ajoute <code>–았어요</code>. <br>Ex: <code>가다</code> → <code>갔어요</code> (Je suis allé(e)).</li>
+                        <li>Sinon, on ajoute <code>–었어요</code>. <br>Ex: <code>먹다</code> → <code>먹었어요</code> (J'ai mangé).</li>
+                        <li>Les verbes en <code>하다</code> deviennent <code>–했어요</code>. <br>Ex: <code>공부하다</code> → <code>공부했어요</code> (J'ai étudié).</li>
+                    </ul>
                 </div>
-            </header>
-
-            <div id="dashboard" class="flex justify-around bg-gray-800 p-3 rounded-lg mb-4 text-center">
-                <div><p class="text-xl md:text-2xl font-bold text-green-500" id="mastered-count">0</p><p class="text-xs text-gray-400">Maîtrisé</p></div>
-                <div><p class="text-xl md:text-2xl font-bold text-amber-500" id="learning-count">0</p><p class="text-xs text-gray-400">En cours</p></div>
-                <div><p class="text-xl md:text-2xl font-bold text-gray-500" id="new-count">0</p><p class="text-xs text-gray-400">Nouveau</p></div>
-            </div>
-             <button id="add-card-btn" class="w-full mb-4 py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition">+ Ajouter une carte</button>
-
-            <div class="scene h-56 md:h-64">
-                <div id="flashcard" class="card rounded-xl">
-                    <div id="card-front" class="card__face card__face--front"></div>
-                    <div id="card-back" class="card__face card__face--back"></div>
+                <div id="lesson-content-particules" class="lesson-content hidden">
+                    <h3>Particules et Compteurs</h3>
+                    <p>Ces éléments sont essentiels pour construire des phrases grammaticalement correctes.</p>
+                    <h4>Les Particules</h4>
+                    <p>Ce sont des petits mots grammaticaux qui donnent un rôle à chaque nom dans la phrase (qui fait l'action, qui subit l'action, où, quand...). Elles sont <strong>essentielles</strong> et n'ont pas d'équivalent direct en français. Apprenez-les comme du vocabulaire.</p>
+                    <ul>
+                        <li>Particule de sujet : <code>-이/가</code> (-i/ga)</li>
+                        <li>Particule de thème/sujet : <code>-은/는</code> (-eun/neun)</li>
+                        <li>Particule d'objet : <code>-을/를</code> (-eul/reul)</li>
+                    </ul>
+                    <h4>Les Compteurs</h4>
+                    <p>En français, on dit "trois pommes". En coréen, on dit "pomme trois [compteur-pour-objets]". Vous devez utiliser un mot spécifique (un compteur) après le chiffre (natif coréen).</p>
+                    <ul>
+                        <li><code>사과 세 <strong>개</strong></code> (trois pommes)</li>
+                        <li><code>학생 두 <strong>명</strong></code> (deux étudiants)</li>
+                        <li><code>물 한 <strong>병</strong></code> (une bouteille d'eau)</li>
+                    </ul>
                 </div>
-            </div>
-
-            <p id="progress" class="text-center text-gray-500 mt-4"></p>
-
-            <div id="status-buttons" class="flex justify-center space-x-3 mt-6">
-                <button data-status="learning" class="status-btn flex-1 py-3 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition">À revoir</button>
-                <button data-status="mastered" class="status-btn flex-1 py-3 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Maîtrisé</button>
-            </div>
-
-            <div class="flex justify-between items-center mt-4 space-x-2">
-                <button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button>
-                <button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Révision</button>
-                <button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button>
             </div>
         </main>
     </div>
     
-    <!-- Modal pour ajouter un paquet -->
-    <div id="add-deck-modal" class="modal-overlay hidden">
-        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4">
-            <h3 class="text-xl font-bold text-center text-white">Nouveau Paquet</h3>
-            <input type="text" id="new-deck-name" placeholder="Nom du paquet" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-            <div class="flex space-x-4">
-                <button id="save-deck-btn" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Créer</button>
-                <button id="cancel-deck-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal pour ajouter une carte -->
-    <div id="add-card-modal" class="modal-overlay hidden">
-        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4">
-            <h3 class="text-xl font-bold text-center text-white">Nouvelle Carte</h3>
-            <input type="text" id="new-card-french" placeholder="Français" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-            <input type="text" id="new-card-hangul" placeholder="Coréen (Hangeul)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-            <input type="text" id="new-card-romanization" placeholder="Romanisation" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-            <div class="flex space-x-4">
-                <button id="save-card-btn" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Sauvegarder</button>
-                <button id="cancel-card-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal de confirmation de suppression -->
-    <div id="delete-deck-modal" class="modal-overlay hidden">
-        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4 text-center">
-            <h3 class="text-xl font-bold text-white">Confirmer la suppression</h3>
-            <p class="text-gray-300">Êtes-vous sûr de vouloir supprimer ce paquet et toutes ses cartes ? Cette action est irréversible.</p>
-            <div class="flex space-x-4">
-                <button id="confirm-delete-deck-btn" class="w-full py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">Supprimer</button>
-                <button id="cancel-delete-deck-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button>
-            </div>
-        </div>
-    </div>
+    <!-- Modals -->
+    <div id="add-deck-modal" class="modal-overlay hidden"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4"><h3 class="text-xl font-bold text-center text-white">Nouveau Paquet</h3><input type="text" id="new-deck-name" placeholder="Nom du paquet" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><div class="flex space-x-4"><button id="save-deck-btn" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Créer</button><button id="cancel-deck-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button></div></div></div>
+    <div id="add-card-modal" class="modal-overlay hidden"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4"><h3 class="text-xl font-bold text-center text-white">Nouvelle Carte</h3><input type="text" id="new-card-french" placeholder="Français" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><input type="text" id="new-card-hangul" placeholder="Coréen (Hangeul)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><input type="text" id="new-card-romanization" placeholder="Romanisation" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><div class="flex space-x-4"><button id="save-card-btn" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Sauvegarder</button><button id="cancel-card-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button></div></div></div>
+    <div id="delete-deck-modal" class="modal-overlay hidden"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4 text-center"><h3 class="text-xl font-bold text-white">Confirmer la suppression</h3><p class="text-gray-300">Êtes-vous sûr de vouloir supprimer ce paquet et toutes ses cartes ? Cette action est irréversible.</p><div class="flex space-x-4"><button id="confirm-delete-deck-btn" class="w-full py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">Supprimer</button><button id="cancel-delete-deck-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button></div></div></div>
 
 
     <!-- Firebase SDK -->
@@ -225,57 +178,13 @@
         const db = getFirestore(app);
 
         const defaultDecks = {
-            'days': {
-                name: 'Jours',
-                cards: [
-                    { id: 'day1', french: 'Lundi', hangul: '월요일', romanization: 'Woryoil' }, { id: 'day2', french: 'Mardi', hangul: '화요일', romanization: 'Hwayoil' },
-                    { id: 'day3', french: 'Mercredi', hangul: '수요일', romanization: 'Suyoil' }, { id: 'day4', french: 'Jeudi', hangul: '목요일', romanization: 'Mogyoil' },
-                    { id: 'day5', french: 'Vendredi', hangul: '금요일', romanization: 'Geumyoil' }, { id: 'day6', french: 'Samedi', hangul: '토요일', romanization: 'Toyoil' },
-                    { id: 'day7', french: 'Dimanche', hangul: '일요일', romanization: 'Iryoil' }
-                ]
-            },
-            'numbers_sino_0_10': {
-                name: 'Chiffres 0-10 (Sino)',
-                cards: [
-                    { id: 'sino_num0', french: 'Zéro', hangul: '영 / 공', romanization: 'Yeong / Gong' },
-                    { id: 'sino_num1', french: 'Un', hangul: '일', romanization: 'Il' },
-                    { id: 'sino_num2', french: 'Deux', hangul: '이', romanization: 'I' },
-                    { id: 'sino_num3', french: 'Trois', hangul: '삼', romanization: 'Sam' },
-                    { id: 'sino_num4', french: 'Quatre', hangul: '사', romanization: 'Sa' },
-                    { id: 'sino_num5', french: 'Cinq', hangul: '오', romanization: 'O' },
-                    { id: 'sino_num6', french: 'Six', hangul: '육', romanization: 'Yuk' },
-                    { id: 'sino_num7', french: 'Sept', hangul: '칠', romanization: 'Chil' },
-                    { id: 'sino_num8', french: 'Huit', hangul: '팔', romanization: 'Pal' },
-                    { id: 'sino_num9', french: 'Neuf', hangul: '구', romanization: 'Gu' },
-                    { id: 'sino_num10', french: 'Dix', hangul: '십', romanization: 'Sip' }
-                ]
-            },
-            'numbers_key': {
-                name: 'Nombres Clés',
-                cards: [
-                    { id: 'keynum1', french: 'Dix (sino)', hangul: '십', romanization: 'Sip' },
-                    { id: 'keynum2', french: 'Vingt', hangul: '이십', romanization: 'Isip' },
-                    { id: 'keynum3', french: 'Trente', hangul: '삼십', romanization: 'Samsip' },
-                    { id: 'keynum4', french: 'Cent', hangul: '백', romanization: 'Baek' },
-                    { id: 'keynum5', french: 'Mille', hangul: '천', romanization: 'Cheon' },
-                    { id: 'keynum6', french: 'Dix Mille', hangul: '만', romanization: 'Man' }
-                ]
-            },
-            'pronouns': {
-                name: 'Pronoms',
-                cards: [
-                    { id: 'pro1', french: 'Je (Informel)', hangul: '나', romanization: 'Na' },
-                    { id: 'pro2', french: 'Je (Formel)', hangul: '저', romanization: 'Jeo' },
-                    { id: 'pro3', french: 'Tu (Informel)', hangul: '너', romanization: 'Neo' },
-                    { id: 'pro4', french: 'Il / Lui', hangul: '그', romanization: 'Geu' },
-                    { id: 'pro5', french: 'Elle', hangul: '그녀', romanization: 'Geunyeo' },
-                    { id: 'pro6', french: 'Nous (Inclusif)', hangul: '우리', romanization: 'Uri' },
-                    { id: 'pro7', french: 'Nous (Formel)', hangul: '저희', romanization: 'Jeohui' },
-                    { id: 'pro8', french: 'Vous (Groupe)', hangul: '여러분', romanization: 'Yeoreobun' },
-                    { id: 'pro9', french: 'Ils / Eux', hangul: '그들', romanization: 'Geudeul' },
-                    { id: 'pro10', french: 'Elles', hangul: '그녀들', romanization: 'Geunyeodeul' }
-                ]
-            }
+            'days': { name: 'Jours', category: 'Les Bases du Coréen', cards: [ { id: 'day1', french: 'Lundi', hangul: '월요일', romanization: 'Woryoil' }, { id: 'day2', french: 'Mardi', hangul: '화요일', romanization: 'Hwayoil' }, { id: 'day3', french: 'Mercredi', hangul: '수요일', romanization: 'Suyoil' }, { id: 'day4', french: 'Jeudi', hangul: '목요일', romanization: 'Mogyoil' }, { id: 'day5', french: 'Vendredi', hangul: '금요일', romanization: 'Geumyoil' }, { id: 'day6', french: 'Samedi', hangul: '토요일', romanization: 'Toyoil' }, { id: 'day7', french: 'Dimanche', hangul: '일요일', romanization: 'Iryoil' } ] },
+            'numbers_sino_0_10': { name: 'Chiffres 0-10 (Sino)', category: 'Les Bases du Coréen', cards: [ { id: 'sino_num0', french: 'Zéro', hangul: '영 / 공', romanization: 'Yeong / Gong' }, { id: 'sino_num1', french: 'Un', hangul: '일', romanization: 'Il' }, { id: 'sino_num2', french: 'Deux', hangul: '이', romanization: 'I' }, { id: 'sino_num3', french: 'Trois', hangul: '삼', romanization: 'Sam' }, { id: 'sino_num4', french: 'Quatre', hangul: '사', romanization: 'Sa' }, { id: 'sino_num5', french: 'Cinq', hangul: '오', romanization: 'O' }, { id: 'sino_num6', french: 'Six', hangul: '육', romanization: 'Yuk' }, { id: 'sino_num7', french: 'Sept', hangul: '칠', romanization: 'Chil' }, { id: 'sino_num8', french: 'Huit', hangul: '팔', romanization: 'Pal' }, { id: 'sino_num9', french: 'Neuf', hangul: '구', romanization: 'Gu' }, { id: 'sino_num10', french: 'Dix', hangul: '십', romanization: 'Sip' } ] },
+            'pronouns': { name: 'Pronoms', category: 'Les Bases du Coréen', cards: [ { id: 'pro1', french: 'Je (Informel)', hangul: '나', romanization: 'Na' }, { id: 'pro2', french: 'Je (Formel)', hangul: '저', romanization: 'Jeo' }, { id: 'pro3', french: 'Tu (Informel)', hangul: '너', romanization: 'Neo' }, { id: 'pro4', french: 'Il / Lui', hangul: '그', romanization: 'Geu' }, { id: 'pro5', french: 'Elle', hangul: '그녀', romanization: 'Geunyeo' }, { id: 'pro6', french: 'Nous (Inclusif)', hangul: '우리', romanization: 'Uri' }, { id: 'pro7', french: 'Nous (Formel)', hangul: '저희', romanization: 'Jeohui' }, { id: 'pro8', french: 'Vous (Groupe)', hangul: '여러분', romanization: 'Yeoreobun' }, { id: 'pro9', french: 'Ils / Eux', hangul: '그들', romanization: 'Geudeul' }, { id: 'pro10', french: 'Elles', hangul: '그녀들', romanization: 'Geunyeodeul' } ] },
+            'vocab_food': { name: 'Nourriture', category: 'Niveau Intermédiaire', cards: [ {id: 'food1', french: 'Eau', hangul: '물', romanization: 'mul'}, {id: 'food2', french: 'Pain', hangul: '빵', romanization: 'ppang'}, {id: 'food3', french: 'Riz (cuit)', hangul: '밥', romanization: 'bap'}, {id: 'food4', french: 'Viande', hangul: '고기', romanization: 'gogi'}, {id: 'food5', french: 'Café', hangul: '커피', romanization: 'keopi'}, {id: 'food6', french: 'Restaurant', hangul: '식당', romanization: 'sikdang'} ] },
+            'vocab_places': { name: 'Lieux', category: 'Niveau Intermédiaire', cards: [ {id: 'place1', french: 'Maison', hangul: '집', romanization: 'jip'}, {id: 'place2', french: 'École', hangul: '학교', romanization: 'hakgyo'}, {id: 'place3', french: 'Bureau', hangul: '회사', romanization: 'hoesa'}, {id: 'place4', french: 'Marché', hangul: '시장', romanization: 'sijang'}, {id: 'place5', french: 'Hôpital', hangul: '병원', romanization: 'byeong-won'}, {id: 'place6', french: 'Banque', hangul: '은행', romanization: 'eunhaeng'} ] },
+            'particles_connectors': { name: 'Particules & Connecteurs', category: 'Niveau Intermédiaire', cards: [ {id: 'pcon1', french: '"Et" (lier des noms)', hangul: '하고 / (이)랑', romanization: 'hago / (i)rang'}, {id: 'pcon2', french: '"Aussi", "également"', hangul: '–도', romanization: '-do'}, {id: 'pcon3', french: 'De (A) à (B)', hangul: '–에서 –까지', romanization: '-eseo -kkaji'}, {id: 'pcon4', french: '"Mais"', hangul: '하지만', romanization: 'hajiman'}, {id: 'pcon5', french: '"Donc"', hangul: '그래서', romanization: 'geuraeseo'} ] },
+            'counters': { name: 'Compteurs', category: 'Niveau Intermédiaire', cards: [ {id: 'count1', french: 'Compteur général', hangul: '개', romanization: 'gae'}, {id: 'count2', french: 'Compteur (personnes)', hangul: '명', romanization: 'myeong'}, {id: 'count3', french: 'Compteur (bouteilles)', hangul: '병', romanization: 'byeong'}, {id: 'count4', french: 'Compteur (livres)', hangul: '권', romanization: 'gwon'} ] }
         };
 
         let userDecks = {};
@@ -301,6 +210,8 @@
         const addCardModal = document.getElementById('add-card-modal');
         const deleteDeckModal = document.getElementById('delete-deck-modal');
         const confirmDeleteBtn = document.getElementById('confirm-delete-deck-btn');
+        const flashcardView = document.getElementById('flashcard-view');
+        const lessonView = document.getElementById('lesson-view');
 
         onAuthStateChanged(auth, user => {
             if (user) {
@@ -322,7 +233,7 @@
             for (const deckId in defaultDecks) {
                 const deckData = defaultDecks[deckId];
                 const deckRef = doc(db, "users", user.uid, "decks", deckId);
-                batch.set(deckRef, { name: deckData.name, isDefault: true }, { merge: true });
+                batch.set(deckRef, { name: deckData.name, isDefault: true, category: deckData.category }, { merge: true });
                 deckData.cards.forEach(cardData => {
                     const cardRef = doc(db, "users", user.uid, "decks", deckId, "cards", cardData.id);
                     batch.set(cardRef, cardData, { merge: true });
@@ -330,8 +241,6 @@
             }
             await batch.commit();
 
-
-            // Load all user decks
             const decksCollectionRef = collection(db, "users", user.uid, "decks");
             const finalDecksSnapshot = await getDocs(query(decksCollectionRef));
             userDecks = {};
@@ -339,16 +248,12 @@
                 const deckId = deckDoc.id;
                 const cardsCollectionRef = collection(db, "users", user.uid, "decks", deckId, "cards");
                 const cardsSnapshot = await getDocs(query(cardsCollectionRef));
-                userDecks[deckId] = {
-                    ...deckDoc.data(),
-                    id: deckId,
-                    cards: cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }))
-                };
+                userDecks[deckId] = { ...deckDoc.data(), id: deckId, cards: cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) };
                 userDecks[deckId].cards.sort((a, b) => (a.id || '').localeCompare(b.id || ''));
             }
             
             populateDeckSidebars();
-            const firstDeckId = Object.keys(userDecks)[0];
+            const firstDeckId = Object.keys(userDecks).find(id => userDecks[id].category === 'Les Bases du Coréen') || Object.keys(userDecks)[0];
             if (firstDeckId) {
                 await loadDeck(firstDeckId);
             }
@@ -357,14 +262,31 @@
             appContent.classList.remove('hidden');
         }
         
+        function showLesson(lessonId, lessonTitle) {
+            flashcardView.classList.add('hidden');
+            lessonView.classList.remove('hidden');
+
+            document.querySelectorAll('.lesson-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`lesson-content-${lessonId}`).classList.remove('hidden');
+
+            deckTitle.textContent = lessonTitle;
+
+            document.querySelectorAll('.deck-btn, .lesson-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll(`.lesson-btn[data-lesson-id="${lessonId}"]`).forEach(btn => btn.classList.add('active'));
+        }
+        
         async function loadDeck(deckId) {
+            lessonView.classList.add('hidden');
+            flashcardView.classList.remove('hidden');
+            document.getElementById('add-card-btn').classList.remove('hidden');
+        
             currentDeckId = deckId;
             deckTitle.textContent = userDecks[deckId].name;
             isReviewMode = false;
             reviewModeBtn.classList.remove('active');
             reviewModeBtn.textContent = "Révision Intelligente";
 
-            document.querySelectorAll('.deck-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.deck-btn, .lesson-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll(`.deck-btn[data-deck-id="${deckId}"]`).forEach(btn => btn.classList.add('active'));
 
             updateVisibleCards();
@@ -372,69 +294,140 @@
             updateCardDisplay();
         }
 
+        function startTrainingSession(cards, trainingTitle) {
+            if (cards.length === 0) {
+                // In a real app, use a custom modal instead of alert
+                alert("Il n'y a aucune carte à réviser !");
+                return;
+            }
+            
+            lessonView.classList.add('hidden');
+            flashcardView.classList.remove('hidden');
+            document.getElementById('add-card-btn').classList.add('hidden');
+
+            const virtualDeckId = 'training_session';
+            userDecks[virtualDeckId] = { id: virtualDeckId, name: trainingTitle, cards: cards };
+            currentDeckId = virtualDeckId;
+
+            deckTitle.textContent = trainingTitle;
+            isReviewMode = false;
+            reviewModeBtn.classList.remove('active');
+            reviewModeBtn.textContent = "Révision Intelligente";
+            
+            document.querySelectorAll('.deck-btn, .lesson-btn').forEach(btn => btn.classList.remove('active'));
+
+            updateVisibleCards();
+            updateDashboard();
+            updateCardDisplay();
+        }
+
+
         function populateDeckSidebars() {
             deckSidebarDesktop.innerHTML = '';
             deckSidebarMobile.innerHTML = '';
-            const sortedDecks = Object.values(userDecks).sort((a,b) => a.name.localeCompare(b.name));
 
-            for (const deckData of sortedDecks) {
-                const deckName = deckData.name;
-                const deckId = deckData.id;
-                
+            const trainAllButton = document.createElement('button');
+            trainAllButton.id = 'train-all-btn';
+            trainAllButton.className = 'w-full mb-4 py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition';
+            trainAllButton.textContent = "S'entraîner sur tout";
+            deckSidebarDesktop.appendChild(trainAllButton);
+
+            const groupedDecks = Object.values(userDecks).reduce((acc, deck) => {
+                const category = deck.category === 'Niveau Intermédiaire' ? 'Niveau Intermédiaire' : 'Les Bases du Coréen';
+                if (!acc[category]) acc[category] = [];
+                acc[category].push(deck);
+                return acc;
+            }, {});
+
+            const createDeckButton = (deckData) => {
                 const allCardsMastered = deckData.cards.length > 0 && deckData.cards.every(c => c.status === 'mastered');
                 const masteredIcon = allCardsMastered ? `<span class="text-green-400" title="Paquet maîtrisé !"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>` : '';
                 const deleteButton = !deckData.isDefault ? `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : '';
+                
+                const button = document.createElement('button');
+                button.dataset.deckId = deckData.id;
+                button.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
+                button.innerHTML = `<span class="flex-grow">${deckData.name}</span> ${masteredIcon} ${deleteButton}`;
+                return button;
+            };
 
-                const buttonHtml = `<span class="flex-grow">${deckName}</span> ${masteredIcon} ${deleteButton}`;
+            const populate = (sidebar, isMobile) => {
+                if (isMobile) {
+                     const trainAllMobile = document.createElement('button');
+                     trainAllMobile.id = 'train-all-btn-mobile';
+                     trainAllMobile.className = 'flex-shrink-0 px-4 py-2 rounded-lg text-sm text-white bg-orange-600 hover:bg-orange-700 transition';
+                     trainAllMobile.textContent = "Tout réviser";
+                     sidebar.appendChild(trainAllMobile);
+                }
 
-                const buttonDesktop = document.createElement('button');
-                buttonDesktop.dataset.deckId = deckId;
-                buttonDesktop.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition flex items-center justify-between space-x-2';
-                buttonDesktop.innerHTML = buttonHtml;
-                deckSidebarDesktop.appendChild(buttonDesktop);
+                const categories = ['Les Bases du Coréen', 'Niveau Intermédiaire'];
+                categories.forEach(category => {
+                    if (!groupedDecks[category]) return;
 
-                const buttonMobile = document.createElement('button');
-                buttonMobile.dataset.deckId = deckId;
-                buttonMobile.className = 'deck-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm text-gray-300 bg-gray-700 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
-                buttonMobile.innerHTML = buttonHtml;
-                deckSidebarMobile.appendChild(buttonMobile);
-            }
+                    if (isMobile) {
+                        groupedDecks[category].sort((a,b) => a.name.localeCompare(b.name)).forEach(deckData => {
+                            const button = createDeckButton(deckData);
+                             button.className = 'deck-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm text-gray-300 bg-gray-700 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
+                             sidebar.appendChild(button);
+                        });
+                        return;
+                    }
+
+                    const accordionWrapper = document.createElement('div');
+                    accordionWrapper.className = 'space-y-1';
+                    const toggleBtn = document.createElement('button');
+                    toggleBtn.className = 'accordion-toggle w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
+                    toggleBtn.innerHTML = `<span>${category}</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'accordion-content hidden pl-4 space-y-1';
+                    
+                    const trainCategoryBtn = document.createElement('button');
+                    trainCategoryBtn.className = 'train-category-btn w-full text-left p-3 rounded-lg text-orange-400 hover:bg-gray-600 transition';
+                    trainCategoryBtn.dataset.category = category;
+                    trainCategoryBtn.textContent = `S'entraîner sur l'onglet`;
+                    contentDiv.appendChild(trainCategoryBtn);
+
+                    groupedDecks[category].sort((a,b) => a.name.localeCompare(b.name)).forEach(deckData => contentDiv.appendChild(createDeckButton(deckData)));
+
+                    if (category === 'Niveau Intermédiaire') {
+                        const lesson1 = document.createElement('button');
+                        lesson1.className = 'lesson-btn w-full text-left p-3 rounded-lg text-blue-400 hover:bg-gray-600 transition';
+                        lesson1.dataset.lessonId = 'conjugaison';
+                        lesson1.dataset.lessonTitle = 'Leçon : La Conjugaison';
+                        lesson1.innerHTML = '<span>Leçon : La Conjugaison</span>';
+                        contentDiv.appendChild(lesson1);
+
+                        const lesson2 = document.createElement('button');
+                        lesson2.className = 'lesson-btn w-full text-left p-3 rounded-lg text-blue-400 hover:bg-gray-600 transition';
+                        lesson2.dataset.lessonId = 'particules';
+                        lesson2.dataset.lessonTitle = 'Leçon : Particules & Compteurs';
+                        lesson2.innerHTML = '<span>Leçon : Particules & Compteurs</span>';
+                        contentDiv.appendChild(lesson2);
+                    }
+
+                    accordionWrapper.appendChild(toggleBtn);
+                    accordionWrapper.appendChild(contentDiv);
+                    sidebar.appendChild(accordionWrapper);
+                });
+            };
+
+            populate(deckSidebarDesktop, false);
+            populate(deckSidebarMobile, true);
         }
         
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
+        function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
 
         function updateVisibleCards() {
             const currentDeck = userDecks[currentDeckId];
             if (!currentDeck) return;
-
             if (isReviewMode) {
                 const toReview = currentDeck.cards.filter(c => c.status === 'learning' || c.status === 'new' || !c.status);
                 const mastered = currentDeck.cards.filter(c => c.status === 'mastered');
-                
-                shuffleArray(toReview);
-                shuffleArray(mastered);
-
-                let reviewQuiz = [];
-                const masteredCount = 5;
-                const toReviewCount = 15;
-
-                reviewQuiz = reviewQuiz.concat(mastered.slice(0, masteredCount));
-                reviewQuiz = reviewQuiz.concat(toReview.slice(0, toReviewCount));
-                
-                if (reviewQuiz.length < 20) {
-                    const remainingMastered = mastered.slice(masteredCount);
-                    const needed = 20 - reviewQuiz.length;
-                    reviewQuiz = reviewQuiz.concat(remainingMastered.slice(0, needed));
-                }
-
+                shuffleArray(toReview); shuffleArray(mastered);
+                let reviewQuiz = [ ...mastered.slice(0, 5), ...toReview.slice(0, 15) ];
+                if (reviewQuiz.length < 20) { reviewQuiz.push(...mastered.slice(5, 5 + (20 - reviewQuiz.length))); }
                 shuffleArray(reviewQuiz);
                 visibleCards = reviewQuiz.slice(0, 20);
-
             } else {
                 visibleCards = [...currentDeck.cards];
             }
@@ -444,21 +437,18 @@
         function updateDashboard() {
             const currentDeck = userDecks[currentDeckId];
             if (!currentDeck) {
-                document.getElementById('mastered-count').textContent = 0;
-                document.getElementById('learning-count').textContent = 0;
-                document.getElementById('new-count').textContent = 0;
+                ['mastered-count', 'learning-count', 'new-count'].forEach(id => document.getElementById(id).textContent = 0);
                 return;
             };
             document.getElementById('mastered-count').textContent = currentDeck.cards.filter(c => c.status === 'mastered').length;
             document.getElementById('learning-count').textContent = currentDeck.cards.filter(c => c.status === 'learning').length;
-            document.getElementById('new-count').textContent = currentDeck.cards.filter(c => c.status === 'new' || !c.status).length;
+            document.getElementById('new-count').textContent = currentDeck.cards.filter(c => !c.status || c.status === 'new').length;
         }
 
         function updateCardDisplay() {
             const showNavButtons = !isReviewMode;
             prevBtn.style.visibility = showNavButtons ? 'visible' : 'hidden';
             nextBtn.style.visibility = showNavButtons ? 'visible' : 'hidden';
-
             card.classList.remove('is-flipped');
             
             setTimeout(() => {
@@ -467,21 +457,14 @@
                     cardBack.innerHTML = '';
                     progressText.textContent = '0 / 0';
                     card.classList.remove('status-new', 'status-learning', 'status-mastered');
-                    prevBtn.disabled = true;
-                    nextBtn.disabled = true;
+                    prevBtn.disabled = true; nextBtn.disabled = true;
                     return;
                 }
-
                 const currentCardData = visibleCards[currentCardIndex];
                 cardFront.innerHTML = `<h2 class="text-4xl md:text-6xl font-bold korean-font">${currentCardData.hangul}</h2>`;
-                cardBack.innerHTML = `
-                    <h3 class="text-3xl md:text-5xl font-bold">${currentCardData.french}</h3>
-                    <p class="text-lg md:text-xl mt-2 text-gray-300">${currentCardData.romanization}</p>
-                `;
-
+                cardBack.innerHTML = `<h3 class="text-3xl md:text-5xl font-bold">${currentCardData.french}</h3><p class="text-lg md:text-xl mt-2 text-gray-300">${currentCardData.romanization}</p>`;
                 card.classList.remove('status-new', 'status-learning', 'status-mastered');
                 card.classList.add(`status-${currentCardData.status || 'new'}`);
-
                 progressText.textContent = `Carte ${currentCardIndex + 1} sur ${visibleCards.length}`;
                 prevBtn.disabled = currentCardIndex === 0;
                 nextBtn.disabled = currentCardIndex === visibleCards.length - 1;
@@ -491,21 +474,14 @@
         async function updateCardStatus(newStatus) {
             if (!auth.currentUser || visibleCards.length === 0) return;
             const cardId = visibleCards[currentCardIndex].id;
-            
             const cardInFullDeck = userDecks[currentDeckId].cards.find(c => c.id === cardId);
             if(cardInFullDeck) cardInFullDeck.status = newStatus;
-            
             card.classList.remove('status-new', 'status-learning', 'status-mastered');
             card.classList.add(`status-${newStatus}`);
             updateDashboard();
-            populateDeckSidebars(); // Refresh sidebar for mastered icon
-
+            populateDeckSidebars();
             const docRef = doc(db, "users", auth.currentUser.uid, "decks", currentDeckId, "cards", cardId);
-            try {
-                await setDoc(docRef, { status: newStatus }, { merge: true });
-            } catch (error) {
-                console.error("Erreur de mise à jour:", error);
-            }
+            try { await setDoc(docRef, { status: newStatus }, { merge: true }); } catch (error) { console.error("Erreur de mise à jour:", error); }
         }
 
         function setupEventListeners() {
@@ -513,80 +489,53 @@
                 const isFlipped = card.classList.contains('is-flipped');
                 if (isReviewMode) {
                     if (isFlipped) {
-                        if (currentCardIndex < visibleCards.length - 1) {
-                            currentCardIndex++;
-                            updateCardDisplay();
-                        } else {
-                            isReviewMode = false;
-                            reviewModeBtn.classList.remove('active');
-                            reviewModeBtn.textContent = 'Révision Intelligente';
-                            updateVisibleCards();
-                            updateCardDisplay();
-                        }
-                    } else {
-                        card.classList.add('is-flipped');
-                    }
-                } else {
-                    card.classList.toggle('is-flipped');
-                }
+                        if (currentCardIndex < visibleCards.length - 1) { currentCardIndex++; updateCardDisplay(); } 
+                        else { isReviewMode = false; reviewModeBtn.classList.remove('active'); reviewModeBtn.textContent = 'Révision Intelligente'; updateVisibleCards(); updateCardDisplay(); }
+                    } else { card.classList.add('is-flipped'); }
+                } else { card.classList.toggle('is-flipped'); }
             });
-
-            nextBtn.addEventListener('click', () => {
-                if (currentCardIndex < visibleCards.length - 1) {
-                    currentCardIndex++;
-                    updateCardDisplay();
-                }
-            });
-            prevBtn.addEventListener('click', () => {
-                if (currentCardIndex > 0) {
-                    currentCardIndex--;
-                    updateCardDisplay();
-                }
-            });
+            nextBtn.addEventListener('click', () => { if (currentCardIndex < visibleCards.length - 1) { currentCardIndex++; updateCardDisplay(); } });
+            prevBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; updateCardDisplay(); } });
             
-            [deckSidebarDesktop, deckSidebarMobile].forEach(sidebar => {
-                sidebar.addEventListener('click', (e) => {
-                    const deckBtn = e.target.closest('.deck-btn');
-                    const deleteBtn = e.target.closest('.delete-deck-btn');
+            function handleSidebarClick(e) {
+                const deckBtn = e.target.closest('.deck-btn');
+                const lessonBtn = e.target.closest('.lesson-btn');
+                const deleteBtn = e.target.closest('.delete-deck-btn');
+                const accordionToggle = e.target.closest('.accordion-toggle');
+                const trainCategoryBtn = e.target.closest('.train-category-btn');
+                const trainAllBtn = e.target.closest('#train-all-btn, #train-all-btn-mobile');
 
-                    if (deleteBtn) {
-                        e.stopPropagation();
-                        const deckIdToDelete = deckBtn.dataset.deckId;
-                        openDeleteConfirmation(deckIdToDelete);
-                    } else if (deckBtn) {
-                        loadDeck(deckBtn.dataset.deckId);
-                    }
-                });
-            });
-            
+                if (deleteBtn) { e.stopPropagation(); openDeleteConfirmation(deckBtn.dataset.deckId); } 
+                else if (deckBtn) { loadDeck(deckBtn.dataset.deckId); } 
+                else if (lessonBtn) { showLesson(lessonBtn.dataset.lessonId, lessonBtn.dataset.lessonTitle); }
+                else if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); }
+                else if (trainCategoryBtn) {
+                    const category = trainCategoryBtn.dataset.category;
+                    const cards = Object.values(userDecks).filter(deck => (deck.category || 'Les Bases du Coréen') === category).flatMap(deck => deck.cards);
+                    startTrainingSession(cards, `Entraînement : ${category}`);
+                }
+                else if (trainAllBtn) {
+                    const allCards = Object.values(userDecks).filter(d => d.id !== 'training_session').flatMap(deck => deck.cards);
+                    startTrainingSession(allCards, "Entraînement : Toutes les cartes");
+                }
+            }
+            deckSidebarDesktop.addEventListener('click', handleSidebarClick);
+            deckSidebarMobile.addEventListener('click', handleSidebarClick);
+
             reviewModeBtn.addEventListener('click', () => {
                 isReviewMode = !isReviewMode;
                 reviewModeBtn.classList.toggle('active', isReviewMode);
-                if(isReviewMode) {
-                    reviewModeBtn.textContent = "Quitter la révision";
-                } else {
-                    reviewModeBtn.textContent = "Révision Intelligente";
-                }
-                updateVisibleCards();
-                updateCardDisplay();
+                reviewModeBtn.textContent = isReviewMode ? "Quitter la révision" : "Révision Intelligente";
+                updateVisibleCards(); updateCardDisplay();
             });
-
-            document.getElementById('status-buttons').addEventListener('click', (e) => {
-                const statusBtn = e.target.closest('.status-btn');
-                if (statusBtn) updateCardStatus(statusBtn.dataset.status);
-            });
-            
-            // --- Modal Listeners ---
+            document.getElementById('status-buttons').addEventListener('click', (e) => { const statusBtn = e.target.closest('.status-btn'); if (statusBtn) updateCardStatus(statusBtn.dataset.status); });
             document.getElementById('add-deck-btn').addEventListener('click', () => addDeckModal.classList.remove('hidden'));
             document.getElementById('cancel-deck-btn').addEventListener('click', () => addDeckModal.classList.add('hidden'));
             document.getElementById('save-deck-btn').addEventListener('click', saveNewDeck);
-            
             document.getElementById('add-card-btn').addEventListener('click', () => addCardModal.classList.remove('hidden'));
             document.getElementById('cancel-card-btn').addEventListener('click', () => addCardModal.classList.add('hidden'));
             document.getElementById('save-card-btn').addEventListener('click', saveNewCard);
-
             document.getElementById('cancel-delete-deck-btn').addEventListener('click', () => deleteDeckModal.classList.add('hidden'));
-            
             document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('signup-form').addEventListener('submit', handleSignup);
@@ -598,33 +547,19 @@
         }
 
         async function deleteDeck(deckId, updateUI = true) {
-            const cardsRef = collection(db, "users", auth.currentUser.uid, "decks", deckId, "cards");
-            const cardsSnapshot = await getDocs(cardsRef);
             const batch = writeBatch(db);
-            cardsSnapshot.forEach(doc => {
-                batch.delete(doc.ref);
-            });
-            
-            const deckRef = doc(db, "users", auth.currentUser.uid, "decks", deckId);
-            batch.delete(deckRef);
-
+            const cardsSnapshot = await getDocs(collection(db, "users", auth.currentUser.uid, "decks", deckId, "cards"));
+            cardsSnapshot.forEach(doc => batch.delete(doc.ref));
+            batch.delete(doc(db, "users", auth.currentUser.uid, "decks", deckId));
             await batch.commit();
-
             if (updateUI) {
                 delete userDecks[deckId];
                 deleteDeckModal.classList.add('hidden');
                 populateDeckSidebars();
-                
                 if (currentDeckId === deckId) {
                     const firstDeckId = Object.keys(userDecks)[0];
-                    if (firstDeckId) {
-                        loadDeck(firstDeckId);
-                    } else {
-                        deckTitle.textContent = "Aucun paquet";
-                        currentDeckId = null;
-                        updateDashboard();
-                        updateCardDisplay();
-                    }
+                    if (firstDeckId) { loadDeck(firstDeckId); } 
+                    else { deckTitle.textContent = "Aucun paquet"; currentDeckId = null; updateDashboard(); updateCardDisplay(); }
                 }
             }
         }
@@ -633,82 +568,54 @@
             const deckNameInput = document.getElementById('new-deck-name');
             const deckName = deckNameInput.value.trim();
             if (!deckName) return;
-            
             const newDeckRef = doc(collection(db, "users", auth.currentUser.uid, "decks"));
-            await setDoc(newDeckRef, { name: deckName, isDefault: false });
-            
-            userDecks[newDeckRef.id] = { id: newDeckRef.id, name: deckName, isDefault: false, cards: [] };
-            
+            await setDoc(newDeckRef, { name: deckName, isDefault: false, category: 'Les Bases du Coréen' });
+            userDecks[newDeckRef.id] = { id: newDeckRef.id, name: deckName, isDefault: false, category: 'Les Bases du Coréen', cards: [] };
             populateDeckSidebars();
             loadDeck(newDeckRef.id);
-            
             deckNameInput.value = '';
             addDeckModal.classList.add('hidden');
         }
         
         async function saveNewCard() {
-            const frenchInput = document.getElementById('new-card-french');
-            const hangulInput = document.getElementById('new-card-hangul');
-            const romanizationInput = document.getElementById('new-card-romanization');
-            
             const newCard = {
-                french: frenchInput.value.trim(),
-                hangul: hangulInput.value.trim(),
-                romanization: romanizationInput.value.trim(),
+                french: document.getElementById('new-card-french').value.trim(),
+                hangul: document.getElementById('new-card-hangul').value.trim(),
+                romanization: document.getElementById('new-card-romanization').value.trim(),
                 status: 'new'
             };
-            
             if (!newCard.french || !newCard.hangul) return;
-            
-            const cardsCollectionRef = collection(db, "users", auth.currentUser.uid, "decks", currentDeckId, "cards");
-            const newCardRef = await addDoc(cardsCollectionRef, newCard);
-            
+            const newCardRef = await addDoc(collection(db, "users", auth.currentUser.uid, "decks", currentDeckId, "cards"), newCard);
             newCard.id = newCardRef.id;
             userDecks[currentDeckId].cards.push(newCard);
-            
-            updateVisibleCards();
-            updateDashboard();
-            updateCardDisplay();
-            
-            frenchInput.value = '';
-            hangulInput.value = '';
-            romanizationInput.value = '';
+            updateVisibleCards(); updateDashboard(); updateCardDisplay();
+            document.getElementById('new-card-french').value = '';
+            document.getElementById('new-card-hangul').value = '';
+            document.getElementById('new-card-romanization').value = '';
             addCardModal.classList.add('hidden');
         }
 
-        async function handleLogin(e) { 
+        async function handleAuth(e, authFunc) {
             e.preventDefault();
             const button = e.target.querySelector('button[type="submit"]');
+            const email = e.target.querySelector('input[type="email"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
             button.classList.add('btn-loading');
-            try { 
-                await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value); 
-            } catch (error) { 
-                handleAuthError(error); 
-            } finally {
-                button.classList.remove('btn-loading');
-            }
+            try { await authFunc(auth, email, password); } 
+            catch (error) { handleAuthError(error); } 
+            finally { button.classList.remove('btn-loading'); }
         }
-        async function handleSignup(e) { 
-            e.preventDefault(); 
-            const button = e.target.querySelector('button[type="submit"]');
-            button.classList.add('btn-loading');
-            try { 
-                await createUserWithEmailAndPassword(auth, document.getElementById('signup-email').value, document.getElementById('signup-password').value); 
-            } catch (error) { 
-                handleAuthError(error); 
-            } finally {
-                button.classList.remove('btn-loading');
-            }
-        }
+        const handleLogin = (e) => handleAuth(e, signInWithEmailAndPassword);
+        const handleSignup = (e) => handleAuth(e, createUserWithEmailAndPassword);
+
         function handleAuthError(error) {
             const errorElement = document.getElementById('auth-error');
-            switch (error.code) {
-                case 'auth/wrong-password': case 'auth/invalid-credential': errorElement.textContent = 'Mot de passe ou e-mail incorrect.'; break;
-                case 'auth/user-not-found': errorElement.textContent = 'Aucun compte trouvé pour cet e-mail.'; break;
-                case 'auth/weak-password': errorElement.textContent = 'Le mot de passe doit faire au moins 6 caractères.'; break;
-                case 'auth/email-already-in-use': errorElement.textContent = 'Cette adresse e-mail est déjà utilisée.'; break;
-                default: errorElement.textContent = 'Une erreur est survenue.';
-            }
+            const errorMap = {
+                'auth/wrong-password': 'Mot de passe ou e-mail incorrect.', 'auth/invalid-credential': 'Mot de passe ou e-mail incorrect.',
+                'auth/user-not-found': 'Aucun compte trouvé pour cet e-mail.', 'auth/weak-password': 'Le mot de passe doit faire au moins 6 caractères.',
+                'auth/email-already-in-use': 'Cette adresse e-mail est déjà utilisée.'
+            };
+            errorElement.textContent = errorMap[error.code] || 'Une erreur est survenue.';
         }
         
         setupEventListeners();
