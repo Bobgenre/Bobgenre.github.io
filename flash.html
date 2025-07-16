@@ -69,11 +69,25 @@
         .accordion-toggle svg { transition: transform 0.2s ease-in-out; }
         .accordion-toggle.open svg { transform: rotate(180deg); }
 
-        /* Styles for lesson view */
-        #lesson-view { scrollbar-width: thin; scrollbar-color: #4b5563 #1f2937; }
-        #lesson-view::-webkit-scrollbar { width: 8px; }
-        #lesson-view::-webkit-scrollbar-track { background: #1f2937; }
-        #lesson-view::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 4px; }
+        /* Styles for lesson view and accordion content */
+        #lesson-view, .accordion-content {
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 #1f2937;
+        }
+        #lesson-view::-webkit-scrollbar, .accordion-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        #lesson-view::-webkit-scrollbar-track, .accordion-content::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        #lesson-view::-webkit-scrollbar-thumb, .accordion-content::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 4px;
+        }
+        .accordion-content {
+            max-height: 30vh;
+            overflow-y: auto;
+        }
         #lesson-view h3 { font-size: 1.5rem; font-weight: bold; color: #fb923c; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #4b5563; padding-bottom: 0.5rem; }
         #lesson-view h4 { font-size: 1.25rem; font-weight: bold; color: #fdbf6f; margin-top: 1.25rem; margin-bottom: 0.5rem; }
         #lesson-view p { color: #d1d5db; line-height: 1.6; margin-bottom: 1rem; }
