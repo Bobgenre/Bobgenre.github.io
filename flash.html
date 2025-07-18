@@ -435,7 +435,7 @@
             deckTitle.textContent = userDecks[deckId].name;
             isReviewMode = false;
             reviewModeBtn.classList.remove('active');
-            reviewModeBtn.textContent = "Révision Intelligente";
+            reviewModeBtn.textContent = "Révision";
 
             document.querySelectorAll('.deck-btn, .lesson-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll(`.deck-btn[data-deck-id="${deckId}"]`).forEach(btn => btn.classList.add('active'));
@@ -462,7 +462,7 @@
             deckTitle.textContent = trainingTitle;
             isReviewMode = false;
             reviewModeBtn.classList.remove('active');
-            reviewModeBtn.textContent = "Révision Intelligente";
+            reviewModeBtn.textContent = "Révision";
             
             document.querySelectorAll('.deck-btn, .lesson-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -590,8 +590,15 @@
                 const toReview = currentDeck.cards.filter(c => c.status === 'learning' || c.status === 'new' || !c.status);
                 const mastered = currentDeck.cards.filter(c => c.status === 'mastered');
                 shuffleArray(toReview); shuffleArray(mastered);
-                let reviewQuiz = [ ...mastered.slice(0, 5), ...toReview.slice(0, 15) ];
-                if (reviewQuiz.length < 20) { reviewQuiz.push(...mastered.slice(5, 5 + (20 - reviewQuiz.length))); }
+                
+                const masteredCount = 15;
+                const toReviewCount = 5;
+
+                let reviewQuiz = [ ...mastered.slice(0, masteredCount), ...toReview.slice(0, toReviewCount) ];
+                if (reviewQuiz.length < 20) { 
+                    const needed = 20 - reviewQuiz.length;
+                    reviewQuiz.push(...mastered.slice(masteredCount, masteredCount + needed)); 
+                }
                 shuffleArray(reviewQuiz);
                 visibleCards = reviewQuiz.slice(0, 20);
             } else {
@@ -679,7 +686,7 @@
                 if (isReviewMode) {
                     if (isFlipped) {
                         if (currentCardIndex < visibleCards.length - 1) { currentCardIndex++; updateCardDisplay(); } 
-                        else { isReviewMode = false; reviewModeBtn.classList.remove('active'); reviewModeBtn.textContent = 'Révision Intelligente'; updateVisibleCards(); updateCardDisplay(); }
+                        else { isReviewMode = false; reviewModeBtn.classList.remove('active'); reviewModeBtn.textContent = 'Révision'; updateVisibleCards(); updateCardDisplay(); }
                     } else { card.classList.add('is-flipped'); }
                 } else { card.classList.toggle('is-flipped'); }
             });
@@ -714,7 +721,7 @@
             reviewModeBtn.addEventListener('click', () => {
                 isReviewMode = !isReviewMode;
                 reviewModeBtn.classList.toggle('active', isReviewMode);
-                reviewModeBtn.textContent = isReviewMode ? "Quitter la révision" : "Révision Intelligente";
+                reviewModeBtn.textContent = isReviewMode ? "Quitter la révision" : "Révision";
                 updateVisibleCards(); updateCardDisplay();
             });
             document.getElementById('status-buttons').addEventListener('click', (e) => { const statusBtn = e.target.closest('.status-btn'); if (statusBtn) updateCardStatus(statusBtn.dataset.status); });
