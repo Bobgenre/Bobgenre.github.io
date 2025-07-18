@@ -88,6 +88,9 @@
             max-height: 45vh;
             overflow-y: auto;
         }
+        #lesson-view {
+             max-height: 65vh;
+        }
         #lesson-view h3 { font-size: 1.5rem; font-weight: bold; color: #fb923c; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #4b5563; padding-bottom: 0.5rem; }
         #lesson-view h4 { font-size: 1.25rem; font-weight: bold; color: #fdbf6f; margin-top: 1.25rem; margin-bottom: 0.5rem; }
         #lesson-view p { color: #d1d5db; line-height: 1.6; margin-bottom: 1rem; }
@@ -95,6 +98,11 @@
         #lesson-view ol { list-style-type: decimal; margin-left: 1.5rem; color: #d1d5db; margin-bottom: 1rem; }
         #lesson-view code { background-color: #374151; color: #f9fafb; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: 'Noto Sans KR', sans-serif; }
         #lesson-view strong { color: #fdba74; }
+        #lesson-view table { width: 100%; border-collapse: collapse; margin-top: 1rem; border-radius: 0.5rem; overflow: hidden; }
+        #lesson-view th, #lesson-view td { border-bottom: 1px solid #4b5563; padding: 0.75rem; text-align: left; }
+        #lesson-view th { background-color: #4b5563; color: #fb923c; }
+        #lesson-view td { color: #d1d5db; }
+        #lesson-view tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.05); }
     </style>
 </head>
 <body class="bg-gray-900 flex items-center justify-center min-h-screen p-2 md:p-4">
@@ -125,7 +133,7 @@
                 <div class="flex justify-between items-center mt-4 space-x-2"><button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button><button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Révision</button><button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button></div>
             </div>
             
-            <div id="lesson-view" class="hidden bg-gray-800 p-6 rounded-lg max-h-[45vh] overflow-y-auto">
+            <div id="lesson-view" class="hidden bg-gray-800 p-6 rounded-lg max-h-[65vh] overflow-y-auto">
                 <!-- Leçons de Base -->
                 <div id="lesson-content-presentation" class="lesson-content hidden">
                     <h3>Se Présenter en Coréen</h3>
@@ -191,6 +199,15 @@
                         <li><strong>Les heures :</strong> <code><strong>세</strong> 시</code> (3 heures)</li>
                     </ul>
                     <p><strong>Exemple combiné pour l'heure :</strong> <code><strong>세</strong> 시 <strong>십</strong> 분</code> (3 heures 10 minutes). On utilise le Natif pour l'heure et le Sino-Coréen pour les minutes.</p>
+                    <h4>Règle Spéciale : La forme courte</h4>
+                    <p>Lorsque les nombres natifs 1, 2, 3, 4 et 20 sont suivis d'un compteur, ils prennent une forme modifiée :</p>
+                    <ul>
+                        <li>하나 (1) → <strong>한</strong> (han)</li>
+                        <li>둘 (2) → <strong>두</strong> (du)</li>
+                        <li>셋 (3) → <strong>세</strong> (se)</li>
+                        <li>넷 (4) → <strong>네</strong> (ne)</li>
+                        <li>스물 (20) → <strong>스무</strong> (seumu)</li>
+                    </ul>
                 </div>
                 <!-- Leçons Intermédiaires -->
                 <div id="lesson-content-conjugaison" class="lesson-content hidden">
@@ -217,22 +234,57 @@
                     </ul>
                 </div>
                 <div id="lesson-content-particules" class="lesson-content hidden">
-                    <h3>Particules et Compteurs</h3>
-                    <p>Ces éléments sont essentiels pour construire des phrases grammaticalement correctes.</p>
-                    <h4>Les Particules</h4>
-                    <p>Ce sont des petits mots grammaticaux qui donnent un rôle à chaque nom dans la phrase (qui fait l'action, qui subit l'action, où, quand...). Elles sont <strong>essentielles</strong> et n'ont pas d'équivalent direct en français. Apprenez-les comme du vocabulaire.</p>
+                    <h3>Comprendre les Particules Coréennes</h3>
+                    <p>En coréen, les particules sont des petits "mots-outils" que l'on attache à la fin des noms pour indiquer leur fonction dans la phrase (qui fait l'action, où, quand, etc.). Elles sont la "colle" qui tient la phrase ensemble.</p>
+                    <h4>Les Particules Fondamentales</h4>
+                    <p><strong>은/는 (eun/neun)</strong> : Particule de <strong>thème</strong>.</p>
+                    <p class="pl-4 -mt-2 mb-4 text-gray-400"><em>Résumé : Utilisée pour introduire le sujet principal d'une conversation ou pour marquer un contraste.</em></p>
+                    <p><strong>이/가 (i/ga)</strong> : Particule de <strong>sujet</strong>.</p>
+                    <p class="pl-4 -mt-2 mb-4 text-gray-400"><em>Résumé : Utilisée pour identifier qui/quoi fait l'action, souvent pour apporter une nouvelle information.</em></p>
+                    <p><strong>을/를 (eul/reul)</strong> : Particule d'<strong>objet</strong>.</p>
+                    <p class="pl-4 -mt-2 mb-4 text-gray-400"><em>Résumé : Marque le nom qui subit directement l'action du verbe (le COD).</em></p>
+                    <p><strong>에 (e)</strong> : Particule de lieu (statique / destination).</p>
+                    <p class="pl-4 -mt-2 mb-4 text-gray-400"><em>Résumé : Utilisée pour indiquer une destination, un lieu où l'on est, ou un moment dans le temps.</em></p>
+                    <p><strong>에서 (eseo)</strong> : Particule de lieu (action).</p>
+                    <p class="pl-4 -mt-2 mb-4 text-gray-400"><em>Résumé : Utilisée pour indiquer le lieu où une action se déroule.</em></p>
+                </div>
+                <div id="lesson-content-compteurs" class="lesson-content hidden">
+                    <h3>Les Compteurs Coréens</h3>
+                    <p>En coréen, on utilise des mots spécifiques (des "compteurs") pour compter différents types d'objets ou d'êtres vivants. Ces compteurs sont toujours utilisés avec le système de <strong>nombres natifs coréens</strong> (하나, 둘, 셋...).</p>
+                    <h4>Rappel important</h4>
+                    <p>Les nombres 1, 2, 3, 4 et 20 changent de forme devant un compteur :</p>
                     <ul>
-                        <li>Particule de sujet : <code>-이/가</code> (-i/ga)</li>
-                        <li>Particule de thème/sujet : <code>-은/는</code> (-eun/neun)</li>
-                        <li>Particule d'objet : <code>-을/를</code> (-eul/reul)</li>
+                        <li>하나 (1) → <strong>한</strong></li>
+                        <li>둘 (2) → <strong>두</strong></li>
+                        <li>셋 (3) → <strong>세</strong></li>
+                        <li>넷 (4) → <strong>네</strong></li>
+                        <li>스물 (20) → <strong>스무</strong></li>
                     </ul>
-                    <h4>Les Compteurs</h4>
-                    <p>En français, on dit "trois pommes". En coréen, on dit "pomme trois [compteur-pour-objets]". Vous devez utiliser un mot spécifique (un compteur) après le chiffre (natif coréen).</p>
-                    <ul>
-                        <li><code>사과 세 <strong>개</strong></code> (trois pommes)</li>
-                        <li><code>학생 두 <strong>명</strong></code> (deux étudiants)</li>
-                        <li><code>물 한 <strong>병</strong></code> (une bouteille d'eau)</li>
-                    </ul>
+                    <h4>Tableau des Compteurs Courants</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Compteur</th>
+                                <th>Prononciation</th>
+                                <th>Utilisation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>개</strong></td><td>gae</td><td>Objets en général (le plus courant)</td></tr>
+                            <tr><td><strong>명</strong></td><td>myeong</td><td>Personnes (formel)</td></tr>
+                            <tr><td><strong>사람</strong></td><td>saram</td><td>Personnes (courant)</td></tr>
+                            <tr><td><strong>마리</strong></td><td>mari</td><td>Animaux</td></tr>
+                            <tr><td><strong>권</strong></td><td>gwon</td><td>Livres, magazines</td></tr>
+                            <tr><td><strong>장</strong></td><td>jang</td><td>Feuilles, papier, tickets</td></tr>
+                            <tr><td><strong>병</strong></td><td>byeong</td><td>Bouteilles</td></tr>
+                            <tr><td><strong>잔</strong></td><td>jan</td><td>Verres, tasses</td></tr>
+                            <tr><td><strong>대</strong></td><td>dae</td><td>Véhicules, machines</td></tr>
+                            <tr><td><strong>살</strong></td><td>sal</td><td>Âge</td></tr>
+                            <tr><td><strong>번</strong></td><td>beon</td><td>Fois (occurrences)</td></tr>
+                            <tr><td><strong>시</strong></td><td>si</td><td>Heure (le moment)</td></tr>
+                            <tr><td><strong>시간</strong></td><td>sigan</td><td>Heures (durée)</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
@@ -264,13 +316,26 @@
         const db = getFirestore(app);
 
         const defaultDecks = {
+            // Niveau 1
             'days': { name: 'Jours', category: 'Les Bases du Coréen', cards: [ { id: 'day1', french: 'Lundi', hangul: '월요일', romanization: 'Woryoil' }, { id: 'day2', french: 'Mardi', hangul: '화요일', romanization: 'Hwayoil' }, { id: 'day3', french: 'Mercredi', hangul: '수요일', romanization: 'Suyoil' }, { id: 'day4', french: 'Jeudi', hangul: '목요일', romanization: 'Mogyoil' }, { id: 'day5', french: 'Vendredi', hangul: '금요일', romanization: 'Geumyoil' }, { id: 'day6', french: 'Samedi', hangul: '토요일', romanization: 'Toyoil' }, { id: 'day7', french: 'Dimanche', hangul: '일요일', romanization: 'Iryoil' } ] },
             'numbers_sino_0_10': { name: 'Chiffres 0-10 (Sino)', category: 'Les Bases du Coréen', cards: [ { id: 'sino_num0', french: 'Zéro', hangul: '영 / 공', romanization: 'Yeong / Gong' }, { id: 'sino_num1', french: 'Un', hangul: '일', romanization: 'Il' }, { id: 'sino_num2', french: 'Deux', hangul: '이', romanization: 'I' }, { id: 'sino_num3', french: 'Trois', hangul: '삼', romanization: 'Sam' }, { id: 'sino_num4', french: 'Quatre', hangul: '사', romanization: 'Sa' }, { id: 'sino_num5', french: 'Cinq', hangul: '오', romanization: 'O' }, { id: 'sino_num6', french: 'Six', hangul: '육', romanization: 'Yuk' }, { id: 'sino_num7', french: 'Sept', hangul: '칠', romanization: 'Chil' }, { id: 'sino_num8', french: 'Huit', hangul: '팔', romanization: 'Pal' }, { id: 'sino_num9', french: 'Neuf', hangul: '구', romanization: 'Gu' }, { id: 'sino_num10', french: 'Dix', hangul: '십', romanization: 'Sip' } ] },
             'pronouns': { name: 'Pronoms', category: 'Les Bases du Coréen', cards: [ { id: 'pro1', french: 'Je (Informel)', hangul: '나', romanization: 'Na' }, { id: 'pro2', french: 'Je (Formel)', hangul: '저', romanization: 'Jeo' }, { id: 'pro3', french: 'Tu (Informel)', hangul: '너', romanization: 'Neo' }, { id: 'pro4', french: 'Il / Lui', hangul: '그', romanization: 'Geu' }, { id: 'pro5', french: 'Elle', hangul: '그녀', romanization: 'Geunyeo' }, { id: 'pro6', french: 'Nous (Inclusif)', hangul: '우리', romanization: 'Uri' }, { id: 'pro7', french: 'Nous (Formel)', hangul: '저희', romanization: 'Jeohui' }, { id: 'pro8', french: 'Vous (Groupe)', hangul: '여러분', romanization: 'Yeoreobun' }, { id: 'pro9', french: 'Ils / Eux', hangul: '그들', romanization: 'Geudeul' }, { id: 'pro10', french: 'Elles', hangul: '그녀들', romanization: 'Geunyeodeul' } ] },
+            'noms_essentiels': { name: 'Noms essentiels', category: 'Les Bases du Coréen', cards: [ {id: 'n1', french: 'Nom', hangul: '이름', romanization: 'ireum'}, {id: 'n2', french: 'Corée', hangul: '한국', romanization: 'hanguk'}, {id: 'n3', french: 'Magasin', hangul: '가게', romanization: 'gage'}, {id: 'n4', french: 'Papa / Père', hangul: '아빠 / 아버지', romanization: 'appa / abeoji'}, {id: 'n5', french: 'Maman / Mère', hangul: '엄마 / 어머니', romanization: 'eomma / eomeoni'} ] },
+            'verbes_courants': { name: 'Verbes Courants', category: 'Les Bases du Coréen', cards: [ {id: 'v1', french: 'Être (équivalent de)', hangul: '이다', romanization: 'ida'}, {id: 'v2', french: 'Être (se trouver) / Avoir', hangul: '있다', romanization: 'itda'}, {id: 'v3', french: 'Ne pas être / Ne pas avoir', hangul: '없다', romanization: 'eopda'}, {id: 'v4', french: 'Donner', hangul: '주다', romanization: 'juda'}, {id: 'v5', french: 'Recevoir', hangul: '받다', romanization: 'batda'}, {id: 'v6', french: 'Lire', hangul: '읽다', romanization: 'ikda'} ] },
+            // Niveau 2
             'vocab_food': { name: 'Nourriture', category: 'Niveau Intermédiaire', cards: [ {id: 'food1', french: 'Eau', hangul: '물', romanization: 'mul'}, {id: 'food2', french: 'Pain', hangul: '빵', romanization: 'ppang'}, {id: 'food3', french: 'Riz (cuit)', hangul: '밥', romanization: 'bap'}, {id: 'food4', french: 'Viande', hangul: '고기', romanization: 'gogi'}, {id: 'food5', french: 'Café', hangul: '커피', romanization: 'keopi'}, {id: 'food6', french: 'Restaurant', hangul: '식당', romanization: 'sikdang'} ] },
             'vocab_places': { name: 'Lieux', category: 'Niveau Intermédiaire', cards: [ {id: 'place1', french: 'Maison', hangul: '집', romanization: 'jip'}, {id: 'place2', french: 'École', hangul: '학교', romanization: 'hakgyo'}, {id: 'place3', french: 'Bureau', hangul: '회사', romanization: 'hoesa'}, {id: 'place4', french: 'Marché', hangul: '시장', romanization: 'sijang'}, {id: 'place5', french: 'Hôpital', hangul: '병원', romanization: 'byeong-won'}, {id: 'place6', french: 'Banque', hangul: '은행', romanization: 'eunhaeng'} ] },
             'particles_connectors': { name: 'Particules & Connecteurs', category: 'Niveau Intermédiaire', cards: [ {id: 'pcon1', french: '"Et" (lier des noms)', hangul: '하고 / (이)랑', romanization: 'hago / (i)rang'}, {id: 'pcon2', french: '"Aussi", "également"', hangul: '–도', romanization: '-do'}, {id: 'pcon3', french: 'De (A) à (B)', hangul: '–에서 –까지', romanization: '-eseo -kkaji'}, {id: 'pcon4', french: '"Mais"', hangul: '하지만', romanization: 'hajiman'}, {id: 'pcon5', french: '"Donc"', hangul: '그래서', romanization: 'geuraeseo'} ] },
-            'counters': { name: 'Compteurs', category: 'Niveau Intermédiaire', cards: [ {id: 'count1', french: 'Compteur général', hangul: '개', romanization: 'gae'}, {id: 'count2', french: 'Compteur (personnes)', hangul: '명', romanization: 'myeong'}, {id: 'count3', french: 'Compteur (bouteilles)', hangul: '병', romanization: 'byeong'}, {id: 'count4', french: 'Compteur (livres)', hangul: '권', romanization: 'gwon'} ] }
+            'vocab_counters': { name: 'Les Compteurs', category: 'Niveau Intermédiaire', cards: [ {id: 'count1', french: 'Objets en général', hangul: '개', romanization: 'gae'}, {id: 'count2', french: 'Personnes (formel)', hangul: '명', romanization: 'myeong'}, {id: 'count3', french: 'Personnes (courant)', hangul: '사람', romanization: 'saram'}, {id: 'count4', french: 'Animaux', hangul: '마리', romanization: 'mari'}, {id: 'count5', french: 'Livres, magazines', hangul: '권', romanization: 'gwon'}, {id: 'count6', french: 'Feuilles, papier, tickets', hangul: '장', romanization: 'jang'}, {id: 'count7', french: 'Bouteilles', hangul: '병', romanization: 'byeong'}, {id: 'count8', french: 'Verres, tasses', hangul: '잔', romanization: 'jan'}, {id: 'count9', french: 'Véhicules, machines', hangul: '대', romanization: 'dae'}, {id: 'count10', french: 'Âge', hangul: '살', romanization: 'sal'}, {id: 'count11', french: 'Fois (occurrences)', hangul: '번', romanization: 'beon'}, {id: 'count12', french: 'Heure (le moment)', hangul: '시', romanization: 'si'}, {id: 'count13', french: 'Heures (durée)', hangul: '시간', romanization: 'sigan'} ] },
+            'noms_intermediaire': { name: 'Noms (Intermédiaire)', category: 'Niveau Intermédiaire', cards: [ {id: 'n_int1', french: 'Aujourd\'hui', hangul: '오늘', romanization: 'oneul'}, {id: 'n_int2', french: 'Hier', hangul: '어제', romanization: 'eoje'}, {id: 'n_int3', french: 'Demain', hangul: '내일', romanization: 'naeil'}, {id: 'n_int4', french: 'Week-end', hangul: '주말', romanization: 'jumal'}, {id: 'n_int5', french: 'Année', hangul: '년', romanization: 'nyeon'}, {id: 'n_int6', french: 'Argent', hangul: '돈', romanization: 'don'}, {id: 'n_int7', french: 'Film', hangul: '영화', romanization: 'yeonghwa'}, {id: 'n_int8', french: 'Vêtement', hangul: '옷', romanization: 'ot'} ] },
+            'verbes_intermediaire': { name: 'Verbes (Intermédiaire)', category: 'Niveau Intermédiaire', cards: [ {id: 'v_int1', french: 'Acheter', hangul: '사다', romanization: 'sada'}, {id: 'v_int2', french: 'Travailler', hangul: '일하다', romanization: 'ilhada'}, {id: 'v_int3', french: 'Étudier', hangul: '공부하다', romanization: 'gongbuhada'}, {id: 'v_int4', french: 'Rencontrer', hangul: '만나다', romanization: 'mannada'}, {id: 'v_int5', french: 'Aimer / Apprécier', hangul: '좋아하다', romanization: 'joahada'}, {id: 'v_int6', french: 'Porter (un vêtement)', hangul: '입다', romanization: 'ipda'}, {id: 'v_int7', french: 'Attendre', hangul: '기다리다', romanization: 'gidarida'} ] },
+            'adjectifs_intermediaire': { name: 'Adjectifs (Intermédiaire)', category: 'Niveau Intermédiaire', cards: [ {id: 'adj_int1', french: 'Délicieux', hangul: '맛있다', romanization: 'masitda'}, {id: 'adj_int2', french: 'Amusant / Intéressant', hangul: '재미있다', romanization: 'jaemiitda'}, {id: 'adj_int3', french: 'Difficile', hangul: '어렵다', romanization: 'eoryeopda'}, {id: 'adj_int4', french: 'Facile', hangul: '쉽다', romanization: 'swipda'}, {id: 'adj_int5', french: 'Être fatigué', hangul: '피곤하다', romanization: 'pigonhada'} ] },
+            'adverbes_connecteurs_intermediaire': { name: 'Adverbes & Connecteurs (Intermédiaire)', category: 'Niveau Intermédiaire', cards: [ {id: 'adv_int1', french: 'Très', hangul: '아주 / 너무', romanization: 'aju / neomu'}, {id: 'adv_int2', french: 'Beaucoup', hangul: '많이', romanization: 'mani'}, {id: 'adv_int3', french: 'Maintenant', hangul: '지금', romanization: 'jigeum'}, {id: 'adv_int4', french: 'Ensemble', hangul: '같이', romanization: 'gachi'} ] },
+            // Niveau 3
+            'noms_avance': { name: 'Noms (Avancé)', category: 'Niveau Avancé', cards: [ {id: 'n_adv1', french: 'Pensée / Idée', hangul: '생각', romanization: 'saenggak'}, {id: 'n_adv2', french: 'Cœur / Esprit', hangul: '마음', romanization: 'maeum'}, {id: 'n_adv3', french: 'Parole / Langue', hangul: '말', romanization: 'mal'}, {id: 'n_adv4', french: 'Problème / Question', hangul: '문제', romanization: 'munje'}, {id: 'n_adv5', french: 'Raison / Cause', hangul: '이유', romanization: 'iyu'}, {id: 'n_adv6', french: 'Le monde', hangul: '세상', romanization: 'sesang'} ] },
+            'verbes_avance': { name: 'Verbes (Avancé)', category: 'Niveau Avancé', cards: [ {id: 'v_adv1', french: 'Savoir / Connaître', hangul: '알다', romanization: 'alda'}, {id: 'v_adv2', french: 'Ne pas savoir', hangul: '모르다', romanization: 'moreuda'}, {id: 'v_adv3', french: 'Penser', hangul: '생각하다', romanization: 'saenggakhada'}, {id: 'v_adv4', french: 'Parler / Dire', hangul: '말하다', romanization: 'malhada'}, {id: 'v_adv5', french: 'Fabriquer / Créer', hangul: '만들다', romanization: 'mandeulda'}, {id: 'v_adv6', french: 'Apprendre', hangul: '배우다', romanization: 'baeuda'}, {id: 'v_adv7', french: 'Avoir besoin de', hangul: '필요하다', romanization: 'piryohada'}, {id: 'v_adv8', french: 'Utiliser', hangul: '사용하다', romanization: 'sayonghada'} ] },
+            'adjectifs_avance': { name: 'Adjectifs (Avancé)', category: 'Niveau Avancé', cards: [ {id: 'adj_adv1', french: 'Similaire', hangul: '비슷하다', romanization: 'biseuthada'}, {id: 'adj_adv2', french: 'Différent', hangul: '다르다', romanization: 'dareuda'}, {id: 'adj_adv3', french: 'Important', hangul: '중요하다', romanization: 'jung-yohada'}, {id: 'adj_adv4', french: 'Heureux', hangul: '행복하다', romanization: 'haengbokhada'}, {id: 'adj_adv5', french: 'Triste', hangul: '슬프다', romanization: 'seulpeuda'} ] },
+            'autres_avance': { name: 'Autres (Avancé)', category: 'Niveau Avancé', cards: [ {id: 'oth_adv1', french: 'À cause de', hangul: '때문에', romanization: 'ttaemune'}, {id: 'oth_adv2', french: 'Si (condition)', hangul: '~(으)면', romanization: '-(eu)myeon'}, {id: 'oth_adv3', french: 'À propos de', hangul: '~에 대해서', romanization: '-e daehaeseo'}, {id: 'oth_adv4', french: 'Si (hypothèse)', hangul: '만약', romanization: 'manyak'} ] }
         };
 
         let userDecks = {};
@@ -418,7 +483,7 @@
             deckSidebarDesktop.appendChild(trainAllButton);
 
             const groupedDecks = Object.values(userDecks).reduce((acc, deck) => {
-                const category = deck.category === 'Niveau Intermédiaire' ? 'Niveau Intermédiaire' : 'Les Bases du Coréen';
+                const category = deck.category || 'Les Bases du Coréen';
                 if (!acc[category]) acc[category] = [];
                 acc[category].push(deck);
                 return acc;
@@ -445,7 +510,7 @@
                      sidebar.appendChild(trainAllMobile);
                 }
 
-                const categories = ['Les Bases du Coréen', 'Niveau Intermédiaire'];
+                const categories = ['Les Bases du Coréen', 'Niveau Intermédiaire', 'Niveau Avancé'];
                 categories.forEach(category => {
                     if (!groupedDecks[category]) return;
 
@@ -493,7 +558,8 @@
                     if (category === 'Niveau Intermédiaire') {
                         const lessonData = [
                             { id: 'conjugaison', title: 'Leçon : La Conjugaison' },
-                            { id: 'particules', title: 'Leçon : Particules & Compteurs' }
+                            { id: 'particules', title: 'Leçon : Les Particules' },
+                            { id: 'compteurs', title: 'Leçon : Les Compteurs' }
                         ];
                         lessonData.forEach(data => {
                             const button = document.createElement('button');
@@ -572,16 +638,39 @@
         }
 
         async function updateCardStatus(newStatus) {
-            if (!auth.currentUser || visibleCards.length === 0 || currentDeckId === 'training_session') return;
-            const cardId = visibleCards[currentCardIndex].id;
-            const cardInFullDeck = userDecks[currentDeckId].cards.find(c => c.id === cardId);
-            if(cardInFullDeck) cardInFullDeck.status = newStatus;
+            if (!auth.currentUser || visibleCards.length === 0) return;
+
+            const currentCard = visibleCards[currentCardIndex];
+            const cardId = currentCard.id;
+            const originalDeckId = currentDeckId === 'training_session' ? currentCard.originalDeckId : currentDeckId;
+
+            if (!originalDeckId) {
+                console.error("Impossible de trouver le paquet d'origine pour cette carte.");
+                return;
+            }
+
+            const cardInFullDeck = userDecks[originalDeckId]?.cards.find(c => c.id === cardId);
+            if (cardInFullDeck) {
+                cardInFullDeck.status = newStatus;
+            }
+            
+            currentCard.status = newStatus;
+
             card.classList.remove('status-new', 'status-learning', 'status-mastered');
             card.classList.add(`status-${newStatus}`);
-            updateDashboard();
+
             populateDeckSidebars();
-            const docRef = doc(db, "users", auth.currentUser.uid, "decks", currentDeckId, "cards", cardId);
-            try { await setDoc(docRef, { status: newStatus }, { merge: true }); } catch (error) { console.error("Erreur de mise à jour:", error); }
+            
+            if(currentDeckId !== 'training_session') {
+                updateDashboard();
+            }
+
+            const docRef = doc(db, "users", auth.currentUser.uid, "decks", originalDeckId, "cards", cardId);
+            try {
+                await setDoc(docRef, { status: newStatus }, { merge: true });
+            } catch (error) {
+                console.error("Erreur de mise à jour:", error);
+            }
         }
 
         function setupEventListeners() {
@@ -611,11 +700,11 @@
                 else if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); }
                 else if (trainCategoryBtn) {
                     const category = trainCategoryBtn.dataset.category;
-                    const cards = Object.values(userDecks).filter(deck => (deck.category || 'Les Bases du Coréen') === category && deck.id !== 'training_session').flatMap(deck => deck.cards);
+                    const cards = Object.values(userDecks).filter(deck => (deck.category || 'Les Bases du Coréen') === category && deck.id !== 'training_session').flatMap(deck => deck.cards.map(card => ({ ...card, originalDeckId: deck.id })));
                     startTrainingSession(cards, `Entraînement : ${category}`);
                 }
                 else if (trainAllBtn) {
-                    const allCards = Object.values(userDecks).filter(d => d.id !== 'training_session').flatMap(deck => deck.cards);
+                    const allCards = Object.values(userDecks).filter(d => d.id !== 'training_session').flatMap(deck => deck.cards.map(card => ({...card, originalDeckId: deck.id})));
                     startTrainingSession(allCards, "Entraînement : Toutes les cartes");
                 }
             }
