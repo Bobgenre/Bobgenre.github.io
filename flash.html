@@ -116,7 +116,7 @@
     <!-- App Content -->
     <div id="app-content" class="hidden w-full max-w-6xl mx-auto p-2 md:p-4 flex flex-col md:flex-row md:space-x-8">
         <aside class="w-full md:w-1/4 flex-shrink-0 mb-6 md:mb-0">
-            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-gray-300">Vos Paquets</h2><button id="add-deck-btn" class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-orange-700 transition">+</button></div>
+            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-gray-300">Menu</h2><button id="add-deck-btn" class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-orange-700 transition">+</button></div>
             <div id="deck-sidebar-mobile" class="md:hidden flex space-x-2 pb-2 mobile-deck-nav"></div>
             <div id="deck-sidebar-desktop" class="hidden md:block space-y-2"></div>
         </aside>
@@ -218,7 +218,7 @@
                         <li>Prenez un verbe à l'infinitif (ex: <code>먹다</code>, manger).</li>
                         <li>Retirez le <code>–다</code> final pour obtenir le <strong>radical</strong> (ex: <code>먹</code>).</li>
                         <li>Appliquez la règle de conjugaison au radical.</li>
-                    </ul>
+                    </ol>
                     <h4>Règles pour le Présent (<code>–아/어요</code>)</h4>
                     <ul>
                         <li><strong>Règle 1 :</strong> Si la dernière voyelle du radical est <strong>ㅏ</strong> ou <strong>ㅗ</strong>, on ajoute <code>–아요</code>. <br>Ex: <code>가다</code> → <code>가</code> + <code>아요</code> → <code>가요</code> (Je vais).</li>
@@ -234,19 +234,25 @@
                     </ul>
                 </div>
                 <div id="lesson-content-particules" class="lesson-content hidden">
-                    <h3>Comprendre les Particules Coréennes</h3>
-                    <p>En coréen, les particules sont des petits "mots-outils" que l'on attache à la fin des noms pour indiquer leur fonction dans la phrase (qui fait l'action, où, quand, etc.). Elles sont la "colle" qui tient la phrase ensemble.</p>
-                    <h4>Les Particules Fondamentales</h4>
-                    <p><strong>은/는 (eun/neun)</strong> : Particule de <strong>thème</strong>.</p>
-                    <p class="pl-4 -mt-2 mb-4 text-gray-400"><em>Résumé : Utilisée pour introduire le sujet principal d'une conversation ou pour marquer un contraste.</em></p>
-                    <p><strong>이/가 (i/ga)</strong> : Particule de <strong>sujet</strong>.</p>
-                    <p class="pl-4 -mt-2 mb-4 text-gray-400"><em>Résumé : Utilisée pour identifier qui/quoi fait l'action, souvent pour apporter une nouvelle information.</em></p>
-                    <p><strong>을/를 (eul/reul)</strong> : Particule d'<strong>objet</strong>.</p>
-                    <p class="pl-4 -mt-2 mb-4 text-gray-400"><em>Résumé : Marque le nom qui subit directement l'action du verbe (le COD).</em></p>
-                    <p><strong>에 (e)</strong> : Particule de lieu (statique / destination).</p>
-                    <p class="pl-4 -mt-2 mb-4 text-gray-400"><em>Résumé : Utilisée pour indiquer une destination, un lieu où l'on est, ou un moment dans le temps.</em></p>
-                    <p><strong>에서 (eseo)</strong> : Particule de lieu (action).</p>
-                    <p class="pl-4 -mt-2 mb-4 text-gray-400"><em>Résumé : Utilisée pour indiquer le lieu où une action se déroule.</em></p>
+                    <h3>Les Particules & Connecteurs</h3>
+                    <p>Les particules sont des "étiquettes" grammaticales attachées aux noms. Les connecteurs lient des mots ou des phrases.</p>
+                    <h4>Particules de Sujet/Thème</h4>
+                    <p><strong>은/는 (eun/neun)</strong> : La particule de <strong>thème</strong>. Elle introduit le sujet principal, "Quant à moi...", ou marque un contraste. <br>Ex: <code><strong>저는</strong> 학생이에요.</code> (Moi, je suis étudiant.)</p>
+                    <p><strong>이/가 (i/ga)</strong> : La particule de <strong>sujet</strong>. Elle identifie simplement qui fait l'action, souvent pour une nouvelle information. "C'est [sujet] qui...". <br>Ex: <code><strong>날씨가</strong> 좋아요.</code> (Le temps est beau.)</p>
+                    
+                    <h4>Particule d'Objet</h4>
+                    <p><strong>을/를 (eul/reul)</strong> : Marque le complément d'objet direct (COD). Répond à la question "quoi ?". <br>Ex: <code>커피<strong>를</strong> 마셔요.</code> (Je bois du café.)</p>
+                    
+                    <h4>Particules de Lieu</h4>
+                    <p><strong>에 (e)</strong> : Indique une <strong>destination</strong> (avec <code>가다</code>/<code>오다</code>), un <strong>lieu statique</strong> (avec <code>있다</code>/<code>없다</code>), ou le <strong>temps</strong>. <br>Ex: <code>학교<strong>에</strong> 가요</code> (Je vais <strong>à</strong> l'école).</p>
+                    
+                    <p><strong>에서 (eseo)</strong> : Indique le lieu <strong>où une action se déroule</strong>. <br>Ex: <code>학교<strong>에서</strong> 공부해요</code> (J'étudie <strong>à</strong> l'école).</p>
+
+                    <h4>Connecteurs</h4>
+                    <p><strong>하고 / (이)랑 (hago / (i)rang)</strong> : Signifie "et" pour lier des noms. <br>Ex: <code>빵<strong>하고</strong> 물</code> (Du pain et de l'eau).</p>
+                    <p><strong>그리고 (geurigo)</strong> : Signifie "et" pour lier deux phrases. <br>Ex: <code>밥을 먹어요. <strong>그리고</strong> 영화를 봐요.</code> (Je mange. Et je regarde un film.)</p>
+                    <p><strong>하지만 (hajiman)</strong> : Signifie "mais". <br>Ex: <code>비가 와요. <strong>하지만</strong> 저는 학교에 가요.</code> (Il pleut. Mais je vais à l'école.)</p>
+                    <p><strong>그래서 (geuraeseo)</strong> : Signifie "donc", "alors". <br>Ex: <code>피곤해요. <strong>그래서</strong> 자요.</code> (Je suis fatigué. Donc je dors.)</p>
                 </div>
                 <div id="lesson-content-compteurs" class="lesson-content hidden">
                     <h3>Les Compteurs Coréens</h3>
@@ -321,7 +327,6 @@
             'deck_verbes': { name: 'Verbes', cards: [ {id: 'v1', french: 'Acheter', hangul: '사다', romanization: 'sada'}, {id: 'v2', french: 'Aimer / Apprécier', hangul: '좋아하다', romanization: 'joahada'}, {id: 'v3', french: 'Apprendre', hangul: '배우다', romanization: 'baeuda'}, {id: 'v4', french: 'Attendre', hangul: '기다리다', romanization: 'gidarida'}, {id: 'v5', french: 'Avoir besoin de', hangul: '필요하다', romanization: 'piryohada'}, {id: 'v6', french: 'Boire', hangul: '마시다', romanization: 'masida'}, {id: 'v7', french: 'Donner', hangul: '주다', romanization: 'juda'}, {id: 'v8', french: 'Dormir', hangul: '자다', romanization: 'jada'}, {id: 'v9', french: 'Être (équivalent de)', hangul: '이다', romanization: 'ida'}, {id: 'v10', french: 'Être (se trouver) / Avoir', hangul: '있다', romanization: 'itda'}, {id: 'v11', french: 'Étudier', hangul: '공부하다', romanization: 'gongbuhada'}, {id: 'v12', french: 'Fabriquer / Créer', hangul: '만들다', romanization: 'mandeulda'}, {id: 'v13', french: 'Faire', hangul: '하다', romanization: 'hada'}, {id: 'v14', french: 'Lire', hangul: '읽다', romanization: 'ikda'}, {id: 'v15', french: 'Manger', hangul: '먹다', romanization: 'meokda'}, {id: 'v16', french: 'Ne pas être / Ne pas avoir', hangul: '없다', romanization: 'eopda'}, {id: 'v17', french: 'Ne pas savoir', hangul: '모르다', romanization: 'moreuda'}, {id: 'v18', french: 'Parler / Dire', hangul: '말하다', romanization: 'malhada'}, {id: 'v19', french: 'Penser', hangul: '생각하다', romanization: 'saenggakhada'}, {id: 'v20', french: 'Porter (un vêtement)', hangul: '입다', romanization: 'ipda'}, {id: 'v21', french: 'Recevoir', hangul: '받다', romanization: 'batda'}, {id: 'v22', french: 'Rencontrer', hangul: '만나다', romanization: 'mannada'}, {id: 'v23', french: 'Savoir / Connaître', hangul: '알다', romanization: 'alda'}, {id: 'v24', french: 'Travailler', hangul: '일하다', romanization: 'ilhada'}, {id: 'v25', french: 'Utiliser', hangul: '사용하다', romanization: 'sayonghada'}, {id: 'v26', french: 'Venir', hangul: '오다', romanization: 'oda'}, {id: 'v27', french: 'Voir / Regarder', hangul: '보다', romanization: 'boda'}, {id: 'v28', french: 'Aller', hangul: '가다', romanization: 'gada'} ] },
             'deck_adjectifs': { name: 'Adjectifs', cards: [ {id: 'a1', french: 'Amusant / Intéressant', hangul: '재미있다', romanization: 'jaemiitda'}, {id: 'a2', french: 'Bon / Bien', hangul: '좋다', romanization: 'jota'}, {id: 'a3', french: 'Délicieux', hangul: '맛있다', romanization: 'masitda'}, {id: 'a4', french: 'Différent', hangul: '다르다', romanization: 'dareuda'}, {id: 'a5', french: 'Difficile', hangul: '어렵다', romanization: 'eoryeopda'}, {id: 'a6', french: 'Être fatigué', hangul: '피곤하다', romanization: 'pigonhada'}, {id: 'a7', french: 'Facile', hangul: '쉽다', romanization: 'swipda'}, {id: 'a8', french: 'Grand', hangul: '크다', romanization: 'keuda'}, {id: 'a9', french: 'Heureux', hangul: '행복하다', romanization: 'haengbokhada'}, {id: 'a10', french: 'Important', hangul: '중요하다', romanization: 'jung-yohada'}, {id: 'a11', french: 'Mauvais', hangul: '나쁘다', romanization: 'nappeuda'}, {id: 'a12', french: 'Petit', hangul: '작다', romanization: 'jakda'}, {id: 'a13', french: 'Similaire', hangul: '비슷하다', romanization: 'biseuthada'}, {id: 'a14', french: 'Triste', hangul: '슬프다', romanization: 'seulpeuda'} ] },
             'deck_nombres': { name: 'Nombres', cards: [ {id: 'num1', french: 'Zéro (Sino)', hangul: '영 / 공', romanization: 'Yeong / Gong'}, {id: 'num2', french: 'Un (Sino)', hangul: '일', romanization: 'Il'}, {id: 'num3', french: 'Deux (Sino)', hangul: '이', romanization: 'I'}, {id: 'num4', french: 'Trois (Sino)', hangul: '삼', romanization: 'Sam'}, {id: 'num5', french: 'Quatre (Sino)', hangul: '사', romanization: 'Sa'}, {id: 'num6', french: 'Cinq (Sino)', hangul: '오', romanization: 'O'}, {id: 'num7', french: 'Six (Sino)', hangul: '육', romanization: 'Yuk'}, {id: 'num8', french: 'Sept (Sino)', hangul: '칠', romanization: 'Chil'}, {id: 'num9', french: 'Huit (Sino)', hangul: '팔', romanization: 'Pal'}, {id: 'num10', french: 'Neuf (Sino)', hangul: '구', romanization: 'Gu'}, {id: 'num11', french: 'Dix (Sino)', hangul: '십', romanization: 'Sip'}, {id: 'num12', french: 'Un (Natif)', hangul: '하나', romanization: 'hana'}, {id: 'num13', french: 'Deux (Natif)', hangul: '둘', romanization: 'dul'}, {id: 'num14', french: 'Trois (Natif)', hangul: '셋', romanization: 'set'}, {id: 'num15', french: 'Quatre (Natif)', hangul: '넷', romanization: 'net'}, {id: 'num16', french: 'Cinq (Natif)', hangul: '다섯', romanization: 'daseot'}, {id: 'num17', french: 'Six (Natif)', hangul: '여섯', romanization: 'yeoseot'}, {id: 'num18', french: 'Sept (Natif)', hangul: '일곱', romanization: 'ilgop'}, {id: 'num19', french: 'Huit (Natif)', hangul: '여덟', romanization: 'yeodeol'}, {id: 'num20', french: 'Neuf (Natif)', hangul: '아홉', romanization: 'ahop'}, {id: 'num21', french: 'Dix (Natif)', hangul: '열', romanization: 'yeol'} ] },
-            'deck_particules': { name: 'Particules & Connecteurs', cards: [ {id: 'part1', french: '"Et" (lier des noms)', hangul: '하고 / (이)랑', romanization: 'hago / (i)rang'}, {id: 'part2', french: '"Aussi", "également"', hangul: '–도', romanization: '-do'}, {id: 'part3', french: 'De (A) à (B)', hangul: '–에서 –까지', romanization: '-eseo -kkaji'}, {id: 'part4', french: '"Mais"', hangul: '하지만', romanization: 'hajiman'}, {id: 'part5', french: '"Donc"', hangul: '그래서', romanization: 'geuraeseo'}, {id: 'part6', french: 'À cause de', hangul: '때문에', romanization: 'ttaemune'}, {id: 'part7', french: 'Si (condition)', hangul: '~(으)면', romanization: '-(eu)myeon'}, {id: 'part8', french: 'À propos de', hangul: '~에 대해서', romanization: '-e daehaeseo'}, {id: 'part9', french: 'Si (hypothèse)', hangul: '만약', romanization: 'manyak'} ] },
             'deck_compteurs': { name: 'Compteurs', cards: [ {id: 'c1', french: 'Objets en général', hangul: '개', romanization: 'gae'}, {id: 'c2', french: 'Personnes (formel)', hangul: '명', romanization: 'myeong'}, {id: 'c3', french: 'Personnes (courant)', hangul: '사람', romanization: 'saram'}, {id: 'c4', french: 'Animaux', hangul: '마리', romanization: 'mari'}, {id: 'c5', french: 'Livres, magazines', hangul: '권', romanization: 'gwon'}, {id: 'c6', french: 'Feuilles, papier, tickets', hangul: '장', romanization: 'jang'}, {id: 'c7', french: 'Bouteilles', hangul: '병', romanization: 'byeong'}, {id: 'c8', french: 'Verres, tasses', hangul: '잔', romanization: 'jan'}, {id: 'c9', french: 'Véhicules, machines', hangul: '대', romanization: 'dae'}, {id: 'c10', french: 'Âge', hangul: '살', romanization: 'sal'}, {id: 'c11', french: 'Fois (occurrences)', hangul: '번', romanization: 'beon'}, {id: 'c12', french: 'Heure (le moment)', hangul: '시', romanization: 'si'}, {id: 'c13', french: 'Heures (durée)', hangul: '시간', romanization: 'sigan'} ] },
             'deck_adverbes': { name: 'Adverbes & Autres', cards: [ {id: 'adv1', french: 'Très', hangul: '아주 / 너무', romanization: 'aju / neomu'}, {id: 'adv2', french: 'Beaucoup', hangul: '많이', romanization: 'mani'}, {id: 'adv3', french: 'Maintenant', hangul: '지금', romanization: 'jigeum'}, {id: 'adv4', french: 'Ensemble', hangul: '같이', romanization: 'gachi'} ] }
         };
@@ -469,40 +474,57 @@
             deckSidebarDesktop.innerHTML = '';
             deckSidebarMobile.innerHTML = '';
 
+            const createDeckButton = (deckData) => {
+                const allCardsMastered = deckData.cards.length > 0 && deckData.cards.every(c => c.status === 'mastered');
+                const masteredIcon = allCardsMastered ? `<span class="text-green-400" title="Paquet maîtrisé !"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>` : '';
+                const deleteButton = !deckData.isDefault ? `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : '';
+                
+                const button = document.createElement('button');
+                button.dataset.deckId = deckData.id;
+                button.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
+                button.innerHTML = `<span class="flex-grow">${deckData.name}</span> ${masteredIcon} ${deleteButton}`;
+                return button;
+            };
+
+            // --- Desktop Sidebar ---
             const trainAllButton = document.createElement('button');
             trainAllButton.id = 'train-all-btn';
             trainAllButton.className = 'w-full mb-4 py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition';
             trainAllButton.textContent = "S'entraîner sur tout";
             deckSidebarDesktop.appendChild(trainAllButton);
 
-            const sortedDecks = Object.values(userDecks).sort((a, b) => a.name.localeCompare(b.name));
-
-            sortedDecks.forEach(deckData => {
-                const buttonDesktop = createDeckButton(deckData);
-                deckSidebarDesktop.appendChild(buttonDesktop);
-
-                const buttonMobile = createDeckButton(deckData);
-                buttonMobile.className = 'deck-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm text-gray-300 bg-gray-700 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
-                deckSidebarMobile.appendChild(buttonMobile);
-            });
+            const decksAccordionWrapper = document.createElement('div');
+            decksAccordionWrapper.className = 'space-y-1';
+            const decksToggleBtn = document.createElement('button');
+            decksToggleBtn.className = 'accordion-toggle open w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
+            decksToggleBtn.innerHTML = `<span>Paquets</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+            const decksContentDiv = document.createElement('div');
+            decksContentDiv.className = 'accordion-content pl-4 space-y-1';
             
-            // Add Lessons Section
+            const sortedDecks = Object.values(userDecks).sort((a, b) => a.name.localeCompare(b.name));
+            sortedDecks.forEach(deckData => decksContentDiv.appendChild(createDeckButton(deckData)));
+
+            decksAccordionWrapper.appendChild(decksToggleBtn);
+            decksAccordionWrapper.appendChild(decksContentDiv);
+            deckSidebarDesktop.appendChild(decksAccordionWrapper);
+            
+            // --- Lessons Section ---
             const lessonData = [
                 { id: 'presentation', title: 'Leçon : Se Présenter' },
                 { id: 'phrases', title: 'Leçon : Formation de Phrase' },
                 { id: 'nombres', title: 'Leçon : Utilisation des Nombres' },
                 { id: 'conjugaison', title: 'Leçon : La Conjugaison' },
-                { id: 'particules', title: 'Leçon : Les Particules' },
+                { id: 'particules', title: 'Leçon : Les Particules & Connecteurs' },
                 { id: 'compteurs', title: 'Leçon : Les Compteurs' }
             ];
 
-            const accordionWrapper = document.createElement('div');
-            accordionWrapper.className = 'space-y-1 mt-4';
-            const toggleBtn = document.createElement('button');
-            toggleBtn.className = 'accordion-toggle w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
-            toggleBtn.innerHTML = `<span>Leçons</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'accordion-content hidden pl-4 space-y-1';
+            const lessonsAccordionWrapper = document.createElement('div');
+            lessonsAccordionWrapper.className = 'space-y-1 mt-2';
+            const lessonsToggleBtn = document.createElement('button');
+            lessonsToggleBtn.className = 'accordion-toggle w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
+            lessonsToggleBtn.innerHTML = `<span>Leçons</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+            const lessonsContentDiv = document.createElement('div');
+            lessonsContentDiv.className = 'accordion-content hidden pl-4 space-y-1';
 
             lessonData.forEach(data => {
                 const button = document.createElement('button');
@@ -510,24 +532,12 @@
                 button.dataset.lessonId = data.id;
                 button.dataset.lessonTitle = data.title;
                 button.innerHTML = `<span>${data.title}</span>`;
-                contentDiv.appendChild(button);
+                lessonsContentDiv.appendChild(button);
             });
 
-            accordionWrapper.appendChild(toggleBtn);
-            accordionWrapper.appendChild(contentDiv);
-            deckSidebarDesktop.appendChild(accordionWrapper);
-        }
-
-        function createDeckButton(deckData) {
-            const allCardsMastered = deckData.cards.length > 0 && deckData.cards.every(c => c.status === 'mastered');
-            const masteredIcon = allCardsMastered ? `<span class="text-green-400" title="Paquet maîtrisé !"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>` : '';
-            const deleteButton = !deckData.isDefault ? `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : '';
-            
-            const button = document.createElement('button');
-            button.dataset.deckId = deckData.id;
-            button.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
-            button.innerHTML = `<span class="flex-grow">${deckData.name}</span> ${masteredIcon} ${deleteButton}`;
-            return button;
+            lessonsAccordionWrapper.appendChild(lessonsToggleBtn);
+            lessonsAccordionWrapper.appendChild(lessonsContentDiv);
+            deckSidebarDesktop.appendChild(lessonsAccordionWrapper);
         }
         
         function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
