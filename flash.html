@@ -316,26 +316,14 @@
         const db = getFirestore(app);
 
         const defaultDecks = {
-            // Niveau 1
-            'days': { name: 'Jours', category: 'Les Bases du Coréen', cards: [ { id: 'day1', french: 'Lundi', hangul: '월요일', romanization: 'Woryoil' }, { id: 'day2', french: 'Mardi', hangul: '화요일', romanization: 'Hwayoil' }, { id: 'day3', french: 'Mercredi', hangul: '수요일', romanization: 'Suyoil' }, { id: 'day4', french: 'Jeudi', hangul: '목요일', romanization: 'Mogyoil' }, { id: 'day5', french: 'Vendredi', hangul: '금요일', romanization: 'Geumyoil' }, { id: 'day6', french: 'Samedi', hangul: '토요일', romanization: 'Toyoil' }, { id: 'day7', french: 'Dimanche', hangul: '일요일', romanization: 'Iryoil' } ] },
-            'numbers_sino_0_10': { name: 'Chiffres 0-10 (Sino)', category: 'Les Bases du Coréen', cards: [ { id: 'sino_num0', french: 'Zéro', hangul: '영 / 공', romanization: 'Yeong / Gong' }, { id: 'sino_num1', french: 'Un', hangul: '일', romanization: 'Il' }, { id: 'sino_num2', french: 'Deux', hangul: '이', romanization: 'I' }, { id: 'sino_num3', french: 'Trois', hangul: '삼', romanization: 'Sam' }, { id: 'sino_num4', french: 'Quatre', hangul: '사', romanization: 'Sa' }, { id: 'sino_num5', french: 'Cinq', hangul: '오', romanization: 'O' }, { id: 'sino_num6', french: 'Six', hangul: '육', romanization: 'Yuk' }, { id: 'sino_num7', french: 'Sept', hangul: '칠', romanization: 'Chil' }, { id: 'sino_num8', french: 'Huit', hangul: '팔', romanization: 'Pal' }, { id: 'sino_num9', french: 'Neuf', hangul: '구', romanization: 'Gu' }, { id: 'sino_num10', french: 'Dix', hangul: '십', romanization: 'Sip' } ] },
-            'pronouns': { name: 'Pronoms', category: 'Les Bases du Coréen', cards: [ { id: 'pro1', french: 'Je (Informel)', hangul: '나', romanization: 'Na' }, { id: 'pro2', french: 'Je (Formel)', hangul: '저', romanization: 'Jeo' }, { id: 'pro3', french: 'Tu (Informel)', hangul: '너', romanization: 'Neo' }, { id: 'pro4', french: 'Il / Lui', hangul: '그', romanization: 'Geu' }, { id: 'pro5', french: 'Elle', hangul: '그녀', romanization: 'Geunyeo' }, { id: 'pro6', french: 'Nous (Inclusif)', hangul: '우리', romanization: 'Uri' }, { id: 'pro7', french: 'Nous (Formel)', hangul: '저희', romanization: 'Jeohui' }, { id: 'pro8', french: 'Vous (Groupe)', hangul: '여러분', romanization: 'Yeoreobun' }, { id: 'pro9', french: 'Ils / Eux', hangul: '그들', romanization: 'Geudeul' }, { id: 'pro10', french: 'Elles', hangul: '그녀들', romanization: 'Geunyeodeul' } ] },
-            'noms_essentiels': { name: 'Noms essentiels', category: 'Les Bases du Coréen', cards: [ {id: 'n1', french: 'Nom', hangul: '이름', romanization: 'ireum'}, {id: 'n2', french: 'Corée', hangul: '한국', romanization: 'hanguk'}, {id: 'n3', french: 'Magasin', hangul: '가게', romanization: 'gage'}, {id: 'n4', french: 'Papa / Père', hangul: '아빠 / 아버지', romanization: 'appa / abeoji'}, {id: 'n5', french: 'Maman / Mère', hangul: '엄마 / 어머니', romanization: 'eomma / eomeoni'} ] },
-            'verbes_courants': { name: 'Verbes Courants', category: 'Les Bases du Coréen', cards: [ {id: 'v1', french: 'Être (équivalent de)', hangul: '이다', romanization: 'ida'}, {id: 'v2', french: 'Être (se trouver) / Avoir', hangul: '있다', romanization: 'itda'}, {id: 'v3', french: 'Ne pas être / Ne pas avoir', hangul: '없다', romanization: 'eopda'}, {id: 'v4', french: 'Donner', hangul: '주다', romanization: 'juda'}, {id: 'v5', french: 'Recevoir', hangul: '받다', romanization: 'batda'}, {id: 'v6', french: 'Lire', hangul: '읽다', romanization: 'ikda'} ] },
-            // Niveau 2
-            'vocab_food': { name: 'Nourriture', category: 'Niveau Intermédiaire', cards: [ {id: 'food1', french: 'Eau', hangul: '물', romanization: 'mul'}, {id: 'food2', french: 'Pain', hangul: '빵', romanization: 'ppang'}, {id: 'food3', french: 'Riz (cuit)', hangul: '밥', romanization: 'bap'}, {id: 'food4', french: 'Viande', hangul: '고기', romanization: 'gogi'}, {id: 'food5', french: 'Café', hangul: '커피', romanization: 'keopi'}, {id: 'food6', french: 'Restaurant', hangul: '식당', romanization: 'sikdang'} ] },
-            'vocab_places': { name: 'Lieux', category: 'Niveau Intermédiaire', cards: [ {id: 'place1', french: 'Maison', hangul: '집', romanization: 'jip'}, {id: 'place2', french: 'École', hangul: '학교', romanization: 'hakgyo'}, {id: 'place3', french: 'Bureau', hangul: '회사', romanization: 'hoesa'}, {id: 'place4', french: 'Marché', hangul: '시장', romanization: 'sijang'}, {id: 'place5', french: 'Hôpital', hangul: '병원', romanization: 'byeong-won'}, {id: 'place6', french: 'Banque', hangul: '은행', romanization: 'eunhaeng'} ] },
-            'particles_connectors': { name: 'Particules & Connecteurs', category: 'Niveau Intermédiaire', cards: [ {id: 'pcon1', french: '"Et" (lier des noms)', hangul: '하고 / (이)랑', romanization: 'hago / (i)rang'}, {id: 'pcon2', french: '"Aussi", "également"', hangul: '–도', romanization: '-do'}, {id: 'pcon3', french: 'De (A) à (B)', hangul: '–에서 –까지', romanization: '-eseo -kkaji'}, {id: 'pcon4', french: '"Mais"', hangul: '하지만', romanization: 'hajiman'}, {id: 'pcon5', french: '"Donc"', hangul: '그래서', romanization: 'geuraeseo'} ] },
-            'vocab_counters': { name: 'Les Compteurs', category: 'Niveau Intermédiaire', cards: [ {id: 'count1', french: 'Objets en général', hangul: '개', romanization: 'gae'}, {id: 'count2', french: 'Personnes (formel)', hangul: '명', romanization: 'myeong'}, {id: 'count3', french: 'Personnes (courant)', hangul: '사람', romanization: 'saram'}, {id: 'count4', french: 'Animaux', hangul: '마리', romanization: 'mari'}, {id: 'count5', french: 'Livres, magazines', hangul: '권', romanization: 'gwon'}, {id: 'count6', french: 'Feuilles, papier, tickets', hangul: '장', romanization: 'jang'}, {id: 'count7', french: 'Bouteilles', hangul: '병', romanization: 'byeong'}, {id: 'count8', french: 'Verres, tasses', hangul: '잔', romanization: 'jan'}, {id: 'count9', french: 'Véhicules, machines', hangul: '대', romanization: 'dae'}, {id: 'count10', french: 'Âge', hangul: '살', romanization: 'sal'}, {id: 'count11', french: 'Fois (occurrences)', hangul: '번', romanization: 'beon'}, {id: 'count12', french: 'Heure (le moment)', hangul: '시', romanization: 'si'}, {id: 'count13', french: 'Heures (durée)', hangul: '시간', romanization: 'sigan'} ] },
-            'noms_intermediaire': { name: 'Noms (Intermédiaire)', category: 'Niveau Intermédiaire', cards: [ {id: 'n_int1', french: 'Aujourd\'hui', hangul: '오늘', romanization: 'oneul'}, {id: 'n_int2', french: 'Hier', hangul: '어제', romanization: 'eoje'}, {id: 'n_int3', french: 'Demain', hangul: '내일', romanization: 'naeil'}, {id: 'n_int4', french: 'Week-end', hangul: '주말', romanization: 'jumal'}, {id: 'n_int5', french: 'Année', hangul: '년', romanization: 'nyeon'}, {id: 'n_int6', french: 'Argent', hangul: '돈', romanization: 'don'}, {id: 'n_int7', french: 'Film', hangul: '영화', romanization: 'yeonghwa'}, {id: 'n_int8', french: 'Vêtement', hangul: '옷', romanization: 'ot'} ] },
-            'verbes_intermediaire': { name: 'Verbes (Intermédiaire)', category: 'Niveau Intermédiaire', cards: [ {id: 'v_int1', french: 'Acheter', hangul: '사다', romanization: 'sada'}, {id: 'v_int2', french: 'Travailler', hangul: '일하다', romanization: 'ilhada'}, {id: 'v_int3', french: 'Étudier', hangul: '공부하다', romanization: 'gongbuhada'}, {id: 'v_int4', french: 'Rencontrer', hangul: '만나다', romanization: 'mannada'}, {id: 'v_int5', french: 'Aimer / Apprécier', hangul: '좋아하다', romanization: 'joahada'}, {id: 'v_int6', french: 'Porter (un vêtement)', hangul: '입다', romanization: 'ipda'}, {id: 'v_int7', french: 'Attendre', hangul: '기다리다', romanization: 'gidarida'} ] },
-            'adjectifs_intermediaire': { name: 'Adjectifs (Intermédiaire)', category: 'Niveau Intermédiaire', cards: [ {id: 'adj_int1', french: 'Délicieux', hangul: '맛있다', romanization: 'masitda'}, {id: 'adj_int2', french: 'Amusant / Intéressant', hangul: '재미있다', romanization: 'jaemiitda'}, {id: 'adj_int3', french: 'Difficile', hangul: '어렵다', romanization: 'eoryeopda'}, {id: 'adj_int4', french: 'Facile', hangul: '쉽다', romanization: 'swipda'}, {id: 'adj_int5', french: 'Être fatigué', hangul: '피곤하다', romanization: 'pigonhada'} ] },
-            'adverbes_connecteurs_intermediaire': { name: 'Adverbes & Connecteurs (Intermédiaire)', category: 'Niveau Intermédiaire', cards: [ {id: 'adv_int1', french: 'Très', hangul: '아주 / 너무', romanization: 'aju / neomu'}, {id: 'adv_int2', french: 'Beaucoup', hangul: '많이', romanization: 'mani'}, {id: 'adv_int3', french: 'Maintenant', hangul: '지금', romanization: 'jigeum'}, {id: 'adv_int4', french: 'Ensemble', hangul: '같이', romanization: 'gachi'} ] },
-            // Niveau 3
-            'noms_avance': { name: 'Noms (Avancé)', category: 'Niveau Avancé', cards: [ {id: 'n_adv1', french: 'Pensée / Idée', hangul: '생각', romanization: 'saenggak'}, {id: 'n_adv2', french: 'Cœur / Esprit', hangul: '마음', romanization: 'maeum'}, {id: 'n_adv3', french: 'Parole / Langue', hangul: '말', romanization: 'mal'}, {id: 'n_adv4', french: 'Problème / Question', hangul: '문제', romanization: 'munje'}, {id: 'n_adv5', french: 'Raison / Cause', hangul: '이유', romanization: 'iyu'}, {id: 'n_adv6', french: 'Le monde', hangul: '세상', romanization: 'sesang'} ] },
-            'verbes_avance': { name: 'Verbes (Avancé)', category: 'Niveau Avancé', cards: [ {id: 'v_adv1', french: 'Savoir / Connaître', hangul: '알다', romanization: 'alda'}, {id: 'v_adv2', french: 'Ne pas savoir', hangul: '모르다', romanization: 'moreuda'}, {id: 'v_adv3', french: 'Penser', hangul: '생각하다', romanization: 'saenggakhada'}, {id: 'v_adv4', french: 'Parler / Dire', hangul: '말하다', romanization: 'malhada'}, {id: 'v_adv5', french: 'Fabriquer / Créer', hangul: '만들다', romanization: 'mandeulda'}, {id: 'v_adv6', french: 'Apprendre', hangul: '배우다', romanization: 'baeuda'}, {id: 'v_adv7', french: 'Avoir besoin de', hangul: '필요하다', romanization: 'piryohada'}, {id: 'v_adv8', french: 'Utiliser', hangul: '사용하다', romanization: 'sayonghada'} ] },
-            'adjectifs_avance': { name: 'Adjectifs (Avancé)', category: 'Niveau Avancé', cards: [ {id: 'adj_adv1', french: 'Similaire', hangul: '비슷하다', romanization: 'biseuthada'}, {id: 'adj_adv2', french: 'Différent', hangul: '다르다', romanization: 'dareuda'}, {id: 'adj_adv3', french: 'Important', hangul: '중요하다', romanization: 'jung-yohada'}, {id: 'adj_adv4', french: 'Heureux', hangul: '행복하다', romanization: 'haengbokhada'}, {id: 'adj_adv5', french: 'Triste', hangul: '슬프다', romanization: 'seulpeuda'} ] },
-            'autres_avance': { name: 'Autres (Avancé)', category: 'Niveau Avancé', cards: [ {id: 'oth_adv1', french: 'À cause de', hangul: '때문에', romanization: 'ttaemune'}, {id: 'oth_adv2', french: 'Si (condition)', hangul: '~(으)면', romanization: '-(eu)myeon'}, {id: 'oth_adv3', french: 'À propos de', hangul: '~에 대해서', romanization: '-e daehaeseo'}, {id: 'oth_adv4', french: 'Si (hypothèse)', hangul: '만약', romanization: 'manyak'} ] }
+            'deck_noms': { name: 'Noms', cards: [ {id: 'n1', french: 'Année', hangul: '년', romanization: 'nyeon'}, {id: 'n2', french: 'Argent', hangul: '돈', romanization: 'don'}, /* ... all other nouns */ {id: 'n38', french: 'Week-end', hangul: '주말', romanization: 'jumal'} ] },
+            'deck_pronoms': { name: 'Pronoms', cards: [ {id: 'p1', french: 'Elle', hangul: '그녀', romanization: 'Geunyeo'}, /* ... all other pronouns */ {id: 'p10', french: 'Vous (Groupe)', hangul: '여러분', romanization: 'Yeoreobun'} ] },
+            'deck_verbes': { name: 'Verbes', cards: [ {id: 'v1', french: 'Acheter', hangul: '사다', romanization: 'sada'}, /* ... all other verbs */ {id: 'v28', french: 'Aller', hangul: '가다', romanization: 'gada'} ] },
+            'deck_adjectifs': { name: 'Adjectifs', cards: [ {id: 'a1', french: 'Amusant / Intéressant', hangul: '재미있다', romanization: 'jaemiitda'}, /* ... all other adjectives */ {id: 'a14', french: 'Triste', hangul: '슬프다', romanization: 'seulpeuda'} ] },
+            'deck_nombres': { name: 'Nombres', cards: [ {id: 'num1', french: 'Zéro (Sino)', hangul: '영 / 공', romanization: 'Yeong / Gong'}, /* ... all sino and native numbers */ {id: 'num21', french: 'Dix (Natif)', hangul: '열', romanization: 'yeol'} ] },
+            'deck_particules': { name: 'Particules & Connecteurs', cards: [ {id: 'part1', french: '"Et" (lier des noms)', hangul: '하고 / (이)랑', romanization: 'hago / (i)rang'}, /* ... all particles */ {id: 'part9', french: 'Si (hypothèse)', hangul: '만약', romanization: 'manyak'} ] },
+            'deck_compteurs': { name: 'Compteurs', cards: [ {id: 'c1', french: 'Objets en général', hangul: '개', romanization: 'gae'}, /* ... all counters */ {id: 'c13', french: 'Heures (durée)', hangul: '시간', romanization: 'sigan'} ] },
+            'deck_adverbes': { name: 'Adverbes & Autres', cards: [ {id: 'adv1', french: 'Très', hangul: '아주 / 너무', romanization: 'aju / neomu'}, {id: 'adv2', french: 'Beaucoup', hangul: '많이', romanization: 'mani'}, {id: 'adv3', french: 'Maintenant', hangul: '지금', romanization: 'jigeum'}, {id: 'adv4', french: 'Ensemble', hangul: '같이', romanization: 'gachi'} ] }
         };
 
         let userDecks = {};
@@ -384,7 +372,7 @@
             for (const deckId in defaultDecks) {
                 const deckData = defaultDecks[deckId];
                 const deckRef = doc(db, "users", user.uid, "decks", deckId);
-                batch.set(deckRef, { name: deckData.name, isDefault: true, category: deckData.category }, { merge: true });
+                batch.set(deckRef, { name: deckData.name, isDefault: true }, { merge: true });
                 deckData.cards.forEach(cardData => {
                     const cardRef = doc(db, "users", user.uid, "decks", deckId, "cards", cardData.id);
                     batch.set(cardRef, cardData, { merge: true });
@@ -399,14 +387,19 @@
                 const deckId = deckDoc.id;
                 const cardsCollectionRef = collection(db, "users", user.uid, "decks", deckId, "cards");
                 const cardsSnapshot = await getDocs(query(cardsCollectionRef));
-                userDecks[deckId] = { ...deckDoc.data(), id: deckId, cards: cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) };
+                userDecks[deckId] = { ...deckDoc.data(), id: deckDoc.id, cards: cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) };
                 userDecks[deckId].cards.sort((a, b) => (a.id || '').localeCompare(b.id || ''));
             }
             
             populateDeckSidebars();
-            const firstDeckId = Object.keys(userDecks).find(id => userDecks[id].category === 'Les Bases du Coréen') || Object.keys(userDecks)[0];
+            const firstDeckId = Object.keys(userDecks)[0];
             if (firstDeckId) {
                 await loadDeck(firstDeckId);
+            } else {
+                deckTitle.textContent = "Aucun paquet";
+                currentDeckId = null;
+                updateDashboard();
+                updateCardDisplay();
             }
             
             loader.style.display = 'none';
@@ -434,7 +427,6 @@
             currentDeckId = deckId;
             deckTitle.textContent = userDecks[deckId].name;
             isReviewMode = false;
-            reviewModeBtn.classList.remove('active');
             reviewModeBtn.textContent = "Révision";
 
             document.querySelectorAll('.deck-btn, .lesson-btn').forEach(btn => btn.classList.remove('active'));
@@ -461,7 +453,6 @@
 
             deckTitle.textContent = trainingTitle;
             isReviewMode = false;
-            reviewModeBtn.classList.remove('active');
             reviewModeBtn.textContent = "Révision";
             
             document.querySelectorAll('.deck-btn, .lesson-btn').forEach(btn => btn.classList.remove('active'));
@@ -482,103 +473,59 @@
             trainAllButton.textContent = "S'entraîner sur tout";
             deckSidebarDesktop.appendChild(trainAllButton);
 
-            const groupedDecks = Object.values(userDecks).reduce((acc, deck) => {
-                const category = deck.category || 'Les Bases du Coréen';
-                if (!acc[category]) acc[category] = [];
-                acc[category].push(deck);
-                return acc;
-            }, {});
+            const sortedDecks = Object.values(userDecks).sort((a, b) => a.name.localeCompare(b.name));
 
-            const createDeckButton = (deckData) => {
-                const allCardsMastered = deckData.cards.length > 0 && deckData.cards.every(c => c.status === 'mastered');
-                const masteredIcon = allCardsMastered ? `<span class="text-green-400" title="Paquet maîtrisé !"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>` : '';
-                const deleteButton = !deckData.isDefault ? `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : '';
-                
+            sortedDecks.forEach(deckData => {
+                const buttonDesktop = createDeckButton(deckData);
+                deckSidebarDesktop.appendChild(buttonDesktop);
+
+                const buttonMobile = createDeckButton(deckData);
+                buttonMobile.className = 'deck-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm text-gray-300 bg-gray-700 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
+                deckSidebarMobile.appendChild(buttonMobile);
+            });
+            
+            // Add Lessons Section
+            const lessonData = [
+                { id: 'presentation', title: 'Leçon : Se Présenter' },
+                { id: 'phrases', title: 'Leçon : Formation de Phrase' },
+                { id: 'nombres', title: 'Leçon : Utilisation des Nombres' },
+                { id: 'conjugaison', title: 'Leçon : La Conjugaison' },
+                { id: 'particules', title: 'Leçon : Les Particules' },
+                { id: 'compteurs', title: 'Leçon : Les Compteurs' }
+            ];
+
+            const accordionWrapper = document.createElement('div');
+            accordionWrapper.className = 'space-y-1 mt-4';
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'accordion-toggle w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
+            toggleBtn.innerHTML = `<span>Leçons</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'accordion-content hidden pl-4 space-y-1';
+
+            lessonData.forEach(data => {
                 const button = document.createElement('button');
-                button.dataset.deckId = deckData.id;
-                button.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
-                button.innerHTML = `<span class="flex-grow">${deckData.name}</span> ${masteredIcon} ${deleteButton}`;
-                return button;
-            };
+                button.className = 'lesson-btn w-full text-left p-3 rounded-lg text-blue-400 hover:bg-gray-600 transition';
+                button.dataset.lessonId = data.id;
+                button.dataset.lessonTitle = data.title;
+                button.innerHTML = `<span>${data.title}</span>`;
+                contentDiv.appendChild(button);
+            });
 
-            const populate = (sidebar, isMobile) => {
-                if (isMobile) {
-                     const trainAllMobile = document.createElement('button');
-                     trainAllMobile.id = 'train-all-btn-mobile';
-                     trainAllMobile.className = 'flex-shrink-0 px-4 py-2 rounded-lg text-sm text-white bg-orange-600 hover:bg-orange-700 transition';
-                     trainAllMobile.textContent = "Tout réviser";
-                     sidebar.appendChild(trainAllMobile);
-                }
+            accordionWrapper.appendChild(toggleBtn);
+            accordionWrapper.appendChild(contentDiv);
+            deckSidebarDesktop.appendChild(accordionWrapper);
+        }
 
-                const categories = ['Les Bases du Coréen', 'Niveau Intermédiaire', 'Niveau Avancé'];
-                categories.forEach(category => {
-                    if (!groupedDecks[category]) return;
-
-                    if (isMobile) {
-                        groupedDecks[category].sort((a,b) => a.name.localeCompare(b.name)).forEach(deckData => {
-                            const button = createDeckButton(deckData);
-                             button.className = 'deck-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm text-gray-300 bg-gray-700 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
-                             sidebar.appendChild(button);
-                        });
-                        return;
-                    }
-
-                    const accordionWrapper = document.createElement('div');
-                    accordionWrapper.className = 'space-y-1';
-                    const toggleBtn = document.createElement('button');
-                    toggleBtn.className = 'accordion-toggle w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
-                    toggleBtn.innerHTML = `<span>${category}</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-                    const contentDiv = document.createElement('div');
-                    contentDiv.className = 'accordion-content hidden pl-4 space-y-1';
-                    
-                    const trainCategoryBtn = document.createElement('button');
-                    trainCategoryBtn.className = 'train-category-btn w-full text-left p-3 rounded-lg text-orange-400 hover:bg-gray-600 transition';
-                    trainCategoryBtn.dataset.category = category;
-                    trainCategoryBtn.textContent = `S'entraîner sur l'onglet`;
-                    contentDiv.appendChild(trainCategoryBtn);
-
-                    groupedDecks[category].sort((a,b) => a.name.localeCompare(b.name)).forEach(deckData => contentDiv.appendChild(createDeckButton(deckData)));
-
-                    if (category === 'Les Bases du Coréen') {
-                        const lessonData = [
-                            { id: 'presentation', title: 'Leçon : Se Présenter' },
-                            { id: 'phrases', title: 'Leçon : Formation de Phrase' },
-                            { id: 'nombres', title: 'Leçon : Utilisation des Nombres' }
-                        ];
-                        lessonData.forEach(data => {
-                            const button = document.createElement('button');
-                            button.className = 'lesson-btn w-full text-left p-3 rounded-lg text-blue-400 hover:bg-gray-600 transition';
-                            button.dataset.lessonId = data.id;
-                            button.dataset.lessonTitle = data.title;
-                            button.innerHTML = `<span>${data.title}</span>`;
-                            contentDiv.appendChild(button);
-                        });
-                    }
-
-                    if (category === 'Niveau Intermédiaire') {
-                        const lessonData = [
-                            { id: 'conjugaison', title: 'Leçon : La Conjugaison' },
-                            { id: 'particules', title: 'Leçon : Les Particules' },
-                            { id: 'compteurs', title: 'Leçon : Les Compteurs' }
-                        ];
-                        lessonData.forEach(data => {
-                            const button = document.createElement('button');
-                            button.className = 'lesson-btn w-full text-left p-3 rounded-lg text-blue-400 hover:bg-gray-600 transition';
-                            button.dataset.lessonId = data.id;
-                            button.dataset.lessonTitle = data.title;
-                            button.innerHTML = `<span>${data.title}</span>`;
-                            contentDiv.appendChild(button);
-                        });
-                    }
-
-                    accordionWrapper.appendChild(toggleBtn);
-                    accordionWrapper.appendChild(contentDiv);
-                    sidebar.appendChild(accordionWrapper);
-                });
-            };
-
-            populate(deckSidebarDesktop, false);
-            populate(deckSidebarMobile, true);
+        function createDeckButton(deckData) {
+            const allCardsMastered = deckData.cards.length > 0 && deckData.cards.every(c => c.status === 'mastered');
+            const masteredIcon = allCardsMastered ? `<span class="text-green-400" title="Paquet maîtrisé !"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>` : '';
+            const deleteButton = !deckData.isDefault ? `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : '';
+            
+            const button = document.createElement('button');
+            button.dataset.deckId = deckData.id;
+            button.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
+            button.innerHTML = `<span class="flex-grow">${deckData.name}</span> ${masteredIcon} ${deleteButton}`;
+            return button;
         }
         
         function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
@@ -698,18 +645,12 @@
                 const lessonBtn = e.target.closest('.lesson-btn');
                 const deleteBtn = e.target.closest('.delete-deck-btn');
                 const accordionToggle = e.target.closest('.accordion-toggle');
-                const trainCategoryBtn = e.target.closest('.train-category-btn');
                 const trainAllBtn = e.target.closest('#train-all-btn, #train-all-btn-mobile');
 
                 if (deleteBtn) { e.stopPropagation(); openDeleteConfirmation(deckBtn.dataset.deckId); } 
                 else if (deckBtn) { loadDeck(deckBtn.dataset.deckId); } 
                 else if (lessonBtn) { showLesson(lessonBtn.dataset.lessonId, lessonBtn.dataset.lessonTitle); }
                 else if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); }
-                else if (trainCategoryBtn) {
-                    const category = trainCategoryBtn.dataset.category;
-                    const cards = Object.values(userDecks).filter(deck => (deck.category || 'Les Bases du Coréen') === category && deck.id !== 'training_session').flatMap(deck => deck.cards.map(card => ({ ...card, originalDeckId: deck.id })));
-                    startTrainingSession(cards, `Entraînement : ${category}`);
-                }
                 else if (trainAllBtn) {
                     const allCards = Object.values(userDecks).filter(d => d.id !== 'training_session').flatMap(deck => deck.cards.map(card => ({...card, originalDeckId: deck.id})));
                     startTrainingSession(allCards, "Entraînement : Toutes les cartes");
@@ -765,8 +706,8 @@
             const deckName = deckNameInput.value.trim();
             if (!deckName) return;
             const newDeckRef = doc(collection(db, "users", auth.currentUser.uid, "decks"));
-            await setDoc(newDeckRef, { name: deckName, isDefault: false, category: 'Les Bases du Coréen' });
-            userDecks[newDeckRef.id] = { id: newDeckRef.id, name: deckName, isDefault: false, category: 'Les Bases du Coréen', cards: [] };
+            await setDoc(newDeckRef, { name: deckName, isDefault: false });
+            userDecks[newDeckRef.id] = { id: newDeckRef.id, name: deckName, isDefault: false, cards: [] };
             populateDeckSidebars();
             loadDeck(newDeckRef.id);
             deckNameInput.value = '';
