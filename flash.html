@@ -321,6 +321,7 @@
         const auth = getAuth();
         const db = getFirestore(app);
 
+        // Database of default cards and decks
         const defaultDecks = {
             'deck_noms': { name: 'Noms', cards: [ {id: 'n1', french: 'Année', hangul: '년', romanization: 'nyeon'}, {id: 'n2', french: 'Argent', hangul: '돈', romanization: 'don'}, {id: 'n3', french: 'Aujourd\'hui', hangul: '오늘', romanization: 'oneul'}, {id: 'n4', french: 'Banque', hangul: '은행', romanization: 'eunhaeng'}, {id: 'n5', french: 'Bureau', hangul: '회사', romanization: 'hoesa'}, {id: 'n6', french: 'Café', hangul: '커피', romanization: 'keopi'}, {id: 'n7', french: 'Cœur / Esprit', hangul: '마음', romanization: 'maeum'}, {id: 'n8', french: 'Corée', hangul: '한국', romanization: 'hanguk'}, {id: 'n9', french: 'Demain', hangul: '내일', romanization: 'naeil'}, {id: 'n10', french: 'Dimanche', hangul: '일요일', romanization: 'Iryoil'}, {id: 'n11', french: 'Eau', hangul: '물', romanization: 'mul'}, {id: 'n12', french: 'École', hangul: '학교', romanization: 'hakgyo'}, {id: 'n13', french: 'Film', hangul: '영화', romanization: 'yeonghwa'}, {id: 'n14', french: 'Hier', hangul: '어제', romanization: 'eoje'}, {id: 'n15', french: 'Hôpital', hangul: '병원', romanization: 'byeong-won'}, {id: 'n16', french: 'Jeudi', hangul: '목요일', romanization: 'Mogyoil'}, {id: 'n17', french: 'Le monde', hangul: '세상', romanization: 'sesang'}, {id: 'n18', french: 'Lundi', hangul: '월요일', romanization: 'Woryoil'}, {id: 'n19', french: 'Magasin', hangul: '가게', romanization: 'gage'}, {id: 'n20', french: 'Maison', hangul: '집', romanization: 'jip'}, {id: 'n21', french: 'Maman / Mère', hangul: '엄마 / 어머니', romanization: 'eomma / eomeoni'}, {id: 'n22', french: 'Marché', hangul: '시장', romanization: 'sijang'}, {id: 'n23', french: 'Mardi', hangul: '화요일', romanization: 'Hwayoil'}, {id: 'n24', french: 'Mercredi', hangul: '수요일', romanization: 'Suyoil'}, {id: 'n25', french: 'Nom', hangul: '이름', romanization: 'ireum'}, {id: 'n26', french: 'Pain', hangul: '빵', romanization: 'ppang'}, {id: 'n27', french: 'Papa / Père', hangul: '아빠 / 아버지', romanization: 'appa / abeoji'}, {id: 'n28', french: 'Parole / Langue', hangul: '말', romanization: 'mal'}, {id: 'n29', french: 'Pensée / Idée', hangul: '생각', romanization: 'saenggak'}, {id: 'n30', french: 'Problème / Question', hangul: '문제', romanization: 'munje'}, {id: 'n31', french: 'Raison / Cause', hangul: '이유', romanization: 'iyu'}, {id: 'n32', french: 'Restaurant', hangul: '식당', romanization: 'sikdang'}, {id: 'n33', french: 'Riz (cuit)', hangul: '밥', romanization: 'bap'}, {id: 'n34', french: 'Samedi', hangul: '토요일', romanization: 'Toyoil'}, {id: 'n35', french: 'Vendredi', hangul: '금요일', romanization: 'Geumyoil'}, {id: 'n36', french: 'Vêtement', hangul: '옷', romanization: 'ot'}, {id: 'n37', french: 'Viande', hangul: '고기', romanization: 'gogi'}, {id: 'n38', french: 'Week-end', hangul: '주말', romanization: 'jumal'} ] },
             'deck_pronoms': { name: 'Pronoms', cards: [ {id: 'p1', french: 'Elle', hangul: '그녀', romanization: 'Geunyeo'}, {id: 'p2', french: 'Elles', hangul: '그녀들', romanization: 'Geunyeodeul'}, {id: 'p3', french: 'Il / Lui', hangul: '그', romanization: 'Geu'}, {id: 'p4', french: 'Ils / Eux', hangul: '그들', romanization: 'Geudeul'}, {id: 'p5', french: 'Je (Formel)', hangul: '저', romanization: 'Jeo'}, {id: 'p6', french: 'Je (Informel)', hangul: '나', romanization: 'Na'}, {id: 'p7', french: 'Nous (Formel)', hangul: '저희', romanization: 'Jeohui'}, {id: 'p8', french: 'Nous (Inclusif)', hangul: '우리', romanization: 'Uri'}, {id: 'p9', french: 'Tu (Informel)', hangul: '너', romanization: 'Neo'}, {id: 'p10', french: 'Vous (Groupe)', hangul: '여러분', romanization: 'Yeoreobun'} ] },
@@ -331,12 +332,14 @@
             'deck_adverbes': { name: 'Adverbes & Autres', cards: [ {id: 'adv1', french: 'Très', hangul: '아주 / 너무', romanization: 'aju / neomu'}, {id: 'adv2', french: 'Beaucoup', hangul: '많이', romanization: 'mani'}, {id: 'adv3', french: 'Maintenant', hangul: '지금', romanization: 'jigeum'}, {id: 'adv4', french: 'Ensemble', hangul: '같이', romanization: 'gachi'} ] }
         };
 
+        // Global state variables
         let userDecks = {};
         let currentDeckId = null;
         let currentCardIndex = 0;
         let isReviewMode = false;
         let visibleCards = [];
 
+        // DOM Element references
         const loader = document.getElementById('loader');
         const authOverlay = document.getElementById('auth-overlay');
         const appContent = document.getElementById('app-content');
@@ -357,6 +360,7 @@
         const flashcardView = document.getElementById('flashcard-view');
         const lessonView = document.getElementById('lesson-view');
 
+        // --- Authentication ---
         onAuthStateChanged(auth, user => {
             if (user) {
                 authOverlay.style.display = 'none';
@@ -370,9 +374,11 @@
             }
         });
 
+        // --- App Initialization ---
         async function initializeAppLogic(user) {
             document.getElementById('user-email').textContent = user.email;
             
+            // Set up default decks for the user if they don't exist
             const batch = writeBatch(db);
             for (const deckId in defaultDecks) {
                 const deckData = defaultDecks[deckId];
@@ -385,6 +391,7 @@
             }
             await batch.commit();
 
+            // Load all user decks and cards from Firestore
             const decksCollectionRef = collection(db, "users", user.uid, "decks");
             const finalDecksSnapshot = await getDocs(query(decksCollectionRef));
             userDecks = {};
@@ -411,6 +418,7 @@
             appContent.classList.remove('hidden');
         }
         
+        // --- UI Logic ---
         function showLesson(lessonId, lessonTitle) {
             flashcardView.classList.add('hidden');
             lessonView.classList.remove('hidden');
@@ -477,7 +485,7 @@
             const createDeckButton = (deckData) => {
                 const allCardsMastered = deckData.cards.length > 0 && deckData.cards.every(c => c.status === 'mastered');
                 const masteredIcon = allCardsMastered ? `<span class="text-green-400" title="Paquet maîtrisé !"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>` : '';
-                const deleteButton = !deckData.isDefault ? `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : '';
+                const deleteButton = `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`;
                 
                 const button = document.createElement('button');
                 button.dataset.deckId = deckData.id;
@@ -647,6 +655,7 @@
             }
         }
 
+        // --- Event Listeners ---
         function setupEventListeners() {
             card.addEventListener('click', () => {
                 const isFlipped = card.classList.contains('is-flipped');
@@ -698,6 +707,7 @@
             document.getElementById('signup-form').addEventListener('submit', handleSignup);
         }
         
+        // --- Data Modification Functions ---
         function openDeleteConfirmation(deckId) {
             deleteDeckModal.classList.remove('hidden');
             confirmDeleteBtn.onclick = () => deleteDeck(deckId, true);
