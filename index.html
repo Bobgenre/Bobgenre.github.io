@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -44,6 +45,13 @@
         #timer-progress { transition: width 1s linear; }
         .edit-mode-item { display: none; }
         .edit-mode .edit-mode-item { display: flex; }
+        .sortable-ghost {
+            background: #2d3748;
+            opacity: 0.5;
+        }
+        .drag-handle {
+            cursor: move;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200">
@@ -102,9 +110,9 @@
                 </div>
 
                 <div id="tab-contents">
-                    <div id="Tirage" class="tab-content"><div id="Tirage-exercises" class="space-y-6"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Tirage">+ Ajouter un exercice</button></div>
-                    <div id="Poussée" class="tab-content"><div id="Poussée-exercises" class="space-y-6"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Poussée">+ Ajouter un exercice</button></div>
-                    <div id="Jambes" class="tab-content"><div id="Jambes-exercises" class="space-y-6"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Jambes">+ Ajouter un exercice</button></div>
+                    <div id="Tirage" class="tab-content"><div id="Tirage-exercises" class="space-y-6 exercise-list"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Tirage">+ Ajouter un exercice</button></div>
+                    <div id="Poussée" class="tab-content"><div id="Poussée-exercises" class="space-y-6 exercise-list"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Poussée">+ Ajouter un exercice</button></div>
+                    <div id="Jambes" class="tab-content"><div id="Jambes-exercises" class="space-y-6 exercise-list"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Jambes">+ Ajouter un exercice</button></div>
                     <div id="suivi" class="tab-content"><div id="suivi-graphs-content" class="space-y-4"></div></div>
                 </div>
             </main>
@@ -191,6 +199,7 @@
         let currentProgramData = {};
         let timerInterval = null;
         let isEditMode = false;
+        let sortableInstances = [];
 
         // --- AUTHENTIFICATION ---
         onAuthStateChanged(auth, user => {
@@ -271,13 +280,18 @@
                         const setsSummary = lastPerf.sets.map(set => `${set.reps}x${set.weight}kg`).join(', ');
                         lastPerfHtml = `<p class="text-sm text-orange-400 font-semibold mt-2">Dernière séance : ${setsSummary}</p>`;
                     }
-                    return `<div class="p-4 bg-gray-700/50 rounded-lg">
+                    return `<div class="p-4 bg-gray-700/50 rounded-lg exercise-card" data-id="${exercise.id}">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-bold text-lg text-gray-100">${exercise.name}</h4>
-                                <p class="font-semibold mt-1 text-gray-300">${exercise.sets} séries de ${exercise.reps} répétitions</p>
+                             <div class="flex items-center gap-3 flex-grow">
+                                <div class="edit-mode-item drag-handle text-gray-500 hover:text-gray-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-gray-100">${exercise.name}</h4>
+                                    <p class="font-semibold mt-1 text-gray-300">${exercise.sets} séries de ${exercise.reps} répétitions</p>
+                                </div>
                             </div>
-                            <button class="start-timer-btn flex items-center justify-center w-32 gap-2 text-xs font-medium text-white bg-gray-600 hover:bg-gray-500 px-3 py-2 rounded-full transition-transform duration-200 hover:scale-105" data-rest-time="${exercise.rest_time}" data-exercise-name="${exercise.name}">
+                            <button class="start-timer-btn flex items-center justify-center w-32 gap-2 text-xs font-medium text-white bg-gray-600 hover:bg-gray-500 px-3 py-2 rounded-full transition-transform duration-200 hover:scale-105 flex-shrink-0" data-rest-time="${exercise.rest_time}" data-exercise-name="${exercise.name}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 <span>${exercise.rest_time}</span>
                             </button>
@@ -421,7 +435,33 @@
             });
         }
 
-        // --- GESTION DU PROGRAMME (CRUD) ---
+        // --- GESTION DU PROGRAMME (CRUD & Drag-and-Drop) ---
+        function initializeSortables() {
+            destroySortables(); // Clear existing instances
+            const exerciseLists = document.querySelectorAll('.exercise-list');
+            exerciseLists.forEach(list => {
+                const programType = list.parentElement.id;
+                const sortable = new Sortable(list, {
+                    animation: 150,
+                    handle: '.drag-handle',
+                    ghostClass: 'sortable-ghost',
+                    onEnd: async (evt) => {
+                        const newOrderIds = Array.from(evt.target.children).map(item => item.dataset.id);
+                        currentProgramData[programType] = newOrderIds.map(id => 
+                            currentProgramData[programType].find(ex => ex.id === id)
+                        );
+                        await updateProgramInFirestore();
+                    }
+                });
+                sortableInstances.push(sortable);
+            });
+        }
+
+        function destroySortables() {
+            sortableInstances.forEach(sortable => sortable.destroy());
+            sortableInstances = [];
+        }
+
         function toggleEditMode() {
             isEditMode = !isEditMode;
             const btn = document.getElementById('toggle-edit-mode-btn');
@@ -430,7 +470,14 @@
             btn.classList.toggle('hover:bg-orange-700', isEditMode);
             btn.classList.toggle('bg-gray-600', !isEditMode);
             btn.classList.toggle('hover:bg-gray-500', !isEditMode);
-            renderProgram(currentProgramData, currentLogs);
+            
+            renderProgram(currentProgramData, currentLogs); // Re-render to show/hide handles and other edit UI
+
+            if (isEditMode) {
+                initializeSortables();
+            } else {
+                destroySortables();
+            }
         }
 
         function openExerciseModal(programType, exerciseId = null) {
@@ -484,6 +531,7 @@
             }
             
             await updateProgramInFirestore();
+            renderProgram(currentProgramData, currentLogs); // Re-render the list
             closeExerciseModal();
         }
 
@@ -501,6 +549,7 @@
                 currentProgramData[programType].splice(index, 1);
                 await updateProgramInFirestore();
             }
+            renderProgram(currentProgramData, currentLogs); // Re-render the list
             document.getElementById('delete-confirm-modal').classList.add('hidden');
         }
 
@@ -566,6 +615,11 @@
         }
         function startTimer(durationString, exerciseName) {
             if (timerInterval) clearInterval(timerInterval);
+
+            if (typeof Tone !== 'undefined' && Tone.context.state !== 'running') {
+                Tone.start();
+            }
+
             const totalSeconds = parseDuration(durationString); if (totalSeconds === 0) return;
             let secondsRemaining = totalSeconds;
             const modal = document.getElementById('timer-modal'), display = document.getElementById('timer-display'), progress = document.getElementById('timer-progress'), nameDisplay = document.getElementById('timer-exercise-name');
@@ -577,7 +631,12 @@
                 if (secondsRemaining <= 0) {
                     clearInterval(timerInterval); timerInterval = null; display.textContent = "FINI !";
                     progress.style.width = '100%'; progress.classList.remove('bg-orange-600'); progress.classList.add('bg-green-500');
-                    if (typeof Tone !== 'undefined') { const synth = new Tone.Synth().toDestination(); synth.triggerAttackRelease("C5", "8n", Tone.now()); synth.triggerAttackRelease("G5", "8n", Tone.now() + 0.2); }
+                    
+                    if (typeof Tone !== 'undefined') { 
+                        const synth = new Tone.Synth().toDestination(); 
+                        synth.triggerAttackRelease("C5", "8n", Tone.now()); 
+                        synth.triggerAttackRelease("G5", "8n", Tone.now() + 0.2); 
+                    }
                 }
                 secondsRemaining--;
             };
