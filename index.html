@@ -3,21 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Programme Musculation - Suivi Multi-Appareils</title>
+    <title>Flashcards Coréen - Apprentissage Personnalisé</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .tab-btn.active { background-color: #f97316; color: white; }
-        .tab-btn.suivi.active { background-color: #f97316; color: white; }
-        .chart-container { position: relative; height: 250px; width: 100%; }
-        .accordion-toggle svg, .chevron-icon { transition: transform 0.2s ease-in-out; }
-        .accordion-toggle.open svg, .rotate-180 { transform: rotate(180deg); }
+        .korean-font { font-family: 'Noto Sans KR', sans-serif; }
+        .scene { perspective: 1000px; }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.6s, border-color 0.3s;
+            border: 4px solid transparent;
+        }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card__face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .card__face--front { background-color: #1f2937; color: #f9fafb; }
+        .card__face--back { background-color: #374151; color: white; transform: rotateY(180deg); }
+        
+        .status-new { border-color: #6b7280; }
+        .status-learning { border-color: #f59e0b; }
+        .status-mastered { border-color: #22c55e; }
+
         #loader, #auth-overlay, .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(17, 24, 39, 0.95);
@@ -25,7 +46,7 @@
             z-index: 9999; flex-direction: column;
             transition: opacity 0.3s;
         }
-        .spinner {
+        .spinner, .btn-loading::after {
             border: 4px solid rgba(255, 255, 255, 0.1);
             width: 36px;
             height: 36px;
@@ -33,149 +54,259 @@
             border-left-color: #f97316;
             animation: spin 1s ease infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .btn-loading { position: relative; color: transparent !important; }
         .btn-loading::after {
             content: ''; position: absolute; top: 50%; left: 50%;
             width: 20px; height: 20px; margin-top: -10px; margin-left: -10px;
-            border: 2px solid #fff; border-radius: 50%; border-top-color: transparent;
-            animation: spin 0.6s linear infinite;
+            border-width: 2px;
         }
-        .set-row-btn { flex-shrink: 0; }
-        #timer-progress { transition: width 1s linear; }
-        .edit-mode-item { display: none; }
-        .edit-mode .edit-mode-item { display: flex; }
-        .sortable-ghost {
-            background: #2d3748;
-            opacity: 0.5;
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .review-mode-btn.active { background-color: #d97706; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+        .deck-btn.active, .lesson-btn.active { background-color: #ea580c; color: white; }
+        .mobile-deck-nav { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+        .mobile-deck-nav::-webkit-scrollbar { display: none; }
+        .accordion-toggle svg { transition: transform 0.2s ease-in-out; }
+        .accordion-toggle.open svg { transform: rotate(180deg); }
+
+        /* Styles for lesson view and accordion content */
+        #lesson-view, .accordion-content {
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 #1f2937;
         }
-        .drag-handle {
-            cursor: move;
+        #lesson-view::-webkit-scrollbar, .accordion-content::-webkit-scrollbar {
+            width: 8px;
         }
+        #lesson-view::-webkit-scrollbar-track, .accordion-content::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        #lesson-view::-webkit-scrollbar-thumb, .accordion-content::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 4px;
+        }
+        .accordion-content {
+            max-height: 45vh;
+            overflow-y: auto;
+        }
+        #lesson-view {
+             max-height: 65vh;
+        }
+        #lesson-view h3 { font-size: 1.5rem; font-weight: bold; color: #fb923c; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #4b5563; padding-bottom: 0.5rem; }
+        #lesson-view h4 { font-size: 1.25rem; font-weight: bold; color: #fdbf6f; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+        #lesson-view p { color: #d1d5db; line-height: 1.6; margin-bottom: 1rem; }
+        #lesson-view ul { list-style-type: disc; margin-left: 1.5rem; color: #d1d5db; margin-bottom: 1rem; }
+        #lesson-view ol { list-style-type: decimal; margin-left: 1.5rem; color: #d1d5db; margin-bottom: 1rem; }
+        #lesson-view code { background-color: #374151; color: #f9fafb; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: 'Noto Sans KR', sans-serif; }
+        #lesson-view strong { color: #fdba74; }
+        #lesson-view table { width: 100%; border-collapse: collapse; margin-top: 1rem; border-radius: 0.5rem; overflow: hidden; }
+        #lesson-view th, #lesson-view td { border-bottom: 1px solid #4b5563; padding: 0.75rem; text-align: left; }
+        #lesson-view th { background-color: #4b5563; color: #fb923c; }
+        #lesson-view td { color: #d1d5db; }
+        #lesson-view tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.05); }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200">
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-2 md:p-4">
 
-    <!-- Écran de Connexion / Inscription -->
-    <div id="auth-overlay">
-        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl">
-            <h2 class="text-2xl font-bold text-center text-gray-100 mb-2">Connexion</h2>
-            <p class="text-center text-gray-400 mb-6">Connectez-vous pour synchroniser vos données.</p>
-            <div id="auth-error" class="text-red-500 text-sm text-center mb-4 min-h-[20px]"></div>
-            <form id="login-form" class="space-y-4">
-                <input type="email" id="login-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-                <input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-                <button type="submit" class="w-full py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Se connecter</button>
-            </form>
-            <div class="my-4 flex items-center"><hr class="w-full border-gray-600"><span class="p-2 text-gray-500 text-sm">OU</span><hr class="w-full border-gray-600"></div>
-            <form id="signup-form" class="space-y-4">
-                <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-                <input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
-                <button type="submit" class="w-full py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Créer un compte</button>
-            </form>
-        </div>
-    </div>
+    <!-- Auth Screen -->
+    <div id="auth-overlay"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl"><h2 class="text-2xl font-bold text-center text-gray-100 mb-2">Flashcards Coréen</h2><p class="text-center text-gray-400 mb-6">Connectez-vous pour sauvegarder votre progression.</p><div id="auth-error" class="text-red-500 text-sm text-center mb-4 min-h-[20px]"></div><form id="login-form" class="space-y-4"><input type="email" id="login-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><button type="submit" class="w-full py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Se connecter</button></form><div class="my-4 flex items-center"><hr class="w-full border-gray-600"><span class="p-2 text-gray-500 text-sm">OU</span><hr class="w-full border-gray-600"></div><form id="signup-form" class="space-y-4"><input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><button type="submit" class="w-full py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Créer un compte</button></form></div></div>
 
-    <!-- Indicateur de chargement -->
-    <div id="loader" class="hidden">
-        <div class="spinner"></div>
-        <p id="loader-text" class="mt-4 text-lg font-semibold text-gray-300">Chargement des données...</p>
-    </div>
+    <!-- Loader -->
+    <div id="loader" style="display: none;"><div class="spinner"></div><p class="mt-4 text-lg font-semibold text-gray-300">Chargement...</p></div>
 
-    <div id="app-content" class="hidden">
-        <div class="container mx-auto p-4 md:p-8">
-            <header class="text-center mb-8">
-                <h1 class="text-4xl md:text-5xl font-bold text-gray-100">Votre Programme Hebdomadaire</h1>
-                <p class="text-xl text-orange-500 mt-2">Format 3 Jours : Tirage / Poussée / Jambes</p>
-                <div class="mt-4 flex justify-center items-center flex-wrap gap-4">
-                    <a href="flash.html" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition">Appli Flashcards</a>
-                    <button id="toggle-edit-mode-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition">Gérer le programme</button>
-                    <div id="auth-info" class="p-2 bg-gray-800 rounded-lg inline-block">
-                        <p id="user-email" class="text-sm text-gray-400"></p>
-                        <button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button>
-                    </div>
-                </div>
-            </header>
+    <!-- App Content -->
+    <div id="app-content" class="hidden w-full max-w-6xl mx-auto p-2 md:p-4 flex flex-col md:flex-row md:space-x-8">
+        <aside class="w-full md:w-1/4 flex-shrink-0 mb-6 md:mb-0">
+            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-gray-300">Menu</h2><button id="add-deck-btn" class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-orange-700 transition">+</button></div>
+            <div id="deck-sidebar-mobile" class="md:hidden flex space-x-2 pb-2 mobile-deck-nav"></div>
+            <div id="deck-sidebar-desktop" class="hidden md:block space-y-2"></div>
+        </aside>
 
-            <main id="main-content" class="bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
-                <div class="mb-6 border-b border-gray-700">
-                    <nav class="flex flex-wrap -mb-px" id="tabs">
-                        <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2 text-gray-400 hover:bg-gray-700" data-tab="Tirage">Tirage</button>
-                        <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg mr-2 text-gray-400 hover:bg-gray-700" data-tab="Poussée">Poussée</button>
-                        <button class="tab-btn text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg text-gray-400 hover:bg-gray-700" data-tab="Jambes">Jambes</button>
-                        <div class="ml-auto flex flex-wrap">
-                            <button class="tab-btn suivi text-lg font-semibold py-3 px-4 md:px-6 rounded-t-lg border border-orange-500 text-orange-500 hover:bg-gray-700" data-tab="suivi">Suivi Graphique</button>
-                        </div>
-                    </nav>
-                </div>
+        <main class="flex-grow">
+            <header class="flex justify-between items-start mb-4"><h1 id="deck-title" class="text-2xl md:text-3xl font-bold text-orange-400"></h1><div class="flex items-center gap-4"><a href="index.html" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition text-sm">Appli Muscu</a><div id="auth-info" class="text-right flex-shrink-0"><p id="user-email" class="text-sm text-gray-500"></p><button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button></div></div></header>
 
-                <div id="tab-contents">
-                    <div id="Tirage" class="tab-content"><div id="Tirage-exercises" class="space-y-6 exercise-list"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Tirage">+ Ajouter un exercice</button></div>
-                    <div id="Poussée" class="tab-content"><div id="Poussée-exercises" class="space-y-6 exercise-list"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Poussée">+ Ajouter un exercice</button></div>
-                    <div id="Jambes" class="tab-content"><div id="Jambes-exercises" class="space-y-6 exercise-list"></div><button class="add-exercise-btn edit-mode-item mt-6 w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition" data-program-type="Jambes">+ Ajouter un exercice</button></div>
-                    <div id="suivi" class="tab-content"><div id="suivi-graphs-content" class="space-y-4"></div></div>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- Modals -->
-    <div id="performance-modal" class="modal-overlay hidden flex items-center justify-center">
-        <div class="relative mx-auto p-5 border border-gray-700 w-full max-w-lg shadow-lg rounded-md bg-gray-800">
-            <h3 class="text-lg leading-6 font-medium text-gray-100 text-center" id="modal-title"></h3>
-            <input type="hidden" id="modal-exercise-id">
-            <div id="sets-container" class="mt-4 space-y-3 px-4 max-h-64 overflow-y-auto"></div>
-            <div class="px-4 mt-4"><button id="add-set-btn" class="w-full py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition">+ Ajouter une série</button></div>
-            <div class="items-center px-4 py-3 mt-2"><button id="save-performance-btn" class="px-4 py-2 bg-orange-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-orange-700">Enregistrer</button><button id="close-modal-btn" class="mt-2 px-4 py-2 bg-gray-600 text-gray-200 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-500">Annuler</button></div>
-        </div>
-    </div>
-    <div id="timer-modal" class="modal-overlay hidden flex items-center justify-center p-4">
-        <div class="relative w-full max-w-sm p-6 bg-gray-800 rounded-2xl shadow-2xl text-center border border-gray-700">
-            <h3 class="text-xl font-semibold text-gray-400">Temps de repos pour</h3>
-            <p id="timer-exercise-name" class="text-2xl font-bold text-gray-100 mb-4">Exercice</p>
-            <div id="timer-display" class="text-7xl font-bold text-orange-500 my-4 tabular-nums">00:00</div>
-            <div class="w-full bg-gray-700 rounded-full h-4 mb-6 overflow-hidden"><div id="timer-progress" class="bg-orange-600 h-4 rounded-full" style="width: 100%;"></div></div>
-            <button id="close-timer-modal-btn" class="w-full py-3 bg-gray-600 text-gray-200 font-bold rounded-lg hover:bg-gray-500 transition">Arrêter et fermer</button>
-        </div>
-    </div>
-    <div id="history-modal" class="modal-overlay hidden flex items-center justify-center">
-        <div class="relative mx-auto p-5 border border-gray-700 w-full max-w-2xl shadow-lg rounded-md bg-gray-800">
-            <div class="flex justify-between items-center mb-4"><h3 class="text-lg leading-6 font-medium text-gray-100" id="history-modal-title">Historique des séances</h3><button id="close-history-modal-btn" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button></div>
-            <div id="history-list-container" class="mt-4 space-y-2 px-1 max-h-96 overflow-y-auto"></div>
-        </div>
-    </div>
-    <div id="exercise-modal" class="modal-overlay hidden flex items-center justify-center">
-        <div class="relative mx-auto p-6 border border-gray-700 w-full max-w-lg shadow-lg rounded-md bg-gray-800">
-            <h3 class="text-xl font-bold text-center text-white mb-6" id="exercise-modal-title"></h3>
-            <form id="exercise-form" class="space-y-4">
-                <input type="hidden" id="exercise-modal-id"><input type="hidden" id="exercise-modal-program-type">
-                <div><label class="text-sm font-medium text-gray-400">Nom de l'exercice</label><input type="text" id="exercise-name" required class="w-full mt-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"></div>
-                <div><label class="text-sm font-medium text-gray-400">Séries (ex: 4)</label><input type="text" id="exercise-sets" required class="w-full mt-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"></div>
-                <div><label class="text-sm font-medium text-gray-400">Répétitions (ex: 8-12)</label><input type="text" id="exercise-reps" required class="w-full mt-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"></div>
-                <div><label class="text-sm font-medium text-gray-400">Temps de repos (ex: 1 min 30)</label><input type="text" id="exercise-rest" required class="w-full mt-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"></div>
-                <div class="flex space-x-4 pt-4">
-                    <button type="submit" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Sauvegarder</button>
-                    <button type="button" id="cancel-exercise-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="delete-confirm-modal" class="modal-overlay hidden flex items-center justify-center">
-        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4 text-center">
-            <h3 class="text-xl font-bold text-white" id="delete-confirm-title">Confirmer la suppression</h3>
-            <p class="text-gray-300" id="delete-confirm-text"></p>
-            <div class="flex space-x-4">
-                <button id="confirm-delete-btn" class="w-full py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">Supprimer</button>
-                <button id="cancel-delete-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button>
+            <div id="flashcard-view">
+                <div id="dashboard" class="flex justify-around bg-gray-800 p-3 rounded-lg mb-4 text-center"><div><p class="text-xl md:text-2xl font-bold text-green-500" id="mastered-count">0</p><p class="text-xs text-gray-400">Maîtrisé</p></div><div><p class="text-xl md:text-2xl font-bold text-amber-500" id="learning-count">0</p><p class="text-xs text-gray-400">En cours</p></div><div><p class="text-xl md:text-2xl font-bold text-gray-500" id="new-count">0</p><p class="text-xs text-gray-400">Nouveau</p></div></div>
+                <button id="add-card-btn" class="w-full mb-4 py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition">+ Ajouter une carte</button>
+                <div class="scene h-56 md:h-64"><div id="flashcard" class="card rounded-xl"><div id="card-front" class="card__face card__face--front"></div><div id="card-back" class="card__face card__face--back"></div></div></div>
+                <p id="progress" class="text-center text-gray-500 mt-4"></p>
+                <div id="status-buttons" class="flex justify-center space-x-3 mt-6"><button data-status="learning" class="status-btn flex-1 py-3 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition">À revoir</button><button data-status="mastered" class="status-btn flex-1 py-3 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Maîtrisé</button></div>
+                <div class="flex justify-between items-center mt-4 space-x-2"><button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button><button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Révision</button><button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button></div>
             </div>
-        </div>
+            
+            <div id="lesson-view" class="hidden bg-gray-800 p-6 rounded-lg max-h-[65vh] overflow-y-auto">
+                <!-- Leçons de Base -->
+                <div id="lesson-content-presentation" class="lesson-content hidden">
+                    <h3>Se Présenter en Coréen</h3>
+                    <p>Voici les phrases clés pour une présentation simple et polie.</p>
+                    <h4>Dire son nom</h4>
+                    <p>La structure la plus courante est "<strong>[Votre Nom] + 이에요/예요</strong>" (ieyo/yeyo).</p>
+                    <ul>
+                        <li>Si votre nom se termine par une consonne : <strong>이에요</strong>. Ex: <code>저는 마크<strong>이에요</strong>.</code> (Je suis Marc.)</li>
+                        <li>Si votre nom se termine par une voyelle : <strong>예요</strong>. Ex: <code>저는 마리<strong>예요</strong>.</code> (Je suis Marie.)</li>
+                    </ul>
+                    <p>Vous pouvez aussi utiliser : <code>제 이름은 [Votre Nom]입니다.</code> (Mon nom est [Votre Nom]. - Plus formel)</p>
+                    <h4>Dire sa nationalité</h4>
+                    <p>La structure est "<strong>[Pays] + 사람이에요</strong>" (saram-ieyo).</p>
+                    <ul>
+                        <li><code>저는 프랑스 사람이에요.</code> (Je suis français(e).)</li>
+                        <li><code>저는 캐나다 사람이에요.</code> (Je suis canadien(ne).)</li>
+                    </ul>
+                    <h4>Demander le nom</h4>
+                    <p><code>이름이 뭐예요?</code> (ireum-i mwo-yeyo?) - Comment vous appelez-vous ?</p>
+                </div>
+                <div id="lesson-content-phrases" class="lesson-content hidden">
+                    <h3>La Structure des Phrases</h3>
+                    <p>Le coréen a une structure de phrase différente du français. La comprendre est essentiel.</p>
+                    <h4>Structure de base : Sujet - Objet - Verbe (SOV)</h4>
+                    <p>Alors qu'en français on dit "Je mange une pomme" (Sujet-Verbe-Objet), en coréen l'ordre est inversé. Le verbe vient toujours à la fin.</p>
+                    <ul>
+                        <li>Français : Je (S) mange (V) une pomme (O).</li>
+                        <li>Coréen : 저는 (S) 사과를 (O) 먹어요 (V). - <code>jeoneun sagwareul meogeoyo.</code></li>
+                    </ul>
+                    <p>N'oubliez pas les particules ! <code>-는</code> marque le sujet et <code>-를</code> marque l'objet.</p>
+                    <h4>Former une question</h4>
+                    <p>La manière la plus simple de poser une question est de prendre une phrase affirmative et de la terminer par un point d'interrogation, en montant l'intonation à la fin.</p>
+                    <ul>
+                        <li>Affirmation : <code>학교에 가요.</code> (Je vais à l'école.)</li>
+                        <li>Question : <code>학교에 가요?</code> (Tu vas à l'école ?)</li>
+                    </ul>
+                    <p>Vous pouvez aussi utiliser des mots interrogatifs :</p>
+                    <ul>
+                        <li><strong>누구</strong> (nugu) - Qui ?</li>
+                        <li><strong>뭐</strong> (mwo) - Quoi ?</li>
+                        <li><strong>어디</strong> (eodi) - Où ?</li>
+                        <li><strong>언제</strong> (eonje) - Quand ?</li>
+                        <li><strong>왜</strong> (wae) - Pourquoi ?</li>
+                    </ul>
+                    <p>Exemple : <code><strong>어디</strong> 가요?</code> (Où vas-tu ?)</p>
+                </div>
+                <div id="lesson-content-nombres" class="lesson-content hidden">
+                    <h3>Utiliser les Deux Systèmes de Nombres</h3>
+                    <p>Vous connaissez les deux systèmes de nombres : Sino-Coréen et Natif Coréen. Voici quand utiliser chacun.</p>
+                    <h4>Nombres Sino-Coréens (일, 이, 삼...)</h4>
+                    <p>On les utilise pour tout ce qui est "technique" ou mathématique :</p>
+                    <ul>
+                        <li><strong>L'argent :</strong> <code>천 원</code> (1000 won)</li>
+                        <li><strong>Les dates :</strong> <code>오월 십일</code> (le 11 mai)</li>
+                        <li><strong>Les minutes et les secondes :</strong> <code>십 분</code> (10 minutes)</li>
+                        <li><strong>Les numéros de téléphone, d'étage, de bus...</strong></li>
+                    </ul>
+                    <h4>Nombres Natifs Coréens (하나, 둘, 셋...)</h4>
+                    <p>On les utilise pour compter des choses concrètes, souvent avec un compteur.</p>
+                    <ul>
+                        <li><strong>Compter des objets/personnes :</strong> <code>사과 <strong>세</strong> 개</code> (trois pommes)</li>
+                        <li><strong>L'âge :</strong> <code>스무 <strong>살</strong></code> (20 ans)</li>
+                        <li><strong>Les heures :</strong> <code><strong>세</strong> 시</code> (3 heures)</li>
+                    </ul>
+                    <p><strong>Exemple combiné pour l'heure :</strong> <code><strong>세</strong> 시 <strong>십</strong> 분</code> (3 heures 10 minutes). On utilise le Natif pour l'heure et le Sino-Coréen pour les minutes.</p>
+                    <h4>Règle Spéciale : La forme courte</h4>
+                    <p>Lorsque les nombres natifs 1, 2, 3, 4 et 20 sont suivis d'un compteur, ils prennent une forme modifiée :</p>
+                    <ul>
+                        <li>하나 (1) → <strong>한</strong> (han)</li>
+                        <li>둘 (2) → <strong>두</strong> (du)</li>
+                        <li>셋 (3) → <strong>세</strong> (se)</li>
+                        <li>넷 (4) → <strong>네</strong> (ne)</li>
+                        <li>스물 (20) → <strong>스무</strong> (seumu)</li>
+                    </ul>
+                </div>
+                <!-- Leçons Intermédiaires -->
+                <div id="lesson-content-conjugaison" class="lesson-content hidden">
+                    <h3>La Conjugaison de Base</h3>
+                    <p>C'est le cœur de la langue coréenne. Pour former une phrase, vous devez conjuguer le verbe ou l'adjectif. La forme polie standard en <code>–아/어요</code> (-a/eoyo) est la plus utile au quotidien.</p>
+                    <h4>Comment ça marche ?</h4>
+                    <ol>
+                        <li>Prenez un verbe à l'infinitif (ex: <code>먹다</code>, manger).</li>
+                        <li>Retirez le <code>–다</code> final pour obtenir le <strong>radical</strong> (ex: <code>먹</code>).</li>
+                        <li>Appliquez la règle de conjugaison au radical.</li>
+                    </ol>
+                    <h4>Règles pour le Présent (<code>–아/어요</code>)</h4>
+                    <ul>
+                        <li><strong>Règle 1 :</strong> Si la dernière voyelle du radical est <strong>ㅏ</strong> ou <strong>ㅗ</strong>, on ajoute <code>–아요</code>. <br>Ex: <code>가다</code> → <code>가</code> + <code>아요</code> → <code>가요</code> (Je vais).</li>
+                        <li><strong>Règle 2 :</strong> Pour toutes les autres voyelles, on ajoute <code>–어요</code>. <br>Ex: <code>먹다</code> → <code>먹</code> + <code>어요</code> → <code>먹어요</code> (Je mange).</li>
+                        <li><strong>Règle 3 (Exception) :</strong> Les verbes en <code>하다</code> (faire) deviennent <code>–해요</code>. <br>Ex: <code>공부하다</code> → <code>공부해요</code> (J'étudie).</li>
+                    </ul>
+                    <h4>Règles pour le Passé (<code>–았/었어요</code>)</h4>
+                    <p>La logique est la même que pour le présent.</p>
+                    <ul>
+                        <li>Si la dernière voyelle du radical est <strong>ㅏ</strong> ou <strong>ㅗ</strong>, on ajoute <code>–았어요</code>. <br>Ex: <code>가다</code> → <code>갔어요</code> (Je suis allé(e)).</li>
+                        <li>Sinon, on ajoute <code>–었어요</code>. <br>Ex: <code>먹다</code> → <code>먹었어요</code> (J'ai mangé).</li>
+                        <li>Les verbes en <code>하다</code> deviennent <code>–했어요</code>. <br>Ex: <code>공부하다</code> → <code>공부했어요</code> (J'ai étudié).</li>
+                    </ul>
+                </div>
+                <div id="lesson-content-particules" class="lesson-content hidden">
+                    <h3>Les Particules & Connecteurs</h3>
+                    <p>Les particules sont des "étiquettes" grammaticales attachées aux noms. Les connecteurs lient des mots ou des phrases.</p>
+                    <h4>Particules de Sujet/Thème</h4>
+                    <p><strong>은/는 (eun/neun)</strong> : La particule de <strong>thème</strong>. Elle introduit le sujet principal, "Quant à moi...", ou marque un contraste. <br>Ex: <code><strong>저는</strong> 학생이에요.</code> (Moi, je suis étudiant.)</p>
+                    <p><strong>이/가 (i/ga)</strong> : La particule de <strong>sujet</strong>. Elle identifie simplement qui fait l'action, souvent pour une nouvelle information. "C'est [sujet] qui...". <br>Ex: <code><strong>날씨가</strong> 좋아요.</code> (Le temps est beau.)</p>
+                    
+                    <h4>Particule d'Objet</h4>
+                    <p><strong>을/를 (eul/reul)</strong> : Marque le complément d'objet direct (COD). Répond à la question "quoi ?". <br>Ex: <code>커피<strong>를</strong> 마셔요.</code> (Je bois du café.)</p>
+                    
+                    <h4>Particules de Lieu</h4>
+                    <p><strong>에 (e)</strong> : Indique une <strong>destination</strong> (avec <code>가다</code>/<code>오다</code>), un <strong>lieu statique</strong> (avec <code>있다</code>/<code>없다</code>), ou le <strong>temps</strong>. <br>Ex: <code>학교<strong>에</strong> 가요</code> (Je vais <strong>à</strong> l'école).</p>
+                    
+                    <p><strong>에서 (eseo)</strong> : Indique le lieu <strong>où une action se déroule</strong>. <br>Ex: <code>학교<strong>에서</strong> 공부해요</code> (J'étudie <strong>à</strong> l'école).</p>
+
+                    <h4>Connecteurs</h4>
+                    <p><strong>하고 / (이)랑 (hago / (i)rang)</strong> : Signifie "et" pour lier des noms. <br>Ex: <code>빵<strong>하고</strong> 물</code> (Du pain et de l'eau).</p>
+                    <p><strong>그리고 (geurigo)</strong> : Signifie "et" pour lier deux phrases. <br>Ex: <code>밥을 먹어요. <strong>그리고</strong> 영화를 봐요.</code> (Je mange. Et je regarde un film.)</p>
+                    <p><strong>하지만 (hajiman)</strong> : Signifie "mais". <br>Ex: <code>비가 와요. <strong>하지만</strong> 저는 학교에 가요.</code> (Il pleut. Mais je vais à l'école.)</p>
+                    <p><strong>그래서 (geuraeseo)</strong> : Signifie "donc", "alors". <br>Ex: <code>피곤해요. <strong>그래서</strong> 자요.</code> (Je suis fatigué. Donc je dors.)</p>
+                </div>
+                <div id="lesson-content-compteurs" class="lesson-content hidden">
+                    <h3>Les Compteurs Coréens</h3>
+                    <p>En coréen, on utilise des mots spécifiques (des "compteurs") pour compter différents types d'objets ou d'êtres vivants. Ces compteurs sont toujours utilisés avec le système de <strong>nombres natifs coréens</strong> (하나, 둘, 셋...).</p>
+                    <h4>Rappel important</h4>
+                    <p>Les nombres 1, 2, 3, 4 et 20 changent de forme devant un compteur :</p>
+                    <ul>
+                        <li>하나 (1) → <strong>한</strong></li>
+                        <li>둘 (2) → <strong>두</strong></li>
+                        <li>셋 (3) → <strong>세</strong></li>
+                        <li>넷 (4) → <strong>네</strong></li>
+                        <li>스물 (20) → <strong>스무</strong></li>
+                    </ul>
+                    <h4>Tableau des Compteurs Courants</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Compteur</th>
+                                <th>Prononciation</th>
+                                <th>Utilisation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>개</strong></td><td>gae</td><td>Objets en général (le plus courant)</td></tr>
+                            <tr><td><strong>명</strong></td><td>myeong</td><td>Personnes (formel)</td></tr>
+                            <tr><td><strong>사람</strong></td><td>saram</td><td>Personnes (courant)</td></tr>
+                            <tr><td><strong>마리</strong></td><td>mari</td><td>Animaux</td></tr>
+                            <tr><td><strong>권</strong></td><td>gwon</td><td>Livres, magazines</td></tr>
+                            <tr><td><strong>장</strong></td><td>jang</td><td>Feuilles, papier, tickets</td></tr>
+                            <tr><td><strong>병</strong></td><td>byeong</td><td>Bouteilles</td></tr>
+                            <tr><td><strong>잔</strong></td><td>jan</td><td>Verres, tasses</td></tr>
+                            <tr><td><strong>대</strong></td><td>dae</td><td>Véhicules, machines</td></tr>
+                            <tr><td><strong>살</strong></td><td>sal</td><td>Âge</td></tr>
+                            <tr><td><strong>번</strong></td><td>beon</td><td>Fois (occurrences)</td></tr>
+                            <tr><td><strong>시</strong></td><td>si</td><td>Heure (le moment)</td></tr>
+                            <tr><td><strong>시간</strong></td><td>sigan</td><td>Heures (durée)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
     </div>
+    
+    <!-- Modals -->
+    <div id="add-deck-modal" class="modal-overlay hidden"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4"><h3 class="text-xl font-bold text-center text-white">Nouveau Paquet</h3><input type="text" id="new-deck-name" placeholder="Nom du paquet" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><div class="flex space-x-4"><button id="save-deck-btn" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Créer</button><button id="cancel-deck-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button></div></div></div>
+    <div id="add-card-modal" class="modal-overlay hidden"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4"><h3 class="text-xl font-bold text-center text-white">Nouvelle Carte</h3><input type="text" id="new-card-french" placeholder="Français" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><input type="text" id="new-card-hangul" placeholder="Coréen (Hangeul)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><input type="text" id="new-card-romanization" placeholder="Romanisation" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><div class="flex space-x-4"><button id="save-card-btn" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Sauvegarder</button><button id="cancel-card-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button></div></div></div>
+    <div id="delete-deck-modal" class="modal-overlay hidden"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4 text-center"><h3 class="text-xl font-bold text-white">Confirmer la suppression</h3><p class="text-gray-300">Êtes-vous sûr de vouloir supprimer ce paquet et toutes ses cartes ? Cette action est irréversible.</p><div class="flex space-x-4"><button id="confirm-delete-deck-btn" class="w-full py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">Supprimer</button><button id="cancel-delete-deck-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button></div></div></div>
+
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, writeBatch, query, getDocs, addDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
@@ -190,20 +321,47 @@
         const auth = getAuth();
         const db = getFirestore(app);
 
-        const chartInstances = {};
+        // Database of default cards and decks
+        const defaultDecks = {
+            'deck_noms': { name: 'Noms', cards: [ {id: 'n1', french: 'Année', hangul: '년', romanization: 'nyeon'}, {id: 'n2', french: 'Argent', hangul: '돈', romanization: 'don'}, {id: 'n3', french: 'Aujourd\'hui', hangul: '오늘', romanization: 'oneul'}, {id: 'n4', french: 'Banque', hangul: '은행', romanization: 'eunhaeng'}, {id: 'n5', french: 'Bureau', hangul: '회사', romanization: 'hoesa'}, {id: 'n6', french: 'Café', hangul: '커피', romanization: 'keopi'}, {id: 'n7', french: 'Cœur / Esprit', hangul: '마음', romanization: 'maeum'}, {id: 'n8', french: 'Corée', hangul: '한국', romanization: 'hanguk'}, {id: 'n9', french: 'Demain', hangul: '내일', romanization: 'naeil'}, {id: 'n10', french: 'Dimanche', hangul: '일요일', romanization: 'Iryoil'}, {id: 'n11', french: 'Eau', hangul: '물', romanization: 'mul'}, {id: 'n12', french: 'École', hangul: '학교', romanization: 'hakgyo'}, {id: 'n13', french: 'Film', hangul: '영화', romanization: 'yeonghwa'}, {id: 'n14', french: 'Hier', hangul: '어제', romanization: 'eoje'}, {id: 'n15', french: 'Hôpital', hangul: '병원', romanization: 'byeong-won'}, {id: 'n16', french: 'Jeudi', hangul: '목요일', romanization: 'Mogyoil'}, {id: 'n17', french: 'Le monde', hangul: '세상', romanization: 'sesang'}, {id: 'n18', french: 'Lundi', hangul: '월요일', romanization: 'Woryoil'}, {id: 'n19', french: 'Magasin', hangul: '가게', romanization: 'gage'}, {id: 'n20', french: 'Maison', hangul: '집', romanization: 'jip'}, {id: 'n21', french: 'Maman / Mère', hangul: '엄마 / 어머니', romanization: 'eomma / eomeoni'}, {id: 'n22', french: 'Marché', hangul: '시장', romanization: 'sijang'}, {id: 'n23', french: 'Mardi', hangul: '화요일', romanization: 'Hwayoil'}, {id: 'n24', french: 'Mercredi', hangul: '수요일', romanization: 'Suyoil'}, {id: 'n25', french: 'Nom', hangul: '이름', romanization: 'ireum'}, {id: 'n26', french: 'Pain', hangul: '빵', romanization: 'ppang'}, {id: 'n27', french: 'Papa / Père', hangul: '아빠 / 아버지', romanization: 'appa / abeoji'}, {id: 'n28', french: 'Parole / Langue', hangul: '말', romanization: 'mal'}, {id: 'n29', french: 'Pensée / Idée', hangul: '생각', romanization: 'saenggak'}, {id: 'n30', french: 'Problème / Question', hangul: '문제', romanization: 'munje'}, {id: 'n31', french: 'Raison / Cause', hangul: '이유', romanization: 'iyu'}, {id: 'n32', french: 'Restaurant', hangul: '식당', romanization: 'sikdang'}, {id: 'n33', french: 'Riz (cuit)', hangul: '밥', romanization: 'bap'}, {id: 'n34', french: 'Samedi', hangul: '토요일', romanization: 'Toyoil'}, {id: 'n35', french: 'Vendredi', hangul: '금요일', romanization: 'Geumyoil'}, {id: 'n36', french: 'Vêtement', hangul: '옷', romanization: 'ot'}, {id: 'n37', french: 'Viande', hangul: '고기', romanization: 'gogi'}, {id: 'n38', french: 'Week-end', hangul: '주말', romanization: 'jumal'} ] },
+            'deck_pronoms': { name: 'Pronoms', cards: [ {id: 'p1', french: 'Elle', hangul: '그녀', romanization: 'Geunyeo'}, {id: 'p2', french: 'Elles', hangul: '그녀들', romanization: 'Geunyeodeul'}, {id: 'p3', french: 'Il / Lui', hangul: '그', romanization: 'Geu'}, {id: 'p4', french: 'Ils / Eux', hangul: '그들', romanization: 'Geudeul'}, {id: 'p5', french: 'Je (Formel)', hangul: '저', romanization: 'Jeo'}, {id: 'p6', french: 'Je (Informel)', hangul: '나', romanization: 'Na'}, {id: 'p7', french: 'Nous (Formel)', hangul: '저희', romanization: 'Jeohui'}, {id: 'p8', french: 'Nous (Inclusif)', hangul: '우리', romanization: 'Uri'}, {id: 'p9', french: 'Tu (Informel)', hangul: '너', romanization: 'Neo'}, {id: 'p10', french: 'Vous (Groupe)', hangul: '여러분', romanization: 'Yeoreobun'} ] },
+            'deck_verbes': { name: 'Verbes', cards: [ {id: 'v1', french: 'Acheter', hangul: '사다', romanization: 'sada'}, {id: 'v2', french: 'Aimer / Apprécier', hangul: '좋아하다', romanization: 'joahada'}, {id: 'v3', french: 'Apprendre', hangul: '배우다', romanization: 'baeuda'}, {id: 'v4', french: 'Attendre', hangul: '기다리다', romanization: 'gidarida'}, {id: 'v5', french: 'Avoir besoin de', hangul: '필요하다', romanization: 'piryohada'}, {id: 'v6', french: 'Boire', hangul: '마시다', romanization: 'masida'}, {id: 'v7', french: 'Donner', hangul: '주다', romanization: 'juda'}, {id: 'v8', french: 'Dormir', hangul: '자다', romanization: 'jada'}, {id: 'v9', french: 'Être (équivalent de)', hangul: '이다', romanization: 'ida'}, {id: 'v10', french: 'Être (se trouver) / Avoir', hangul: '있다', romanization: 'itda'}, {id: 'v11', french: 'Étudier', hangul: '공부하다', romanization: 'gongbuhada'}, {id: 'v12', french: 'Fabriquer / Créer', hangul: '만들다', romanization: 'mandeulda'}, {id: 'v13', french: 'Faire', hangul: '하다', romanization: 'hada'}, {id: 'v14', french: 'Lire', hangul: '읽다', romanization: 'ikda'}, {id: 'v15', french: 'Manger', hangul: '먹다', romanization: 'meokda'}, {id: 'v16', french: 'Ne pas être / Ne pas avoir', hangul: '없다', romanization: 'eopda'}, {id: 'v17', french: 'Ne pas savoir', hangul: '모르다', romanization: 'moreuda'}, {id: 'v18', french: 'Parler / Dire', hangul: '말하다', romanization: 'malhada'}, {id: 'v19', french: 'Penser', hangul: '생각하다', romanization: 'saenggakhada'}, {id: 'v20', french: 'Porter (un vêtement)', hangul: '입다', romanization: 'ipda'}, {id: 'v21', french: 'Recevoir', hangul: '받다', romanization: 'batda'}, {id: 'v22', french: 'Rencontrer', hangul: '만나다', romanization: 'mannada'}, {id: 'v23', french: 'Savoir / Connaître', hangul: '알다', romanization: 'alda'}, {id: 'v24', french: 'Travailler', hangul: '일하다', romanization: 'ilhada'}, {id: 'v25', french: 'Utiliser', hangul: '사용하다', romanization: 'sayonghada'}, {id: 'v26', french: 'Venir', hangul: '오다', romanization: 'oda'}, {id: 'v27', french: 'Voir / Regarder', hangul: '보다', romanization: 'boda'}, {id: 'v28', french: 'Aller', hangul: '가다', romanization: 'gada'} ] },
+            'deck_adjectifs': { name: 'Adjectifs', cards: [ {id: 'a1', french: 'Amusant / Intéressant', hangul: '재미있다', romanization: 'jaemiitda'}, {id: 'a2', french: 'Bon / Bien', hangul: '좋다', romanization: 'jota'}, {id: 'a3', french: 'Délicieux', hangul: '맛있다', romanization: 'masitda'}, {id: 'a4', french: 'Différent', hangul: '다르다', romanization: 'dareuda'}, {id: 'a5', french: 'Difficile', hangul: '어렵다', romanization: 'eoryeopda'}, {id: 'a6', french: 'Être fatigué', hangul: '피곤하다', romanization: 'pigonhada'}, {id: 'a7', french: 'Facile', hangul: '쉽다', romanization: 'swipda'}, {id: 'a8', french: 'Grand', hangul: '크다', romanization: 'keuda'}, {id: 'a9', french: 'Heureux', hangul: '행복하다', romanization: 'haengbokhada'}, {id: 'a10', french: 'Important', hangul: '중요하다', romanization: 'jung-yohada'}, {id: 'a11', french: 'Mauvais', hangul: '나쁘다', romanization: 'nappeuda'}, {id: 'a12', french: 'Petit', hangul: '작다', romanization: 'jakda'}, {id: 'a13', french: 'Similaire', hangul: '비슷하다', romanization: 'biseuthada'}, {id: 'a14', french: 'Triste', hangul: '슬프다', romanization: 'seulpeuda'} ] },
+            'deck_nombres': { name: 'Nombres', cards: [ {id: 'num1', french: 'Zéro (Sino)', hangul: '영 / 공', romanization: 'Yeong / Gong'}, {id: 'num2', french: 'Un (Sino)', hangul: '일', romanization: 'Il'}, {id: 'num3', french: 'Deux (Sino)', hangul: '이', romanization: 'I'}, {id: 'num4', french: 'Trois (Sino)', hangul: '삼', romanization: 'Sam'}, {id: 'num5', french: 'Quatre (Sino)', hangul: '사', romanization: 'Sa'}, {id: 'num6', french: 'Cinq (Sino)', hangul: '오', romanization: 'O'}, {id: 'num7', french: 'Six (Sino)', hangul: '육', romanization: 'Yuk'}, {id: 'num8', french: 'Sept (Sino)', hangul: '칠', romanization: 'Chil'}, {id: 'num9', french: 'Huit (Sino)', hangul: '팔', romanization: 'Pal'}, {id: 'num10', french: 'Neuf (Sino)', hangul: '구', romanization: 'Gu'}, {id: 'num11', french: 'Dix (Sino)', hangul: '십', romanization: 'Sip'}, {id: 'num12', french: 'Un (Natif)', hangul: '하나', romanization: 'hana'}, {id: 'num13', french: 'Deux (Natif)', hangul: '둘', romanization: 'dul'}, {id: 'num14', french: 'Trois (Natif)', hangul: '셋', romanization: 'set'}, {id: 'num15', french: 'Quatre (Natif)', hangul: '넷', romanization: 'net'}, {id: 'num16', french: 'Cinq (Natif)', hangul: '다섯', romanization: 'daseot'}, {id: 'num17', french: 'Six (Natif)', hangul: '여섯', romanization: 'yeoseot'}, {id: 'num18', french: 'Sept (Natif)', hangul: '일곱', romanization: 'ilgop'}, {id: 'num19', french: 'Huit (Natif)', hangul: '여덟', romanization: 'yeodeol'}, {id: 'num20', french: 'Neuf (Natif)', hangul: '아홉', romanization: 'ahop'}, {id: 'num21', french: 'Dix (Natif)', hangul: '열', romanization: 'yeol'} ] },
+            'deck_compteurs': { name: 'Compteurs', cards: [ {id: 'c1', french: 'Objets en général', hangul: '개', romanization: 'gae'}, {id: 'c2', french: 'Personnes (formel)', hangul: '명', romanization: 'myeong'}, {id: 'c3', french: 'Personnes (courant)', hangul: '사람', romanization: 'saram'}, {id: 'c4', french: 'Animaux', hangul: '마리', romanization: 'mari'}, {id: 'c5', french: 'Livres, magazines', hangul: '권', romanization: 'gwon'}, {id: 'c6', french: 'Feuilles, papier, tickets', hangul: '장', romanization: 'jang'}, {id: 'c7', french: 'Bouteilles', hangul: '병', romanization: 'byeong'}, {id: 'c8', french: 'Verres, tasses', hangul: '잔', romanization: 'jan'}, {id: 'c9', french: 'Véhicules, machines', hangul: '대', romanization: 'dae'}, {id: 'c10', french: 'Âge', hangul: '살', romanization: 'sal'}, {id: 'c11', french: 'Fois (occurrences)', hangul: '번', romanization: 'beon'}, {id: 'c12', french: 'Heure (le moment)', hangul: '시', romanization: 'si'}, {id: 'c13', french: 'Heures (durée)', hangul: '시간', romanization: 'sigan'} ] },
+            'deck_adverbes': { name: 'Adverbes & Autres', cards: [ {id: 'adv1', french: 'Très', hangul: '아주 / 너무', romanization: 'aju / neomu'}, {id: 'adv2', french: 'Beaucoup', hangul: '많이', romanization: 'mani'}, {id: 'adv3', french: 'Maintenant', hangul: '지금', romanization: 'jigeum'}, {id: 'adv4', french: 'Ensemble', hangul: '같이', romanization: 'gachi'} ] }
+        };
+
+        // Global state variables
+        let userDecks = {};
+        let currentDeckId = null;
+        let currentCardIndex = 0;
+        let isReviewMode = false;
+        let visibleCards = [];
+
+        // DOM Element references
         const loader = document.getElementById('loader');
         const authOverlay = document.getElementById('auth-overlay');
         const appContent = document.getElementById('app-content');
-        let unsubscribe;
-        let currentLogs = [];
-        let currentProgramData = {};
-        let timerInterval = null;
-        let isEditMode = false;
-        let sortableInstances = [];
+        const card = document.getElementById('flashcard');
+        const cardFront = document.getElementById('card-front');
+        const cardBack = document.getElementById('card-back');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressText = document.getElementById('progress');
+        const deckSidebarDesktop = document.getElementById('deck-sidebar-desktop');
+        const deckSidebarMobile = document.getElementById('deck-sidebar-mobile');
+        const deckTitle = document.getElementById('deck-title');
+        const reviewModeBtn = document.getElementById('review-mode-btn');
+        const addDeckModal = document.getElementById('add-deck-modal');
+        const addCardModal = document.getElementById('add-card-modal');
+        const deleteDeckModal = document.getElementById('delete-deck-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-deck-btn');
+        const flashcardView = document.getElementById('flashcard-view');
+        const lessonView = document.getElementById('lesson-view');
 
-        // --- AUTHENTIFICATION ---
+        // --- Authentication ---
         onAuthStateChanged(auth, user => {
-            if (unsubscribe) unsubscribe();
             if (user) {
                 authOverlay.style.display = 'none';
                 appContent.classList.add('hidden');
@@ -216,481 +374,430 @@
             }
         });
 
-        // --- LOGIQUE PRINCIPALE ---
+        // --- App Initialization ---
         async function initializeAppLogic(user) {
-            document.getElementById('user-email').textContent = `Connecté : ${user.email}`;
-            const programRef = doc(db, "users", user.uid, "program", "main");
+            document.getElementById('user-email').textContent = user.email;
             
-            try {
-                let programSnap = await getDoc(programRef);
-                if (!programSnap.exists()) {
-                    await setupInitialProgram(user.uid);
-                    programSnap = await getDoc(programRef);
+            // Check if default decks have already been created to avoid re-creating them on every load.
+            const defaultCheckRef = doc(db, "users", user.uid, "decks", 'deck_noms'); // Check for one of the default decks
+            const defaultCheckSnap = await getDoc(defaultCheckRef);
+
+            if (!defaultCheckSnap.exists()) {
+                console.log("First time setup for user: creating default decks.");
+                // If the check deck doesn't exist, it's the first time, so create all default decks.
+                const batch = writeBatch(db);
+                for (const deckId in defaultDecks) {
+                    const deckData = defaultDecks[deckId];
+                    const deckRef = doc(db, "users", user.uid, "decks", deckId);
+                    batch.set(deckRef, { name: deckData.name, isDefault: true });
+                    deckData.cards.forEach(cardData => {
+                        const cardRef = doc(db, "users", user.uid, "decks", deckId, "cards", cardData.id);
+                        const initialCardData = { ...cardData, status: 'new' };
+                        batch.set(cardRef, initialCardData);
+                    });
                 }
-                currentProgramData = programSnap.data();
-
-                const logsQuery = query(collection(db, "users", user.uid, "workout_logs"));
-                
-                unsubscribe = onSnapshot(logsQuery, (snapshot) => {
-                    loader.style.display = 'none';
-                    appContent.classList.remove('hidden');
-                    if(!document.querySelector('#tabs .tab-btn.active')) {
-                        document.querySelector('#tabs .tab-btn').classList.add('active');
-                        document.querySelector('#tab-contents .tab-content').classList.add('active');
-                    }
-                    currentLogs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                    renderAll(currentProgramData, currentLogs);
-                });
-            } catch (error) {
-                console.error("Erreur critique:", error);
-                loader.innerHTML = '<p class="text-red-500">Erreur de chargement des données.</p>';
+                await batch.commit();
             }
-        }
 
-        async function setupInitialProgram(userId) {
-            const initialProgram = {
-                "Tirage": [{ id: "exo1", name: "Tractions Normales", sets: "5", reps: "3-6", rest_time: "2 min" }, { id: "exo2", name: "Rowing à la machine", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo3", name: "Tirage Vertical Prise Large", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo4", name: "Curl Biceps à la barre EZ", sets: "3", reps: "10-12", rest_time: "1 min" }],
-                "Poussée": [{ id: "exo5", name: "Dips au poids du corps", sets: "4", reps: "Jusqu'à l'échec", rest_time: "2 min" }, { id: "exo6", name: "Développé Couché (Haltères)", sets: "4", reps: "8-12", rest_time: "1 min 30" }, { id: "exo7", name: "Développé Militaire", sets: "3", reps: "8-10", rest_time: "1 min 30" }, { id: "exo8", name: "Pompes", sets: "3", reps: "Jusqu'à l'échec", rest_time: "1 min" }],
-                "Jambes": [{ id: "exo9", name: "Squat à la barre", sets: "4", reps: "8-10", rest_time: "2 min 30" }, { id: "exo10", name: "Soulevé de Terre Roumain", sets: "4", reps: "10-12", rest_time: "2 min" }, { id: "exo11", name: "Fentes Marchées", sets: "3", reps: "12-15 par jambe", rest_time: "1 min 30" }, { id: "exo12", name: "Relevés de jambes suspendu", sets: "4", reps: "10-15", rest_time: "1 min" }, { id: "exo13", name: "Gainage", sets: "3", reps: "Temps maximum", rest_time: "1 min" }]
-            };
-            await setDoc(doc(db, "users", userId, "program", "main"), initialProgram);
+            // Load all user decks and cards from Firestore
+            const decksCollectionRef = collection(db, "users", user.uid, "decks");
+            const finalDecksSnapshot = await getDocs(query(decksCollectionRef));
+            userDecks = {};
+            for (const deckDoc of finalDecksSnapshot.docs) {
+                const deckId = deckDoc.id;
+                const cardsCollectionRef = collection(db, "users", user.uid, "decks", deckId, "cards");
+                const cardsSnapshot = await getDocs(query(cardsCollectionRef));
+                userDecks[deckId] = { ...deckDoc.data(), id: deckDoc.id, cards: cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) };
+                userDecks[deckId].cards.sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+            }
+            
+            populateDeckSidebars();
+            const firstDeckId = Object.keys(userDecks).find(id => id !== 'training_session'); // Find first non-training deck
+            if (firstDeckId) {
+                await loadDeck(firstDeckId);
+            } else {
+                deckTitle.textContent = "Aucun paquet";
+                currentDeckId = null;
+                updateDashboard();
+                updateCardDisplay();
+            }
+            
+            loader.style.display = 'none';
+            appContent.classList.remove('hidden');
         }
         
-        async function updateProgramInFirestore() {
-            if (!auth.currentUser) return;
-            const programRef = doc(db, "users", auth.currentUser.uid, "program", "main");
-            await setDoc(programRef, currentProgramData);
-        }
+        // --- UI Logic ---
+        function showLesson(lessonId, lessonTitle) {
+            flashcardView.classList.add('hidden');
+            lessonView.classList.remove('hidden');
 
-        // --- AFFICHAGE ---
-        function renderAll(programData, allLogs) {
-            renderProgram(programData, allLogs);
-            renderGraphs(programData, allLogs);
-        }
+            document.querySelectorAll('.lesson-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`lesson-content-${lessonId}`).classList.remove('hidden');
 
-        function renderProgram(programData, allLogs) {
-            document.getElementById('main-content').classList.toggle('edit-mode', isEditMode);
-            for (const [type, exercises] of Object.entries(programData)) {
-                const container = document.getElementById(`${type}-exercises`);
-                if (!container) continue;
-                container.innerHTML = exercises.map(exercise => {
-                    const lastPerf = allLogs.filter(log => log.exerciseId === exercise.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                    let lastPerfHtml = '<p class="text-sm text-gray-500 italic mt-2">Aucune donnée précédente.</p>';
-                    if (lastPerf && lastPerf.sets) {
-                        const setsSummary = lastPerf.sets.map(set => `${set.reps}x${set.weight}kg`).join(', ');
-                        lastPerfHtml = `<p class="text-sm text-orange-400 font-semibold mt-2">Dernière séance : ${setsSummary}</p>`;
-                    }
-                    return `<div class="p-4 bg-gray-700/50 rounded-lg exercise-card" data-id="${exercise.id}">
-                        <div class="flex justify-between items-start">
-                             <div class="flex items-center gap-3 flex-grow">
-                                <div class="edit-mode-item drag-handle text-gray-500 hover:text-gray-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-lg text-gray-100">${exercise.name}</h4>
-                                    <p class="font-semibold mt-1 text-gray-300">${exercise.sets} séries de ${exercise.reps} répétitions</p>
-                                </div>
-                            </div>
-                            <button class="start-timer-btn flex items-center justify-center w-32 gap-2 text-xs font-medium text-white bg-gray-600 hover:bg-gray-500 px-3 py-2 rounded-full transition-transform duration-200 hover:scale-105 flex-shrink-0" data-rest-time="${exercise.rest_time}" data-exercise-name="${exercise.name}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                <span>${exercise.rest_time}</span>
-                            </button>
-                        </div>
-                        ${lastPerfHtml}
-                        <button class="add-performance-btn mt-3 w-full text-sm font-semibold text-orange-500 bg-orange-900/50 hover:bg-orange-900/70 py-2 px-4 rounded-md transition" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Ajouter une performance</button>
-                        <div class="edit-mode-item mt-3 pt-3 border-t border-gray-600/50 justify-end space-x-2">
-                            <button class="edit-exercise-btn text-sm font-semibold text-blue-400 bg-blue-900/50 hover:bg-blue-900/70 py-1 px-3 rounded-md transition" data-program-type="${type}" data-exercise-id="${exercise.id}">Modifier</button>
-                            <button class="delete-exercise-btn text-sm font-semibold text-red-400 bg-red-900/50 hover:bg-red-900/70 py-1 px-3 rounded-md transition" data-program-type="${type}" data-exercise-id="${exercise.id}" data-exercise-name="${exercise.name}">Supprimer</button>
-                        </div>
-                    </div>`;
-                }).join('');
-            }
+            deckTitle.textContent = lessonTitle;
+
+            document.querySelectorAll('.deck-btn, .lesson-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll(`.lesson-btn[data-lesson-id="${lessonId}"]`).forEach(btn => btn.classList.add('active'));
         }
         
-        function renderGraphs(programData, allLogs) {
-            const container = document.getElementById('suivi-graphs-content');
-            container.innerHTML = '';
-            Object.values(chartInstances).forEach(chart => chart.destroy());
-            const exercisesWithLogs = [...new Set(allLogs.map(log => log.exerciseId))];
-            const groupedExercises = {};
-            exercisesWithLogs.forEach(exerciseId => {
-                const programType = Object.keys(programData).find(type => programData[type].some(ex => ex.id === exerciseId));
-                const exercise = programData[programType]?.find(ex => ex.id === exerciseId);
-                if (exercise) {
-                    if (!groupedExercises[programType]) groupedExercises[programType] = [];
-                    groupedExercises[programType].push(exercise);
-                }
-            });
-            for (const [programType, exercises] of Object.entries(groupedExercises)) {
-                const accordion = document.createElement('div');
-                accordion.className = 'border border-gray-700 rounded-lg';
-                accordion.innerHTML = `<button class="accordion-toggle flex justify-between items-center w-full p-4 bg-gray-700/60 hover:bg-gray-700 rounded-t-lg"><span class="text-xl font-bold text-gray-100">${programType}</span><svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content hidden p-4 border-t border-gray-700">${exercises.map(ex => `
-                    <div class="bg-gray-700/30 rounded-lg mb-2">
-                        <div class="flex justify-between items-center p-3">
-                            <button class="exercise-graph-toggle flex-grow text-left flex justify-between items-center" data-exercise-id="${ex.id}"><span class="font-semibold text-gray-200">${ex.name}</span><svg class="chevron-icon w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
-                            <button class="open-history-btn p-2 rounded-full hover:bg-gray-600 ml-2 flex-shrink-0" title="Voir l'historique" data-exercise-id="${ex.id}" data-exercise-name="${ex.name}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4h22v4H1zM1 10h22v4H1zM1 16h22v4H1z"/></svg></button>
-                        </div>
-                        <div id="wrapper-chart-${ex.id}" class="chart-wrapper hidden mt-2 p-2"><div class="chart-container"><canvas id="chart-${ex.id}"></canvas></div></div>
-                    </div>`).join('')}</div>`;
-                container.appendChild(accordion);
-            }
+        async function loadDeck(deckId) {
+            lessonView.classList.add('hidden');
+            flashcardView.classList.remove('hidden');
+            document.getElementById('add-card-btn').classList.remove('hidden');
+            reviewModeBtn.disabled = false;
+        
+            currentDeckId = deckId;
+            deckTitle.textContent = userDecks[deckId].name;
+            isReviewMode = false;
+            reviewModeBtn.textContent = "Révision";
+
+            document.querySelectorAll('.deck-btn, .lesson-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll(`.deck-btn[data-deck-id="${deckId}"]`).forEach(btn => btn.classList.add('active'));
+
+            updateVisibleCards();
+            updateDashboard();
+            updateCardDisplay();
         }
 
-        function createChart(exerciseId, allLogs) {
-            const chartId = `chart-${exerciseId}`;
-            if (chartInstances[chartId]) chartInstances[chartId].destroy();
-            const history = allLogs.filter(log => log.exerciseId === exerciseId && log.sets && log.sets.length > 0).sort((a,b) => new Date(a.date) - new Date(b.date));
-            const wrapper = document.getElementById(`wrapper-chart-${exerciseId}`); 
-            if (!wrapper) return;
-            const chartContainer = wrapper.querySelector('.chart-container');
-            if (history.length < 2) {
-                chartContainer.innerHTML = '<p class="text-center text-gray-400 p-4">Pas assez de données pour afficher un graphique.</p>';
+        function startTrainingSession(cards, trainingTitle) {
+            if (cards.length === 0) {
+                // Remplacer alert() par un modal personnalisé si possible
+                alert("Il n'y a aucune carte à réviser !");
                 return;
             }
-            if (!chartContainer.querySelector('canvas')) chartContainer.innerHTML = `<canvas id="${chartId}"></canvas>`;
-            const labels = history.map(ex => new Date(ex.date).toLocaleDateString('fr-FR'));
-            const isBodyweight = history.every(log => log.sets.every(set => set.weight === 0 || set.weight === null));
-            let chartData, chartLabel;
-            if (isBodyweight) {
-                chartData = history.map(log => log.sets.reduce((totalReps, set) => totalReps + (set.reps || 0), 0));
-                chartLabel = 'Répétitions totales';
-            } else {
-                chartData = history.map(log => log.sets.reduce((totalVolume, set) => totalVolume + ((set.reps || 0) * (set.weight || 0)), 0));
-                chartLabel = 'Volume total (kg)';
-            }
-            const ctx = document.getElementById(chartId).getContext('2d');
-            chartInstances[chartId] = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: chartLabel, data: chartData, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.2)', fill: true, tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: chartLabel, color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(156, 163, 175, 0.2)'} }, x: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(156, 163, 175, 0.2)'} } }, plugins: { legend: { labels: { color: '#9ca3af' } } } } });
+            
+            lessonView.classList.add('hidden');
+            flashcardView.classList.remove('hidden');
+            document.getElementById('add-card-btn').classList.add('hidden');
+            reviewModeBtn.disabled = false;
+
+            const virtualDeckId = 'training_session';
+            // On s'assure que le paquet d'entraînement n'est pas sauvegardé de manière permanente
+            userDecks[virtualDeckId] = { id: virtualDeckId, name: trainingTitle, cards: cards, isTemporary: true };
+            currentDeckId = virtualDeckId;
+
+            deckTitle.textContent = trainingTitle;
+            isReviewMode = false;
+            reviewModeBtn.textContent = "Révision (20 au hasard)";
+            
+            document.querySelectorAll('.deck-btn, .lesson-btn').forEach(btn => btn.classList.remove('active'));
+
+            updateVisibleCards();
+            updateDashboard();
+            updateCardDisplay();
+        }
+
+
+        function populateDeckSidebars() {
+            deckSidebarDesktop.innerHTML = '';
+            deckSidebarMobile.innerHTML = '';
+
+            const createDeckButton = (deckData) => {
+                const allCardsMastered = deckData.cards.length > 0 && deckData.cards.every(c => c.status === 'mastered');
+                const masteredIcon = allCardsMastered ? `<span class="text-green-400" title="Paquet maîtrisé !"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>` : '';
+                const deleteButton = `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`;
+                
+                const button = document.createElement('button');
+                button.dataset.deckId = deckData.id;
+                button.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
+                button.innerHTML = `<span class="flex-grow">${deckData.name}</span> ${masteredIcon} ${deleteButton}`;
+                return button;
+            };
+
+            // --- Desktop Sidebar ---
+            const trainAllButton = document.createElement('button');
+            trainAllButton.id = 'train-all-btn';
+            trainAllButton.className = 'w-full mb-4 py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition';
+            trainAllButton.textContent = "S'entraîner sur tout";
+            deckSidebarDesktop.appendChild(trainAllButton);
+
+            const decksAccordionWrapper = document.createElement('div');
+            decksAccordionWrapper.className = 'space-y-1';
+            const decksToggleBtn = document.createElement('button');
+            decksToggleBtn.className = 'accordion-toggle open w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
+            decksToggleBtn.innerHTML = `<span>Paquets</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+            const decksContentDiv = document.createElement('div');
+            decksContentDiv.className = 'accordion-content pl-4 space-y-1';
+            
+            // CORRECTION: Filtrer le paquet d'entraînement temporaire
+            const sortedDecks = Object.values(userDecks).filter(deck => !deck.isTemporary).sort((a, b) => a.name.localeCompare(b.name));
+            sortedDecks.forEach(deckData => decksContentDiv.appendChild(createDeckButton(deckData)));
+
+            decksAccordionWrapper.appendChild(decksToggleBtn);
+            decksAccordionWrapper.appendChild(decksContentDiv);
+            deckSidebarDesktop.appendChild(decksAccordionWrapper);
+            
+            // --- Lessons Section ---
+            const lessonData = [
+                { id: 'presentation', title: 'Leçon : Se Présenter' },
+                { id: 'phrases', title: 'Leçon : Formation de Phrase' },
+                { id: 'nombres', title: 'Leçon : Utilisation des Nombres' },
+                { id: 'conjugaison', title: 'Leçon : La Conjugaison' },
+                { id: 'particules', title: 'Leçon : Les Particules & Connecteurs' },
+                { id: 'compteurs', title: 'Leçon : Les Compteurs' }
+            ];
+
+            const lessonsAccordionWrapper = document.createElement('div');
+            lessonsAccordionWrapper.className = 'space-y-1 mt-2';
+            const lessonsToggleBtn = document.createElement('button');
+            lessonsToggleBtn.className = 'accordion-toggle w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
+            lessonsToggleBtn.innerHTML = `<span>Leçons</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+            const lessonsContentDiv = document.createElement('div');
+            lessonsContentDiv.className = 'accordion-content hidden pl-4 space-y-1';
+
+            lessonData.forEach(data => {
+                const button = document.createElement('button');
+                button.className = 'lesson-btn w-full text-left p-3 rounded-lg text-blue-400 hover:bg-gray-600 transition';
+                button.dataset.lessonId = data.id;
+                button.dataset.lessonTitle = data.title;
+                button.innerHTML = `<span>${data.title}</span>`;
+                lessonsContentDiv.appendChild(button);
+            });
+
+            lessonsAccordionWrapper.appendChild(lessonsToggleBtn);
+            lessonsAccordionWrapper.appendChild(lessonsContentDiv);
+            deckSidebarDesktop.appendChild(lessonsAccordionWrapper);
         }
         
-        // --- ÉVÉNEMENTS ---
+        function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
+
+        function updateVisibleCards() {
+            const currentDeck = userDecks[currentDeckId];
+            if (!currentDeck) return;
+            
+            if (isReviewMode) {
+                if (currentDeck.isTemporary) {
+                    let allCardsPool = [...currentDeck.cards];
+                    shuffleArray(allCardsPool);
+                    visibleCards = allCardsPool.slice(0, 20);
+                } else {
+                    visibleCards = [...currentDeck.cards];
+                    shuffleArray(visibleCards);
+                }
+            } else {
+                if (currentDeck.isTemporary) {
+                    const allCards = [...currentDeck.cards];
+                    const toReview = allCards.filter(c => c.status === 'learning' || c.status === 'new' || !c.status);
+                    const mastered = allCards.filter(c => c.status === 'mastered');
+
+                    shuffleArray(toReview);
+                    shuffleArray(mastered);
+
+                    visibleCards = [...toReview, ...mastered];
+                } else {
+                    visibleCards = [...currentDeck.cards];
+                }
+            }
+            currentCardIndex = 0;
+        }
+
+        function updateDashboard() {
+            let cardsToCount = [];
+            // Le tableau de bord doit compter toutes les cartes SAUF celles du paquet temporaire
+            const realDecks = Object.values(userDecks).filter(d => !d.isTemporary);
+
+            if (currentDeckId && userDecks[currentDeckId] && !userDecks[currentDeckId].isTemporary) {
+                cardsToCount = userDecks[currentDeckId].cards;
+            } else {
+                // Si on est en session d'entraînement ou si aucun paquet n'est sélectionné, on compte tout
+                cardsToCount = realDecks.flatMap(deck => deck.cards);
+            }
+
+            document.getElementById('mastered-count').textContent = cardsToCount.filter(c => c.status === 'mastered').length;
+            document.getElementById('learning-count').textContent = cardsToCount.filter(c => c.status === 'learning').length;
+            document.getElementById('new-count').textContent = cardsToCount.filter(c => !c.status || c.status === 'new').length;
+        }
+
+        function updateCardDisplay() {
+            const showNavButtons = !isReviewMode;
+            prevBtn.style.visibility = showNavButtons ? 'visible' : 'hidden';
+            nextBtn.style.visibility = showNavButtons ? 'visible' : 'hidden';
+            card.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                if (!currentDeckId || !userDecks[currentDeckId] || visibleCards.length === 0) {
+                    cardFront.innerHTML = `<h2 class="text-xl md:text-2xl font-bold text-center p-4">${isReviewMode ? 'Aucune carte à réviser !' : 'Paquet vide.'}</h2>`;
+                    cardBack.innerHTML = '';
+                    progressText.textContent = '0 / 0';
+                    card.classList.remove('status-new', 'status-learning', 'status-mastered');
+                    prevBtn.disabled = true; nextBtn.disabled = true;
+                    return;
+                }
+                const currentCardData = visibleCards[currentCardIndex];
+                cardFront.innerHTML = `<h2 class="text-4xl md:text-6xl font-bold korean-font">${currentCardData.hangul}</h2>`;
+                cardBack.innerHTML = `<h3 class="text-3xl md:text-5xl font-bold">${currentCardData.french}</h3><p class="text-lg md:text-xl mt-2 text-gray-300">${currentCardData.romanization}</p>`;
+                card.classList.remove('status-new', 'status-learning', 'status-mastered');
+                card.classList.add(`status-${currentCardData.status || 'new'}`);
+                progressText.textContent = `Carte ${currentCardIndex + 1} sur ${visibleCards.length}`;
+                prevBtn.disabled = currentCardIndex === 0;
+                nextBtn.disabled = currentCardIndex === visibleCards.length - 1;
+            }, 150);
+        }
+
+        async function updateCardStatus(newStatus) {
+            if (!auth.currentUser || visibleCards.length === 0) return;
+
+            const currentCard = visibleCards[currentCardIndex];
+            const cardId = currentCard.id;
+            // Trouver le paquet d'origine de la carte, même pendant une session d'entraînement
+            const originalDeckId = currentCard.originalDeckId || currentDeckId;
+
+            if (!originalDeckId || !userDecks[originalDeckId]) {
+                console.error("Impossible de trouver le paquet d'origine pour cette carte.", currentCard);
+                return;
+            }
+
+            // Mettre à jour la carte dans la liste principale
+            const cardInFullDeck = userDecks[originalDeckId]?.cards.find(c => c.id === cardId);
+            if (cardInFullDeck) {
+                cardInFullDeck.status = newStatus;
+            }
+            
+            // Mettre à jour la carte dans la vue actuelle
+            currentCard.status = newStatus;
+
+            card.classList.remove('status-new', 'status-learning', 'status-mastered');
+            card.classList.add(`status-${newStatus}`);
+
+            populateDeckSidebars();
+            updateDashboard();
+
+            const docRef = doc(db, "users", auth.currentUser.uid, "decks", originalDeckId, "cards", cardId);
+            try {
+                await setDoc(docRef, { status: newStatus }, { merge: true });
+            } catch (error) {
+                console.error("Erreur de mise à jour:", error);
+            }
+        }
+
+        // --- Event Listeners ---
         function setupEventListeners() {
-            document.getElementById('close-modal-btn').addEventListener('click', closePerformanceModal);
-            document.getElementById('save-performance-btn').addEventListener('click', savePerformance);
+            card.addEventListener('click', () => {
+                const isFlipped = card.classList.contains('is-flipped');
+                if (isReviewMode) {
+                    if (isFlipped) {
+                        if (currentCardIndex < visibleCards.length - 1) { currentCardIndex++; updateCardDisplay(); } 
+                        else { isReviewMode = false; reviewModeBtn.classList.remove('active'); reviewModeBtn.textContent = 'Révision'; updateVisibleCards(); updateCardDisplay(); }
+                    } else { card.classList.add('is-flipped'); }
+                } else { card.classList.toggle('is-flipped'); }
+            });
+            nextBtn.addEventListener('click', () => { if (currentCardIndex < visibleCards.length - 1) { currentCardIndex++; updateCardDisplay(); } });
+            prevBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; updateCardDisplay(); } });
+            
+            function handleSidebarClick(e) {
+                const deckBtn = e.target.closest('.deck-btn');
+                const lessonBtn = e.target.closest('.lesson-btn');
+                const deleteBtn = e.target.closest('.delete-deck-btn');
+                const accordionToggle = e.target.closest('.accordion-toggle');
+                const trainAllBtn = e.target.closest('#train-all-btn, #train-all-btn-mobile');
+
+                if (deleteBtn) { e.stopPropagation(); openDeleteConfirmation(deckBtn.dataset.deckId); } 
+                else if (deckBtn) { loadDeck(deckBtn.dataset.deckId); } 
+                else if (lessonBtn) { showLesson(lessonBtn.dataset.lessonId, lessonBtn.dataset.lessonTitle); }
+                else if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); }
+                else if (trainAllBtn) {
+                    const allCards = Object.values(userDecks).filter(d => !d.isTemporary).flatMap(deck => deck.cards.map(card => ({...card, originalDeckId: deck.id})));
+                    startTrainingSession(allCards, "Entraînement : Toutes les cartes");
+                }
+            }
+            deckSidebarDesktop.addEventListener('click', handleSidebarClick);
+            deckSidebarMobile.addEventListener('click', handleSidebarClick);
+
+            reviewModeBtn.addEventListener('click', () => {
+                isReviewMode = !isReviewMode;
+                reviewModeBtn.classList.toggle('active', isReviewMode);
+                reviewModeBtn.textContent = isReviewMode ? "Quitter la révision" : "Révision";
+                updateVisibleCards(); updateCardDisplay();
+            });
+            document.getElementById('status-buttons').addEventListener('click', (e) => { const statusBtn = e.target.closest('.status-btn'); if (statusBtn) updateCardStatus(statusBtn.dataset.status); });
+            document.getElementById('add-deck-btn').addEventListener('click', () => addDeckModal.classList.remove('hidden'));
+            document.getElementById('cancel-deck-btn').addEventListener('click', () => addDeckModal.classList.add('hidden'));
+            document.getElementById('save-deck-btn').addEventListener('click', saveNewDeck);
+            document.getElementById('add-card-btn').addEventListener('click', () => addCardModal.classList.remove('hidden'));
+            document.getElementById('cancel-card-btn').addEventListener('click', () => addCardModal.classList.add('hidden'));
+            document.getElementById('save-card-btn').addEventListener('click', saveNewCard);
+            document.getElementById('cancel-delete-deck-btn').addEventListener('click', () => deleteDeckModal.classList.add('hidden'));
             document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('signup-form').addEventListener('submit', handleSignup);
-            document.getElementById('add-set-btn').addEventListener('click', () => addSetRow());
-            document.getElementById('close-timer-modal-btn').addEventListener('click', closeTimerModal);
-            document.getElementById('close-history-modal-btn').addEventListener('click', closeHistoryModal);
-            document.getElementById('toggle-edit-mode-btn').addEventListener('click', toggleEditMode);
-            document.getElementById('exercise-form').addEventListener('submit', saveExercise);
-            document.getElementById('cancel-exercise-btn').addEventListener('click', closeExerciseModal);
-            document.getElementById('cancel-delete-btn').addEventListener('click', () => document.getElementById('delete-confirm-modal').classList.add('hidden'));
-
-            appContent.addEventListener('click', e => {
-                const addPerfBtn = e.target.closest('.add-performance-btn');
-                if (addPerfBtn) { openPerformanceModal(addPerfBtn.dataset.exerciseId, addPerfBtn.dataset.exerciseName); return; }
-                
-                const timerBtn = e.target.closest('.start-timer-btn');
-                if (timerBtn) { startTimer(timerBtn.dataset.restTime, timerBtn.dataset.exerciseName); return; }
-                
-                const accordionToggle = e.target.closest('.accordion-toggle');
-                if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); return; }
-                
-                const exerciseToggle = e.target.closest('.exercise-graph-toggle');
-                if (exerciseToggle) {
-                    const wrapper = exerciseToggle.parentElement.nextElementSibling;
-                    wrapper.classList.toggle('hidden');
-                    exerciseToggle.querySelector('.chevron-icon').classList.toggle('rotate-180');
-                    if (!wrapper.classList.contains('hidden')) createChart(exerciseToggle.dataset.exerciseId, currentLogs);
-                    return;
-                }
-
-                const historyBtn = e.target.closest('.open-history-btn');
-                if (historyBtn) { openHistoryModal(historyBtn.dataset.exerciseId, historyBtn.dataset.exerciseName); return; }
-                
-                const tabBtn = e.target.closest('.tab-btn');
-                if(tabBtn) {
-                    document.querySelectorAll('#tabs .tab-btn, #tab-contents .tab-content').forEach(el => el.classList.remove('active'));
-                    tabBtn.classList.add('active');
-                    document.getElementById(tabBtn.dataset.tab).classList.add('active');
-                }
-                
-                const addExoBtn = e.target.closest('.add-exercise-btn');
-                if (addExoBtn) { openExerciseModal(addExoBtn.dataset.programType); return; }
-
-                const editExoBtn = e.target.closest('.edit-exercise-btn');
-                if (editExoBtn) { openExerciseModal(editExoBtn.dataset.programType, editExoBtn.dataset.exerciseId); return; }
-                
-                const deleteExoBtn = e.target.closest('.delete-exercise-btn');
-                if (deleteExoBtn) { openDeleteConfirmModal(deleteExoBtn.dataset.programType, deleteExoBtn.dataset.exerciseId, deleteExoBtn.dataset.exerciseName); return; }
-            });
-            
-            document.getElementById('performance-modal').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.preventDefault(); });
-            document.getElementById('sets-container').addEventListener('click', e => {
-                const duplicateBtn = e.target.closest('.duplicate-set-btn');
-                if (duplicateBtn) { const row = duplicateBtn.closest('.set-row'); addSetRow(row.querySelector('.set-reps-input').value, row.querySelector('.set-weight-input').value); return; }
-                const removeBtn = e.target.closest('.remove-set-btn');
-                if (removeBtn) { removeBtn.closest('.set-row').remove(); document.querySelectorAll('#sets-container .set-row').forEach((r, index) => { r.querySelector('.set-number').textContent = `${index + 1}.`; }); }
-            });
-            document.getElementById('history-list-container').addEventListener('click', e => {
-                const deleteBtn = e.target.closest('.delete-log-btn');
-                if (!deleteBtn) return;
-                const isArmed = deleteBtn.dataset.armed === 'true';
-                if (isArmed) { deleteLogEntry(deleteBtn.dataset.logId); } else {
-                    document.querySelectorAll('.delete-log-btn[data-armed="true"]').forEach(btn => { btn.dataset.armed = 'false'; btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`; btn.classList.remove('bg-red-700'); });
-                    deleteBtn.dataset.armed = 'true'; deleteBtn.innerHTML = 'Sûr ?'; deleteBtn.classList.add('bg-red-700');
-                    setTimeout(() => { if (deleteBtn.dataset.armed === 'true') { deleteBtn.dataset.armed = 'false'; deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`; deleteBtn.classList.remove('bg-red-700'); } }, 3000);
-                }
-            });
+        }
+        
+        // --- Data Modification Functions ---
+        function openDeleteConfirmation(deckId) {
+            deleteDeckModal.classList.remove('hidden');
+            confirmDeleteBtn.onclick = () => deleteDeck(deckId, true);
         }
 
-        // --- GESTION DU PROGRAMME (CRUD & Drag-and-Drop) ---
-        function initializeSortables() {
-            destroySortables(); // Clear existing instances
-            const exerciseLists = document.querySelectorAll('.exercise-list');
-            exerciseLists.forEach(list => {
-                const programType = list.parentElement.id;
-                const sortable = new Sortable(list, {
-                    animation: 150,
-                    handle: '.drag-handle',
-                    ghostClass: 'sortable-ghost',
-                    onEnd: async (evt) => {
-                        const newOrderIds = Array.from(evt.target.children).map(item => item.dataset.id);
-                        currentProgramData[programType] = newOrderIds.map(id => 
-                            currentProgramData[programType].find(ex => ex.id === id)
-                        );
-                        await updateProgramInFirestore();
-                    }
-                });
-                sortableInstances.push(sortable);
-            });
-        }
-
-        function destroySortables() {
-            sortableInstances.forEach(sortable => sortable.destroy());
-            sortableInstances = [];
-        }
-
-        function toggleEditMode() {
-            isEditMode = !isEditMode;
-            const btn = document.getElementById('toggle-edit-mode-btn');
-            btn.textContent = isEditMode ? "Terminer l'édition" : "Gérer le programme";
-            btn.classList.toggle('bg-orange-600', isEditMode);
-            btn.classList.toggle('hover:bg-orange-700', isEditMode);
-            btn.classList.toggle('bg-gray-600', !isEditMode);
-            btn.classList.toggle('hover:bg-gray-500', !isEditMode);
-            
-            renderProgram(currentProgramData, currentLogs); // Re-render to show/hide handles and other edit UI
-
-            if (isEditMode) {
-                initializeSortables();
-            } else {
-                destroySortables();
+        async function deleteDeck(deckId, updateUI = true) {
+            const batch = writeBatch(db);
+            const cardsSnapshot = await getDocs(collection(db, "users", auth.currentUser.uid, "decks", deckId, "cards"));
+            cardsSnapshot.forEach(doc => batch.delete(doc.ref));
+            batch.delete(doc(db, "users", auth.currentUser.uid, "decks", deckId));
+            await batch.commit();
+            if (updateUI) {
+                delete userDecks[deckId];
+                deleteDeckModal.classList.add('hidden');
+                populateDeckSidebars();
+                if (currentDeckId === deckId) {
+                    const firstDeckId = Object.keys(userDecks).find(id => !userDecks[id].isTemporary);
+                    if (firstDeckId) { loadDeck(firstDeckId); } 
+                    else { deckTitle.textContent = "Aucun paquet"; currentDeckId = null; updateDashboard(); updateCardDisplay(); }
+                }
             }
         }
 
-        function openExerciseModal(programType, exerciseId = null) {
-            const modal = document.getElementById('exercise-modal');
-            const form = document.getElementById('exercise-form');
-            form.reset();
-            document.getElementById('exercise-modal-program-type').value = programType;
-            if (exerciseId) {
-                // Edit mode
-                const exercise = currentProgramData[programType].find(ex => ex.id === exerciseId);
-                document.getElementById('exercise-modal-title').textContent = "Modifier l'exercice";
-                document.getElementById('exercise-modal-id').value = exerciseId;
-                document.getElementById('exercise-name').value = exercise.name;
-                document.getElementById('exercise-sets').value = exercise.sets;
-                document.getElementById('exercise-reps').value = exercise.reps;
-                document.getElementById('exercise-rest').value = exercise.rest_time;
-            } else {
-                // Add mode
-                document.getElementById('exercise-modal-title').textContent = "Ajouter un exercice";
-                document.getElementById('exercise-modal-id').value = '';
-            }
-            modal.classList.remove('hidden');
+        async function saveNewDeck() {
+            const deckNameInput = document.getElementById('new-deck-name');
+            const deckName = deckNameInput.value.trim();
+            if (!deckName) return;
+            const newDeckRef = doc(collection(db, "users", auth.currentUser.uid, "decks"));
+            await setDoc(newDeckRef, { name: deckName, isDefault: false });
+            userDecks[newDeckRef.id] = { id: newDeckRef.id, name: deckName, isDefault: false, cards: [] };
+            populateDeckSidebars();
+            loadDeck(newDeckRef.id);
+            deckNameInput.value = '';
+            addDeckModal.classList.add('hidden');
+        }
+        
+        async function saveNewCard() {
+            const newCard = {
+                french: document.getElementById('new-card-french').value.trim(),
+                hangul: document.getElementById('new-card-hangul').value.trim(),
+                romanization: document.getElementById('new-card-romanization').value.trim(),
+                status: 'new'
+            };
+            if (!newCard.french || !newCard.hangul) return;
+            const newCardRef = await addDoc(collection(db, "users", auth.currentUser.uid, "decks", currentDeckId, "cards"), newCard);
+            newCard.id = newCardRef.id;
+            userDecks[currentDeckId].cards.push(newCard);
+            updateVisibleCards(); updateDashboard(); updateCardDisplay();
+            document.getElementById('new-card-french').value = '';
+            document.getElementById('new-card-hangul').value = '';
+            document.getElementById('new-card-romanization').value = '';
+            addCardModal.classList.add('hidden');
         }
 
-        function closeExerciseModal() {
-            document.getElementById('exercise-modal').classList.add('hidden');
-        }
-
-        async function saveExercise(e) {
+        async function handleAuth(e, authFunc) {
             e.preventDefault();
-            const exerciseId = document.getElementById('exercise-modal-id').value;
-            const programType = document.getElementById('exercise-modal-program-type').value;
-            const updatedExercise = {
-                name: document.getElementById('exercise-name').value.trim(),
-                sets: document.getElementById('exercise-sets').value.trim(),
-                reps: document.getElementById('exercise-reps').value.trim(),
-                rest_time: document.getElementById('exercise-rest').value.trim()
-            };
-
-            if (!updatedExercise.name || !updatedExercise.sets || !updatedExercise.reps || !updatedExercise.rest_time) {
-                alert("Veuillez remplir tous les champs.");
-                return;
-            }
-
-            if (exerciseId) { // Edit
-                const index = currentProgramData[programType].findIndex(ex => ex.id === exerciseId);
-                currentProgramData[programType][index] = { ...currentProgramData[programType][index], ...updatedExercise };
-            } else { // Add
-                updatedExercise.id = 'exo' + Date.now();
-                currentProgramData[programType].push(updatedExercise);
-            }
-            
-            await updateProgramInFirestore();
-            renderProgram(currentProgramData, currentLogs); // Re-render the list
-            closeExerciseModal();
+            const button = e.target.querySelector('button[type="submit"]');
+            const email = e.target.querySelector('input[type="email"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+            button.classList.add('btn-loading');
+            try { await authFunc(auth, email, password); } 
+            catch (error) { handleAuthError(error); } 
+            finally { button.classList.remove('btn-loading'); }
         }
+        const handleLogin = (e) => handleAuth(e, signInWithEmailAndPassword);
+        const handleSignup = (e) => handleAuth(e, createUserWithEmailAndPassword);
 
-        function openDeleteConfirmModal(programType, exerciseId, exerciseName) {
-            const modal = document.getElementById('delete-confirm-modal');
-            document.getElementById('delete-confirm-text').textContent = `Êtes-vous sûr de vouloir supprimer l'exercice "${exerciseName}" ? Cette action est irréversible.`;
-            const confirmBtn = document.getElementById('confirm-delete-btn');
-            confirmBtn.onclick = () => deleteExercise(programType, exerciseId);
-            modal.classList.remove('hidden');
-        }
-
-        async function deleteExercise(programType, exerciseId) {
-            const index = currentProgramData[programType].findIndex(ex => ex.id === exerciseId);
-            if (index > -1) {
-                currentProgramData[programType].splice(index, 1);
-                await updateProgramInFirestore();
-            }
-            renderProgram(currentProgramData, currentLogs); // Re-render the list
-            document.getElementById('delete-confirm-modal').classList.add('hidden');
-        }
-
-        // --- GESTION DE L'HISTORIQUE ---
-        function openHistoryModal(exerciseId, exerciseName) {
-            const modal = document.getElementById('history-modal');
-            const title = document.getElementById('history-modal-title');
-            const container = document.getElementById('history-list-container');
-            
-            title.textContent = `Historique pour : ${exerciseName}`;
-            container.innerHTML = '';
-
-            const exerciseLogs = currentLogs
-                .filter(log => log.exerciseId === exerciseId)
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            if (exerciseLogs.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-center">Aucune séance enregistrée pour cet exercice.</p>';
-            } else {
-                exerciseLogs.forEach(log => {
-                    const date = log.date ? new Date(log.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Date inconnue';
-                    
-                    const setsSummary = (log.sets && Array.isArray(log.sets))
-                        ? log.sets.map(set => `${set.reps || 0}x${set.weight || 0}kg`).join(', ')
-                        : '<span class="text-yellow-500">Ancien format de données</span>';
-
-                    const entryDiv = document.createElement('div');
-                    entryDiv.className = 'history-entry flex justify-between items-center p-3 bg-gray-700 rounded-lg';
-                    entryDiv.innerHTML = `
-                        <div>
-                            <p class="font-bold text-gray-200">${date}</p>
-                            <p class="text-sm text-gray-400">${setsSummary}</p>
-                        </div>
-                        <button class="delete-log-btn p-2 rounded-full text-white bg-red-500 hover:bg-red-600 transition" data-log-id="${log.id}" data-armed="false" title="Supprimer cette entrée">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
-                    `;
-                    container.appendChild(entryDiv);
-                });
-            }
-            modal.classList.remove('hidden');
-        }
-        function closeHistoryModal() { document.getElementById('history-modal').classList.add('hidden'); }
-        async function deleteLogEntry(logId) {
-            if (!logId) return;
-            try {
-                await deleteDoc(doc(db, "users", auth.currentUser.uid, "workout_logs", logId));
-                closeHistoryModal();
-            } catch (error) { console.error("Erreur lors de la suppression:", error); alert("Impossible de supprimer l'entrée."); }
-        }
-
-        // --- GESTION DU MINUTEUR ---
-        function parseDuration(durationString) {
-            let totalSeconds = 0; const cleanedString = durationString.replace('sec', '').trim();
-            const minMatch = cleanedString.match(/(\d+(\.\d+)?)\s*min/);
-            if (minMatch) {
-                totalSeconds += parseFloat(minMatch[1]) * 60;
-                const remainingString = cleanedString.substring(minMatch[0].length).trim();
-                if (remainingString) { const trailingSeconds = parseInt(remainingString, 10); if (!isNaN(trailingSeconds)) totalSeconds += trailingSeconds; }
-            } else if (cleanedString.includes(' ')) { const parts = cleanedString.split(/\s+/); totalSeconds += (parseInt(parts[0], 10) * 60) + (parseInt(parts[1], 10) || 0);
-            } else if (!isNaN(parseFloat(cleanedString))) { totalSeconds += parseFloat(cleanedString); }
-            return totalSeconds;
-        }
-        function startTimer(durationString, exerciseName) {
-            if (timerInterval) clearInterval(timerInterval);
-
-            if (typeof Tone !== 'undefined' && Tone.context.state !== 'running') {
-                Tone.start();
-            }
-
-            const totalSeconds = parseDuration(durationString); if (totalSeconds === 0) return;
-            let secondsRemaining = totalSeconds;
-            const modal = document.getElementById('timer-modal'), display = document.getElementById('timer-display'), progress = document.getElementById('timer-progress'), nameDisplay = document.getElementById('timer-exercise-name');
-            nameDisplay.textContent = exerciseName; modal.classList.remove('hidden');
-            const updateTimer = () => {
-                const minutes = Math.floor(secondsRemaining / 60), seconds = secondsRemaining % 60;
-                display.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                progress.style.width = `${(secondsRemaining / totalSeconds) * 100}%`;
-                if (secondsRemaining <= 0) {
-                    clearInterval(timerInterval); timerInterval = null; display.textContent = "FINI !";
-                    progress.style.width = '100%'; progress.classList.remove('bg-orange-600'); progress.classList.add('bg-green-500');
-                    
-                    if (typeof Tone !== 'undefined') { 
-                        const synth = new Tone.Synth().toDestination(); 
-                        synth.triggerAttackRelease("C5", "8n", Tone.now()); 
-                        synth.triggerAttackRelease("G5", "8n", Tone.now() + 0.2); 
-                    }
-                }
-                secondsRemaining--;
-            };
-            updateTimer(); timerInterval = setInterval(updateTimer, 1000);
-        }
-        function closeTimerModal() {
-            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-            document.getElementById('timer-modal').classList.add('hidden');
-            const progress = document.getElementById('timer-progress');
-            progress.classList.remove('bg-green-500'); progress.classList.add('bg-orange-600');
-        }
-
-        // --- GESTION DES PERFORMANCES ---
-        function addSetRow(reps = '', weight = '0') {
-            const container = document.getElementById('sets-container'); const setIndex = container.children.length + 1;
-            const div = document.createElement('div'); div.className = 'set-row flex items-center space-x-2';
-            div.innerHTML = `<span class="set-number font-semibold text-gray-400 w-8 text-right pr-2">${setIndex}.</span><input type="number" placeholder="Reps" class="set-reps-input w-full px-3 py-1 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white" value="${reps}"><span class="text-gray-400">reps à</span><input type="number" placeholder="Poids" class="set-weight-input w-full px-3 py-1 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white" value="${weight}"><span class="text-gray-400">kg</span><button class="duplicate-set-btn set-row-btn text-orange-500 hover:text-orange-400 p-1" title="Dupliquer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="remove-set-btn set-row-btn text-red-500 hover:text-red-400 p-1" title="Supprimer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>`;
-            container.appendChild(div);
-        }
-        function openPerformanceModal(exerciseId, exerciseName) {
-            document.getElementById('modal-exercise-id').value = exerciseId; document.getElementById('modal-title').textContent = `Ajouter Performance pour ${exerciseName}`;
-            document.getElementById('sets-container').innerHTML = ''; addSetRow();
-            document.getElementById('performance-modal').classList.remove('hidden'); document.querySelector('#sets-container .set-reps-input').focus();
-        }
-        function closePerformanceModal() { document.getElementById('performance-modal').classList.add('hidden'); }
-        async function savePerformance() {
-            const exerciseId = document.getElementById('modal-exercise-id').value; const sets = [];
-            document.querySelectorAll('#sets-container .set-row').forEach(row => {
-                const reps = parseInt(row.querySelector('.set-reps-input').value); const weight = parseFloat(row.querySelector('.set-weight-input').value);
-                if (!isNaN(reps) && reps > 0) { sets.push({ reps, weight: isNaN(weight) ? 0 : weight }); }
-            });
-            if (sets.length === 0) return alert("Veuillez entrer au moins une série valide.");
-            const log = { exerciseId, sets, date: new Date().toISOString().split('T')[0] };
-            try { await addDoc(collection(db, "users", auth.currentUser.uid, "workout_logs"), log); closePerformanceModal(); } catch (e) { console.error("Erreur:", e); alert("Une erreur est survenue."); }
-        }
-
-        // --- GESTION AUTH ---
         function handleAuthError(error) {
             const errorElement = document.getElementById('auth-error');
-            switch (error.code) {
-                case 'auth/wrong-password': case 'auth/invalid-credential': errorElement.textContent = 'Mot de passe ou e-mail incorrect.'; break;
-                case 'auth/user-not-found': errorElement.textContent = 'Aucun compte trouvé pour cet e-mail.'; break;
-                case 'auth/weak-password': errorElement.textContent = 'Le mot de passe doit faire au moins 6 caractères.'; break;
-                case 'auth/email-already-in-use': errorElement.textContent = 'Cette adresse e-mail est déjà utilisée.'; break;
-                default: errorElement.textContent = 'Une erreur est survenue.';
-            }
-        }
-        async function handleLogin(e) {
-            e.preventDefault(); const button = e.target.querySelector('button[type="submit"]'); button.classList.add('btn-loading');
-            try { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value); } catch (error) { handleAuthError(error); } finally { button.classList.remove('btn-loading'); }
-        }
-        async function handleSignup(e) {
-            e.preventDefault(); const button = e.target.querySelector('button[type="submit"]'); button.classList.add('btn-loading');
-            try { await createUserWithEmailAndPassword(auth, document.getElementById('signup-email').value, document.getElementById('signup-password').value); } catch (error) { handleAuthError(error); } finally { button.classList.remove('btn-loading'); }
+            const errorMap = {
+                'auth/wrong-password': 'Mot de passe ou e-mail incorrect.', 'auth/invalid-credential': 'Mot de passe ou e-mail incorrect.',
+                'auth/user-not-found': 'Aucun compte trouvé pour cet e-mail.', 'auth/weak-password': 'Le mot de passe doit faire au moins 6 caractères.',
+                'auth/email-already-in-use': 'Cette adresse e-mail est déjà utilisée.'
+            };
+            errorElement.textContent = errorMap[error.code] || 'Une erreur est survenue.';
         }
         
         setupEventListeners();
