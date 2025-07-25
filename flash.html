@@ -566,11 +566,41 @@
             if (!currentDeck) return;
             
             if (isReviewMode) {
+                // Smart review logic for "S'entrainer sur tout"
                 if (currentDeck.isTemporary) {
-                    let allCardsPool = [...currentDeck.cards];
-                    shuffleArray(allCardsPool);
-                    visibleCards = allCardsPool.slice(0, 20);
+                    const allCards = [...currentDeck.cards];
+                    const toReviewCards = allCards.filter(c => c.status === 'learning' || c.status === 'new' || !c.status);
+                    const masteredCards = allCards.filter(c => c.status === 'mastered');
+
+                    shuffleArray(toReviewCards);
+                    shuffleArray(masteredCards);
+
+                    let finalReviewList = [];
+                    const reviewSize = 20;
+                    
+                    // Prioritize cards to review (e.g., 75% of the session)
+                    const targetToReviewCount = Math.ceil(reviewSize * 0.75);
+                    const actualToReviewCount = Math.min(toReviewCards.length, targetToReviewCount);
+                    finalReviewList.push(...toReviewCards.slice(0, actualToReviewCount));
+
+                    // Fill the rest with mastered cards
+                    const remainingSlots = reviewSize - finalReviewList.length;
+                    if (remainingSlots > 0) {
+                        const masteredCount = Math.min(masteredCards.length, remainingSlots);
+                        finalReviewList.push(...masteredCards.slice(0, masteredCount));
+                    }
+                    
+                    // If we still don't have enough cards (e.g. less than 20 total), fill with more "to review" cards if available
+                     if (finalReviewList.length < reviewSize && toReviewCards.length > actualToReviewCount) {
+                        const moreToReviewNeeded = reviewSize - finalReviewList.length;
+                        const availableMoreToReview = toReviewCards.slice(actualToReviewCount);
+                        finalReviewList.push(...availableMoreToReview.slice(0, moreToReviewNeeded));
+                    }
+
+                    shuffleArray(finalReviewList);
+                    visibleCards = finalReviewList;
                 } else {
+                    // Standard shuffle for single deck review
                     visibleCards = [...currentDeck.cards];
                     shuffleArray(visibleCards);
                 }
