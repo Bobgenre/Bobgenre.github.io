@@ -378,18 +378,26 @@
         async function initializeAppLogic(user) {
             document.getElementById('user-email').textContent = user.email;
             
-            // Set up default decks for the user if they don't exist
-            const batch = writeBatch(db);
-            for (const deckId in defaultDecks) {
-                const deckData = defaultDecks[deckId];
-                const deckRef = doc(db, "users", user.uid, "decks", deckId);
-                batch.set(deckRef, { name: deckData.name, isDefault: true }, { merge: true });
-                deckData.cards.forEach(cardData => {
-                    const cardRef = doc(db, "users", user.uid, "decks", deckId, "cards", cardData.id);
-                    batch.set(cardRef, cardData, { merge: true });
-                });
+            // Check if default decks have already been created to avoid re-creating them on every load.
+            const defaultCheckRef = doc(db, "users", user.uid, "decks", 'deck_noms'); // Check for one of the default decks
+            const defaultCheckSnap = await getDoc(defaultCheckRef);
+
+            if (!defaultCheckSnap.exists()) {
+                console.log("First time setup for user: creating default decks.");
+                // If the check deck doesn't exist, it's the first time, so create all default decks.
+                const batch = writeBatch(db);
+                for (const deckId in defaultDecks) {
+                    const deckData = defaultDecks[deckId];
+                    const deckRef = doc(db, "users", user.uid, "decks", deckId);
+                    batch.set(deckRef, { name: deckData.name, isDefault: true });
+                    deckData.cards.forEach(cardData => {
+                        const cardRef = doc(db, "users", user.uid, "decks", deckId, "cards", cardData.id);
+                        const initialCardData = { ...cardData, status: 'new' };
+                        batch.set(cardRef, initialCardData);
+                    });
+                }
+                await batch.commit();
             }
-            await batch.commit();
 
             // Load all user decks and cards from Firestore
             const decksCollectionRef = collection(db, "users", user.uid, "decks");
@@ -404,7 +412,7 @@
             }
             
             populateDeckSidebars();
-            const firstDeckId = Object.keys(userDecks)[0];
+            const firstDeckId = Object.keys(userDecks).find(id => id !== 'training_session'); // Find first non-training deck
             if (firstDeckId) {
                 await loadDeck(firstDeckId);
             } else {
@@ -453,6 +461,7 @@
 
         function startTrainingSession(cards, trainingTitle) {
             if (cards.length === 0) {
+                // Remplacer alert() par un modal personnalisé si possible
                 alert("Il n'y a aucune carte à réviser !");
                 return;
             }
@@ -463,7 +472,8 @@
             reviewModeBtn.disabled = false;
 
             const virtualDeckId = 'training_session';
-            userDecks[virtualDeckId] = { id: virtualDeckId, name: trainingTitle, cards: cards };
+            // On s'assure que le paquet d'entraînement n'est pas sauvegardé de manière permanente
+            userDecks[virtualDeckId] = { id: virtualDeckId, name: trainingTitle, cards: cards, isTemporary: true };
             currentDeckId = virtualDeckId;
 
             deckTitle.textContent = trainingTitle;
@@ -509,7 +519,8 @@
             const decksContentDiv = document.createElement('div');
             decksContentDiv.className = 'accordion-content pl-4 space-y-1';
             
-            const sortedDecks = Object.values(userDecks).sort((a, b) => a.name.localeCompare(b.name));
+            // CORRECTION: Filtrer le paquet d'entraînement temporaire
+            const sortedDecks = Object.values(userDecks).filter(deck => !deck.isTemporary).sort((a, b) => a.name.localeCompare(b.name));
             sortedDecks.forEach(deckData => decksContentDiv.appendChild(createDeckButton(deckData)));
 
             decksAccordionWrapper.appendChild(decksToggleBtn);
@@ -555,7 +566,7 @@
             if (!currentDeck) return;
             
             if (isReviewMode) {
-                if (currentDeckId === 'training_session') {
+                if (currentDeck.isTemporary) {
                     let allCardsPool = [...currentDeck.cards];
                     shuffleArray(allCardsPool);
                     visibleCards = allCardsPool.slice(0, 20);
@@ -564,7 +575,7 @@
                     shuffleArray(visibleCards);
                 }
             } else {
-                if (currentDeckId === 'training_session') {
+                if (currentDeck.isTemporary) {
                     const allCards = [...currentDeck.cards];
                     const toReview = allCards.filter(c => c.status === 'learning' || c.status === 'new' || !c.status);
                     const mastered = allCards.filter(c => c.status === 'mastered');
@@ -582,13 +593,14 @@
 
         function updateDashboard() {
             let cardsToCount = [];
-            if (currentDeckId === 'training_session') {
-                cardsToCount = Object.values(userDecks).filter(d => d.id !== 'training_session').flatMap(deck => deck.cards);
-            } else if (userDecks[currentDeckId]) {
+            // Le tableau de bord doit compter toutes les cartes SAUF celles du paquet temporaire
+            const realDecks = Object.values(userDecks).filter(d => !d.isTemporary);
+
+            if (currentDeckId && userDecks[currentDeckId] && !userDecks[currentDeckId].isTemporary) {
                 cardsToCount = userDecks[currentDeckId].cards;
             } else {
-                 ['mastered-count', 'learning-count', 'new-count'].forEach(id => document.getElementById(id).textContent = 0);
-                 return;
+                // Si on est en session d'entraînement ou si aucun paquet n'est sélectionné, on compte tout
+                cardsToCount = realDecks.flatMap(deck => deck.cards);
             }
 
             document.getElementById('mastered-count').textContent = cardsToCount.filter(c => c.status === 'mastered').length;
@@ -627,18 +639,21 @@
 
             const currentCard = visibleCards[currentCardIndex];
             const cardId = currentCard.id;
-            const originalDeckId = currentDeckId === 'training_session' ? currentCard.originalDeckId : currentDeckId;
+            // Trouver le paquet d'origine de la carte, même pendant une session d'entraînement
+            const originalDeckId = currentCard.originalDeckId || currentDeckId;
 
-            if (!originalDeckId) {
-                console.error("Impossible de trouver le paquet d'origine pour cette carte.");
+            if (!originalDeckId || !userDecks[originalDeckId]) {
+                console.error("Impossible de trouver le paquet d'origine pour cette carte.", currentCard);
                 return;
             }
 
+            // Mettre à jour la carte dans la liste principale
             const cardInFullDeck = userDecks[originalDeckId]?.cards.find(c => c.id === cardId);
             if (cardInFullDeck) {
                 cardInFullDeck.status = newStatus;
             }
             
+            // Mettre à jour la carte dans la vue actuelle
             currentCard.status = newStatus;
 
             card.classList.remove('status-new', 'status-learning', 'status-mastered');
@@ -654,18 +669,49 @@
                 console.error("Erreur de mise à jour:", error);
             }
         }
+        
+        // --- Card Flip Logic ---
+        function flipCard() {
+            const isFlipped = card.classList.contains('is-flipped');
+            if (isReviewMode) {
+                if (isFlipped) {
+                    if (currentCardIndex < visibleCards.length - 1) { 
+                        currentCardIndex++; 
+                        updateCardDisplay(); 
+                    } else { 
+                        isReviewMode = false; 
+                        reviewModeBtn.classList.remove('active'); 
+                        reviewModeBtn.textContent = 'Révision'; 
+                        updateVisibleCards(); 
+                        updateCardDisplay(); 
+                    }
+                } else { 
+                    card.classList.add('is-flipped'); 
+                }
+            } else { 
+                card.classList.toggle('is-flipped'); 
+            }
+        }
 
         // --- Event Listeners ---
         function setupEventListeners() {
-            card.addEventListener('click', () => {
-                const isFlipped = card.classList.contains('is-flipped');
-                if (isReviewMode) {
-                    if (isFlipped) {
-                        if (currentCardIndex < visibleCards.length - 1) { currentCardIndex++; updateCardDisplay(); } 
-                        else { isReviewMode = false; reviewModeBtn.classList.remove('active'); reviewModeBtn.textContent = 'Révision'; updateVisibleCards(); updateCardDisplay(); }
-                    } else { card.classList.add('is-flipped'); }
-                } else { card.classList.toggle('is-flipped'); }
+            card.addEventListener('click', flipCard);
+
+            document.addEventListener('keydown', (e) => {
+                // Do not trigger shortcuts if a modal is open or if typing in an input field
+                const isModalOpen = !!document.querySelector('.modal-overlay:not(.hidden)');
+                const isTyping = e.target.tagName === 'INPUT';
+                if (isModalOpen || isTyping) return;
+
+                // Only trigger card-related shortcuts if the flashcard view is active
+                if (!flashcardView.classList.contains('hidden')) {
+                    if (e.code === 'Space') {
+                        e.preventDefault(); // Prevent default space action (like scrolling)
+                        flipCard();
+                    }
+                }
             });
+
             nextBtn.addEventListener('click', () => { if (currentCardIndex < visibleCards.length - 1) { currentCardIndex++; updateCardDisplay(); } });
             prevBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; updateCardDisplay(); } });
             
@@ -681,7 +727,7 @@
                 else if (lessonBtn) { showLesson(lessonBtn.dataset.lessonId, lessonBtn.dataset.lessonTitle); }
                 else if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); }
                 else if (trainAllBtn) {
-                    const allCards = Object.values(userDecks).filter(d => d.id !== 'training_session').flatMap(deck => deck.cards.map(card => ({...card, originalDeckId: deck.id})));
+                    const allCards = Object.values(userDecks).filter(d => !d.isTemporary).flatMap(deck => deck.cards.map(card => ({...card, originalDeckId: deck.id})));
                     startTrainingSession(allCards, "Entraînement : Toutes les cartes");
                 }
             }
@@ -724,7 +770,7 @@
                 deleteDeckModal.classList.add('hidden');
                 populateDeckSidebars();
                 if (currentDeckId === deckId) {
-                    const firstDeckId = Object.keys(userDecks)[0];
+                    const firstDeckId = Object.keys(userDecks).find(id => !userDecks[id].isTemporary);
                     if (firstDeckId) { loadDeck(firstDeckId); } 
                     else { deckTitle.textContent = "Aucun paquet"; currentDeckId = null; updateDashboard(); updateCardDisplay(); }
                 }
