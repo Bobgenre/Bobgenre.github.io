@@ -130,7 +130,14 @@
                 <div class="scene h-56 md:h-64"><div id="flashcard" class="card rounded-xl"><div id="card-front" class="card__face card__face--front"></div><div id="card-back" class="card__face card__face--back"></div></div></div>
                 <p id="progress" class="text-center text-gray-500 mt-4"></p>
                 <div id="status-buttons" class="flex justify-center space-x-3 mt-6"><button data-status="learning" class="status-btn flex-1 py-3 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition">À revoir</button><button data-status="mastered" class="status-btn flex-1 py-3 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Maîtrisé</button></div>
-                <div class="flex justify-between items-center mt-4 space-x-2"><button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button><button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Révision</button><button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button></div>
+                <div class="flex justify-between items-center mt-4 space-x-2">
+                    <button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button>
+                    <div class="flex-grow flex justify-center items-center space-x-2">
+                        <button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Révision</button>
+                        <button id="review-all-btn" class="hidden bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Tout réviser</button>
+                    </div>
+                    <button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button>
+                </div>
             </div>
             
             <div id="lesson-view" class="hidden bg-gray-800 p-6 rounded-lg max-h-[65vh] overflow-y-auto">
@@ -337,6 +344,7 @@
         let currentDeckId = null;
         let currentCardIndex = 0;
         let isReviewMode = false;
+        let isReviewAllMode = false; // New flag for "review all" mode
         let visibleCards = [];
 
         // DOM Element references
@@ -353,6 +361,7 @@
         const deckSidebarMobile = document.getElementById('deck-sidebar-mobile');
         const deckTitle = document.getElementById('deck-title');
         const reviewModeBtn = document.getElementById('review-mode-btn');
+        const reviewAllBtn = document.getElementById('review-all-btn');
         const addDeckModal = document.getElementById('add-deck-modal');
         const addCardModal = document.getElementById('add-card-modal');
         const deleteDeckModal = document.getElementById('delete-deck-modal');
@@ -445,6 +454,7 @@
             flashcardView.classList.remove('hidden');
             document.getElementById('add-card-btn').classList.remove('hidden');
             reviewModeBtn.disabled = false;
+            reviewAllBtn.classList.add('hidden'); // Hide "Tout réviser" button for normal decks
         
             currentDeckId = deckId;
             deckTitle.textContent = userDecks[deckId].name;
@@ -470,6 +480,7 @@
             flashcardView.classList.remove('hidden');
             document.getElementById('add-card-btn').classList.add('hidden');
             reviewModeBtn.disabled = false;
+            reviewAllBtn.classList.remove('hidden'); // Show "Tout réviser" button
 
             const virtualDeckId = 'training_session';
             // On s'assure que le paquet d'entraînement n'est pas sauvegardé de manière permanente
@@ -566,45 +577,49 @@
             if (!currentDeck) return;
             
             if (isReviewMode) {
-                // Smart review logic for "S'entrainer sur tout"
                 if (currentDeck.isTemporary) {
-                    const allCards = [...currentDeck.cards];
-                    const toReviewCards = allCards.filter(c => c.status === 'learning' || c.status === 'new' || !c.status);
-                    const masteredCards = allCards.filter(c => c.status === 'mastered');
+                     if (isReviewAllMode) {
+                        // User wants to review ALL cards from the training session
+                        visibleCards = [...currentDeck.cards];
+                        shuffleArray(visibleCards);
+                    } else {
+                        // Smart 20 review logic
+                        const allCards = [...currentDeck.cards];
+                        const toReviewCards = allCards.filter(c => c.status === 'learning' || c.status === 'new' || !c.status);
+                        const masteredCards = allCards.filter(c => c.status === 'mastered');
 
-                    shuffleArray(toReviewCards);
-                    shuffleArray(masteredCards);
+                        shuffleArray(toReviewCards);
+                        shuffleArray(masteredCards);
 
-                    let finalReviewList = [];
-                    const reviewSize = 20;
-                    
-                    // Prioritize cards to review (e.g., 75% of the session)
-                    const targetToReviewCount = Math.ceil(reviewSize * 0.75);
-                    const actualToReviewCount = Math.min(toReviewCards.length, targetToReviewCount);
-                    finalReviewList.push(...toReviewCards.slice(0, actualToReviewCount));
+                        let finalReviewList = [];
+                        const reviewSize = 20;
+                        
+                        const targetToReviewCount = Math.ceil(reviewSize * 0.75);
+                        const actualToReviewCount = Math.min(toReviewCards.length, targetToReviewCount);
+                        finalReviewList.push(...toReviewCards.slice(0, actualToReviewCount));
 
-                    // Fill the rest with mastered cards
-                    const remainingSlots = reviewSize - finalReviewList.length;
-                    if (remainingSlots > 0) {
-                        const masteredCount = Math.min(masteredCards.length, remainingSlots);
-                        finalReviewList.push(...masteredCards.slice(0, masteredCount));
+                        const remainingSlots = reviewSize - finalReviewList.length;
+                        if (remainingSlots > 0) {
+                            const masteredCount = Math.min(masteredCards.length, remainingSlots);
+                            finalReviewList.push(...masteredCards.slice(0, masteredCount));
+                        }
+                        
+                         if (finalReviewList.length < reviewSize && toReviewCards.length > actualToReviewCount) {
+                            const moreToReviewNeeded = reviewSize - finalReviewList.length;
+                            const availableMoreToReview = toReviewCards.slice(actualToReviewCount);
+                            finalReviewList.push(...availableMoreToReview.slice(0, moreToReviewNeeded));
+                        }
+
+                        shuffleArray(finalReviewList);
+                        visibleCards = finalReviewList;
                     }
-                    
-                    // If we still don't have enough cards (e.g. less than 20 total), fill with more "to review" cards if available
-                     if (finalReviewList.length < reviewSize && toReviewCards.length > actualToReviewCount) {
-                        const moreToReviewNeeded = reviewSize - finalReviewList.length;
-                        const availableMoreToReview = toReviewCards.slice(actualToReviewCount);
-                        finalReviewList.push(...availableMoreToReview.slice(0, moreToReviewNeeded));
-                    }
-
-                    shuffleArray(finalReviewList);
-                    visibleCards = finalReviewList;
                 } else {
                     // Standard shuffle for single deck review
                     visibleCards = [...currentDeck.cards];
                     shuffleArray(visibleCards);
                 }
             } else {
+                // Logic for non-review mode
                 if (currentDeck.isTemporary) {
                     const allCards = [...currentDeck.cards];
                     const toReview = allCards.filter(c => c.status === 'learning' || c.status === 'new' || !c.status);
@@ -623,13 +638,11 @@
 
         function updateDashboard() {
             let cardsToCount = [];
-            // Le tableau de bord doit compter toutes les cartes SAUF celles du paquet temporaire
             const realDecks = Object.values(userDecks).filter(d => !d.isTemporary);
 
             if (currentDeckId && userDecks[currentDeckId] && !userDecks[currentDeckId].isTemporary) {
                 cardsToCount = userDecks[currentDeckId].cards;
             } else {
-                // Si on est en session d'entraînement ou si aucun paquet n'est sélectionné, on compte tout
                 cardsToCount = realDecks.flatMap(deck => deck.cards);
             }
 
@@ -669,7 +682,6 @@
 
             const currentCard = visibleCards[currentCardIndex];
             const cardId = currentCard.id;
-            // Trouver le paquet d'origine de la carte, même pendant une session d'entraînement
             const originalDeckId = currentCard.originalDeckId || currentDeckId;
 
             if (!originalDeckId || !userDecks[originalDeckId]) {
@@ -677,13 +689,11 @@
                 return;
             }
 
-            // Mettre à jour la carte dans la liste principale
             const cardInFullDeck = userDecks[originalDeckId]?.cards.find(c => c.id === cardId);
             if (cardInFullDeck) {
                 cardInFullDeck.status = newStatus;
             }
             
-            // Mettre à jour la carte dans la vue actuelle
             currentCard.status = newStatus;
 
             card.classList.remove('status-new', 'status-learning', 'status-mastered');
@@ -709,9 +719,14 @@
                         currentCardIndex++; 
                         updateCardDisplay(); 
                     } else { 
-                        isReviewMode = false; 
-                        reviewModeBtn.classList.remove('active'); 
-                        reviewModeBtn.textContent = 'Révision'; 
+                        // Exit review mode automatically after the last card
+                        isReviewMode = false;
+                        isReviewAllMode = false;
+                        reviewModeBtn.classList.remove('active');
+                        reviewModeBtn.textContent = (currentDeckId === 'training_session') ? "Révision (20 au hasard)" : "Révision";
+                        if (currentDeckId === 'training_session') {
+                            reviewAllBtn.classList.remove('hidden');
+                        }
                         updateVisibleCards(); 
                         updateCardDisplay(); 
                     }
@@ -728,15 +743,13 @@
             card.addEventListener('click', flipCard);
 
             document.addEventListener('keydown', (e) => {
-                // Do not trigger shortcuts if a modal is open or if typing in an input field
                 const isModalOpen = !!document.querySelector('.modal-overlay:not(.hidden)');
                 const isTyping = e.target.tagName === 'INPUT';
                 if (isModalOpen || isTyping) return;
 
-                // Only trigger card-related shortcuts if the flashcard view is active
                 if (!flashcardView.classList.contains('hidden')) {
                     if (e.code === 'Space') {
-                        e.preventDefault(); // Prevent default space action (like scrolling)
+                        e.preventDefault();
                         flipCard();
                     }
                 }
@@ -765,11 +778,35 @@
             deckSidebarMobile.addEventListener('click', handleSidebarClick);
 
             reviewModeBtn.addEventListener('click', () => {
-                isReviewMode = !isReviewMode;
-                reviewModeBtn.classList.toggle('active', isReviewMode);
-                reviewModeBtn.textContent = isReviewMode ? "Quitter la révision" : "Révision";
-                updateVisibleCards(); updateCardDisplay();
+                if (isReviewMode) { // Exit any review mode
+                    isReviewMode = false;
+                    isReviewAllMode = false;
+                    reviewModeBtn.classList.remove('active');
+                    reviewModeBtn.textContent = (currentDeckId === 'training_session') ? "Révision (20 au hasard)" : "Révision";
+                    if (currentDeckId === 'training_session') {
+                        reviewAllBtn.classList.remove('hidden');
+                    }
+                } else { // Enter smart 20 review mode
+                    isReviewMode = true;
+                    isReviewAllMode = false;
+                    reviewModeBtn.classList.add('active');
+                    reviewModeBtn.textContent = "Quitter la révision";
+                    reviewAllBtn.classList.add('hidden');
+                }
+                updateVisibleCards(); 
+                updateCardDisplay();
             });
+
+            reviewAllBtn.addEventListener('click', () => {
+                isReviewMode = true;
+                isReviewAllMode = true;
+                reviewModeBtn.classList.add('active');
+                reviewModeBtn.textContent = "Quitter la révision";
+                reviewAllBtn.classList.add('hidden');
+                updateVisibleCards();
+                updateCardDisplay();
+            });
+
             document.getElementById('status-buttons').addEventListener('click', (e) => { const statusBtn = e.target.closest('.status-btn'); if (statusBtn) updateCardStatus(statusBtn.dataset.status); });
             document.getElementById('add-deck-btn').addEventListener('click', () => addDeckModal.classList.remove('hidden'));
             document.getElementById('cancel-deck-btn').addEventListener('click', () => addDeckModal.classList.add('hidden'));
