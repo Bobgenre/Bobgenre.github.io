@@ -31,31 +31,34 @@
     <div id="app" class="max-w-7xl mx-auto">
 
         <!-- Vue Liste (Page d'accueil) -->
-        <div id="list-view" class="animate-fade-in">
+        <div id="home-view" class="animate-fade-in">
             <header class="text-center mb-8">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">LEC Été 2025</h1>
                 <p class="text-lg text-gray-300 mt-2">Classement le plus probable par groupe</p>
+                <button id="show-analysis-button" class="mt-4 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                    Voir l'Analyse des Matchs
+                </button>
             </header>
             <main>
                 <div>
                     <h2 class="text-3xl font-bold text-white mb-4 mt-8 border-b-2 border-indigo-500 pb-2">Groupe A</h2>
-                    <div id="group-a-list" class="space-y-4 mt-4">
-                        <!-- Les cartes des équipes du groupe A seront injectées ici -->
-                    </div>
+                    <div id="group-a-list" class="space-y-4 mt-4"></div>
                 </div>
                 <div>
                     <h2 class="text-3xl font-bold text-white mb-4 mt-12 border-b-2 border-purple-500 pb-2">Groupe B</h2>
-                    <div id="group-b-list" class="space-y-4 mt-4">
-                        <!-- Les cartes des équipes du groupe B seront injectées ici -->
-                    </div>
+                    <div id="group-b-list" class="space-y-4 mt-4"></div>
                 </div>
             </main>
         </div>
 
-        <!-- Vue Détail (Page d'une équipe) -->
-        <div id="detail-view" class="hidden animate-fade-in">
-            <!-- Le contenu détaillé d'une équipe sera injecté ici -->
-        </div>
+        <!-- Vue Détail Équipe -->
+        <div id="team-detail-view" class="hidden animate-fade-in"></div>
+
+        <!-- Vue Liste des Analyses de Matchs -->
+        <div id="analysis-list-view" class="hidden animate-fade-in"></div>
+        
+        <!-- Vue Détail d'un Match -->
+        <div id="match-detail-view" class="hidden animate-fade-in"></div>
 
         <footer class="text-center text-gray-500 text-sm mt-12 pb-4">
             <p>Analyse basée sur les classements de puissance et les résultats au 05/08/2025.</p>
@@ -67,22 +70,42 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- Données des équipes ---
             const teamsData = [
-              { id: 'kc', name: 'Karmine Corp', tag: 'KC', rank: 1, logo: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Karmine_Corp_logo.svg', group: 'A', record: '2-0', roster: ['Canna', 'Yike', 'Vladi', 'Caliste', 'Targamas'], pastMatches: [{ opponent: 'NAVI', result: '2-0', win: true }, { opponent: 'GX', result: '2-1', win: true }], schedule: [{ opponent: 'MKOI', date: '10/08/2025', winChance: 75 }, { opponent: 'VIT', date: '18/08/2025', winChance: 83 }], analysis: "Considérée comme la meilleure équipe de la ligue par de nombreux experts, la Karmine Corp est la grande favorite du Groupe A. Avec un style de jeu agressif et des joueurs de classe mondiale à chaque poste, leur qualification en Upper Bracket semble presque assurée. Leur match contre Movistar KOI sera déterminant pour la première place.", probabilities: [{ position: 1, chance: 75 }, { position: 2, chance: 20 }, { position: 3, chance: 4 }, { position: 4, chance: 1 }, { position: 5, chance: 0 }] },
+              { id: 'kc', name: 'Karmine Corp', tag: 'KC', rank: 1, logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/2/2d/Karmine_Corplogo_square.png/revision/latest/scale-to-width-down/220?cb=20240319113928', group: 'A', record: '2-0', roster: ['Canna', 'Yike', 'Vladi', 'Caliste', 'Targamas'], pastMatches: [{ opponent: 'NAVI', result: '2-0', win: true }, { opponent: 'GX', result: '2-1', win: true }], schedule: [{ opponent: 'MKOI', date: '10/08/2025', winChance: 75 }, { opponent: 'VIT', date: '18/08/2025', winChance: 83 }], analysis: "Considérée comme la meilleure équipe de la ligue par de nombreux experts, la Karmine Corp est la grande favorite du Groupe A. Avec un style de jeu agressif et des joueurs de classe mondiale à chaque poste, leur qualification en Upper Bracket semble presque assurée. Leur match contre Movistar KOI sera déterminant pour la première place.", probabilities: [{ position: 1, chance: 75 }, { position: 2, chance: 20 }, { position: 3, chance: 4 }, { position: 4, chance: 1 }, { position: 5, chance: 0 }] },
               { id: 'g2', name: 'G2 Esports', tag: 'G2', rank: 2, logo: 'https://upload.wikimedia.org/wikipedia/pt/thumb/2/23/G2_Esports_logo.png/250px-G2_Esports_logo.png', group: 'B', record: '0-0', roster: ['BrokenBlade', 'SkewMond', 'Caps', 'Hans Sama', 'Labrov'], pastMatches: [], schedule: [{ opponent: 'TH', date: '09/08/2025', winChance: 78 }, { opponent: 'FNC', date: '17/08/2025', winChance: 67 }, { opponent: 'BDS', date: '18/08/2025', winChance: 75 }, { opponent: 'SK', date: '25/08/2025', winChance: 82 }], analysis: "G2 reste une force dominante en Europe. Leur capacité à innover et la puissance de leurs individualités, menées par Caps, en font les favoris du Groupe B. Leur affrontement contre Fnatic sera le point culminant de la phase de groupe et décidera très probablement de la première place.", probabilities: [{ position: 1, chance: 70 }, { position: 2, chance: 25 }, { position: 3, chance: 4 }, { position: 4, chance: 1 }, { position: 5, chance: 0 }] },
-              { id: 'mkoi', name: 'Movistar KOI', tag: 'MKOI', rank: 3, logo: 'https://upload.wikimedia.org/wikipedia/fr/b/bd/Movistar_KOIlogo_square.png', group: 'A', record: '0-0', roster: ['Myrwn', 'Elyoya', 'Jojopyun', 'Supa', 'Alvaro'], pastMatches: [], schedule: [{ opponent: 'GX', date: '09/08/2025', winChance: 73 }, { opponent: 'KC', date: '10/08/2025', winChance: 25 }, { opponent: 'NAVI', date: '16/08/2025', winChance: 77 }, { opponent: 'VIT', date: '26/08/2025', winChance: 63 }], analysis: "Champions du Spring Split, Movistar KOI est un prétendant sérieux au titre. Leur synergie mid-jungle entre Jojopyun et Elyoya est l'une des meilleures de la ligue. Ils sont les principaux concurrents de la KC pour la tête du Groupe A et ont de fortes chances de finir dans le top 2.", probabilities: [{ position: 1, chance: 20 }, { position: 2, chance: 70 }, { position: 3, chance: 8 }, { position: 4, chance: 2 }, { position: 5, chance: 0 }] },
-              { id: 'fnc', name: 'Fnatic', tag: 'FNC', rank: 4, logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/f/f4/Fnatic-Logo-2020.svg/1200px-Fnatic-Logo-2020.svg.png', group: 'B', record: '2-0', roster: ['Oscarinin', 'Razork', 'Poby', 'Upset', 'Mikyx'], pastMatches: [{ opponent: 'TH', result: '2-0', win: true }, { opponent: 'SK', result: '2-0', win: true }], schedule: [{ opponent: 'BDS', date: '10/08/2025', winChance: 60 }, { opponent: 'G2', date: '17/08/2025', winChance: 33 }], analysis: "Avec un départ parfait à 2-0, Fnatic a confirmé son statut de cador. L'équipe semble solide et déterminée. Leur duel contre G2 sera l'un des matchs les plus attendus de la saison et déterminera probablement qui obtiendra la première place du groupe B, synonyme de position favorable pour les playoffs.", probabilities: [{ position: 1, chance: 25 }, { position: 2, chance: 65 }, { position: 3, chance: 8 }, { position: 4, chance: 2 }, { position: 5, chance: 0 }] },
-              { id: 'vit', name: 'Team Vitality', tag: 'VIT', rank: 5, logo: 'https://upload.wikimedia.org/wikipedia/fr/3/30/Team_Vitality_Logo_2018.png', group: 'A', record: '0-1', roster: ['Naak Nako', 'Lyncas', 'Czajek', 'Carzzy', 'Fleshy'], pastMatches: [{ opponent: 'GX', result: '1-2', win: false }], schedule: [{ opponent: 'NAVI', date: '17/08/2025', winChance: 67 }, { opponent: 'KC', date: '18/08/2025', winChance: 17 }, { opponent: 'MKOI', date: '26/08/2025', winChance: 38 }], analysis: "Team Vitality est une équipe solide du milieu de tableau, capable de surprendre les meilleures équipes mais aussi de connaître des baisses de régime. Dans un groupe A très relevé, leur objectif sera de sécuriser la 3ème ou 4ème place pour se qualifier en playoffs. Chaque victoire sera cruciale.", probabilities: [{ position: 1, chance: 2 }, { position: 2, chance: 10 }, { position: 3, chance: 50 }, { position: 4, chance: 35 }, { position: 5, chance: 3 }] },
+              { id: 'mkoi', name: 'Movistar KOI', tag: 'MKOI', rank: 3, logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/b/bd/Movistar_KOIlogo_square.png/revision/latest/scale-to-width-down/220?cb=20240528162718', group: 'A', record: '0-0', roster: ['Myrwn', 'Elyoya', 'Jojopyun', 'Supa', 'Alvaro'], pastMatches: [], schedule: [{ opponent: 'GX', date: '09/08/2025', winChance: 73 }, { opponent: 'KC', date: '10/08/2025', winChance: 25 }, { opponent: 'NAVI', date: '16/08/2025', winChance: 77 }, { opponent: 'VIT', date: '26/08/2025', winChance: 63 }], analysis: "Champions du Spring Split, Movistar KOI est un prétendant sérieux au titre. Leur synergie mid-jungle entre Jojopyun et Elyoya est l'une des meilleures de la ligue. Ils sont les principaux concurrents de la KC pour la tête du Groupe A et ont de fortes chances de finir dans le top 2.", probabilities: [{ position: 1, chance: 20 }, { position: 2, chance: 70 }, { position: 3, chance: 8 }, { position: 4, chance: 2 }, { position: 5, chance: 0 }] },
+              { id: 'fnc', name: 'Fnatic', tag: 'FNC', rank: 4, logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/f/fc/Fnaticlogo_square.png/revision/latest/scale-to-width-down/220?cb=20210319200026', group: 'B', record: '2-0', roster: ['Oscarinin', 'Razork', 'Poby', 'Upset', 'Mikyx'], pastMatches: [{ opponent: 'TH', result: '2-0', win: true }, { opponent: 'SK', result: '2-0', win: true }], schedule: [{ opponent: 'BDS', date: '10/08/2025', winChance: 60 }, { opponent: 'G2', date: '17/08/2025', winChance: 33 }], analysis: "Avec un départ parfait à 2-0, Fnatic a confirmé son statut de cador. L'équipe semble solide et déterminée. Leur duel contre G2 sera l'un des matchs les plus attendus de la saison et déterminera probablement qui obtiendra la première place du groupe B, synonyme de position favorable pour les playoffs.", probabilities: [{ position: 1, chance: 25 }, { position: 2, chance: 65 }, { position: 3, chance: 8 }, { position: 4, chance: 2 }, { position: 5, chance: 0 }] },
+              { id: 'vit', name: 'Team Vitality', tag: 'VIT', rank: 5, logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/8/86/Team_Vitalitylogo_square.png/revision/latest/scale-to-width-down/220?cb=20230224142251', group: 'A', record: '0-1', roster: ['Naak Nako', 'Lyncas', 'Czajek', 'Carzzy', 'Fleshy'], pastMatches: [{ opponent: 'GX', result: '1-2', win: false }], schedule: [{ opponent: 'NAVI', date: '17/08/2025', winChance: 67 }, { opponent: 'KC', date: '18/08/2025', winChance: 17 }, { opponent: 'MKOI', date: '26/08/2025', winChance: 37 }], analysis: "Team Vitality est une équipe solide du milieu de tableau, capable de surprendre les meilleures équipes mais aussi de connaître des baisses de régime. Dans un groupe A très relevé, leur objectif sera de sécuriser la 3ème ou 4ème place pour se qualifier en playoffs. Chaque victoire sera cruciale.", probabilities: [{ position: 1, chance: 2 }, { position: 2, chance: 10 }, { position: 3, chance: 50 }, { position: 4, chance: 35 }, { position: 5, chance: 3 }] },
               { id: 'bds', name: 'Team BDS', tag: 'BDS', rank: 6, logo: 'https://maxesport.gg/medias/2022/01/Logo-BDS.webp', group: 'B', record: '1-1', roster: ['Rooster', 'Boukada', 'nuc', 'Ice', 'Parus'], pastMatches: [{ opponent: 'SK', result: '2-0', win: true }, { opponent: 'FNC', result: '0-2', win: false }], schedule: [{ opponent: 'FNC', date: '10/08/2025', winChance: 40 }, { opponent: 'G2', date: '18/08/2025', winChance: 25 }], analysis: "Team BDS se trouve dans une position similaire à Vitality. Ils ont le potentiel pour se qualifier en playoffs mais devront se battre pour chaque point contre les géants du groupe. Leurs matchs contre Heretics et SK seront décisifs pour espérer une qualification.", probabilities: [{ position: 1, chance: 1 }, { position: 2, chance: 5 }, { position: 3, chance: 45 }, { position: 4, chance: 40 }, { position: 5, chance: 9 }] },
-              { id: 'th', name: 'Team Heretics', tag: 'TH', rank: 7, logo: 'https://upload.wikimedia.org/wikipedia/fr/6/69/Team_Heretics.png', group: 'B', record: '0-1', roster: ['Carlsen', 'Sheo', 'Kamiloo', 'Flakked', 'Stend'], pastMatches: [{ opponent: 'FNC', result: '0-2', win: false }], schedule: [{ opponent: 'G2', date: '09/08/2025', winChance: 22 }, { opponent: 'SK', date: '16/08/2025', winChance: 56 }, { opponent: 'BDS', date: '25/08/2025', winChance: 46 }], analysis: "Team Heretics a montré de belles choses mais manque de régularité face aux meilleures équipes. Leur qualification passera impérativement par des victoires contre leurs concurrents directs pour les 3ème et 4ème places. Le match contre BDS sera particulièrement important.", probabilities: [{ position: 1, chance: 1 }, { position: 2, chance: 3 }, { position: 3, chance: 30 }, { position: 4, chance: 46 }, { position: 5, chance: 20 }] },
+              { id: 'th', name: 'Team Heretics', tag: 'TH', rank: 7, logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/b/bf/Team_Hereticslogo_square.png/revision/latest/scale-to-width-down/220?cb=20221027072323', group: 'B', record: '0-1', roster: ['Carlsen', 'Sheo', 'Kamiloo', 'Flakked', 'Stend'], pastMatches: [{ opponent: 'FNC', result: '0-2', win: false }], schedule: [{ opponent: 'G2', date: '09/08/2025', winChance: 22 }, { opponent: 'SK', date: '16/08/2025', winChance: 56 }, { opponent: 'BDS', date: '25/08/2025', winChance: 46 }], analysis: "Team Heretics a montré de belles choses mais manque de régularité face aux meilleures équipes. Leur qualification passera impérativement par des victoires contre leurs concurrents directs pour les 3ème et 4ème places. Le match contre BDS sera particulièrement important.", probabilities: [{ position: 1, chance: 1 }, { position: 2, chance: 3 }, { position: 3, chance: 30 }, { position: 4, chance: 46 }, { position: 5, chance: 20 }] },
               { id: 'gx', name: 'GIANTX', tag: 'GX', rank: 8, logo: 'https://upload.wikimedia.org/wikipedia/en/0/0e/GiantX_logo.svg', group: 'A', record: '1-1', roster: ['Lot', 'Isma', 'Jackies', 'Noah', 'Jun'], pastMatches: [{ opponent: 'KC', result: '1-2', win: false }, { opponent: 'VIT', result: '2-1', win: true }], schedule: [{ opponent: 'MKOI', date: '09/08/2025', winChance: 27 }, { opponent: 'NAVI', date: '26/08/2025', winChance: 56 }], analysis: "GIANTX se bat dans le peloton du milieu de tableau. Leur départ à 1-1 est encourageant. Pour se qualifier, ils devront probablement remporter leur match contre NAVI et espérer une victoire surprise contre une des équipes du haut de tableau, ou compter sur les résultats des autres.", probabilities: [{ position: 1, chance: 1 }, { position: 2, chance: 5 }, { position: 3, chance: 35 }, { position: 4, chance: 49 }, { position: 5, chance: 10 }] },
               { id: 'sk', name: 'SK Gaming', tag: 'SK', rank: 9, logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/SK_Gaming_Logo_2022.svg/768px-SK_Gaming_Logo_2022.svg.png', group: 'B', record: '0-2', roster: ['DnDn', 'Skeanz', 'Abbedagge', 'Keduii', 'Loopy'], pastMatches: [{ opponent: 'BDS', result: '0-2', win: false }, { opponent: 'FNC', result: '0-2', win: false }], schedule: [{ opponent: 'TH', date: '16/08/2025', winChance: 44 }, { opponent: 'G2', date: '25/08/2025', winChance: 18 }], analysis: "Avec un départ difficile à 0-2, la tâche s'annonce compliquée pour SK Gaming. Considérés comme l'une des équipes les plus faibles du groupe, chaque match sera un défi. Leur objectif principal sera de remporter une victoire, notamment contre Team Heretics, pour tenter de jouer les trouble-fêtes.", probabilities: [{ position: 1, chance: 0 }, { position: 2, chance: 1 }, { position: 3, chance: 5 }, { position: 4, chance: 28 }, { position: 5, chance: 66 }] },
-              { id: 'navi', name: 'Natus Vincere', tag: 'NAVI', rank: 10, logo: 'https://upload.wikimedia.org/wikipedia/fr/archive/1/1f/20210705211602%21Natus_Vincere_Logo.svg', group: 'A', record: '0-1', roster: ['Adam', 'Thayger', 'Larssen', 'Hans SamD', 'Malrang'], pastMatches: [{ opponent: 'KC', result: '0-2', win: false }], schedule: [{ opponent: 'MKOI', date: '16/08/2025', winChance: 23 }, { opponent: 'VIT', date: '17/08/2025', winChance: 33 }, { opponent: 'GX', date: '26/08/2025', winChance: 44 }], analysis: "Nouveau venu dans la ligue, NAVI est l'inconnue de ce split. Le groupe A est particulièrement difficile et leur qualification serait une grande surprise. L'équipe cherchera à acquérir de l'expérience et à créer des surprises, mais une place dans le bas du tableau semble le plus probable.", probabilities: [{ position: 1, chance: 0 }, { position: 2, chance: 1 }, { position: 3, chance: 3 }, { position: 4, chance: 20 }, { position: 5, chance: 76 }] },
+              { id: 'navi', name: 'Natus Vincere', tag: 'NAVI', rank: 10, logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/ef/Natus_Vincerelogo_square.png/revision/latest/scale-to-width-down/220?cb=20250519222608', group: 'A', record: '0-1', roster: ['Adam', 'Thayger', 'Larssen', 'Hans SamD', 'Malrang'], pastMatches: [{ opponent: 'KC', result: '0-2', win: false }], schedule: [{ opponent: 'MKOI', date: '16/08/2025', winChance: 23 }, { opponent: 'VIT', date: '17/08/2025', winChance: 33 }, { opponent: 'GX', date: '26/08/2025', winChance: 44 }], analysis: "Nouveau venu dans la ligue, NAVI est l'inconnue de ce split. Le groupe A est particulièrement difficile et leur qualification serait une grande surprise. L'équipe cherchera à acquérir de l'expérience et à créer des surprises, mais une place dans le bas du tableau semble le plus probable.", probabilities: [{ position: 1, chance: 0 }, { position: 2, chance: 1 }, { position: 3, chance: 3 }, { position: 4, chance: 20 }, { position: 5, chance: 76 }] },
+            ];
+            
+            const matchupsAnalysis = [
+                { teams: ['KC', 'MKOI'], analysis: "Le choc des titans du Groupe A. KC est considéré comme le favori du tournoi, mais MKOI est le champion en titre du Spring. L'agressivité et la puissance brute de KC, combinées à leur excellente forme (2-0), leur donnent un avantage substantiel sur MKOI qui n'a pas encore joué. Le modèle favorise fortement la dynamique actuelle.", powerScore: { team1: 'KC', team2: 'MKOI', breakdown: [{ criteria: 'Forme (40%)', winner: 'KC', reason: 'KC est en 2-0, MKOI en 0-0. Avantage majeur.' }, { criteria: 'Effectif (30%)', winner: 'KC', reason: 'Plafond de performance légèrement supérieur.' }, { criteria: 'Style (20%)', winner: 'KC', reason: 'Le style proactif est favorisé par le modèle.' }, { criteria: 'Historique (10%)', winner: 'MKOI', reason: 'MKOI a remporté le Spring Split.' }] } },
+                { teams: ['KC', 'VIT'], analysis: "KC est largement favori. Leur niveau de jeu global, leur coordination et la force de leur effectif sont bien supérieurs à ceux de Vitality. La forme actuelle de KC (2-0) face à celle de Vitality (0-1) creuse encore plus l'écart.", powerScore: { team1: 'KC', team2: 'VIT', breakdown: [{ criteria: 'Forme (40%)', winner: 'KC', reason: 'Dynamique opposée (2-0 vs 0-1).' }, { criteria: 'Effectif (30%)', winner: 'KC', reason: 'Qualité individuelle supérieure à chaque poste.' }, { criteria: 'Style (20%)', winner: 'KC', reason: 'Style plus cohérent et décisif.' }, { criteria: 'Historique (10%)', winner: 'KC', reason: 'Historiquement plus dominant.' }] } },
+                { teams: ['G2', 'FNC'], analysis: "Le 'Clásico' européen. Fnatic a démarré très fort (2-0), tandis que G2 n'a pas encore joué. Cependant, le modèle considère G2 comme légèrement supérieur sur le papier en termes de plafond de performance et d'expérience. Fnatic a l'avantage de la forme, mais G2 a celui du prestige, ce qui rend le match serré avec un léger avantage pour G2.", powerScore: { team1: 'G2', team2: 'FNC', breakdown: [{ criteria: 'Forme (40%)', winner: 'FNC', reason: 'FNC est en 2-0, G2 en 0-0.' }, { criteria: 'Effectif (30%)', winner: 'G2', reason: 'Plafond de performance et expérience de G2 supérieurs.' }, { criteria: 'Style (20%)', winner: 'G2', reason: 'La créativité de G2 est un avantage clé.' }, { criteria: 'Historique (10%)', winner: 'G2', reason: 'G2 mène dans les confrontations directes.' }] } },
+                { teams: ['G2', 'BDS'], analysis: "G2 est un net favori. Bien que BDS soit une équipe de playoffs solide, ils n'ont pas encore montré la capacité de rivaliser avec la puissance de feu et la vitesse de jeu de G2 sur l'ensemble de la carte. L'historique des confrontations est aussi largement en faveur de G2.", powerScore: { team1: 'G2', team2: 'BDS', breakdown: [{ criteria: 'Forme (40%)', winner: 'BDS', reason: 'BDS a déjà joué (1-1), G2 non (0-0).' }, { criteria: 'Effectif (30%)', winner: 'G2', reason: 'G2 a un avantage de talent significatif.' }, { criteria: 'Style (20%)', winner: 'G2', reason: 'Le style de G2 est plus complexe et difficile à contrer.' }, { criteria: 'Historique (10%)', winner: 'G2', reason: 'Domination historique de G2.' }] } },
+                { teams: ['G2', 'TH'], analysis: "G2 est largement favori. Team Heretics est une équipe en développement avec du potentiel, mais elle manque encore de la discipline et de la constance nécessaires pour inquiéter une équipe du calibre de G2, qui vise le titre.", powerScore: { team1: 'G2', team2: 'TH', breakdown: [{ criteria: 'Forme (40%)', winner: 'Egalité', reason: 'Les deux équipes n\'ont pas encore montré leur plein potentiel.' }, { criteria: 'Effectif (30%)', winner: 'G2', reason: 'Avantage de talent et d\'expérience massif.' }, { criteria: 'Style (20%)', winner: 'G2', reason: 'G2 est beaucoup plus versatile.' }, { criteria: 'Historique (10%)', winner: 'G2', reason: 'G2 a toujours dominé TH.' }] } },
+                { teams: ['G2', 'SK'], analysis: "C'est l'affrontement le plus déséquilibré du groupe. G2 est un contender au titre, tandis que SK Gaming (0-2) lutte pour éviter la dernière place. L'écart de niveau individuel, collectif et de dynamique est immense.", powerScore: { team1: 'G2', team2: 'SK', breakdown: [{ criteria: 'Forme (40%)', winner: 'G2', reason: 'SK est en 0-2, G2 est attendu au top.' }, { criteria: 'Effectif (30%)', winner: 'G2', reason: 'Écart de niveau très important.' }, { criteria: 'Style (20%)', winner: 'G2', reason: 'G2 est supérieur dans tous les aspects du jeu.' }, { criteria: 'Historique (10%)', winner: 'G2', reason: 'Domination historique.' }] } },
+                { teams: ['MKOI', 'VIT'], analysis: "Movistar KOI est favori. En tant que champions du Spring, ils ont prouvé leur valeur et leur solidité. Vitality est capable de coups d'éclat, mais manque de la régularité de MKOI pour être considéré comme favori dans ce match.", powerScore: { team1: 'MKOI', team2: 'VIT', breakdown: [{ criteria: 'Forme (40%)', winner: 'MKOI', reason: 'MKOI est attendu plus haut malgré le 0-0, VIT est en 0-1.' }, { criteria: 'Effectif (30%)', winner: 'MKOI', reason: 'Effectif plus cohérent et synergique.' }, { criteria: 'Style (20%)', winner: 'MKOI', reason: 'Leur macro-gestion est supérieure.' }, { criteria: 'Historique (10%)', winner: 'MKOI', reason: 'MKOI a de meilleurs résultats récents.' }] } },
+                { teams: ['MKOI', 'GX'], analysis: "MKOI est favori. GIANTX est une équipe compétitive du milieu de tableau, mais MKOI a un effectif plus étoffé et une meilleure exécution stratégique, ce qui devrait leur permettre de s'imposer malgré le bon départ de GX (1-1).", powerScore: { team1: 'MKOI', team2: 'GX', breakdown: [{ criteria: 'Forme (40%)', winner: 'GX', reason: 'GX a un score de 1-1, MKOI de 0-0.' }, { criteria: 'Effectif (30%)', winner: 'MKOI', reason: 'Avantage de talent pour les champions en titre.' }, { criteria: 'Style (20%)', winner: 'MKOI', reason: 'MKOI a une meilleure vision de jeu.' }, { criteria: 'Historique (10%)', winner: 'MKOI', reason: 'MKOI a de meilleurs résultats globaux.' }] } },
+                { teams: ['MKOI', 'NAVI'], analysis: "MKOI est largement favori. L'expérience, la cohésion et le talent individuel de l'équipe championne du Spring sont bien au-dessus de ceux de NAVI, nouveau venu dans la ligue et qui a déjà perdu son premier match.", powerScore: { team1: 'MKOI', team2: 'NAVI', breakdown: [{ criteria: 'Forme (40%)', winner: 'MKOI', reason: 'MKOI est champion, NAVI est en 0-1.' }, { criteria: 'Effectif (30%)', winner: 'MKOI', reason: 'Avantage de talent à tous les postes.' }, { criteria: 'Style (20%)', winner: 'MKOI', reason: 'Cohésion et expérience largement supérieures.' }, { criteria: 'Historique (10%)', winner: 'MKOI', reason: 'Aucun historique, mais le prestige de MKOI domine.' }] } },
+                { teams: ['FNC', 'BDS'], analysis: "Fnatic est favori. Leur début de saison parfait (2-0) et la force de leur duo botlane leur donnent un avantage clair sur une équipe de BDS (1-1) qui, bien que solide, semble un cran en dessous des meilleures équipes.", powerScore: { team1: 'FNC', team2: 'BDS', breakdown: [{ criteria: 'Forme (40%)', winner: 'FNC', reason: 'FNC est invaincu (2-0), BDS est à 1-1.' }, { criteria: 'Effectif (30%)', winner: 'FNC', reason: 'FNC a un léger avantage de talent global.' }, { criteria: 'Style (20%)', winner: 'FNC', reason: 'Leur style de jeu est plus affirmé en ce début de saison.' }, { criteria: 'Historique (10%)', winner: 'FNC', reason: 'Léger avantage historique pour FNC.' }] } },
+                { teams: ['VIT', 'NAVI'], analysis: "Un match qui s'annonce serré entre deux équipes à 0-1. Vitality a plus d'expérience en LEC et un effectif plus prouvé, ce qui leur donne un avantage. Cependant, NAVI est une inconnue et pourrait surprendre. Le modèle favorise l'expérience.", powerScore: { team1: 'VIT', team2: 'NAVI', breakdown: [{ criteria: 'Forme (40%)', winner: 'Egalité', reason: 'Les deux équipes sont en 0-1.' }, { criteria: 'Effectif (30%)', winner: 'VIT', reason: 'L\'effectif de VIT est plus expérimenté en LEC.' }, { criteria: 'Style (20%)', winner: 'VIT', reason: 'Style de jeu plus établi, bien qu\'inconstant.' }, { criteria: 'Historique (10%)', winner: 'Egalité', reason: 'Pas d\'historique pertinent.' }] } },
+                { teams: ['TH', 'BDS'], analysis: "C'est un match crucial pour les playoffs et l'un des plus équilibrés. Les deux équipes ont des forces et des faiblesses similaires. BDS a montré un peu plus de solidité en battant SK, tandis que TH a perdu contre le leader FNC. Léger avantage à BDS pour avoir déjà une victoire.", powerScore: { team1: 'TH', team2: 'BDS', breakdown: [{ criteria: 'Forme (40%)', winner: 'BDS', reason: 'BDS a une victoire (1-1), TH non (0-1).' }, { criteria: 'Effectif (30%)', winner: 'Egalité', reason: 'Niveau de talent globalement similaire.' }, { criteria: 'Style (20%)', winner: 'Egalité', reason: 'Deux styles de jeu encore en construction.' }, { criteria: 'Historique (10%)', winner: 'BDS', reason: 'Léger avantage pour BDS dans les rencontres récentes.' }] } },
+                { teams: ['TH', 'SK'], analysis: "Team Heretics est favori. Bien que les deux équipes soient dans le bas du classement, Heretics (0-1) a montré plus de potentiel et a perdu contre un adversaire plus fort (FNC) que SK Gaming (0-2). La dynamique de SK est très négative.", powerScore: { team1: 'TH', team2: 'SK', breakdown: [{ criteria: 'Forme (40%)', winner: 'TH', reason: 'TH (0-1) a une meilleure dynamique que SK (0-2).' }, { criteria: 'Effectif (30%)', winner: 'TH', reason: 'Léger avantage de talent pour TH.' }, { criteria: 'Style (20%)', winner: 'TH', reason: 'TH a montré plus de potentiel dans son jeu.' }, { criteria: 'Historique (10%)', winner: 'Egalité', reason: 'Pas d\'avantage clair.' }] } },
+                { teams: ['GX', 'NAVI'], analysis: "Un match serré entre deux équipes du milieu/bas de tableau. GIANTX (1-1) a l'avantage de l'expérience et d'une victoire déjà acquise. NAVI (0-1) doit encore prouver son niveau. Le modèle donne l'avantage à l'équipe avec la meilleure dynamique de départ.", powerScore: { team1: 'GX', team2: 'NAVI', breakdown: [{ criteria: 'Forme (40%)', winner: 'GX', reason: 'GX a déjà une victoire (1-1), NAVI non (0-1).' }, { criteria: 'Effectif (30%)', winner: 'Egalité', reason: 'Niveau de talent comparable.' }, { criteria: 'Style (20%)', winner: 'GX', reason: 'Le style de GX est plus rodé en LEC.' }, { criteria: 'Historique (10%)', winner: 'Egalité', reason: 'Pas d\'historique pertinent.' }] } },
             ];
 
-            const listView = document.getElementById('list-view');
-            const detailView = document.getElementById('detail-view');
+            const homeView = document.getElementById('home-view');
+            const teamDetailView = document.getElementById('team-detail-view');
+            const analysisListView = document.getElementById('analysis-list-view');
+            const matchDetailView = document.getElementById('match-detail-view');
             const groupAList = document.getElementById('group-a-list');
             const groupBList = document.getElementById('group-b-list');
+            const showAnalysisButton = document.getElementById('show-analysis-button');
 
             function renderTeamList() {
                 const groupA = teamsData.filter(t => t.group === 'A').sort((a, b) => a.rank - b.rank);
@@ -118,18 +141,13 @@
                 if (!team) return;
 
                 const probabilitiesHTML = team.probabilities.map(p => {
-                    // Si la chance est élevée, le texte est dans la barre colorée.
-                    // Sinon, il est positionné de manière absolue au début de la barre.
                     const textInsideHTML = p.chance > 15 ? `<span class="text-xs font-medium text-white">${p.chance}%</span>` : '';
                     const textOutsideHTML = p.chance <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${p.chance}%</span>` : '';
-
                     return `
                         <div class="flex items-center space-x-2">
                             <span class="w-16 text-right text-gray-300 flex-shrink-0">Place ${p.position}</span>
                             <div class="w-full bg-gray-700 rounded-full h-6 relative">
-                                <div class="bg-indigo-500 h-full rounded-full flex items-center justify-center" style="width: ${p.chance}%">
-                                    ${textInsideHTML}
-                                </div>
+                                <div class="bg-indigo-500 h-full rounded-full flex items-center justify-center" style="width: ${p.chance}%">${textInsideHTML}</div>
                                 ${textOutsideHTML}
                             </div>
                         </div>
@@ -162,9 +180,9 @@
                     `).join('') :
                     '<p class="text-gray-400">Aucun match joué.</p>';
 
-                detailView.innerHTML = `
+                teamDetailView.innerHTML = `
                     <div class="bg-gray-800 rounded-lg p-4 sm:p-8">
-                        <button id="back-button" class="flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors">
+                        <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
                             <span>Retour au classement</span>
                         </button>
@@ -184,24 +202,15 @@
                             </div>
                             <div class="space-y-6">
                                 <div class="bg-gray-900/50 p-4 rounded-lg">
-                                    <h3 class="text-xl font-semibold text-white mb-3 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                                        Composition de l'équipe
-                                    </h3>
+                                    <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>Composition de l'équipe</h3>
                                     <ul class="space-y-1 text-gray-300">${rosterHTML}</ul>
                                 </div>
                                 <div class="bg-gray-900/50 p-4 rounded-lg">
-                                    <h3 class="text-xl font-semibold text-white mb-3 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M16 16v-2a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>
-                                        Matchs Joués
-                                    </h3>
+                                    <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M16 16v-2a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>Matchs Joués</h3>
                                     <ul class="space-y-2">${pastMatchesHTML}</ul>
                                 </div>
                                 <div class="bg-gray-900/50 p-4 rounded-lg">
-                                    <h3 class="text-xl font-semibold text-white mb-3 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
-                                        Matchs Restants
-                                    </h3>
+                                    <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>Matchs Restants</h3>
                                     <ul class="space-y-2">${scheduleHTML}</ul>
                                 </div>
                             </div>
@@ -209,18 +218,182 @@
                     </div>
                 `;
                 
-                document.getElementById('back-button').addEventListener('click', showListView);
+                teamDetailView.querySelector('.back-button').addEventListener('click', () => showView('home'));
+                showView('team-detail');
+            }
 
-                listView.classList.add('hidden');
-                detailView.classList.remove('hidden');
+            function renderAnalysisListView() {
+                const allMatches = [];
+                const seen = new Set();
+                teamsData.forEach(team => {
+                    team.schedule.forEach(match => {
+                        const sortedTeams = [team.tag, match.opponent].sort();
+                        const matchId = sortedTeams.join('-');
+                        if (!seen.has(matchId)) {
+                            allMatches.push({
+                                id: matchId,
+                                team1: teamsData.find(t => t.tag === sortedTeams[0]),
+                                team2: teamsData.find(t => t.tag === sortedTeams[1]),
+                                date: match.date
+                            });
+                            seen.add(matchId);
+                        }
+                    });
+                });
+
+                allMatches.forEach(match => {
+                    const parts = match.date.split('/');
+                    match.dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+                });
+
+                allMatches.sort((a, b) => a.dateObj - b.dateObj);
+
+                const matchesByDate = allMatches.reduce((acc, match) => {
+                    if (!acc[match.date]) acc[match.date] = [];
+                    acc[match.date].push(match);
+                    return acc;
+                }, {});
+
+                const analysisHTML = Object.keys(matchesByDate).map(date => {
+                    const matchesOnDate = matchesByDate[date];
+                    const matchesHTML = matchesOnDate.map(match => {
+                        const team1 = match.team1;
+                        const team2 = match.team2;
+                        const team1WinChance = team1.schedule.find(s => s.opponent === team2.tag)?.winChance || 100 - (team2.schedule.find(s => s.opponent === team1.tag)?.winChance || 50);
+                        const team2WinChance = 100 - team1WinChance;
+                        
+                        return `
+                            <div class="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition-colors match-card" data-match-id="${match.id}">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center space-x-3 w-2/5 justify-start">
+                                        <img src="${team1.logo}" alt="${team1.name}" class="w-10 h-10 object-contain">
+                                        <span class="font-bold text-lg hidden sm:block">${team1.name}</span>
+                                        <span class="font-bold text-lg sm:hidden">${team1.tag}</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="text-sm text-gray-400">VS</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3 w-2/5 justify-end">
+                                        <span class="font-bold text-lg text-right hidden sm:block">${team2.name}</span>
+                                        <span class="font-bold text-lg text-right sm:hidden">${team2.tag}</span>
+                                        <img src="${team2.logo}" alt="${team2.name}" class="w-10 h-10 object-contain">
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2 my-2">
+                                    <div class="w-full bg-green-500/20 rounded-l-full h-2" style="width: ${team1WinChance}%"></div>
+                                    <div class="w-full bg-red-500/20 rounded-r-full h-2" style="width: ${team2WinChance}%"></div>
+                                </div>
+                                <div class="flex justify-between items-center text-sm font-bold">
+                                    <span class="text-green-400">${team1WinChance}%</span>
+                                    <span class="text-red-400">${team2WinChance}%</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    return `
+                        <div>
+                            <h3 class="text-2xl font-bold text-indigo-400 mt-8 mb-4">Journée du ${date}</h3>
+                            <div class="space-y-4">
+                                ${matchesHTML}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                analysisListView.innerHTML = `
+                    <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+                        <span>Retour au classement</span>
+                    </button>
+                    <h2 class="text-3xl font-bold text-white mb-2">Analyse Détaillée des Matchs à Venir</h2>
+                    <p class="text-gray-400 mb-6">Retrouvez ici l'analyse détaillée de chaque affrontement restant dans la phase de groupe. Cliquez sur un match pour voir le détail du calcul de puissance.</p>
+                    <div>${analysisHTML}</div>
+                `;
+                analysisListView.querySelector('.back-button').addEventListener('click', () => showView('home'));
+                analysisListView.querySelectorAll('.match-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        renderMatchDetail(card.dataset.matchId);
+                    });
+                });
+                showView('analysis-list');
+            }
+            
+            function renderMatchDetail(matchId) {
+                const teamTags = matchId.split('-');
+                const team1 = teamsData.find(t => t.tag === teamTags[0]);
+                const team2 = teamsData.find(t => t.tag === teamTags[1]);
+                const matchInfo = matchupsAnalysis.find(a => a.teams.sort().join('-') === matchId);
+                if (!team1 || !team2 || !matchInfo) return;
+
+                const team1WinChance = team1.schedule.find(s => s.opponent === team2.tag)?.winChance || 100 - (team2.schedule.find(s => s.opponent === team1.tag)?.winChance || 50);
+                const team2WinChance = 100 - team1WinChance;
+
+                const breakdownHTML = matchInfo.powerScore.breakdown.map(item => {
+                    const winnerColor = item.winner === team1.tag ? 'text-green-400' : (item.winner === team2.tag ? 'text-red-400' : 'text-yellow-400');
+                    return `
+                        <div class="bg-gray-900/50 p-3 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold">${item.criteria}</span>
+                                <span class="font-bold ${winnerColor}">Avantage ${item.winner}</span>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-1">${item.reason}</p>
+                        </div>
+                    `;
+                }).join('');
+
+                matchDetailView.innerHTML = `
+                    <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="analysis-list">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+                        <span>Retour à la liste des matchs</span>
+                    </button>
+                    <div class="bg-gray-800 rounded-lg p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center space-x-3 w-2/5 justify-start">
+                                <img src="${team1.logo}" alt="${team1.name}" class="w-12 h-12 object-contain">
+                                <span class="font-bold text-xl">${team1.name}</span>
+                            </div>
+                            <div class="text-center"><span class="text-lg font-bold text-gray-400">VS</span></div>
+                            <div class="flex items-center space-x-3 w-2/5 justify-end">
+                                <span class="font-bold text-xl text-right">${team2.name}</span>
+                                <img src="${team2.logo}" alt="${team2.name}" class="w-12 h-12 object-contain">
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 mb-4">
+                            <div class="w-full bg-green-500/20 rounded-l-full h-2" style="width: ${team1WinChance}%"></div>
+                            <div class="w-full bg-red-500/20 rounded-r-full h-2" style="width: ${team2WinChance}%"></div>
+                        </div>
+                        <div class="flex justify-between items-center text-lg font-bold mb-6">
+                            <span class="text-green-400">${team1WinChance}%</span>
+                            <span class="text-red-400">${team2WinChance}%</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-2">Détail du Calcul de Puissance</h3>
+                        <div class="space-y-3 mb-6">${breakdownHTML}</div>
+                        <h3 class="text-xl font-bold text-white mb-2">Conclusion de l'Analyse</h3>
+                        <p class="text-sm text-gray-300 text-justify">${matchInfo.analysis}</p>
+                    </div>
+                `;
+                matchDetailView.querySelector('.back-button').addEventListener('click', () => showView('analysis-list'));
+                showView('match-detail');
+            }
+
+            function showView(viewName) {
+                homeView.classList.add('hidden');
+                teamDetailView.classList.add('hidden');
+                analysisListView.classList.add('hidden');
+                matchDetailView.classList.add('hidden');
+
+                if (viewName === 'home') homeView.classList.remove('hidden');
+                else if (viewName === 'team-detail') teamDetailView.classList.remove('hidden');
+                else if (viewName === 'analysis-list') analysisListView.classList.remove('hidden');
+                else if (viewName === 'match-detail') matchDetailView.classList.remove('hidden');
+                
                 window.scrollTo(0, 0);
             }
+            
+            showAnalysisButton.addEventListener('click', renderAnalysisListView);
 
-            function showListView() {
-                detailView.classList.add('hidden');
-                listView.classList.remove('hidden');
-            }
-
+            // Rendu initial
             renderTeamList();
         });
     </script>
