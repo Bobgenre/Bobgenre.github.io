@@ -24,6 +24,13 @@
         .hidden {
             display: none;
         }
+        .details-row {
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: scaleY(0.9); }
+            to { opacity: 1; transform: scaleY(1); }
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
@@ -35,9 +42,14 @@
             <header class="text-center mb-8">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">LEC Été 2025</h1>
                 <p class="text-lg text-gray-300 mt-2">Classement le plus probable par groupe</p>
-                <button id="show-analysis-button" class="mt-4 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
-                    Voir l'Analyse des Matchs
-                </button>
+                <div class="flex justify-center space-x-4 mt-4">
+                    <button id="show-analysis-button" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                        Analyse des Matchs
+                    </button>
+                    <button id="show-qualif-button" class="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors">
+                        Probas de Qualification (Maths)
+                    </button>
+                </div>
             </header>
             <main>
                 <div>
@@ -59,6 +71,9 @@
         
         <!-- Vue Détail d'un Match -->
         <div id="match-detail-view" class="hidden animate-fade-in"></div>
+
+        <!-- Vue Probabilités de Qualification -->
+        <div id="qualification-view" class="hidden animate-fade-in"></div>
 
         <footer class="text-center text-gray-500 text-sm mt-12 pb-4">
             <p>Analyse basée sur les classements de puissance et les résultats au 05/08/2025.</p>
@@ -103,9 +118,11 @@
             const teamDetailView = document.getElementById('team-detail-view');
             const analysisListView = document.getElementById('analysis-list-view');
             const matchDetailView = document.getElementById('match-detail-view');
+            const qualificationView = document.getElementById('qualification-view');
             const groupAList = document.getElementById('group-a-list');
             const groupBList = document.getElementById('group-b-list');
             const showAnalysisButton = document.getElementById('show-analysis-button');
+            const showQualifButton = document.getElementById('show-qualif-button');
 
             function renderTeamList() {
                 const groupA = teamsData.filter(t => t.group === 'A').sort((a, b) => a.rank - b.rank);
@@ -377,21 +394,95 @@
                 showView('match-detail');
             }
 
+            function renderQualificationView() {
+                const qualificationProbs = teamsData.map(team => ({
+                    name: team.name,
+                    tag: team.tag,
+                    logo: team.logo,
+                    chance: team.mathProbabilities.qualif,
+                    ranks: team.mathProbabilities.ranks
+                })).sort((a,b) => b.chance - a.chance);
+
+                const qualifHTML = qualificationProbs.map(team => `
+                    <div class="qualif-team-container">
+                        <div class="bg-gray-800 rounded-lg p-3 flex items-center space-x-4 cursor-pointer hover:bg-gray-700" data-team-tag="${team.tag}">
+                            <img src="${team.logo}" alt="${team.name}" class="w-10 h-10 object-contain">
+                            <span class="font-bold w-32 flex-shrink-0">${team.name}</span>
+                            <div class="w-full bg-gray-700 rounded-full h-6 relative">
+                                <div class="bg-indigo-500 h-full rounded-full flex items-center justify-center text-xs font-medium text-white" style="width: ${team.chance}%">
+                                    ${team.chance > 15 ? `${team.chance}%` : ''}
+                                </div>
+                                ${team.chance <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${team.chance}%</span>` : ''}
+                            </div>
+                        </div>
+                        <div id="qualif-details-${team.tag}" class="hidden details-row bg-gray-800/50 p-4 rounded-b-lg -mt-2 pt-4"></div>
+                    </div>
+                `).join('');
+
+                qualificationView.innerHTML = `
+                    <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+                        <span>Retour au classement</span>
+                    </button>
+                    <h2 class="text-3xl font-bold text-white mb-2">Probabilités de Qualification aux Playoffs</h2>
+                    <p class="text-gray-400 mb-6">Ces pourcentages sont basés sur une analyse purement mathématique des 16 384 scénarios restants, où chaque match est considéré comme un 50/50. Cliquez sur une équipe pour voir le détail par place.</p>
+                    <div class="space-y-3">${qualifHTML}</div>
+                `;
+
+                qualificationView.querySelector('.back-button').addEventListener('click', () => showView('home'));
+                qualificationView.querySelectorAll('.qualif-team-container > div:first-child').forEach(row => {
+                    row.addEventListener('click', (e) => {
+                        const teamTag = e.currentTarget.dataset.teamTag;
+                        const detailRow = document.getElementById(`qualif-details-${teamTag}`);
+                        const teamData = qualificationProbs.find(t => t.tag === teamTag);
+
+                        // Fermer les autres détails ouverts
+                        document.querySelectorAll('[id^="qualif-details-"]').forEach(d => {
+                            if (d.id !== detailRow.id) {
+                                d.classList.add('hidden');
+                                d.innerHTML = '';
+                            }
+                        });
+
+                        if (detailRow.classList.toggle('hidden')) {
+                            detailRow.innerHTML = '';
+                        } else {
+                            const ranksHTML = teamData.ranks.map(r => `
+                                <div class="flex items-center">
+                                    <span class="w-20 text-gray-300">Place ${r.pos}</span>
+                                    <div class="w-full bg-gray-700 rounded-full h-5">
+                                        <div class="bg-purple-500 h-5 rounded-full text-xs font-medium text-white flex items-center justify-center" style="width: ${r.chance}%">
+                                            ${r.chance > 15 ? `${r.chance.toFixed(1)}%` : ''}
+                                        </div>
+                                    </div>
+                                    ${r.chance <= 15 ? `<span class="ml-2 text-sm text-gray-300">${r.chance.toFixed(1)}%</span>` : ''}
+                                </div>
+                            `).join('');
+                            detailRow.innerHTML = `<div class="space-y-2">${ranksHTML}</div>`;
+                        }
+                    });
+                });
+                showView('qualification');
+            }
+
             function showView(viewName) {
                 homeView.classList.add('hidden');
                 teamDetailView.classList.add('hidden');
                 analysisListView.classList.add('hidden');
                 matchDetailView.classList.add('hidden');
+                qualificationView.classList.add('hidden');
 
                 if (viewName === 'home') homeView.classList.remove('hidden');
                 else if (viewName === 'team-detail') teamDetailView.classList.remove('hidden');
                 else if (viewName === 'analysis-list') analysisListView.classList.remove('hidden');
                 else if (viewName === 'match-detail') matchDetailView.classList.remove('hidden');
+                else if (viewName === 'qualification') qualificationView.classList.remove('hidden');
                 
                 window.scrollTo(0, 0);
             }
             
             showAnalysisButton.addEventListener('click', renderAnalysisListView);
+            showQualifButton.addEventListener('click', renderQualificationView);
 
             // Rendu initial
             renderTeamList();
