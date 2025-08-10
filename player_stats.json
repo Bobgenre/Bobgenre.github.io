@@ -1,0 +1,770 @@
+[
+    {
+        "id": "Canna",
+        "name": "Canna",
+        "team": "KC",
+        "role": "Top",
+        "stats": {
+            "dpm": 566,
+            "kda": 19.33,
+            "champPool": 4,
+            "csm": 7.86,
+            "gpm": 412,
+            "kpar": "69.4%",
+            "ks_percent": "16.9%",
+            "gold_percent": "21.1%"
+        }
+    },
+    {
+        "id": "Yike",
+        "name": "Yike",
+        "team": "KC",
+        "role": "Jungle",
+        "stats": {
+            "dpm": 435,
+            "kda": 4.71,
+            "champPool": 5,
+            "csm": 6.31,
+            "gpm": 398,
+            "kpar": "74.5%",
+            "ks_percent": "27.9%",
+            "gold_percent": "20.1%"
+        }
+    },
+    {
+        "id": "Vladi",
+        "name": "Vladi",
+        "team": "KC",
+        "role": "Mid",
+        "stats": {
+            "dpm": 673,
+            "kda": 5.33,
+            "champPool": 4,
+            "csm": 8.99,
+            "gpm": 417,
+            "kpar": "61.1%",
+            "ks_percent": "15.4%",
+            "gold_percent": "21.2%"
+        }
+    },
+    {
+        "id": "Caliste",
+        "name": "Caliste",
+        "team": "KC",
+        "role": "ADC",
+        "stats": {
+            "dpm": 727,
+            "kda": 20.0,
+            "champPool": 3,
+            "csm": 10.07,
+            "gpm": 487,
+            "kpar": "67.5%",
+            "ks_percent": "33.3%",
+            "gold_percent": "24.7%"
+        }
+    },
+    {
+        "id": "Targamas",
+        "name": "Targamas",
+        "team": "KC",
+        "role": "Support",
+        "stats": {
+            "dpm": 174,
+            "kda": 5.33,
+            "champPool": 4,
+            "csm": 1.26,
+            "gpm": 256,
+            "kpar": "77.3%",
+            "ks_percent": "2.2%",
+            "gold_percent": "13.0%"
+        }
+    },
+    {
+        "id": "BrokenBlade",
+        "name": "BrokenBlade",
+        "team": "G2",
+        "role": "Top",
+        "stats": {
+            "dpm": 777,
+            "kda": 24.0,
+            "champPool": 2,
+            "csm": 8.05,
+            "gpm": 428,
+            "kpar": "64.4%",
+            "ks_percent": "22.2%",
+            "gold_percent": "20.9%"
+        }
+    },
+    {
+        "id": "SkewMond",
+        "name": "SkewMond",
+        "team": "G2",
+        "role": "Jungle",
+        "stats": {
+            "dpm": 484,
+            "kda": 24.0,
+            "champPool": 2,
+            "csm": 7.48,
+            "gpm": 397,
+            "kpar": "63.5%",
+            "ks_percent": "15.9%",
+            "gold_percent": "19.4%"
+        }
+    },
+    {
+        "id": "Caps",
+        "name": "Caps",
+        "team": "G2",
+        "role": "Mid",
+        "stats": {
+            "dpm": 687,
+            "kda": 23.0,
+            "champPool": 2,
+            "csm": 9.58,
+            "gpm": 488,
+            "kpar": "62.8%",
+            "ks_percent": "27.6%",
+            "gold_percent": "23.8%"
+        }
+    },
+    {
+        "id": "Hans Sama",
+        "name": "Hans Sama",
+        "team": "G2",
+        "role": "ADC",
+        "stats": {
+            "dpm": 778,
+            "kda": 25.0,
+            "champPool": 2,
+            "csm": 9.22,
+            "gpm": 469,
+            "kpar": "66.0%",
+            "ks_percent": "31.3%",
+            "gold_percent": "22.9%"
+        }
+    },
+    {
+        "id": "Labrov",
+        "name": "Labrov",
+        "team": "G2",
+        "role": "Support",
+        "stats": {
+            "dpm": 262,
+            "kda": 28.0,
+            "champPool": 2,
+            "csm": 0.94,
+            "gpm": 268,
+            "kpar": "75.3%",
+            "ks_percent": "3.0%",
+            "gold_percent": "13.1%"
+        }
+    },
+    {
+        "id": "Myrwn",
+        "name": "Myrwn",
+        "team": "MKOI",
+        "role": "Top",
+        "stats": {
+            "dpm": 686,
+            "kda": 2.92,
+            "champPool": 4,
+            "csm": 8.25,
+            "gpm": 384,
+            "kpar": "64.2%",
+            "ks_percent": "12.0%",
+            "gold_percent": "20.2%"
+        }
+    },
+    {
+        "id": "Elyoya",
+        "name": "Elyoya",
+        "team": "MKOI",
+        "role": "Jungle",
+        "stats": {
+            "dpm": 370,
+            "kda": 3.6,
+            "champPool": 4,
+            "csm": 6.76,
+            "gpm": 354,
+            "kpar": "72.1%",
+            "ks_percent": "12.5%",
+            "gold_percent": "18.8%"
+        }
+    },
+    {
+        "id": "Supa",
+        "name": "Supa",
+        "team": "MKOI",
+        "role": "ADC",
+        "stats": {
+            "dpm": 1016,
+            "kda": 5.0,
+            "champPool": 3,
+            "csm": 9.97,
+            "gpm": 497,
+            "kpar": "88.5%",
+            "ks_percent": "51.7%",
+            "gold_percent": "26.2%"
+        }
+    },
+    {
+        "id": "Oscarinin",
+        "name": "Oscarinin",
+        "team": "FNC",
+        "role": "Top",
+        "stats": {
+            "dpm": 622,
+            "kda": 4.0,
+            "champPool": 4,
+            "csm": 7.46,
+            "gpm": 365,
+            "kpar": "65.0%",
+            "ks_percent": "14.6%",
+            "gold_percent": "19.0%"
+        }
+    },
+    {
+        "id": "Razork",
+        "name": "Razork",
+        "team": "FNC",
+        "role": "Jungle",
+        "stats": {
+            "dpm": 461,
+            "kda": 4.58,
+            "champPool": 4,
+            "csm": 6.15,
+            "gpm": 371,
+            "kpar": "80.1%",
+            "ks_percent": "21.5%",
+            "gold_percent": "19.3%"
+        }
+    },
+    {
+        "id": "Poby",
+        "name": "Poby",
+        "team": "FNC",
+        "role": "Mid",
+        "stats": {
+            "dpm": 593,
+            "kda": 16.33,
+            "champPool": 4,
+            "csm": 9.93,
+            "gpm": 447,
+            "kpar": "70.3%",
+            "ks_percent": "23.3%",
+            "gold_percent": "23.2%"
+        }
+    },
+    {
+        "id": "Upset",
+        "name": "Upset",
+        "team": "FNC",
+        "role": "ADC",
+        "stats": {
+            "dpm": 647,
+            "kda": 9.17,
+            "champPool": 4,
+            "csm": 10.08,
+            "gpm": 487,
+            "kpar": "79.7%",
+            "ks_percent": "38.8%",
+            "gold_percent": "25.3%"
+        }
+    },
+    {
+        "id": "Mikyx",
+        "name": "Mikyx",
+        "team": "FNC",
+        "role": "Support",
+        "stats": {
+            "dpm": 242,
+            "kda": 3.86,
+            "champPool": 4,
+            "csm": 0.87,
+            "gpm": 250,
+            "kpar": "78.9%",
+            "ks_percent": "1.5%",
+            "gold_percent": "13.0%"
+        }
+    },
+    {
+        "id": "Naak Nako",
+        "name": "Naak Nako",
+        "team": "VIT",
+        "role": "Top",
+        "stats": {
+            "dpm": 304,
+            "kda": 1.4,
+            "champPool": 2,
+            "csm": 7.74,
+            "gpm": 355,
+            "kpar": "63.4%",
+            "ks_percent": "25.0%",
+            "gold_percent": "22.1%"
+        }
+    },
+    {
+        "id": "Lyncas",
+        "name": "Lyncas",
+        "team": "VIT",
+        "role": "Jungle",
+        "stats": {
+            "dpm": 334,
+            "kda": 1.5,
+            "champPool": 2,
+            "csm": 5.89,
+            "gpm": 310,
+            "kpar": "56.6%",
+            "ks_percent": "18.4%",
+            "gold_percent": "19.2%"
+        }
+    },
+    {
+        "id": "Czajek",
+        "name": "Czajek",
+        "team": "VIT",
+        "role": "Mid",
+        "stats": {
+            "dpm": 720,
+            "kda": 0.89,
+            "champPool": 2,
+            "csm": 8.16,
+            "gpm": 359,
+            "kpar": "75.0%",
+            "ks_percent": "40.0%",
+            "gold_percent": "22.3%"
+        }
+    },
+    {
+        "id": "Carzzy",
+        "name": "Carzzy",
+        "team": "VIT",
+        "role": "ADC",
+        "stats": {
+            "dpm": 426,
+            "kda": 0.5,
+            "champPool": 2,
+            "csm": 8.91,
+            "gpm": 350,
+            "kpar": "26.6%",
+            "ks_percent": "8.3%",
+            "gold_percent": "21.8%"
+        }
+    },
+    {
+        "id": "Fleshy",
+        "name": "Fleshy",
+        "team": "VIT",
+        "role": "Support",
+        "stats": {
+            "dpm": 217,
+            "kda": 1.12,
+            "champPool": 2,
+            "csm": 0.95,
+            "gpm": 235,
+            "kpar": "81.7%",
+            "ks_percent": "8.3%",
+            "gold_percent": "14.6%"
+        }
+    },
+    {
+        "id": "Rooster",
+        "name": "Rooster",
+        "team": "BDS",
+        "role": "Top",
+        "stats": {
+            "dpm": 857,
+            "kda": 6.0,
+            "champPool": 2,
+            "csm": 8.47,
+            "gpm": 469,
+            "kpar": "73.3%",
+            "ks_percent": "24.6%",
+            "gold_percent": "22.8%"
+        }
+    },
+    {
+        "id": "Boukada",
+        "name": "Boukada",
+        "team": "BDS",
+        "role": "Jungle",
+        "stats": {
+            "dpm": 310,
+            "kda": 8.67,
+            "champPool": 2,
+            "csm": 5.58,
+            "gpm": 363,
+            "kpar": "61.4%",
+            "ks_percent": "11.3%",
+            "gold_percent": "17.7%"
+        }
+    },
+    {
+        "id": "nuc",
+        "name": "nuc",
+        "team": "BDS",
+        "role": "Mid",
+        "stats": {
+            "dpm": 559,
+            "kda": 5.4,
+            "champPool": 2,
+            "csm": 8.86,
+            "gpm": 435,
+            "kpar": "64.7%",
+            "ks_percent": "18.6%",
+            "gold_percent": "21.2%"
+        }
+    },
+    {
+        "id": "Ice",
+        "name": "Ice",
+        "team": "BDS",
+        "role": "ADC",
+        "stats": {
+            "dpm": 693,
+            "kda": 6.0,
+            "champPool": 2,
+            "csm": 10.46,
+            "gpm": 522,
+            "kpar": "77.3%",
+            "ks_percent": "45.4%",
+            "gold_percent": "25.6%"
+        }
+    },
+    {
+        "id": "Parus",
+        "name": "Parus",
+        "team": "BDS",
+        "role": "Support",
+        "stats": {
+            "dpm": 137,
+            "kda": 5.33,
+            "champPool": 2,
+            "csm": 0.98,
+            "gpm": 259,
+            "kpar": "81.3%",
+            "ks_percent": "0.0%",
+            "gold_percent": "12.7%"
+        }
+    },
+    {
+        "id": "Carlsen",
+        "name": "Carlsen",
+        "team": "TH",
+        "role": "Top",
+        "stats": {
+            "dpm": 423,
+            "kda": 1.36,
+            "champPool": 4,
+            "csm": 8.17,
+            "gpm": 361,
+            "kpar": "nan%",
+            "ks_percent": "nan%",
+            "gold_percent": "21.2%"
+        }
+    },
+    {
+        "id": "Sheo",
+        "name": "Sheo",
+        "team": "TH",
+        "role": "Jungle",
+        "stats": {
+            "dpm": 361,
+            "kda": 1.87,
+            "champPool": 5,
+            "csm": 6.41,
+            "gpm": 335,
+            "kpar": "nan%",
+            "ks_percent": "nan%",
+            "gold_percent": "19.8%"
+        }
+    },
+    {
+        "id": "Kamiloo",
+        "name": "Kamiloo",
+        "team": "TH",
+        "role": "Mid",
+        "stats": {
+            "dpm": 602,
+            "kda": 1.21,
+            "champPool": 5,
+            "csm": 8.17,
+            "gpm": 362,
+            "kpar": "nan%",
+            "ks_percent": "nan%",
+            "gold_percent": "21.3%"
+        }
+    },
+    {
+        "id": "Flakked",
+        "name": "Flakked",
+        "team": "TH",
+        "role": "ADC",
+        "stats": {
+            "dpm": 504,
+            "kda": 1.44,
+            "champPool": 4,
+            "csm": 9.56,
+            "gpm": 410,
+            "kpar": "nan%",
+            "ks_percent": "nan%",
+            "gold_percent": "24.1%"
+        }
+    },
+    {
+        "id": "Stend",
+        "name": "Stend",
+        "team": "TH",
+        "role": "Support",
+        "stats": {
+            "dpm": 155,
+            "kda": 2.36,
+            "champPool": 4,
+            "csm": 1.19,
+            "gpm": 235,
+            "kpar": "82.9%",
+            "ks_percent": "8.0%",
+            "gold_percent": "13.9%"
+        }
+    },
+    {
+        "id": "Lot",
+        "name": "Lot",
+        "team": "GX",
+        "role": "Top",
+        "stats": {
+            "dpm": 535,
+            "kda": 4.91,
+            "champPool": 6,
+            "csm": 8.18,
+            "gpm": 374,
+            "kpar": "57.5%",
+            "ks_percent": "10.6%",
+            "gold_percent": "20.4%"
+        }
+    },
+    {
+        "id": "Isma",
+        "name": "Isma",
+        "team": "GX",
+        "role": "Jungle",
+        "stats": {
+            "dpm": 431,
+            "kda": 3.4,
+            "champPool": 6,
+            "csm": 6.33,
+            "gpm": 348,
+            "kpar": "67.7%",
+            "ks_percent": "23.5%",
+            "gold_percent": "18.9%"
+        }
+    },
+    {
+        "id": "Jackies",
+        "name": "Jackies",
+        "team": "GX",
+        "role": "Mid",
+        "stats": {
+            "dpm": 721,
+            "kda": 2.85,
+            "champPool": 6,
+            "csm": 8.21,
+            "gpm": 401,
+            "kpar": "61.4%",
+            "ks_percent": "16.2%",
+            "gold_percent": "21.8%"
+        }
+    },
+    {
+        "id": "Noah",
+        "name": "Noah",
+        "team": "GX",
+        "role": "ADC",
+        "stats": {
+            "dpm": 746,
+            "kda": 4.81,
+            "champPool": 7,
+            "csm": 9.27,
+            "gpm": 463,
+            "kpar": "73.1%",
+            "ks_percent": "40.5%",
+            "gold_percent": "25.0%"
+        }
+    },
+    {
+        "id": "Jun",
+        "name": "Jun",
+        "team": "GX",
+        "role": "Support",
+        "stats": {
+            "dpm": 187,
+            "kda": 4.61,
+            "champPool": 5,
+            "csm": 1.07,
+            "gpm": 256,
+            "kpar": "77.2%",
+            "ks_percent": "5.6%",
+            "gold_percent": "13.9%"
+        }
+    },
+    {
+        "id": "DnDn",
+        "name": "DnDn",
+        "team": "SK",
+        "role": "Top",
+        "stats": {
+            "dpm": 430,
+            "kda": 1.27,
+            "champPool": 4,
+            "csm": 8.53,
+            "gpm": 370,
+            "kpar": "54.7%",
+            "ks_percent": "18.9%",
+            "gold_percent": "21.4%"
+        }
+    },
+    {
+        "id": "Skeanz",
+        "name": "Skeanz",
+        "team": "SK",
+        "role": "Jungle",
+        "stats": {
+            "dpm": 278,
+            "kda": 2.0,
+            "champPool": 3,
+            "csm": 6.37,
+            "gpm": 346,
+            "kpar": "64.7%",
+            "ks_percent": "30.2%",
+            "gold_percent": "19.9%"
+        }
+    },
+    {
+        "id": "Abbedagge",
+        "name": "Abbedagge",
+        "team": "SK",
+        "role": "Mid",
+        "stats": {
+            "dpm": 530,
+            "kda": 1.33,
+            "champPool": 3,
+            "csm": 9.15,
+            "gpm": 386,
+            "kpar": "47.5%",
+            "ks_percent": "10.4%",
+            "gold_percent": "22.2%"
+        }
+    },
+    {
+        "id": "Keduii",
+        "name": "Keduii",
+        "team": "SK",
+        "role": "ADC",
+        "stats": {
+            "dpm": 546,
+            "kda": 2.56,
+            "champPool": 3,
+            "csm": 9.54,
+            "gpm": 405,
+            "kpar": "68.5%",
+            "ks_percent": "31.1%",
+            "gold_percent": "23.4%"
+        }
+    },
+    {
+        "id": "Loopy",
+        "name": "Loopy",
+        "team": "SK",
+        "role": "Support",
+        "stats": {
+            "dpm": 150,
+            "kda": 1.13,
+            "champPool": 3,
+            "csm": 1.23,
+            "gpm": 227,
+            "kpar": "47.0%",
+            "ks_percent": "12.2%",
+            "gold_percent": "13.1%"
+        }
+    },
+    {
+        "id": "Adam",
+        "name": "Adam",
+        "team": "NAVI",
+        "role": "Top",
+        "stats": {
+            "dpm": 436,
+            "kda": 0.44,
+            "champPool": 2,
+            "csm": 7.5,
+            "gpm": 333,
+            "kpar": "33.4%",
+            "ks_percent": "25.0%",
+            "gold_percent": "20.6%"
+        }
+    },
+    {
+        "id": "Thayger",
+        "name": "Thayger",
+        "team": "NAVI",
+        "role": "Jungle",
+        "stats": {
+            "dpm": 313,
+            "kda": 2.0,
+            "champPool": 2,
+            "csm": 6.08,
+            "gpm": 318,
+            "kpar": "100.0%",
+            "ks_percent": "37.5%",
+            "gold_percent": "19.7%"
+        }
+    },
+    {
+        "id": "Larssen",
+        "name": "Larssen",
+        "team": "NAVI",
+        "role": "Mid",
+        "stats": {
+            "dpm": 446,
+            "kda": 1.6,
+            "champPool": 2,
+            "csm": 8.54,
+            "gpm": 376,
+            "kpar": "79.2%",
+            "ks_percent": "16.6%",
+            "gold_percent": "23.2%"
+        }
+    },
+    {
+        "id": "Hans SamD",
+        "name": "Hans SamD",
+        "team": "NAVI",
+        "role": "ADC",
+        "stats": {
+            "dpm": 581,
+            "kda": 0.86,
+            "champPool": 2,
+            "csm": 8.98,
+            "gpm": 377,
+            "kpar": "54.1%",
+            "ks_percent": "20.9%",
+            "gold_percent": "23.3%"
+        }
+    },
+    {
+        "id": "Malrang",
+        "name": "Malrang",
+        "team": "NAVI",
+        "role": "Support",
+        "stats": {
+            "dpm": 175,
+            "kda": 0.64,
+            "champPool": 2,
+            "csm": 0.77,
+            "gpm": 212,
+            "kpar": "75.0%",
+            "ks_percent": "0.0%",
+            "gold_percent": "13.1%"
+        }
+    }
+]

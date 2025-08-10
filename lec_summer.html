@@ -28,23 +28,60 @@
             from { opacity: 0; transform: scaleY(0.9); }
             to { opacity: 1; transform: scaleY(1); }
         }
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.95);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; flex-direction: column;
+            transition: opacity 0.3s;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #4f46e5; /* indigo-600 */
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .sub-nav-btn.active {
+            color: #a5b4fc; /* indigo-300 */
+            border-bottom-color: #6366f1; /* indigo-500 */
+        }
+        .filter-btn.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .sortable-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .sortable-header:hover {
+            color: #a5b4fc;
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
 
-    <div id="app" class="max-w-7xl mx-auto">
+    <!-- Indicateur de chargement -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p id="loader-text" class="mt-4 text-lg font-semibold text-gray-300">Connexion à la base de données...</p>
+    </div>
+
+    <div id="app-content" class="max-w-7xl mx-auto" style="display: none;">
         <header class="text-center mb-8">
             <h1 class="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500 cursor-pointer" id="home-title">LEC Été 2025</h1>
             <p class="text-lg text-gray-300 mt-2">Classement le plus probable par groupe</p>
             <div class="flex flex-wrap justify-center gap-4 mt-4">
-                <button id="show-analysis-button" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                <button id="show-rankings-button" class="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors">
+                    Classements
+                </button>
+                <button id="show-analysis-button" class="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors">
                     Analyse des Matchs
                 </button>
                 <button id="show-qualif-button" class="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors">
                     Probas de Qualification (Maths)
-                </button>
-                <button id="show-power-score-button" class="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors">
-                    Calcul du Power Score
                 </button>
             </div>
         </header>
@@ -59,496 +96,822 @@
         </footer>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Données des équipes ---
-            const teamsData = [
-              { id: 'kc', name: 'Karmine Corp', tag: 'KC', rank: 1, logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Karmine_Corp_logo.svg/960px-Karmine_Corp_logo.svg.png', group: 'A', record: '2-0', roster: ['Canna', 'Yike', 'Vladi', 'Caliste', 'Targamas'], pastMatches: [{ opponent: 'NAVI', result: '2-0', win: true }, { opponent: 'GX', result: '2-1', win: true }], schedule: [{ opponent: 'MKOI', date: '10/08/2025', winChance: 70 }, { opponent: 'VIT', date: '18/08/2025', winChance: 83 }], analysis: "Toujours invaincue, la Karmine Corp confirme son statut de favorite. Leur niveau de jeu est impressionnant et leur match contre MKOI aujourd'hui est crucial pour verrouiller la première place du groupe.", probabilities: [{ position: 1, chance: 75 }, { position: 2, chance: 20 }, { position: 3, chance: 4 }, { position: 4, chance: 1 }, { position: 5, chance: 0 }], mathProbabilities: { qualif: 99.8, ranks: [{pos: 1, chance: 50}, {pos: 2, chance: 30.5}, {pos: 3, chance: 15}, {pos: 4, chance: 4.3}, {pos: 5, chance: 0.2}]} },
-              { id: 'g2', name: 'G2 Esports', tag: 'G2', rank: 3, logo: 'https://upload.wikimedia.org/wikipedia/pt/thumb/2/23/G2_Esports_logo.png/250px-G2_Esports_logo.png', group: 'B', record: '1-0', roster: ['BrokenBlade', 'SkewMond', 'Caps', 'Hans Sama', 'Labrov'], pastMatches: [{ opponent: 'TH', result: '2-0', win: true }], schedule: [{ opponent: 'FNC', date: '17/08/2025', winChance: 65 }, { opponent: 'BDS', date: '18/08/2025', winChance: 75 }, { opponent: 'SK', date: '25/08/2025', winChance: 85 }], analysis: "G2 a fait une entrée en matière fracassante avec un 2-0 net contre Heretics. L'équipe semble déjà très en forme. Leur affrontement contre Fnatic s'annonce comme la finale pour la première place du groupe.", probabilities: [{ position: 1, chance: 70 }, { position: 2, chance: 25 }, { position: 3, chance: 4 }, { position: 4, chance: 1 }, { position: 5, chance: 0 }], mathProbabilities: { qualif: 93.75, ranks: [{pos: 1, chance: 31.25}, {pos: 2, chance: 37.5}, {pos: 3, chance: 21.875}, {pos: 4, chance: 3.125}, {pos: 5, chance: 6.25}]} },
-              { id: 'mkoi', name: 'Movistar KOI', tag: 'MKOI', rank: 4, logo: 'https://am-a.akamaihd.net/image?resize=400:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1734012609283_MKOI_FullColor_Blue.png', group: 'A', record: '1-0', roster: ['Myrwn', 'Elyoya', 'Jojopyun', 'Supa', 'Alvaro'], pastMatches: [{ opponent: 'GX', result: '2-1', win: true }], schedule: [{ opponent: 'KC', date: '10/08/2025', winChance: 30 }, { opponent: 'NAVI', date: '16/08/2025', winChance: 80 }, { opponent: 'VIT', date: '26/08/2025', winChance: 65 }], analysis: "Les champions en titre ont assuré l'essentiel avec une victoire 2-1 contre GIANTX. Ils ont montré de la résilience. Leur match d'aujourd'hui contre KC est un test majeur pour évaluer leur niveau face au grand favori.", probabilities: [{ position: 1, chance: 20 }, { position: 2, chance: 70 }, { position: 3, chance: 8 }, { position: 4, chance: 2 }, { position: 5, chance: 0 }], mathProbabilities: { qualif: 93.75, ranks: [{pos: 1, chance: 31.25}, {pos: 2, chance: 37.5}, {pos: 3, chance: 21.875}, {pos: 4, chance: 3.125}, {pos: 5, chance: 6.25}]} },
-              { id: 'fnc', name: 'Fnatic', tag: 'FNC', rank: 2, logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/f/f4/Fnatic-Logo-2020.svg/langfr-330px-Fnatic-Logo-2020.svg.png', group: 'B', record: '2-0', roster: ['Oscarinin', 'Razork', 'Poby', 'Upset', 'Mikyx'], pastMatches: [{ opponent: 'TH', result: '2-0', win: true }, { opponent: 'SK', result: '2-0', win: true }], schedule: [{ opponent: 'BDS', date: '10/08/2025', winChance: 60 }, { opponent: 'G2', date: '17/08/2025', winChance: 35 }], analysis: "Avec un départ parfait à 2-0, Fnatic a confirmé son statut de cador. L'équipe semble solide et déterminée. Leur duel contre G2 sera l'un des matchs les plus attendus de la saison et déterminera probablement qui obtiendra la première place du groupe B, synonyme de position favorable pour les playoffs.", probabilities: [{ position: 1, chance: 25 }, { position: 2, chance: 65 }, { position: 3, chance: 8 }, { position: 4, chance: 2 }, { position: 5, chance: 0 }], mathProbabilities: { qualif: 99.9, ranks: [{pos: 1, chance: 55}, {pos: 2, chance: 32}, {pos: 3, chance: 12.9}, {pos: 4, chance: 0}, {pos: 5, chance: 0.1}]} },
-              { id: 'vit', name: 'Team Vitality', tag: 'VIT', rank: 8, logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/3/30/Team_Vitality_Logo_2018.png/960px-Team_Vitality_Logo_2018.png?20181201160334', group: 'A', record: '0-1', roster: ['Naak Nako', 'Lyncas', 'Czajek', 'Carzzy', 'Fleshy'], pastMatches: [{ opponent: 'GX', result: '1-2', win: false }], schedule: [{ opponent: 'NAVI', date: '17/08/2025', winChance: 67 }, { opponent: 'KC', date: '18/08/2025', winChance: 17 }, { opponent: 'MKOI', date: '26/08/2025', winChance: 35 }], analysis: "Malgré une défaite initiale contre GIANTX, Vitality conserve un rang honorable grâce au potentiel de son effectif. Le modèle estime que leur 'plafond' est élevé, mais ils doivent maintenant le prouver par des victoires pour justifier ce classement.", probabilities: [{ position: 1, chance: 2 }, { position: 2, chance: 10 }, { position: 3, chance: 50 }, { position: 4, chance: 35 }, { position: 5, chance: 3 }], mathProbabilities: { qualif: 45, ranks: [{pos: 1, chance: 1}, {pos: 2, chance: 5}, {pos: 3, chance: 15}, {pos: 4, chance: 24}, {pos: 5, chance: 55}]} },
-              { id: 'bds', name: 'Team BDS', tag: 'BDS', rank: 6, logo: 'https://maxesport.gg/medias/2022/01/Logo-BDS.webp', group: 'B', record: '1-1', roster: ['Rooster', 'Boukada', 'nuc', 'Ice', 'Parus'], pastMatches: [{ opponent: 'SK', result: '2-0', win: true }, { opponent: 'FNC', result: '0-2', win: false }], schedule: [{ opponent: 'FNC', date: '10/08/2025', winChance: 40 }, { opponent: 'G2', date: '18/08/2025', winChance: 25 }], analysis: "Team BDS se trouve dans une position similaire à Vitality. Ils ont le potentiel pour se qualifier en playoffs mais devront se battre pour chaque point contre les géants du groupe. Leurs matchs contre Heretics et SK seront décisifs pour espérer une qualification.", probabilities: [{ position: 1, chance: 1 }, { position: 2, chance: 5 }, { position: 3, chance: 45 }, { position: 4, chance: 40 }, { position: 5, chance: 9 }], mathProbabilities: { qualif: 70, ranks: [{pos: 1, chance: 2}, {pos: 2, chance: 10}, {pos: 3, chance: 28}, {pos: 4, chance: 30}, {pos: 5, chance: 30}]} },
-              { id: 'th', name: 'Team Heretics', tag: 'TH', rank: 9, logo: 'https://upload.wikimedia.org/wikipedia/fr/thumb/6/69/Team_Heretics.png/500px-Team_Heretics.png?20230721080913', group: 'B', record: '0-2', roster: ['Carlsen', 'Sheo', 'Kamiloo', 'Flakked', 'Stend'], pastMatches: [{ opponent: 'FNC', result: '0-2', win: false }, { opponent: 'G2', result: '0-2', win: false }], schedule: [{ opponent: 'SK', date: '16/08/2025', winChance: 55 }, { opponent: 'BDS', date: '25/08/2025', winChance: 45 }], analysis: "Avec deux défaites 0-2 contre les leaders du groupe, Heretics est en grande difficulté. Leur qualification est compromise et passera impérativement par deux victoires contre leurs concurrents directs.", probabilities: [{ position: 1, chance: 1 }, { position: 2, chance: 3 }, { position: 3, chance: 30 }, { position: 4, chance: 46 }, { position: 5, chance: 20 }], mathProbabilities: { qualif: 25, ranks: [{pos: 1, chance: 0}, {pos: 2, chance: 0}, {pos: 3, chance: 3.1}, {pos: 4, chance: 21.9}, {pos: 5, chance: 75}]} },
-              { id: 'gx', name: 'GIANTX', tag: 'GX', rank: 5, logo: 'https://upload.wikimedia.org/wikipedia/en/0/0e/GiantX_logo.svg', group: 'A', record: '1-2', roster: ['Lot', 'Isma', 'Jackies', 'Noah', 'Jun'], pastMatches: [{ opponent: 'KC', result: '1-2', win: false }, { opponent: 'VIT', result: '2-1', win: true }, { opponent: 'MKOI', result: '1-2', win: false }], schedule: [{ opponent: 'NAVI', date: '26/08/2025', winChance: 56 }], analysis: "Malgré la défaite contre MKOI, GIANTX a montré qu'ils étaient capables de prendre des games aux meilleures équipes. Leur score de 1-2 est sévère. Leur dernier match contre NAVI est une finale pour la qualification.", probabilities: [{ position: 1, chance: 1 }, { position: 2, chance: 5 }, { position: 3, chance: 35 }, { position: 4, chance: 49 }, { position: 5, chance: 10 }], mathProbabilities: { qualif: 60, ranks: [{pos: 1, chance: 0}, {pos: 2, chance: 2}, {pos: 3, chance: 20}, {pos: 4, chance: 38}, {pos: 5, chance: 40}]} },
-              { id: 'sk', name: 'SK Gaming', tag: 'SK', rank: 10, logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/SK_Gaming_Logo_2022.svg/768px-SK_Gaming_Logo_2022.svg.png', group: 'B', record: '0-2', roster: ['DnDn', 'Skeanz', 'Abbedagge', 'Keduii', 'Loopy'], pastMatches: [{ opponent: 'BDS', result: '0-2', win: false }, { opponent: 'FNC', result: '0-2', win: false }], schedule: [{ opponent: 'TH', date: '16/08/2025', winChance: 45 }, { opponent: 'G2', date: '25/08/2025', winChance: 15 }], analysis: "Avec un départ difficile à 0-2, la tâche s'annonce compliquée pour SK Gaming. Considérés comme l'une des équipes les plus faibles du groupe, chaque match sera un défi. Leur objectif principal sera de remporter une victoire, notamment contre Team Heretics, pour tenter de jouer les trouble-fêtes.", probabilities: [{ position: 1, chance: 0 }, { position: 2, chance: 1 }, { position: 3, chance: 5 }, { position: 4, chance: 28 }, { position: 5, chance: 66 }], mathProbabilities: { qualif: 20, ranks: [{pos: 1, chance: 0}, {pos: 2, chance: 0}, {pos: 3, chance: 2}, {pos: 4, chance: 18}, {pos: 5, chance: 80}]} },
-              { id: 'navi', name: 'Natus Vincere', tag: 'NAVI', rank: 7, logo: 'https://upload.wikimedia.org/wikipedia/fr/2/27/NAVI_Logo_2020.png?20210709101754', group: 'A', record: '0-1', roster: ['Adam', 'Thayger', 'Larssen', 'Hans SamD', 'Malrang'], pastMatches: [{ opponent: 'KC', result: '0-2', win: false }], schedule: [{ opponent: 'MKOI', date: '16/08/2025', winChance: 20 }, { opponent: 'VIT', date: '17/08/2025', winChance: 33 }, { opponent: 'GX', date: '26/08/2025', winChance: 44 }], analysis: "Nouveau venu dans la ligue, NAVI est l'inconnue de ce split. Le groupe A est particulièrement difficile et leur qualification serait une grande surprise. L'équipe cherchera à acquérir de l'expérience et à créer des surprises, mais une place dans le bas du tableau semble le plus probable.", probabilities: [{ position: 1, chance: 0 }, { position: 2, chance: 1 }, { position: 3, chance: 3 }, { position: 4, chance: 20 }, { position: 5, chance: 76 }], mathProbabilities: { qualif: 45, ranks: [{pos: 1, chance: 1}, {pos: 2, chance: 5}, {pos: 3, chance: 15}, {pos: 4, chance: 24}, {pos: 5, chance: 55}]} },
-            ];
-            
-            const matchupsAnalysis = [
-                { teams: ['KC', 'MKOI'], analysis: "Le choc des titans du Groupe A. KC est considéré comme le favori du tournoi, mais MKOI est le champion en titre du Spring. L'agressivité et la puissance brute de KC, combinées à leur excellente forme (2-0), leur donnent un avantage substantiel sur MKOI qui n'a pas encore joué. Le modèle favorise fortement la dynamique actuelle.", powerScore: { team1: 'KC', team2: 'MKOI', breakdown: [{ criteria: 'Forme (40%)', winner: 'KC', reason: 'KC est en 2-0, MKOI en 0-0. Avantage majeur.' }, { criteria: 'Effectif (30%)', winner: 'KC', reason: 'Plafond de performance légèrement supérieur.' }, { criteria: 'Style (20%)', winner: 'KC', reason: 'Le style proactif est favorisé par le modèle.' }, { criteria: 'Historique (10%)', winner: 'MKOI', reason: 'MKOI a remporté le Spring Split.' }] } },
-                { teams: ['KC', 'VIT'], analysis: "KC est largement favori. Leur niveau de jeu global, leur coordination et la force de leur effectif sont bien supérieurs à ceux de Vitality. La forme actuelle de KC (2-0) face à celle de Vitality (0-1) creuse encore plus l'écart.", powerScore: { team1: 'KC', team2: 'VIT', breakdown: [{ criteria: 'Forme (40%)', winner: 'KC', reason: 'Dynamique opposée (2-0 vs 0-1).' }, { criteria: 'Effectif (30%)', winner: 'KC', reason: 'Qualité individuelle supérieure à chaque poste.' }, { criteria: 'Style (20%)', winner: 'KC', reason: 'Style plus cohérent et décisif.' }, { criteria: 'Historique (10%)', winner: 'KC', reason: 'Historiquement plus dominant.' }] } },
-                { teams: ['G2', 'FNC'], analysis: "Le 'Clásico' européen. Les deux équipes sont invaincues. Fnatic a joué plus de matchs, mais G2 a semblé impérial lors de son premier match. Le modèle donne un léger avantage à G2 en raison de leur potentiel perçu comme plus élevé et de leur domination historique dans cette affiche.", powerScore: { team1: 'G2', team2: 'FNC', breakdown: [{ criteria: 'Forme (40%)', winner: 'Egalité', reason: 'Les deux équipes sont invaincues et en pleine confiance.' }, { criteria: 'Effectif (30%)', winner: 'G2', reason: 'Plafond de performance et expérience de G2 supérieurs.' }, { criteria: 'Style (20%)', winner: 'G2', reason: 'La créativité de G2 est un avantage clé.' }, { criteria: 'Historique (10%)', winner: 'G2', reason: 'G2 mène dans les confrontations directes.' }] } },
-                { teams: ['G2', 'BDS'], analysis: "G2 est un net favori. Bien que BDS soit une équipe de playoffs solide, ils n'ont pas encore montré la capacité de rivaliser avec la puissance de feu et la vitesse de jeu de G2 sur l'ensemble de la carte. L'historique des confrontations est aussi largement en faveur de G2.", powerScore: { team1: 'G2', team2: 'BDS', breakdown: [{ criteria: 'Forme (40%)', winner: 'G2', reason: 'G2 est invaincu (1-0), BDS est à 1-1.' }, { criteria: 'Effectif (30%)', winner: 'G2', reason: 'G2 a un avantage de talent significatif.' }, { criteria: 'Style (20%)', winner: 'G2', reason: 'Le style de G2 est plus complexe et difficile à contrer.' }, { criteria: 'Historique (10%)', winner: 'G2', reason: 'Domination historique de G2.' }] } },
-                { teams: ['G2', 'SK'], analysis: "C'est l'affrontement le plus déséquilibré du groupe. G2 est un contender au titre, tandis que SK Gaming (0-2) lutte pour éviter la dernière place. L'écart de niveau individuel, collectif et de dynamique est immense.", powerScore: { team1: 'G2', team2: 'SK', breakdown: [{ criteria: 'Forme (40%)', winner: 'G2', reason: 'SK est en 0-2, G2 est invaincu.' }, { criteria: 'Effectif (30%)', winner: 'G2', reason: 'Écart de niveau très important.' }, { criteria: 'Style (20%)', winner: 'G2', reason: 'G2 est supérieur dans tous les aspects du jeu.' }, { criteria: 'Historique (10%)', winner: 'G2', reason: 'Domination historique.' }] } },
-                { teams: ['MKOI', 'VIT'], analysis: "Movistar KOI est favori. En tant que champions du Spring, et après une première victoire, ils ont confirmé leur statut. Vitality est capable de coups d'éclat, mais leur défaite initiale les place en position d'outsider.", powerScore: { team1: 'MKOI', team2: 'VIT', breakdown: [{ criteria: 'Forme (40%)', winner: 'MKOI', reason: 'MKOI est à 1-0, VIT à 0-1.' }, { criteria: 'Effectif (30%)', winner: 'MKOI', reason: 'Effectif plus cohérent et synergique.' }, { criteria: 'Style (20%)', winner: 'MKOI', reason: 'Leur macro-gestion est supérieure.' }, { criteria: 'Historique (10%)', winner: 'MKOI', reason: 'MKOI a de meilleurs résultats récents.' }] } },
-                { teams: ['MKOI', 'NAVI'], analysis: "MKOI est largement favori. L'expérience, la cohésion et le talent individuel de l'équipe championne du Spring sont bien au-dessus de ceux de NAVI, nouveau venu dans la ligue et qui a déjà perdu son premier match.", powerScore: { team1: 'MKOI', team2: 'NAVI', breakdown: [{ criteria: 'Forme (40%)', winner: 'MKOI', reason: 'MKOI est à 1-0, NAVI à 0-1.' }, { criteria: 'Effectif (30%)', winner: 'MKOI', reason: 'Avantage de talent à tous les postes.' }, { criteria: 'Style (20%)', winner: 'MKOI', reason: 'Cohésion et expérience largement supérieures.' }, { criteria: 'Historique (10%)', winner: 'MKOI', reason: 'Aucun historique, mais le prestige de MKOI domine.' }] } },
-                { teams: ['FNC', 'BDS'], analysis: "Fnatic est favori. Leur début de saison parfait (2-0) et la force de leur duo botlane leur donnent un avantage clair sur une équipe de BDS (1-1) qui, bien que solide, semble un cran en dessous des meilleures équipes.", powerScore: { team1: 'FNC', team2: 'BDS', breakdown: [{ criteria: 'Forme (40%)', winner: 'FNC', reason: 'FNC est invaincu (2-0), BDS est à 1-1.' }, { criteria: 'Effectif (30%)', winner: 'FNC', reason: 'FNC a un léger avantage de talent global.' }, { criteria: 'Style (20%)', winner: 'FNC', reason: 'Leur style de jeu est plus affirmé en ce début de saison.' }, { criteria: 'Historique (10%)', winner: 'FNC', reason: 'Léger avantage historique pour FNC.' }] } },
-                { teams: ['VIT', 'NAVI'], analysis: "Un match qui s'annonce serré entre deux équipes à 0-1. Vitality a plus d'expérience en LEC et un effectif plus prouvé, ce qui leur donne un avantage. Cependant, NAVI est une inconnue et pourrait surprendre. Le modèle favorise l'expérience.", powerScore: { team1: 'VIT', team2: 'NAVI', breakdown: [{ criteria: 'Forme (40%)', winner: 'Egalité', reason: 'Les deux équipes sont en 0-1.' }, { criteria: 'Effectif (30%)', winner: 'VIT', reason: 'L\'effectif de VIT est plus expérimenté en LEC.' }, { criteria: 'Style (20%)', winner: 'VIT', reason: 'Style de jeu plus établi, bien qu\'inconstant.' }, { criteria: 'Historique (10%)', winner: 'Egalité', reason: 'Pas d\'historique pertinent.' }] } },
-                { teams: ['TH', 'BDS'], analysis: "C'est un match crucial pour les playoffs et l'un des plus équilibrés. BDS (1-1) part avec un léger avantage de forme sur TH (0-2). Cependant, TH a affronté les deux leaders du groupe, ce qui nuance leur mauvais départ. Match très indécis.", powerScore: { team1: 'TH', team2: 'BDS', breakdown: [{ criteria: 'Forme (40%)', winner: 'BDS', reason: 'BDS a une victoire (1-1), TH non (0-2).' }, { criteria: 'Effectif (30%)', winner: 'Egalité', reason: 'Niveau de talent globalement similaire.' }, { criteria: 'Style (20%)', winner: 'Egalité', reason: 'Deux styles de jeu encore en construction.' }, { criteria: 'Historique (10%)', winner: 'BDS', reason: 'Léger avantage pour BDS dans les rencontres récentes.' }] } },
-                { teams: ['TH', 'SK'], analysis: "Le match de la dernière chance pour deux équipes à 0-2. Team Heretics est favori car ils ont affronté des adversaires beaucoup plus forts (FNC, G2) que SK. Leurs défaites sont plus 'excusables' et ils ont montré plus de potentiel.", powerScore: { team1: 'TH', team2: 'SK', breakdown: [{ criteria: 'Forme (40%)', winner: 'Egalité', reason: 'Les deux équipes sont en 0-2.' }, { criteria: 'Effectif (30%)', winner: 'TH', reason: 'Léger avantage de talent pour TH.' }, { criteria: 'Style (20%)', winner: 'TH', reason: 'TH a montré plus de potentiel dans son jeu.' }, { criteria: 'Historique (10%)', winner: 'Egalité', reason: 'Pas d\'avantage clair.' }] } },
-                { teams: ['GX', 'NAVI'], analysis: "Un match serré entre deux équipes du milieu/bas de tableau. GIANTX (1-2) a l'avantage de l'expérience et d'une victoire déjà acquise. NAVI (0-1) doit encore prouver son niveau. Le modèle donne l'avantage à l'équipe avec la meilleure dynamique de départ.", powerScore: { team1: 'GX', team2: 'NAVI', breakdown: [{ criteria: 'Forme (40%)', winner: 'GX', reason: 'GX a déjà une victoire (1-2), NAVI non (0-1).' }, { criteria: 'Effectif (30%)', winner: 'Egalité', reason: 'Niveau de talent comparable.' }, { criteria: 'Style (20%)', winner: 'GX', reason: 'Le style de GX est plus rodé en LEC.' }, { criteria: 'Historique (10%)', winner: 'Egalité', reason: 'Pas d\'historique pertinent.' }] } },
-            ];
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-            const mainContent = document.getElementById('main-content');
-            const showAnalysisButton = document.getElementById('show-analysis-button');
-            const showQualifButton = document.getElementById('show-qualif-button');
-            const showPowerScoreButton = document.getElementById('show-power-score-button');
-            const homeTitle = document.getElementById('home-title');
+        // Configuration de votre base de données
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
+            authDomain: "muscu-5e40c.firebaseapp.com",
+            projectId: "muscu-5e40c",
+            storageBucket: "muscu-5e40c.appspot.com",
+            messagingSenderId: "561788112947",
+            appId: "1:561788112947:web:7f2b7c7d74ff328f2b1346"
+        };
 
-            function calculatePowerScores() {
-                const initialRanks = {};
-                teamsData.forEach(t => initialRanks[t.id] = t.rank);
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore(app);
 
-                teamsData.forEach(team => {
+        // Variables globales pour les données
+        let teamsData = [];
+        let matchupsAnalysis = [];
+        let playersData = [];
+        let currentSortKey = 'playerScore';
+        let currentSortDirection = 'desc';
+        let currentRoleFilter = 'All';
+
+        const loader = document.getElementById('loader');
+        const loaderText = document.getElementById('loader-text');
+        const appContent = document.getElementById('app-content');
+        const mainContent = document.getElementById('main-content');
+        const showAnalysisButton = document.getElementById('show-analysis-button');
+        const showQualifButton = document.getElementById('show-qualif-button');
+        const showRankingsButton = document.getElementById('show-rankings-button');
+        const homeTitle = document.getElementById('home-title');
+
+        // --- DÉMARRAGE DE L'APPLICATION ---
+        async function main() {
+            try {
+                await signInAnonymously(auth);
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        loaderText.textContent = "Chargement des données...";
+                        await fetchData();
+                        
+                        calculatePlayerRanks();
+                        calculatePowerScores();
+                        renderHomeView();
+                        
+                        loader.style.display = 'none';
+                        appContent.style.display = 'block';
+                        
+                        setupEventListeners();
+                    }
+                });
+            } catch (error) {
+                console.error("Erreur de connexion à Firebase:", error);
+                loaderText.textContent = "Erreur de connexion. Vérifiez la console.";
+            }
+        }
+
+        // --- GESTION DES DONNÉES FIREBASE ---
+        async function fetchData() {
+            try {
+                const teamsSnapshot = await getDocs(collection(db, "lec-teams"));
+                if (teamsSnapshot.empty) {
+                    throw new Error("La collection 'lec-teams' est vide ou n'existe pas. Assurez-vous d'avoir mis en place les données initiales et les règles de sécurité.");
+                }
+                teamsData = teamsSnapshot.docs.map(doc => doc.data());
+
+                const analysisSnapshot = await getDocs(collection(db, "lec-analysis"));
+                matchupsAnalysis = analysisSnapshot.docs.map(doc => doc.data());
+                
+                const playersSnapshot = await getDocs(collection(db, "lec-players"));
+                playersData = playersSnapshot.docs.map(doc => doc.data());
+
+            } catch (error) {
+                console.error("Erreur lors de la récupération des données :", error);
+                loaderText.innerHTML = `Erreur de chargement des données.<br>Vérifiez que les collections existent dans Firestore et que les règles de sécurité sont correctes.`;
+                throw error;
+            }
+        }
+
+        // --- Logique de l'UI ---
+
+        function calculatePlayerRanks() {
+            const roles = ['Top', 'Jungle', 'Mid', 'ADC', 'Support'];
+            const statsToRank = ['dpm', 'kda', 'champPool', 'csm', 'gpm', 'kpar', 'ks_percent', 'gold_percent', 'playerScore'];
+
+            // Calculer le score de chaque joueur
+            playersData.forEach(player => {
+                if (player.stats) {
                     let score = 0;
-                    // 1. Current Wins
-                    const wins = parseInt(team.record.split('-')[0]);
-                    score += wins * 3;
+                    score += (player.stats.dpm || 0) / 100;
+                    score += (player.stats.kda || 0) * 2;
+                    score += (parseFloat(player.stats.kpar) || 0) / 10;
+                    score += (player.stats.csm || 0);
+                    score += (player.stats.gpm || 0) / 100;
+                    player.stats.playerScore = score;
+                }
+            });
 
-                    // 2. Predicted Wins
-                    const predictedWins = team.schedule.reduce((acc, match) => acc + (match.winChance / 100), 0);
-                    score += predictedWins * 3;
+            // Classer les joueurs pour chaque stat
+            statsToRank.forEach(stat => {
+                // Classement général
+                const sortedAllPlayers = [...playersData].sort((a, b) => (b.stats[stat] || 0) - (a.stats[stat] || 0));
+                sortedAllPlayers.forEach((player, index) => {
+                    if (!player.stats.ranks) player.stats.ranks = {};
+                    player.stats.ranks[`${stat}Overall`] = index + 1;
+                });
 
-                    // 3. Head-to-Head Bonus
-                    team.pastMatches.forEach(match => {
-                        if (match.win) {
-                            score += 1;
-                        }
+                // Classement par rôle
+                roles.forEach(role => {
+                    const playersInRole = playersData.filter(p => p.role === role);
+                    const sortedPlayers = [...playersInRole].sort((a, b) => {
+                        let valA = a.stats[stat];
+                        let valB = b.stats[stat];
+                        if (typeof valA === 'string' && valA.includes('%')) valA = parseFloat(valA.replace('%', ''));
+                        if (typeof valB === 'string' && valB.includes('%')) valB = parseFloat(valB.replace('%', ''));
+                        return (valB || 0) - (valA || 0);
                     });
 
-                    // 4. Prestige
-                    const prestigeRanks = {1:2, 2:2, 3:2, 4:2, 5:1, 6:1, 7:1, 8:1, 9:0, 10:0};
-                    score += prestigeRanks[initialRanks[team.id]] || 0;
-
-                    team.powerScore = score.toFixed(2);
-                });
-
-                // Re-rank based on power score
-                teamsData.sort((a, b) => b.powerScore - a.powerScore);
-                teamsData.forEach((team, index) => {
-                    team.rank = index + 1;
-                });
-            }
-
-            function renderHomeView() {
-                const groupA = teamsData.filter(t => t.group === 'A').sort((a, b) => a.rank - b.rank);
-                const groupB = teamsData.filter(t => t.group === 'B').sort((a, b) => a.rank - b.rank);
-
-                const groupAListHTML = groupA.map(team => createTeamCardHTML(team)).join('');
-                const groupBListHTML = groupB.map(team => createTeamCardHTML(team)).join('');
-
-                mainContent.innerHTML = `
-                    <div>
-                        <h2 class="text-3xl font-bold text-white mb-4 mt-8 border-b-2 border-indigo-500 pb-2">Groupe A</h2>
-                        <div class="space-y-4 mt-4">${groupAListHTML}</div>
-                    </div>
-                    <div>
-                        <h2 class="text-3xl font-bold text-white mb-4 mt-12 border-b-2 border-purple-500 pb-2">Groupe B</h2>
-                        <div class="space-y-4 mt-4">${groupBListHTML}</div>
-                    </div>
-                `;
-
-                mainContent.querySelectorAll('.team-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        const teamId = card.dataset.teamId;
-                        renderTeamDetail(teamId);
+                    sortedPlayers.forEach((player, index) => {
+                        if (!player.stats.ranks) player.stats.ranks = {};
+                        player.stats.ranks[stat] = index + 1;
                     });
                 });
-            }
+            });
+        }
 
-            function createTeamCardHTML(team) {
+        function calculatePowerScores() {
+            teamsData.forEach(team => {
+                let score = 0;
+                const wins = parseInt(team.record.split('-')[0]);
+                score += wins * 4;
+                const predictedWins = team.schedule.reduce((acc, match) => acc + (match.winChance / 100), 0);
+                score += predictedWins * 3;
+
+                let playerPower = 0;
+                team.roster.forEach(playerName => {
+                    const player = playersData.find(p => p.id === playerName);
+                    if (player && player.stats && player.stats.playerScore) {
+                        playerPower += player.stats.playerScore;
+                    }
+                });
+                score += (playerPower / 5) / 10; 
+
+                team.powerScore = score.toFixed(2);
+            });
+
+            teamsData.sort((a, b) => b.powerScore - a.powerScore);
+            teamsData.forEach((team, index) => { team.rank = index + 1; });
+        }
+
+        function renderHomeView() {
+            const groupA = teamsData.filter(t => t.group === 'A').sort((a, b) => a.rank - b.rank);
+            const groupB = teamsData.filter(t => t.group === 'B').sort((a, b) => a.rank - b.rank);
+
+            const groupAListHTML = groupA.map(team => createTeamCardHTML(team)).join('');
+            const groupBListHTML = groupB.map(team => createTeamCardHTML(team)).join('');
+
+            mainContent.innerHTML = `
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-4 mt-8 border-b-2 border-indigo-500 pb-2">Groupe A</h2>
+                    <div class="space-y-4 mt-4">${groupAListHTML}</div>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-4 mt-12 border-b-2 border-purple-500 pb-2">Groupe B</h2>
+                    <div class="space-y-4 mt-4">${groupBListHTML}</div>
+                </div>
+            `;
+
+            mainContent.querySelectorAll('.team-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const teamId = card.dataset.teamId;
+                    renderTeamDetail(teamId);
+                });
+            });
+        }
+
+        function createTeamCardHTML(team) {
+            return `
+                <div data-team-id="${team.id}" class="team-card bg-gray-800 rounded-lg p-4 flex items-center space-x-4 cursor-pointer hover:bg-gray-700 transition-all duration-200 transform hover:scale-105">
+                    <span class="text-2xl font-bold text-gray-500 w-8 text-center">${team.rank}</span>
+                    <img src="${team.logo}" alt="Logo de ${team.name}" class="w-16 h-16 object-contain" onerror="this.onerror=null;this.src='https://placehold.co/64x64/1f2937/ffffff?text=?';">
+                    <div class="flex-grow">
+                        <h3 class="text-xl font-bold text-white">${team.name}</h3>
+                        <p class="text-sm text-gray-400">Rang Global: ${team.rank} | Score Actuel: ${team.record}</p>
+                    </div>
+                    <span class="text-lg font-semibold text-indigo-400">${team.tag}</span>
+                </div>
+            `;
+        }
+
+        function renderTeamDetail(teamId) {
+            const team = teamsData.find(t => t.id === teamId);
+            if (!team) return;
+
+            const probabilitiesHTML = team.probabilities.map(p => {
+                const textInsideHTML = p.chance > 15 ? `<span class="text-xs font-medium text-white">${p.chance}%</span>` : '';
+                const textOutsideHTML = p.chance <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${p.chance}%</span>` : '';
                 return `
-                    <div data-team-id="${team.id}" class="team-card bg-gray-800 rounded-lg p-4 flex items-center space-x-4 cursor-pointer hover:bg-gray-700 transition-all duration-200 transform hover:scale-105">
-                        <span class="text-2xl font-bold text-gray-500 w-8 text-center">${team.rank}</span>
-                        <img src="${team.logo}" alt="Logo de ${team.name}" class="w-16 h-16 object-contain" onerror="this.onerror=null;this.src='https://placehold.co/64x64/1f2937/ffffff?text=?';">
-                        <div class="flex-grow">
-                            <h3 class="text-xl font-bold text-white">${team.name}</h3>
-                            <p class="text-sm text-gray-400">Rang Global: ${team.rank} | Score Actuel: ${team.record}</p>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-16 text-right text-gray-300 flex-shrink-0">Place ${p.position}</span>
+                        <div class="w-full bg-gray-700 rounded-full h-6 relative">
+                            <div class="bg-indigo-500 h-full rounded-full flex items-center justify-center" style="width: ${p.chance}%">${textInsideHTML}</div>
+                            ${textOutsideHTML}
                         </div>
-                        <span class="text-lg font-semibold text-indigo-400">${team.tag}</span>
                     </div>
                 `;
-            }
+            }).join('');
 
-            function renderTeamDetail(teamId) {
-                const team = teamsData.find(t => t.id === teamId);
-                if (!team) return;
+            const rosterHTML = team.roster.map(player => `<li class="pl-4 border-l-2 border-gray-700 hover:border-indigo-400 transition-colors"><button class="player-link text-indigo-400 hover:underline" data-player-id="${player}">${player}</button></li>`).join('');
 
-                const probabilitiesHTML = team.probabilities.map(p => {
-                    const textInsideHTML = p.chance > 15 ? `<span class="text-xs font-medium text-white">${p.chance}%</span>` : '';
-                    const textOutsideHTML = p.chance <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${p.chance}%</span>` : '';
+            const scheduleHTML = team.schedule.length > 0 ? 
+                team.schedule.map(match => {
+                    const chanceColor = match.winChance >= 70 ? 'text-green-400' : match.winChance >= 40 ? 'text-yellow-400' : 'text-red-400';
                     return `
-                        <div class="flex items-center space-x-2">
-                            <span class="w-16 text-right text-gray-300 flex-shrink-0">Place ${p.position}</span>
-                            <div class="w-full bg-gray-700 rounded-full h-6 relative">
-                                <div class="bg-indigo-500 h-full rounded-full flex items-center justify-center" style="width: ${p.chance}%">${textInsideHTML}</div>
-                                ${textOutsideHTML}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                const rosterHTML = team.roster.map(player => `<li class="pl-4 border-l-2 border-gray-700">${player}</li>`).join('');
-
-                const scheduleHTML = team.schedule.length > 0 ? 
-                    team.schedule.map(match => {
-                        const chanceColor = match.winChance >= 70 ? 'text-green-400' : match.winChance >= 40 ? 'text-yellow-400' : 'text-red-400';
-                        return `
-                            <li class="flex justify-between items-center bg-gray-800 p-2 rounded">
-                                <span class="font-medium text-gray-200">vs ${match.opponent}</span>
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-sm text-gray-400">${match.date}</span>
-                                    <span class="font-bold text-sm w-16 text-right ${chanceColor}">${match.winChance}% V</span>
-                                </div>
-                            </li>
-                        `;
-                    }).join('') :
-                    '<p class="text-gray-400">Aucun match restant.</p>';
-
-                const pastMatchesHTML = team.pastMatches.length > 0 ?
-                    team.pastMatches.map(match => `
                         <li class="flex justify-between items-center bg-gray-800 p-2 rounded">
                             <span class="font-medium text-gray-200">vs ${match.opponent}</span>
-                            <span class="font-bold ${match.win ? 'text-green-400' : 'text-red-400'}">${match.result}</span>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-400">${match.date}</span>
+                                <span class="font-bold text-sm w-16 text-right ${chanceColor}">${match.winChance}% V</span>
+                            </div>
                         </li>
-                    `).join('') :
-                    '<p class="text-gray-400">Aucun match joué.</p>';
+                    `;
+                }).join('') :
+                '<p class="text-gray-400">Aucun match restant.</p>';
 
-                mainContent.innerHTML = `
-                    <div class="bg-gray-800 rounded-lg p-4 sm:p-8">
-                        <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-                            <span>Retour au classement</span>
-                        </button>
-                        <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 mb-8">
-                            <img src="${team.logo}" alt="Logo de ${team.name}" class="w-32 h-32 object-contain" onerror="this.onerror=null;this.src='https://placehold.co/128x128/111827/ffffff?text=?';">
-                            <div class="text-center sm:text-left">
-                                <h1 class="text-4xl font-extrabold text-white">${team.name}</h1>
-                                <p class="text-xl text-gray-400">Groupe ${team.group} | Score Actuel: ${team.record}</p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h2 class="text-2xl font-bold text-white mb-4 border-b-2 border-indigo-500 pb-2">Analyse et Pronostics</h2>
-                                <p class="text-gray-300 mb-6 text-justify">${team.analysis}</p>
-                                <h3 class="text-xl font-semibold text-white mb-3">Probabilités de Classement Final</h3>
-                                <div class="space-y-2">${probabilitiesHTML}</div>
-                            </div>
-                            <div class="space-y-6">
-                                <div class="bg-gray-900/50 p-4 rounded-lg">
-                                    <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>Composition de l'équipe</h3>
-                                    <ul class="space-y-1 text-gray-300">${rosterHTML}</ul>
-                                </div>
-                                <div class="bg-gray-900/50 p-4 rounded-lg">
-                                    <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M16 16v-2a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>Matchs Joués</h3>
-                                    <ul class="space-y-2">${pastMatchesHTML}</ul>
-                                </div>
-                                <div class="bg-gray-900/50 p-4 rounded-lg">
-                                    <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>Matchs Restants</h3>
-                                    <ul class="space-y-2">${scheduleHTML}</ul>
-                                </div>
-                            </div>
+            const pastMatchesHTML = team.pastMatches.length > 0 ?
+                team.pastMatches.map(match => `
+                    <li class="flex justify-between items-center bg-gray-800 p-2 rounded">
+                        <span class="font-medium text-gray-200">vs ${match.opponent}</span>
+                        <span class="font-bold ${match.win ? 'text-green-400' : 'text-red-400'}">${match.result}</span>
+                    </li>
+                `).join('') :
+                '<p class="text-gray-400">Aucun match joué.</p>';
+
+            mainContent.innerHTML = `
+                <div class="bg-gray-800 rounded-lg p-4 sm:p-8">
+                    <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+                        <span>Retour au classement</span>
+                    </button>
+                    <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 mb-8">
+                        <img src="${team.logo}" alt="Logo de ${team.name}" class="w-32 h-32 object-contain" onerror="this.onerror=null;this.src='https://placehold.co/128x128/111827/ffffff?text=?';">
+                        <div class="text-center sm:text-left">
+                            <h1 class="text-4xl font-extrabold text-white">${team.name}</h1>
+                            <p class="text-xl text-gray-400">Groupe ${team.group} | Score Actuel: ${team.record}</p>
                         </div>
                     </div>
-                `;
-                
-                mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
-            }
-
-            function renderAnalysisListView() {
-                const allMatches = [];
-                const seen = new Set();
-                teamsData.forEach(team => {
-                    team.schedule.forEach(match => {
-                        const sortedTeams = [team.tag, match.opponent].sort();
-                        const matchId = sortedTeams.join('-');
-                        if (!seen.has(matchId)) {
-                            allMatches.push({
-                                id: matchId,
-                                team1: teamsData.find(t => t.tag === sortedTeams[0]),
-                                team2: teamsData.find(t => t.tag === sortedTeams[1]),
-                                date: match.date
-                            });
-                            seen.add(matchId);
-                        }
-                    });
-                });
-
-                allMatches.forEach(match => {
-                    const parts = match.date.split('/');
-                    match.dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
-                });
-
-                allMatches.sort((a, b) => a.dateObj - b.dateObj);
-
-                const matchesByDate = allMatches.reduce((acc, match) => {
-                    if (!acc[match.date]) acc[match.date] = [];
-                    acc[match.date].push(match);
-                    return acc;
-                }, {});
-
-                const analysisHTML = Object.keys(matchesByDate).map(date => {
-                    const matchesOnDate = matchesByDate[date];
-                    const matchesHTML = matchesOnDate.map(match => {
-                        const team1 = match.team1;
-                        const team2 = match.team2;
-                        const team1WinChance = team1.schedule.find(s => s.opponent === team2.tag)?.winChance || 100 - (team2.schedule.find(s => s.opponent === team1.tag)?.winChance || 50);
-                        const team2WinChance = 100 - team1WinChance;
-                        
-                        let predictedScore;
-                        if (team1WinChance > 70) {
-                            predictedScore = '2-0';
-                        } else if (team1WinChance >= 50) {
-                            predictedScore = '2-1';
-                        } else if (team1WinChance < 30) {
-                            predictedScore = '0-2';
-                        } else {
-                            predictedScore = '1-2';
-                        }
-
-                        return `
-                            <div class="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition-colors match-card" data-match-id="${match.id}">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex items-center space-x-3 w-2/5 justify-start">
-                                        <img src="${team1.logo}" alt="${team1.name}" class="w-10 h-10 object-contain">
-                                        <span class="font-bold text-lg hidden sm:block">${team1.name}</span>
-                                        <span class="font-bold text-lg sm:hidden">${team1.tag}</span>
-                                    </div>
-                                    <div class="text-center">
-                                        <span class="font-bold text-lg text-gray-400">${predictedScore}</span>
-                                        <p class="text-xs text-gray-500">Score Prédit</p>
-                                    </div>
-                                    <div class="flex items-center space-x-3 w-2/5 justify-end">
-                                        <span class="font-bold text-lg text-right hidden sm:block">${team2.name}</span>
-                                        <span class="font-bold text-lg text-right sm:hidden">${team2.tag}</span>
-                                        <img src="${team2.logo}" alt="${team2.name}" class="w-10 h-10 object-contain">
-                                    </div>
-                                </div>
-                                <div class="flex items-center space-x-2 my-2">
-                                    <div class="w-full bg-green-500/20 rounded-l-full h-2" style="width: ${team1WinChance}%"></div>
-                                    <div class="w-full bg-red-500/20 rounded-r-full h-2" style="width: ${team2WinChance}%"></div>
-                                </div>
-                                <div class="flex justify-between items-center text-sm font-bold">
-                                    <span class="text-green-400">${team1WinChance}%</span>
-                                    <span class="text-red-400">${team2WinChance}%</span>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-
-                    return `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <h3 class="text-2xl font-bold text-indigo-400 mt-8 mb-4">Journée du ${date}</h3>
-                            <div class="space-y-4">
-                                ${matchesHTML}
+                            <h2 class="text-2xl font-bold text-white mb-4 border-b-2 border-indigo-500 pb-2">Analyse et Pronostics</h2>
+                            <p class="text-gray-300 mb-6 text-justify">${team.analysis}</p>
+                            <h3 class="text-xl font-semibold text-white mb-3">Probabilités de Classement Final</h3>
+                            <div class="space-y-2">${probabilitiesHTML}</div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="bg-gray-900/50 p-4 rounded-lg">
+                                <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>Composition de l'équipe</h3>
+                                <ul class="space-y-1 text-gray-300">${rosterHTML}</ul>
+                            </div>
+                            <div class="bg-gray-900/50 p-4 rounded-lg">
+                                <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M16 16v-2a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>Matchs Joués</h3>
+                                <ul class="space-y-2">${pastMatchesHTML}</ul>
+                            </div>
+                            <div class="bg-gray-900/50 p-4 rounded-lg">
+                                <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>Matchs Restants</h3>
+                                <ul class="space-y-2">${scheduleHTML}</ul>
                             </div>
                         </div>
-                    `;
-                }).join('');
-
-                mainContent.innerHTML = `
-                    <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-                        <span>Retour au classement</span>
-                    </button>
-                    <h2 class="text-3xl font-bold text-white mb-2">Analyse Détaillée des Matchs à Venir</h2>
-                    <p class="text-gray-400 mb-6">Retrouvez ici l'analyse détaillée de chaque affrontement restant dans la phase de groupe. Cliquez sur un match pour voir le détail du calcul de puissance.</p>
-                    <div>${analysisHTML}</div>
-                `;
-                mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
-                mainContent.querySelectorAll('.match-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        renderMatchDetail(card.dataset.matchId);
-                    });
-                });
-            }
+                    </div>
+                </div>
+            `;
             
-            function renderMatchDetail(matchId) {
-                const teamTags = matchId.split('-');
-                const team1 = teamsData.find(t => t.tag === teamTags[0]);
-                const team2 = teamsData.find(t => t.tag === teamTags[1]);
-                const matchInfo = matchupsAnalysis.find(a => a.teams.sort().join('-') === matchId);
-                if (!team1 || !team2 || !matchInfo) return;
+            mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
+            mainContent.querySelectorAll('.player-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    renderPlayerDetail(e.target.dataset.playerId, teamId);
+                });
+            });
+        }
 
-                const team1WinChance = team1.schedule.find(s => s.opponent === team2.tag)?.winChance || 100 - (team2.schedule.find(s => s.opponent === team1.tag)?.winChance || 50);
-                const team2WinChance = 100 - team1WinChance;
+        function renderAnalysisListView() {
+            const allMatches = [];
+            const seen = new Set();
+            teamsData.forEach(team => {
+                team.schedule.forEach(match => {
+                    const sortedTeams = [team.tag, match.opponent].sort();
+                    const matchId = sortedTeams.join('-');
+                    if (!seen.has(matchId)) {
+                        allMatches.push({
+                            id: matchId,
+                            team1: teamsData.find(t => t.tag === sortedTeams[0]),
+                            team2: teamsData.find(t => t.tag === sortedTeams[1]),
+                            date: match.date
+                        });
+                        seen.add(matchId);
+                    }
+                });
+            });
 
-                const breakdownHTML = matchInfo.powerScore.breakdown.map(item => {
-                    const winnerColor = item.winner === team1.tag ? 'text-green-400' : (item.winner === team2.tag ? 'text-red-400' : 'text-yellow-400');
+            allMatches.forEach(match => {
+                const parts = match.date.split('/');
+                match.dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+            });
+
+            allMatches.sort((a, b) => a.dateObj - b.dateObj);
+
+            const matchesByDate = allMatches.reduce((acc, match) => {
+                if (!acc[match.date]) acc[match.date] = [];
+                acc[match.date].push(match);
+                return acc;
+            }, {});
+
+            const analysisHTML = Object.keys(matchesByDate).map(date => {
+                const matchesOnDate = matchesByDate[date];
+                const matchesHTML = matchesOnDate.map(match => {
+                    const team1 = match.team1;
+                    const team2 = match.team2;
+                    const team1WinChance = team1.schedule.find(s => s.opponent === team2.tag)?.winChance || 100 - (team2.schedule.find(s => s.opponent === team1.tag)?.winChance || 50);
+                    const team2WinChance = 100 - team1WinChance;
+                    
+                    let predictedScore;
+                    if (team1WinChance > 70) {
+                        predictedScore = '2-0';
+                    } else if (team1WinChance >= 50) {
+                        predictedScore = '2-1';
+                    } else if (team1WinChance < 30) {
+                        predictedScore = '0-2';
+                    } else {
+                        predictedScore = '1-2';
+                    }
+
                     return `
-                        <div class="bg-gray-900/50 p-3 rounded-lg">
+                        <div class="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition-colors match-card" data-match-id="${match.id}">
                             <div class="flex justify-between items-center">
-                                <span class="font-semibold">${item.criteria}</span>
-                                <span class="font-bold ${winnerColor}">Avantage ${item.winner}</span>
+                                <div class="flex items-center space-x-3 w-2/5 justify-start">
+                                    <img src="${team1.logo}" alt="${team1.name}" class="w-10 h-10 object-contain">
+                                    <span class="font-bold text-lg hidden sm:block">${team1.name}</span>
+                                    <span class="font-bold text-lg sm:hidden">${team1.tag}</span>
+                                </div>
+                                <div class="text-center">
+                                    <span class="font-bold text-lg text-gray-400">${predictedScore}</span>
+                                    <p class="text-xs text-gray-500">Score Prédit</p>
+                                </div>
+                                <div class="flex items-center space-x-3 w-2/5 justify-end">
+                                    <span class="font-bold text-lg text-right hidden sm:block">${team2.name}</span>
+                                    <span class="font-bold text-lg text-right sm:hidden">${team2.tag}</span>
+                                    <img src="${team2.logo}" alt="${team2.name}" class="w-10 h-10 object-contain">
+                                </div>
                             </div>
-                            <p class="text-sm text-gray-400 mt-1">${item.reason}</p>
+                            <div class="flex items-center space-x-2 my-2">
+                                <div class="w-full bg-green-500/20 rounded-l-full h-2" style="width: ${team1WinChance}%"></div>
+                                <div class="w-full bg-red-500/20 rounded-r-full h-2" style="width: ${team2WinChance}%"></div>
+                            </div>
+                            <div class="flex justify-between items-center text-sm font-bold">
+                                <span class="text-green-400">${team1WinChance}%</span>
+                                <span class="text-red-400">${team2WinChance}%</span>
+                            </div>
                         </div>
                     `;
                 }).join('');
 
-                mainContent.innerHTML = `
-                    <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="analysis-list">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-                        <span>Retour à la liste des matchs</span>
-                    </button>
-                    <div class="bg-gray-800 rounded-lg p-4 sm:p-6">
-                        <div class="flex justify-between items-center mb-3">
-                            <div class="flex items-center space-x-3 w-2/5 justify-start">
-                                <img src="${team1.logo}" alt="${team1.name}" class="w-12 h-12 object-contain">
-                                <span class="font-bold text-xl">${team1.name}</span>
-                            </div>
-                            <div class="text-center"><span class="text-lg font-bold text-gray-400">VS</span></div>
-                            <div class="flex items-center space-x-3 w-2/5 justify-end">
-                                <span class="font-bold text-xl text-right">${team2.name}</span>
-                                <img src="${team2.logo}" alt="${team2.name}" class="w-12 h-12 object-contain">
-                            </div>
+                return `
+                    <div>
+                        <h3 class="text-2xl font-bold text-indigo-400 mt-8 mb-4">Journée du ${date}</h3>
+                        <div class="space-y-4">
+                            ${matchesHTML}
                         </div>
-                        <div class="flex items-center space-x-2 mb-4">
-                            <div class="w-full bg-green-500/20 rounded-l-full h-2" style="width: ${team1WinChance}%"></div>
-                            <div class="w-full bg-red-500/20 rounded-r-full h-2" style="width: ${team2WinChance}%"></div>
-                        </div>
-                        <div class="flex justify-between items-center text-lg font-bold mb-6">
-                            <span class="text-green-400">${team1WinChance}%</span>
-                            <span class="text-red-400">${team2WinChance}%</span>
-                        </div>
-                        <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-2">Détail du Calcul de Puissance</h3>
-                        <div class="space-y-3 mb-6">${breakdownHTML}</div>
-                        <h3 class="text-xl font-bold text-white mb-2">Conclusion de l'Analyse</h3>
-                        <p class="text-sm text-gray-300 text-justify">${matchInfo.analysis}</p>
                     </div>
                 `;
-                mainContent.querySelector('.back-button').addEventListener('click', renderAnalysisListView);
-            }
+            }).join('');
 
-            function renderQualificationView() {
-                const qualificationProbs = teamsData.map(team => ({
-                    name: team.name,
-                    tag: team.tag,
-                    logo: team.logo,
-                    chance: team.mathProbabilities.qualif,
-                    ranks: team.mathProbabilities.ranks
-                })).sort((a,b) => b.chance - a.chance);
+            mainContent.innerHTML = `
+                <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+                    <span>Retour au classement</span>
+                </button>
+                <h2 class="text-3xl font-bold text-white mb-2">Analyse Détaillée des Matchs à Venir</h2>
+                <p class="text-gray-400 mb-6">Retrouvez ici l'analyse détaillée de chaque affrontement restant dans la phase de groupe. Cliquez sur un match pour voir le détail du calcul de puissance.</p>
+                <div>${analysisHTML}</div>
+            `;
+            mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
+            mainContent.querySelectorAll('.match-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    renderMatchDetail(card.dataset.matchId);
+                });
+            });
+        }
+        
+        function renderMatchDetail(matchId) {
+            const teamTags = matchId.split('-');
+            const team1 = teamsData.find(t => t.tag === teamTags[0]);
+            const team2 = teamsData.find(t => t.tag === teamTags[1]);
+            const matchInfo = matchupsAnalysis.find(a => a.teams.sort().join('-') === matchId);
+            if (!team1 || !team2 || !matchInfo) return;
 
-                const qualifHTML = qualificationProbs.map(team => `
-                    <div class="qualif-team-container">
-                        <div class="bg-gray-800 rounded-lg p-3 flex items-center space-x-4 cursor-pointer hover:bg-gray-700" data-team-tag="${team.tag}">
-                            <img src="${team.logo}" alt="${team.name}" class="w-10 h-10 object-contain">
-                            <span class="font-bold w-32 flex-shrink-0">${team.name}</span>
-                            <div class="w-full bg-gray-700 rounded-full h-6 relative">
-                                <div class="bg-indigo-500 h-full rounded-full flex items-center justify-center text-xs font-medium text-white" style="width: ${team.chance}%">
-                                    ${team.chance > 15 ? `${team.chance}%` : ''}
-                                </div>
-                                ${team.chance <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${team.chance}%</span>` : ''}
-                            </div>
+            const team1WinChance = team1.schedule.find(s => s.opponent === team2.tag)?.winChance || 100 - (team2.schedule.find(s => s.opponent === team1.tag)?.winChance || 50);
+            const team2WinChance = 100 - team1WinChance;
+
+            const breakdownHTML = matchInfo.powerScore.breakdown.map(item => {
+                const winnerColor = item.winner === team1.tag ? 'text-green-400' : (item.winner === team2.tag ? 'text-red-400' : 'text-yellow-400');
+                return `
+                    <div class="bg-gray-900/50 p-3 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold">${item.criteria}</span>
+                            <span class="font-bold ${winnerColor}">Avantage ${item.winner}</span>
                         </div>
-                        <div id="qualif-details-${team.tag}" class="hidden details-row bg-gray-800/50 p-4 rounded-b-lg -mt-2 pt-4"></div>
+                        <p class="text-sm text-gray-400 mt-1">${item.reason}</p>
                     </div>
-                `).join('');
-
-                mainContent.innerHTML = `
-                    <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-                        <span>Retour au classement</span>
-                    </button>
-                    <h2 class="text-3xl font-bold text-white mb-2">Probabilités de Qualification aux Playoffs</h2>
-                    <p class="text-gray-400 mb-6">Ces pourcentages sont basés sur une analyse purement mathématique des 16 384 scénarios restants, où chaque match est considéré comme un 50/50. Cliquez sur une équipe pour voir le détail par place.</p>
-                    <div class="space-y-3">${qualifHTML}</div>
                 `;
+            }).join('');
 
-                mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
-                mainContent.querySelectorAll('.qualif-team-container > div:first-child').forEach(row => {
-                    row.addEventListener('click', (e) => {
-                        const teamTag = e.currentTarget.dataset.teamTag;
-                        const detailRow = document.getElementById(`qualif-details-${teamTag}`);
-                        const teamData = qualificationProbs.find(t => t.tag === teamTag);
+            mainContent.innerHTML = `
+                <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="analysis-list">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+                    <span>Retour à la liste des matchs</span>
+                </button>
+                <div class="bg-gray-800 rounded-lg p-4 sm:p-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center space-x-3 w-2/5 justify-start">
+                            <img src="${team1.logo}" alt="${team1.name}" class="w-12 h-12 object-contain">
+                            <span class="font-bold text-xl">${team1.name}</span>
+                        </div>
+                        <div class="text-center"><span class="text-lg font-bold text-gray-400">VS</span></div>
+                        <div class="flex items-center space-x-3 w-2/5 justify-end">
+                            <span class="font-bold text-xl text-right">${team2.name}</span>
+                            <img src="${team2.logo}" alt="${team2.name}" class="w-12 h-12 object-contain">
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-full bg-green-500/20 rounded-l-full h-2" style="width: ${team1WinChance}%"></div>
+                        <div class="w-full bg-red-500/20 rounded-r-full h-2" style="width: ${team2WinChance}%"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-lg font-bold mb-6">
+                        <span class="text-green-400">${team1WinChance}%</span>
+                        <span class="text-red-400">${team2WinChance}%</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-2">Détail du Calcul de Puissance</h3>
+                    <div class="space-y-3 mb-6">${breakdownHTML}</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Conclusion de l'Analyse</h3>
+                    <p class="text-sm text-gray-300 text-justify">${matchInfo.analysis}</p>
+                </div>
+            `;
+            mainContent.querySelector('.back-button').addEventListener('click', renderAnalysisListView);
+        }
 
-                        document.querySelectorAll('[id^="qualif-details-"]').forEach(d => {
-                            if (d.id !== detailRow.id) {
-                                d.classList.add('hidden');
-                                d.innerHTML = '';
-                            }
-                        });
+        function renderQualificationView() {
+            const qualificationProbs = teamsData.map(team => ({
+                name: team.name,
+                tag: team.tag,
+                logo: team.logo,
+                chance: team.mathProbabilities.qualif,
+                ranks: team.mathProbabilities.ranks
+            })).sort((a,b) => b.chance - a.chance);
 
-                        if (detailRow.classList.toggle('hidden')) {
-                            detailRow.innerHTML = '';
-                        } else {
-                            const ranksHTML = teamData.ranks.map(r => `
-                                <div class="flex items-center space-x-2">
-                                    <span class="w-16 text-right text-gray-300 flex-shrink-0">Place ${r.pos}</span>
-                                    <div class="w-full bg-gray-700 rounded-full h-6 relative">
-                                        <div class="bg-purple-500 h-full rounded-full flex items-center justify-center" style="width: ${r.chance}%">
-                                            ${r.chance > 15 ? `<span class="text-xs font-medium text-white">${r.chance.toFixed(1)}%</span>` : ''}
-                                        </div>
-                                        ${r.chance <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${r.chance.toFixed(1)}%</span>` : ''}
-                                    </div>
-                                </div>
-                            `).join('');
-                            detailRow.innerHTML = `<div class="space-y-2">${ranksHTML}</div>`;
+            const qualifHTML = qualificationProbs.map(team => `
+                <div class="qualif-team-container">
+                    <div class="bg-gray-800 rounded-lg p-3 flex items-center space-x-4 cursor-pointer hover:bg-gray-700" data-team-tag="${team.tag}">
+                        <img src="${team.logo}" alt="${team.name}" class="w-10 h-10 object-contain">
+                        <span class="font-bold w-32 flex-shrink-0">${team.name}</span>
+                        <div class="w-full bg-gray-700 rounded-full h-6 relative">
+                            <div class="bg-indigo-500 h-full rounded-full flex items-center justify-center text-xs font-medium text-white" style="width: ${team.chance}%">
+                                ${team.chance > 15 ? `${team.chance}%` : ''}
+                            </div>
+                            ${team.chance <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${team.chance}%</span>` : ''}
+                        </div>
+                    </div>
+                    <div id="qualif-details-${team.tag}" class="hidden details-row bg-gray-800/50 p-4 rounded-b-lg -mt-2 pt-4"></div>
+                </div>
+            `).join('');
+
+            mainContent.innerHTML = `
+                <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+                    <span>Retour au classement</span>
+                </button>
+                <h2 class="text-3xl font-bold text-white mb-2">Probabilités de Qualification aux Playoffs</h2>
+                <p class="text-gray-400 mb-6">Ces pourcentages sont basés sur une analyse purement mathématique des 16 384 scénarios restants, où chaque match est considéré comme un 50/50. Cliquez sur une équipe pour voir le détail par place.</p>
+                <div class="space-y-3">${qualifHTML}</div>
+            `;
+
+            mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
+            mainContent.querySelectorAll('.qualif-team-container > div:first-child').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    const teamTag = e.currentTarget.dataset.teamTag;
+                    const detailRow = document.getElementById(`qualif-details-${teamTag}`);
+                    const teamData = qualificationProbs.find(t => t.tag === teamTag);
+
+                    document.querySelectorAll('[id^="qualif-details-"]').forEach(d => {
+                        if (d.id !== detailRow.id) {
+                            d.classList.add('hidden');
+                            d.innerHTML = '';
                         }
                     });
+
+                    if (detailRow.classList.toggle('hidden')) {
+                        detailRow.innerHTML = '';
+                    } else {
+                        const ranksHTML = teamData.ranks.map(r => `
+                            <div class="flex items-center space-x-2">
+                                <span class="w-16 text-right text-gray-300 flex-shrink-0">Place ${r.pos}</span>
+                                <div class="w-full bg-gray-700 rounded-full h-6 relative">
+                                    <div class="bg-purple-500 h-full rounded-full flex items-center justify-center" style="width: ${r.chance}%">
+                                        ${r.chance > 15 ? `<span class="text-xs font-medium text-white">${r.chance.toFixed(1)}%</span>` : ''}
+                                    </div>
+                                    ${r.chance <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${r.chance.toFixed(1)}%</span>` : ''}
+                                </div>
+                            </div>
+                        `).join('');
+                        detailRow.innerHTML = `<div class="space-y-2">${ranksHTML}</div>`;
+                    }
                 });
+            });
+        }
+        
+        function renderPowerScoreView(container) {
+            const tableHeader = `
+                <div class="grid grid-cols-7 gap-4 p-2 font-bold text-sm text-gray-400 border-b border-gray-700">
+                    <span>Rang</span>
+                    <span class="col-span-2">Équipe</span>
+                    <span>Pts Actuels</span>
+                    <span>Pts Prédits</span>
+                    <span>Player Power</span>
+                    <span class="text-right">Power Score</span>
+                </div>
+            `;
+
+            const tableRows = teamsData.map(team => {
+                const wins = parseInt(team.record.split('-')[0]);
+                const currentScore = (wins * 4); // 4 pts per win
+                const predictedWins = team.schedule.reduce((acc, match) => acc + (match.winChance / 100), 0);
+                const predictedScore = (predictedWins * 3).toFixed(2);
+                let playerPower = 0;
+                team.roster.forEach(playerName => {
+                    const player = playersData.find(p => p.id === playerName);
+                    if (player && player.stats && player.stats.playerScore) {
+                        playerPower += player.stats.playerScore;
+                    }
+                });
+                const avgPlayerPower = (playerPower / 5 / 10).toFixed(2); // Normalisation
+
+                return `
+                    <div class="grid grid-cols-7 gap-4 p-2 items-center border-b border-gray-800">
+                        <span class="font-bold text-lg">${team.rank}</span>
+                        <div class="col-span-2 flex items-center space-x-3">
+                            <img src="${team.logo}" class="w-8 h-8 object-contain">
+                            <span>${team.name}</span>
+                        </div>
+                        <span>${currentScore.toFixed(2)}</span>
+                        <span>${predictedScore}</span>
+                        <span>${avgPlayerPower}</span>
+                        <span class="text-right font-bold text-lg text-indigo-400">${team.powerScore}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const targetContainer = container || mainContent;
+            targetContainer.innerHTML = `
+                <h2 class="text-3xl font-bold text-white mb-2">Classement des Équipes (Power Score)</h2>
+                <p class="text-gray-400 mb-6">Le "Rang Global" est déterminé par ce score, qui évalue la force de chaque équipe. Voici comment il est calculé :</p>
+                <div class="grid md:grid-cols-2 gap-4 text-sm mb-8">
+                    <div class="bg-gray-800 p-4 rounded-lg"><strong>Points Actuels</strong> = (Victoires x 4)</div>
+                    <div class="bg-gray-800 p-4 rounded-lg"><strong>Points Prédits</strong> = (Σ % Victoire Matchs Restants) x 3</div>
+                    <div class="bg-gray-800 p-4 rounded-lg col-span-2"><strong>Power Score Total</strong> = Points Actuels + Points Prédits + Player Power (Moyenne des 5 joueurs / 10)</div>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4">
+                    ${tableHeader}
+                    <div class="space-y-1">${tableRows}</div>
+                </div>
+            `;
+        }
+
+        function renderPlayerDetail(playerId, fromTeamId) {
+            const player = playersData.find(p => p.id === playerId);
+            if (!player) {
+                mainContent.innerHTML = `<p>Données du joueur non trouvées.</p><button class="back-button" data-target="team-detail" data-team-id="${fromTeamId}">Retour</button>`;
+                mainContent.querySelector('.back-button').addEventListener('click', (e) => renderTeamDetail(e.currentTarget.dataset.teamId));
+                return;
             }
             
-            function renderPowerScoreView() {
-                const tableHeader = `
-                    <div class="grid grid-cols-6 gap-4 p-2 font-bold text-sm text-gray-400 border-b border-gray-700">
-                        <span>Rang</span>
-                        <span class="col-span-2">Équipe</span>
-                        <span>Score Actuel</span>
-                        <span>Score Prédit</span>
-                        <span class="text-right">Power Score</span>
+            const playersInRoleCount = playersData.filter(p => p.role === player.role).length;
+
+            function createStatCard(label, value, rank, totalInRole) {
+                let rankColor = 'text-yellow-400';
+                if (rank <= 3) rankColor = 'text-green-400';
+                if (rank > 7) rankColor = 'text-red-400';
+
+                return `
+                    <div class="bg-gray-700/50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-400">${label}</p>
+                        <p class="text-2xl font-bold text-orange-400">${value}</p>
+                        <p class="text-xs font-semibold ${rankColor} mt-1">#${rank}/${totalInRole}</p>
                     </div>
                 `;
-
-                const tableRows = teamsData.map(team => {
-                    const wins = parseInt(team.record.split('-')[0]);
-                    const currentScore = (wins * 3) + team.pastMatches.filter(m => m.win).length;
-                    const predictedWins = team.schedule.reduce((acc, match) => acc + (match.winChance / 100), 0);
-                    const predictedScore = (predictedWins * 3).toFixed(2);
-                    
-                    return `
-                        <div class="grid grid-cols-6 gap-4 p-2 items-center border-b border-gray-800">
-                            <span class="font-bold text-lg">${team.rank}</span>
-                            <div class="col-span-2 flex items-center space-x-3">
-                                <img src="${team.logo}" class="w-8 h-8 object-contain">
-                                <span>${team.name}</span>
-                            </div>
-                            <span>${currentScore.toFixed(2)} pts</span>
-                            <span>+${predictedScore} pts</span>
-                            <span class="text-right font-bold text-lg text-indigo-400">${team.powerScore} pts</span>
-                        </div>
-                    `;
-                }).join('');
-
-                mainContent.innerHTML = `
-                    <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-                        <span>Retour au classement</span>
-                    </button>
-                    <h2 class="text-3xl font-bold text-white mb-2">Calcul du Power Score</h2>
-                    <p class="text-gray-400 mb-6">Le "Rang Global" est déterminé par ce score, qui évalue la force de chaque équipe. Voici comment il est calculé :</p>
-                    <div class="grid md:grid-cols-2 gap-4 text-sm mb-8">
-                        <div class="bg-gray-800 p-4 rounded-lg"><strong>Points Actuels</strong> = (Victoires x 3) + (Bonus H2H x 1)</div>
-                        <div class="bg-gray-800 p-4 rounded-lg"><strong>Points Prédits</strong> = (Σ % Victoire Matchs Restants) x 3</div>
-                        <div class="bg-gray-800 p-4 rounded-lg col-span-2"><strong>Power Score Total</strong> = Points Actuels + Points Prédits + Bonus Prestige (0-2 pts)</div>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg p-4">
-                        ${tableHeader}
-                        <div class="space-y-1">${tableRows}</div>
-                    </div>
-                `;
-                mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
             }
 
-            // Initialisation
-            calculatePowerScores();
-            renderHomeView();
+            const playerScoreBreakdown = [
+                { label: 'DPM', value: player.stats.dpm, points: (player.stats.dpm / 100).toFixed(2), formula: '(DPM / 100)' },
+                { label: 'KDA', value: player.stats.kda, points: (player.stats.kda * 2).toFixed(2), formula: '(KDA * 2)' },
+                { label: 'KPAR', value: player.stats.kpar, points: (parseFloat(player.stats.kpar) / 10).toFixed(2), formula: '(KPAR / 10)' },
+                { label: 'CS/M', value: player.stats.csm, points: player.stats.csm.toFixed(2), formula: '(CS/M)' },
+                { label: 'G/M', value: player.stats.gpm, points: (player.stats.gpm / 100).toFixed(2), formula: '(G/M / 100)' },
+            ];
+            const totalPlayerScore = playerScoreBreakdown.reduce((acc, item) => acc + parseFloat(item.points), 0);
+
+            let rankColorRole = 'text-yellow-400';
+            if (player.stats.ranks.playerScore <= 3) rankColorRole = 'text-green-400';
+            if (player.stats.ranks.playerScore > 7) rankColorRole = 'text-red-400';
+            
+            let rankColorOverall = 'text-yellow-400';
+            if (player.stats.ranks.playerScoreOverall <= 10) rankColorOverall = 'text-green-400';
+            if (player.stats.ranks.playerScoreOverall > 40) rankColorOverall = 'text-red-400';
+
+            mainContent.innerHTML = `
+                 <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="team-detail" data-team-id="${fromTeamId}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+                    <span>Retour à l'équipe</span>
+                </button>
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start">
+                        <div>
+                            <h2 class="text-3xl font-bold text-white">${player.name} <span class="text-xl text-gray-400">(${player.role})</span></h2>
+                        </div>
+                        <div class="text-center sm:text-right bg-gray-900/50 p-3 rounded-lg mt-4 sm:mt-0">
+                             <p class="text-sm text-gray-400">Player Score</p>
+                             <p class="text-3xl font-bold text-orange-400">${totalPlayerScore.toFixed(2)}</p>
+                             <div class="flex space-x-4 text-xs font-semibold mt-1">
+                                <span class="${rankColorRole}">#${player.stats.ranks.playerScore}/${playersInRoleCount} ${player.role}</span>
+                                <span class="${rankColorOverall}">#${player.stats.ranks.playerScoreOverall}/50 LEC</span>
+                             </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        ${createStatCard('DPM', player.stats.dpm, player.stats.ranks.dpm, playersInRoleCount)}
+                        ${createStatCard('KDA', player.stats.kda, player.stats.ranks.kda, playersInRoleCount)}
+                        ${createStatCard('CS/M', player.stats.csm, player.stats.ranks.csm, playersInRoleCount)}
+                        ${createStatCard('G/M', player.stats.gpm, player.stats.ranks.gpm, playersInRoleCount)}
+                        ${createStatCard('KPAR', player.stats.kpar, player.stats.ranks.kpar, playersInRoleCount)}
+                        ${createStatCard('KS%', player.stats.ks_percent, player.stats.ranks.ks_percent, playersInRoleCount)}
+                        ${createStatCard('GS%', player.stats.gold_percent, player.stats.ranks.gold_percent, playersInRoleCount)}
+                        ${createStatCard('Champions Joués', player.stats.champPool, player.stats.ranks.champPool, playersInRoleCount)}
+                    </div>
+                    <div class="mt-8">
+                        <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-2">Calcul du Player Score</h3>
+                        <div class="bg-gray-900/50 rounded-lg p-4 space-y-2">
+                            ${playerScoreBreakdown.map(item => `
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-400">${item.label} (${item.value}):</span>
+                                    <span class="font-mono text-gray-300">${item.formula} = ${item.points} pts</span>
+                                </div>
+                            `).join('')}
+                            <div class="flex justify-between items-center text-lg font-bold border-t border-gray-700 pt-2 mt-2">
+                                <span class="text-white">Score Total du Joueur:</span>
+                                <span class="font-mono text-orange-400">${totalPlayerScore.toFixed(2)} pts</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            mainContent.querySelector('.back-button').addEventListener('click', (e) => renderTeamDetail(e.currentTarget.dataset.teamId));
+        }
+
+        function setupEventListeners() {
             showAnalysisButton.addEventListener('click', renderAnalysisListView);
             showQualifButton.addEventListener('click', renderQualificationView);
-            showPowerScoreButton.addEventListener('click', renderPowerScoreView);
+            showRankingsButton.addEventListener('click', renderRankingsView);
             homeTitle.addEventListener('click', renderHomeView);
-        });
+        }
+        
+        function renderRankingsView(activeTab = 'players') {
+            mainContent.innerHTML = `
+                <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+                    <span>Retour à l'accueil</span>
+                </button>
+                <div class="flex space-x-2 border-b-2 border-gray-700 mb-4">
+                    <button class="sub-nav-btn py-2 px-4 font-semibold text-gray-400 border-b-2 border-transparent" data-tab="players">Classement Joueurs</button>
+                    <button class="sub-nav-btn py-2 px-4 font-semibold text-gray-400 border-b-2 border-transparent" data-tab="power-score">Classement Équipes</button>
+                </div>
+                <div id="rankings-content"></div>
+            `;
+            mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
+            
+            const rankingsContent = document.getElementById('rankings-content');
+            
+            function showTab(tabName) {
+                if (tabName === 'players') {
+                    currentSortKey = 'playerScore';
+                    currentSortDirection = 'desc';
+                    renderPlayerRankingView('All', rankingsContent);
+                } else if (tabName === 'power-score') {
+                    renderPowerScoreView(rankingsContent);
+                }
+            }
+
+            mainContent.querySelectorAll('.sub-nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    mainContent.querySelectorAll('.sub-nav-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    showTab(e.target.dataset.tab);
+                });
+            });
+            
+            // Activer le premier onglet par défaut
+            mainContent.querySelector(`.sub-nav-btn[data-tab="${activeTab}"]`).classList.add('active');
+            showTab(activeTab);
+        }
+
+        function renderPlayerRankingView(role = 'All', container) {
+            currentRoleFilter = role;
+            let filteredPlayers = playersData;
+            if (role !== 'All') {
+                filteredPlayers = playersData.filter(p => p.role === role);
+            }
+
+            const sortedPlayers = [...filteredPlayers].sort((a, b) => {
+                let valA, valB;
+                if (currentSortKey === 'name' || currentSortKey === 'role') {
+                    valA = a[currentSortKey];
+                    valB = b[currentSortKey];
+                } else {
+                    valA = a.stats[currentSortKey];
+                    valB = b.stats[currentSortKey];
+                }
+                
+                if (typeof valA === 'string' && valA.includes('%')) valA = parseFloat(valA.replace('%', ''));
+                if (typeof valB === 'string' && valB.includes('%')) valB = parseFloat(valB.replace('%', ''));
+
+                if (currentSortDirection === 'asc') {
+                    return typeof valA === 'string' ? valA.localeCompare(valB) : (valA || 0) - (valB || 0);
+                } else {
+                    return typeof valB === 'string' ? valB.localeCompare(valA) : (valB || 0) - (valA || 0);
+                }
+            });
+
+            const tableRows = sortedPlayers.map((player, index) => {
+                const team = teamsData.find(t => t.tag === player.team);
+                return `
+                    <tr class="border-b border-gray-700 hover:bg-gray-800 cursor-pointer player-row" data-player-id="${player.id}" data-team-id="${team.id}">
+                        <td class="p-3 font-bold">${index + 1}</td>
+                        <td class="p-3 flex items-center space-x-3">
+                            <img src="${team.logo}" class="w-8 h-8 object-contain">
+                            <span>${player.name}</span>
+                        </td>
+                        <td class="p-3">${player.role}</td>
+                        <td class="p-3 font-bold text-orange-400">${player.stats.playerScore.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            const sortIndicator = (key) => {
+                if (key === currentSortKey) {
+                    return currentSortDirection === 'asc' ? '▲' : '▼';
+                }
+                return '';
+            };
+
+            const targetContainer = container || mainContent;
+            targetContainer.innerHTML = `
+                <h2 class="text-3xl font-bold text-white mb-2">Classement des Joueurs</h2>
+                <p class="text-gray-400 mb-6">Classement basé sur le "Player Score", une note de performance individuelle calculée à partir des statistiques en jeu.</p>
+                <div class="flex space-x-2 mb-4">
+                    <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'All' ? 'active' : 'bg-gray-700'}" data-role="All">Tous</button>
+                    <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'Top' ? 'active' : 'bg-gray-700'}" data-role="Top">Top</button>
+                    <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'Jungle' ? 'active' : 'bg-gray-700'}" data-role="Jungle">Jungle</button>
+                    <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'Mid' ? 'active' : 'bg-gray-700'}" data-role="Mid">Mid</button>
+                    <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'ADC' ? 'active' : 'bg-gray-700'}" data-role="ADC">ADC</button>
+                    <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'Support' ? 'active' : 'bg-gray-700'}" data-role="Support">Support</button>
+                </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-700/50 text-xs text-gray-400 uppercase">
+                            <tr>
+                                <th class="p-3 sortable-header" data-sort-key="rank">Rang ${sortIndicator('rank')}</th>
+                                <th class="p-3 sortable-header" data-sort-key="name">Joueur ${sortIndicator('name')}</th>
+                                <th class="p-3 sortable-header" data-sort-key="role">Rôle ${sortIndicator('role')}</th>
+                                <th class="p-3 sortable-header" data-sort-key="playerScore">Player Score ${sortIndicator('playerScore')}</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+                </div>
+            `;
+            targetContainer.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => renderPlayerRankingView(e.target.dataset.role, targetContainer));
+            });
+            targetContainer.querySelectorAll('.player-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    const playerId = e.currentTarget.dataset.playerId;
+                    const teamId = e.currentTarget.dataset.teamId;
+                    renderPlayerDetail(playerId, teamId);
+                });
+            });
+            targetContainer.querySelectorAll('.sortable-header').forEach(header => {
+                header.addEventListener('click', (e) => {
+                    const sortKey = e.currentTarget.dataset.sortKey;
+                    if (sortKey === 'rank') return;
+                    if (currentSortKey === sortKey) {
+                        currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSortKey = sortKey;
+                        currentSortDirection = 'desc';
+                    }
+                    renderPlayerRankingView(currentRoleFilter, targetContainer);
+                });
+            });
+        }
+
+        // Initialisation
+        main();
     </script>
 </body>
 </html>
