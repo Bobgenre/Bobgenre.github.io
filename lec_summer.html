@@ -153,19 +153,12 @@
 
 
     <!-- Firebase SDK -->
+    <script src="firebase-config.js"></script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, getDocs, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
-            authDomain: "muscu-5e40c.firebaseapp.com",
-            projectId: "muscu-5e40c",
-            storageBucket: "muscu-5e40c.appspot.com",
-            messagingSenderId: "561788112947",
-            appId: "1:561788112947:web:7f2b7c7d74ff328f2b1346"
-        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
