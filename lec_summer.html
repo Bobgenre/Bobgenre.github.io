@@ -59,6 +59,38 @@
         .sortable-header:hover {
             color: #a5b4fc;
         }
+        /* Styles for Modal */
+        #result-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #result-modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #result-modal {
+            background-color: #1f2937; /* gray-800 */
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease-in-out;
+        }
+        #result-modal-overlay.visible #result-modal {
+            transform: scale(1);
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
@@ -91,18 +123,41 @@
         </main>
 
         <footer class="text-center text-gray-500 text-sm mt-12 pb-4">
-            <p>Analyse basée sur les classements de puissance et les résultats au 10/08/2025.</p>
+            <p>Analyse basée sur les classements de puissance et les résultats au 11/08/2025.</p>
             <p>Les probabilités sont des estimations et ne garantissent pas les résultats futurs.</p>
         </footer>
     </div>
+
+    <!-- Modal for entering match results -->
+    <div id="result-modal-overlay">
+        <div id="result-modal">
+            <h2 class="text-2xl font-bold text-white mb-4">Saisir le résultat du match</h2>
+            <div id="modal-match-header" class="flex justify-between items-center mb-6">
+                <!-- Header content will be injected by JS -->
+            </div>
+            <div class="space-y-4">
+                <label for="match-score" class="block text-sm font-medium text-gray-300">Score Final</label>
+                <select id="match-score" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="2-0">2 - 0</option>
+                    <option value="2-1">2 - 1</option>
+                    <option value="1-2">1 - 2</option>
+                    <option value="0-2">0 - 2</option>
+                </select>
+            </div>
+            <div class="mt-8 flex justify-end space-x-4">
+                <button id="modal-cancel-button" class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-500 transition-colors">Annuler</button>
+                <button id="modal-submit-button" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-500 transition-colors">Valider le Résultat</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Configuration de votre base de données
         const firebaseConfig = {
             apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
             authDomain: "muscu-5e40c.firebaseapp.com",
@@ -112,18 +167,17 @@
             appId: "1:561788112947:web:7f2b7c7d74ff328f2b1346"
         };
 
-        // Initialisation de Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
         const db = getFirestore(app);
 
-        // Variables globales pour les données
         let teamsData = [];
-        let matchupsAnalysis = [];
+        let matchesData = [];
         let playersData = [];
         let currentSortKey = 'playerScore';
         let currentSortDirection = 'desc';
         let currentRoleFilter = 'All';
+        let currentView = 'home';
 
         const loader = document.getElementById('loader');
         const loaderText = document.getElementById('loader-text');
@@ -133,8 +187,8 @@
         const showQualifButton = document.getElementById('show-qualif-button');
         const showRankingsButton = document.getElementById('show-rankings-button');
         const homeTitle = document.getElementById('home-title');
+        const modalOverlay = document.getElementById('result-modal-overlay');
 
-        // --- DÉMARRAGE DE L'APPLICATION ---
         async function main() {
             try {
                 await signInAnonymously(auth);
@@ -142,14 +196,10 @@
                     if (user) {
                         loaderText.textContent = "Chargement des données...";
                         await fetchData();
-                        
-                        calculatePlayerRanks();
-                        calculatePowerScores();
+                        recalculateAndRender(false);
                         renderHomeView();
-                        
                         loader.style.display = 'none';
                         appContent.style.display = 'block';
-                        
                         setupEventListeners();
                     }
                 });
@@ -159,67 +209,178 @@
             }
         }
 
-        // --- GESTION DES DONNÉES FIREBASE ---
         async function fetchData() {
             try {
                 const teamsSnapshot = await getDocs(collection(db, "lec-teams"));
-                if (teamsSnapshot.empty) {
-                    throw new Error("La collection 'lec-teams' est vide ou n'existe pas. Assurez-vous d'avoir mis en place les données initiales et les règles de sécurité.");
-                }
-                teamsData = teamsSnapshot.docs.map(doc => doc.data());
+                teamsData = teamsSnapshot.docs.map(doc => ({ ...doc.data(), firestoreId: doc.id }));
 
-                const analysisSnapshot = await getDocs(collection(db, "lec-analysis"));
-                matchupsAnalysis = analysisSnapshot.docs.map(doc => doc.data());
+                const matchesSnapshot = await getDocs(collection(db, "lec-matches"));
+                matchesData = matchesSnapshot.docs.map(doc => ({ ...doc.data(), firestoreId: doc.id }));
                 
                 const playersSnapshot = await getDocs(collection(db, "lec-players"));
                 playersData = playersSnapshot.docs.map(doc => doc.data());
 
+                // Reconstruire les données locales à partir des collections
+                teamsData.forEach(team => {
+                    team.record = `${team.wins}-${team.losses}`;
+                    team.schedule = matchesData
+                        .filter(m => m.status === 'scheduled' && (m.team1 === team.tag || m.team2 === team.tag))
+                        .map(m => ({ opponent: m.team1 === team.tag ? m.team2 : m.team1, date: m.date, matchId: m.firestoreId }));
+                    team.pastMatches = matchesData
+                        .filter(m => m.status === 'played' && (m.team1 === team.tag || m.team2 === team.tag))
+                        .map(m => ({ opponent: m.team1 === team.tag ? m.team2 : m.team1, win: m.winner === team.tag, result: m.result }));
+                });
+
             } catch (error) {
                 console.error("Erreur lors de la récupération des données :", error);
-                loaderText.innerHTML = `Erreur de chargement des données.<br>Vérifiez que les collections existent dans Firestore et que les règles de sécurité sont correctes.`;
+                loaderText.innerHTML = `Erreur de chargement des données.<br>Vérifiez les règles de sécurité et que les collections 'lec-teams', 'lec-matches', 'lec-players' existent.`;
                 throw error;
             }
         }
+        
+        function openResultModal(matchId) {
+            const match = matchesData.find(m => m.firestoreId === matchId);
+            const team1 = teamsData.find(t => t.tag === match.team1);
+            const team2 = teamsData.find(t => t.tag === match.team2);
 
-        // --- Logique de l'UI ---
+            const modalHeader = document.getElementById('modal-match-header');
+            modalHeader.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <img src="${team1.logo}" alt="${team1.name}" class="w-10 h-10 object-contain">
+                    <span class="font-bold text-lg">${team1.name}</span>
+                </div>
+                <span class="text-gray-400 font-bold">VS</span>
+                <div class="flex items-center space-x-3">
+                    <span class="font-bold text-lg">${team2.name}</span>
+                    <img src="${team2.logo}" alt="${team2.name}" class="w-10 h-10 object-contain">
+                </div>
+            `;
+
+            const submitButton = document.getElementById('modal-submit-button');
+            const newSubmitButton = submitButton.cloneNode(true);
+            submitButton.parentNode.replaceChild(newSubmitButton, submitButton);
+            
+            newSubmitButton.addEventListener('click', () => handleResultSubmission(match));
+        }
+
+        function closeResultModal() {
+            modalOverlay.classList.remove('visible');
+        }
+        
+        async function handleResultSubmission(match) {
+            const scoreSelect = document.getElementById('match-score');
+            const result = scoreSelect.value;
+            loader.style.display = 'flex';
+            loaderText.textContent = 'Mise à jour des données...';
+            closeResultModal();
+            await updateMatchResult(match, result);
+            loader.style.display = 'none';
+        }
+
+        async function updateMatchResult(match, result) {
+            const [score1, score2] = result.split('-').map(Number);
+            const winnerTag = score1 > score2 ? match.team1 : match.team2;
+            const loserTag = score1 > score2 ? match.team2 : match.team1;
+
+            const winner = teamsData.find(t => t.tag === winnerTag);
+            const loser = teamsData.find(t => t.tag === loserTag);
+
+            try {
+                const batch = writeBatch(db);
+                
+                const matchRef = doc(db, "lec-matches", match.firestoreId);
+                batch.update(matchRef, { status: 'played', winner: winnerTag, result: result });
+
+                const winnerRef = doc(db, "lec-teams", winner.firestoreId);
+                batch.update(winnerRef, { wins: winner.wins + 1 });
+                
+                const loserRef = doc(db, "lec-teams", loser.firestoreId);
+                batch.update(loserRef, { losses: loser.losses + 1 });
+
+                await batch.commit();
+                
+                await fetchData();
+                recalculateAndRender(true);
+
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour de Firestore:", error);
+                alert("Erreur de sauvegarde. Les changements ne sont pas persistants.");
+            }
+        }
+
+        function recalculateAndRender(shouldRender = true) {
+            loaderText.textContent = 'Calcul des rangs des joueurs...';
+            calculatePlayerRanks();
+            loaderText.textContent = 'Calcul des probabilités de match...';
+            calculateMatchProbabilities();
+            loaderText.textContent = 'Simulation des scénarios de qualification...';
+            const groupATeams = teamsData.filter(t => t.group === 'A');
+            const groupBTeams = teamsData.filter(t => t.group === 'B');
+            calculateQualificationProbabilitiesForGroup(groupATeams);
+            calculateQualificationProbabilitiesForGroup(groupBTeams);
+            loaderText.textContent = 'Calcul des Power Scores...';
+            calculatePowerScores();
+            if (shouldRender) {
+                loaderText.textContent = 'Affichage des résultats...';
+                switch(currentView) {
+                    case 'home': renderHomeView(); break;
+                    case 'analysis': renderAnalysisListView(); break;
+                    case 'qualif': renderQualificationView(); break;
+                    case 'rankings-players': renderPlayerRankingView(currentRoleFilter); break;
+                    case 'rankings-teams': renderPowerScoreView(); break;
+                    default: renderHomeView();
+                }
+            }
+        }
 
         function calculatePlayerRanks() {
             const roles = ['Top', 'Jungle', 'Mid', 'ADC', 'Support'];
-            const statsToRank = ['dpm', 'kda', 'champPool', 'csm', 'gpm', 'kpar', 'ks_percent', 'gold_percent', 'playerScore'];
-
-            // Calculer le score de chaque joueur
+            const statsToRank = ['dpm', 'kda', 'champPool', 'csm', 'gpm', 'kpar', 'ks_percent', 'gold_percent'];
+            const roleAverages = {};
+            roles.forEach(role => {
+                roleAverages[role] = {};
+                statsToRank.forEach(stat => {
+                    const playersInRole = playersData.filter(p => p.role === role);
+                    let total = 0;
+                    let count = 0;
+                    playersInRole.forEach(player => {
+                        let value = player.stats[stat];
+                        if (typeof value === 'string' && value.includes('%')) value = parseFloat(value);
+                        if (value !== null && !isNaN(value)) {
+                            total += value;
+                            count++;
+                        }
+                    });
+                    roleAverages[role][stat] = count > 0 ? total / count : 0;
+                });
+            });
             playersData.forEach(player => {
                 if (player.stats) {
+                    statsToRank.forEach(stat => {
+                        let value = player.stats[stat];
+                        if (typeof value === 'string' && value.includes('%')) value = parseFloat(value);
+                        if (value === null || isNaN(value)) player.stats[stat] = roleAverages[player.role][stat];
+                        else player.stats[stat] = Number(value);
+                    });
                     let score = 0;
                     score += (player.stats.dpm || 0) / 100;
                     score += (player.stats.kda || 0) * 2;
-                    score += (parseFloat(player.stats.kpar) || 0) / 10;
+                    score += (player.stats.kpar || 0) / 10;
                     score += (player.stats.csm || 0);
                     score += (player.stats.gpm || 0) / 100;
                     player.stats.playerScore = score;
                 }
             });
-
-            // Classer les joueurs pour chaque stat
-            statsToRank.forEach(stat => {
-                // Classement général
+            const allStatsToRank = [...statsToRank, 'playerScore'];
+            allStatsToRank.forEach(stat => {
                 const sortedAllPlayers = [...playersData].sort((a, b) => (b.stats[stat] || 0) - (a.stats[stat] || 0));
                 sortedAllPlayers.forEach((player, index) => {
                     if (!player.stats.ranks) player.stats.ranks = {};
                     player.stats.ranks[`${stat}Overall`] = index + 1;
                 });
-
-                // Classement par rôle
                 roles.forEach(role => {
                     const playersInRole = playersData.filter(p => p.role === role);
-                    const sortedPlayers = [...playersInRole].sort((a, b) => {
-                        let valA = a.stats[stat];
-                        let valB = b.stats[stat];
-                        if (typeof valA === 'string' && valA.includes('%')) valA = parseFloat(valA.replace('%', ''));
-                        if (typeof valB === 'string' && valB.includes('%')) valB = parseFloat(valB.replace('%', ''));
-                        return (valB || 0) - (valA || 0);
-                    });
-
+                    const sortedPlayers = [...playersInRole].sort((a, b) => (b.stats[stat] || 0) - (a.stats[stat] || 0));
                     sortedPlayers.forEach((player, index) => {
                         if (!player.stats.ranks) player.stats.ranks = {};
                         player.stats.ranks[stat] = index + 1;
@@ -228,37 +389,130 @@
             });
         }
 
+        function calculateMatchProbabilities() {
+            teamsData.forEach(team => {
+                const roster = playersData.filter(p => p.team === team.tag);
+                let totalPlayerScore = roster.reduce((acc, p) => acc + (p.stats.playerScore || 0), 0);
+                team.basePlayerPower = totalPlayerScore / (roster.length || 5);
+            });
+            const averageLeaguePower = teamsData.reduce((acc, team) => acc + team.basePlayerPower, 0) / teamsData.length;
+            teamsData.forEach(team => {
+                let strengthOfRecordScore = 0;
+                strengthOfRecordScore += team.wins * averageLeaguePower * 0.5;
+                strengthOfRecordScore -= team.losses * averageLeaguePower * 0.5;
+                team.pastMatches.forEach(match => {
+                    const opponent = teamsData.find(t => t.tag === match.opponent);
+                    if (opponent) {
+                        const opponentBasePower = opponent.basePlayerPower || 0;
+                        if (match.win) strengthOfRecordScore += opponentBasePower;
+                        else strengthOfRecordScore -= opponentBasePower / 2;
+                    }
+                });
+                team.strengthOfRecord = strengthOfRecordScore;
+            });
+            teamsData.forEach(team => {
+                team.matchPower = (team.basePlayerPower * 0.6) + (team.strengthOfRecord * 0.4);
+            });
+            const processedMatches = new Set();
+            teamsData.forEach(team => {
+                team.schedule.forEach(match => {
+                    const opponent = teamsData.find(t => t.tag === match.opponent);
+                    if (!opponent) return;
+                    const matchId = [team.tag, opponent.tag].sort().join('-');
+                    if (processedMatches.has(matchId)) return;
+                    const powerDifference = team.matchPower - opponent.matchPower;
+                    const scalingFactor = 40; 
+                    const winChanceTeam1 = 1 / (1 + Math.pow(10, -powerDifference / scalingFactor));
+                    match.winChance = winChanceTeam1 * 100;
+                    const opponentMatch = opponent.schedule.find(m => m.opponent === team.tag);
+                    if (opponentMatch) opponentMatch.winChance = (1 - winChanceTeam1) * 100;
+                    processedMatches.add(matchId);
+                });
+            });
+        }
+
+        function calculateQualificationProbabilitiesForGroup(groupTeams) {
+            const QUALIF_SPOTS_PER_GROUP = 4;
+            const remainingMatches = [];
+            const seen = new Set();
+            const groupTeamTags = new Set(groupTeams.map(t => t.tag));
+            groupTeams.forEach(team => {
+                team.schedule.forEach(match => {
+                    if (groupTeamTags.has(match.opponent)) {
+                        const matchId = [team.tag, match.opponent].sort().join('-');
+                        if (!seen.has(matchId)) {
+                            remainingMatches.push({ team1: team.tag, team2: match.opponent });
+                            seen.add(matchId);
+                        }
+                    }
+                });
+            });
+            const remainingMatchesCount = remainingMatches.length;
+            if (remainingMatchesCount > 14) {
+                groupTeams.forEach(team => team.mathProbabilities = { qualif: 0, ranks: [], scenarios: 0, eliminationScenarios: [] });
+                return;
+            }
+            const totalScenarios = Math.pow(2, remainingMatchesCount);
+            const results = {};
+            groupTeams.forEach(team => {
+                results[team.tag] = { qualif: 0, ranks: Array(groupTeams.length + 1).fill(0), eliminationScenarios: [] };
+            });
+            for (let i = 0; i < totalScenarios; i++) {
+                const tempTeams = JSON.parse(JSON.stringify(groupTeams));
+                const scenarioOutcomes = [];
+                for (let j = 0; j < remainingMatchesCount; j++) {
+                    const match = remainingMatches[j];
+                    const winnerTag = ((i >> j) & 1) === 0 ? match.team1 : match.team2;
+                    const loserTag = ((i >> j) & 1) === 0 ? match.team2 : match.team1;
+                    scenarioOutcomes.push({ winner: winnerTag, loser: loserTag });
+                    const winner = tempTeams.find(t => t.tag === winnerTag);
+                    winner.wins++;
+                }
+                tempTeams.sort((a, b) => b.wins - a.wins || (b.powerScore || 0) - (a.powerScore || 0));
+                tempTeams.forEach((team, rankIndex) => {
+                    results[team.tag].ranks[rankIndex + 1]++;
+                    if (rankIndex < QUALIF_SPOTS_PER_GROUP) {
+                        results[team.tag].qualif++;
+                    } else {
+                        if (results[team.tag].eliminationScenarios.length < 3) {
+                             results[team.tag].eliminationScenarios.push(scenarioOutcomes);
+                        }
+                    }
+                });
+            }
+            groupTeams.forEach(team => {
+                const teamInMainData = teamsData.find(t => t.tag === team.tag);
+                const teamResults = results[team.tag];
+                teamInMainData.mathProbabilities = {
+                    qualif: (teamResults.qualif / totalScenarios) * 100,
+                    ranks: teamResults.ranks.map((count, index) => ({ pos: index, chance: (count / totalScenarios) * 100 })).filter(r => r.pos > 0),
+                    scenarios: totalScenarios,
+                    eliminationScenarios: teamResults.eliminationScenarios
+                };
+            });
+        }
+
         function calculatePowerScores() {
             teamsData.forEach(team => {
                 let score = 0;
-                const wins = parseInt(team.record.split('-')[0]);
-                score += wins * 4;
-                const predictedWins = team.schedule.reduce((acc, match) => acc + (match.winChance / 100), 0);
+                score += team.wins * 4;
+                const predictedWins = team.schedule.reduce((acc, match) => acc + ((match.winChance || 0) / 100), 0);
                 score += predictedWins * 3;
-
-                let playerPower = 0;
-                team.roster.forEach(playerName => {
-                    const player = playersData.find(p => p.id === playerName);
-                    if (player && player.stats && player.stats.playerScore) {
-                        playerPower += player.stats.playerScore;
-                    }
-                });
-                score += (playerPower / 5) / 10; 
-
+                const roster = playersData.filter(p => p.team === team.tag);
+                let playerPower = roster.reduce((acc, p) => acc + (p.stats.playerScore || 0), 0);
+                score += (playerPower / (roster.length || 5)) / 10; 
                 team.powerScore = score.toFixed(2);
             });
-
             teamsData.sort((a, b) => b.powerScore - a.powerScore);
             teamsData.forEach((team, index) => { team.rank = index + 1; });
         }
 
         function renderHomeView() {
+            currentView = 'home';
             const groupA = teamsData.filter(t => t.group === 'A').sort((a, b) => a.rank - b.rank);
             const groupB = teamsData.filter(t => t.group === 'B').sort((a, b) => a.rank - b.rank);
-
             const groupAListHTML = groupA.map(team => createTeamCardHTML(team)).join('');
             const groupBListHTML = groupB.map(team => createTeamCardHTML(team)).join('');
-
             mainContent.innerHTML = `
                 <div>
                     <h2 class="text-3xl font-bold text-white mb-4 mt-8 border-b-2 border-indigo-500 pb-2">Groupe A</h2>
@@ -269,12 +523,8 @@
                     <div class="space-y-4 mt-4">${groupBListHTML}</div>
                 </div>
             `;
-
             mainContent.querySelectorAll('.team-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const teamId = card.dataset.teamId;
-                    renderTeamDetail(teamId);
-                });
+                card.addEventListener('click', () => renderTeamDetail(card.dataset.teamId));
             });
         }
 
@@ -293,40 +543,28 @@
         }
 
         function renderTeamDetail(teamId) {
+            currentView = `team-${teamId}`;
             const team = teamsData.find(t => t.id === teamId);
             if (!team) return;
-
-            const probabilitiesHTML = team.probabilities.map(p => {
-                const textInsideHTML = p.chance > 15 ? `<span class="text-xs font-medium text-white">${p.chance}%</span>` : '';
-                const textOutsideHTML = p.chance <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${p.chance}%</span>` : '';
-                return `
-                    <div class="flex items-center space-x-2">
-                        <span class="w-16 text-right text-gray-300 flex-shrink-0">Place ${p.position}</span>
-                        <div class="w-full bg-gray-700 rounded-full h-6 relative">
-                            <div class="bg-indigo-500 h-full rounded-full flex items-center justify-center" style="width: ${p.chance}%">${textInsideHTML}</div>
-                            ${textOutsideHTML}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            const rosterHTML = team.roster.map(player => `<li class="pl-4 border-l-2 border-gray-700 hover:border-indigo-400 transition-colors"><button class="player-link text-indigo-400 hover:underline" data-player-id="${player}">${player}</button></li>`).join('');
-
+            
+            const roster = playersData.filter(p => p.team === team.tag);
+            const rosterHTML = roster.map(player => `<li class="pl-4 border-l-2 border-gray-700 hover:border-indigo-400 transition-colors"><button class="player-link text-indigo-400 hover:underline" data-player-id="${player.id}">${player.name}</button></li>`).join('');
+            
             const scheduleHTML = team.schedule.length > 0 ? 
                 team.schedule.map(match => {
-                    const chanceColor = match.winChance >= 70 ? 'text-green-400' : match.winChance >= 40 ? 'text-yellow-400' : 'text-red-400';
+                    const winChance = match.winChance || 0;
+                    const chanceColor = winChance >= 70 ? 'text-green-400' : winChance >= 40 ? 'text-yellow-400' : 'text-red-400';
                     return `
                         <li class="flex justify-between items-center bg-gray-800 p-2 rounded">
                             <span class="font-medium text-gray-200">vs ${match.opponent}</span>
                             <div class="flex items-center space-x-2">
-                                <span class="text-sm text-gray-400">${match.date}</span>
-                                <span class="font-bold text-sm w-16 text-right ${chanceColor}">${match.winChance}% V</span>
+                                <span class="text-sm text-gray-400">${new Date(match.date).toLocaleDateString('fr-FR')}</span>
+                                <span class="font-bold text-sm w-16 text-right ${chanceColor}">${winChance.toFixed(0)}% V</span>
                             </div>
                         </li>
                     `;
                 }).join('') :
                 '<p class="text-gray-400">Aucun match restant.</p>';
-
             const pastMatchesHTML = team.pastMatches.length > 0 ?
                 team.pastMatches.map(match => `
                     <li class="flex justify-between items-center bg-gray-800 p-2 rounded">
@@ -335,7 +573,6 @@
                     </li>
                 `).join('') :
                 '<p class="text-gray-400">Aucun match joué.</p>';
-
             mainContent.innerHTML = `
                 <div class="bg-gray-800 rounded-lg p-4 sm:p-8">
                     <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
@@ -350,12 +587,6 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <h2 class="text-2xl font-bold text-white mb-4 border-b-2 border-indigo-500 pb-2">Analyse et Pronostics</h2>
-                            <p class="text-gray-300 mb-6 text-justify">${team.analysis}</p>
-                            <h3 class="text-xl font-semibold text-white mb-3">Probabilités de Classement Final</h3>
-                            <div class="space-y-2">${probabilitiesHTML}</div>
-                        </div>
                         <div class="space-y-6">
                             <div class="bg-gray-900/50 p-4 rounded-lg">
                                 <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>Composition de l'équipe</h3>
@@ -365,15 +596,14 @@
                                 <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M16 16v-2a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>Matchs Joués</h3>
                                 <ul class="space-y-2">${pastMatchesHTML}</ul>
                             </div>
-                            <div class="bg-gray-900/50 p-4 rounded-lg">
-                                <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>Matchs Restants</h3>
-                                <ul class="space-y-2">${scheduleHTML}</ul>
-                            </div>
+                        </div>
+                        <div class="bg-gray-900/50 p-4 rounded-lg">
+                            <h3 class="text-xl font-semibold text-white mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>Matchs Restants</h3>
+                            <ul class="space-y-2">${scheduleHTML}</ul>
                         </div>
                     </div>
                 </div>
             `;
-            
             mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
             mainContent.querySelectorAll('.player-link').forEach(link => {
                 link.addEventListener('click', (e) => {
@@ -384,32 +614,11 @@
         }
 
         function renderAnalysisListView() {
-            const allMatches = [];
-            const seen = new Set();
-            teamsData.forEach(team => {
-                team.schedule.forEach(match => {
-                    const sortedTeams = [team.tag, match.opponent].sort();
-                    const matchId = sortedTeams.join('-');
-                    if (!seen.has(matchId)) {
-                        allMatches.push({
-                            id: matchId,
-                            team1: teamsData.find(t => t.tag === sortedTeams[0]),
-                            team2: teamsData.find(t => t.tag === sortedTeams[1]),
-                            date: match.date
-                        });
-                        seen.add(matchId);
-                    }
-                });
-            });
-
-            allMatches.forEach(match => {
-                const parts = match.date.split('/');
-                match.dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
-            });
-
-            allMatches.sort((a, b) => a.dateObj - b.dateObj);
-
-            const matchesByDate = allMatches.reduce((acc, match) => {
+            currentView = 'analysis';
+            const scheduledMatches = matchesData.filter(m => m.status === 'scheduled');
+            scheduledMatches.sort((a,b) => new Date(a.date) - new Date(b.date));
+            
+            const matchesByDate = scheduledMatches.reduce((acc, match) => {
                 if (!acc[match.date]) acc[match.date] = [];
                 acc[match.date].push(match);
                 return acc;
@@ -418,24 +627,17 @@
             const analysisHTML = Object.keys(matchesByDate).map(date => {
                 const matchesOnDate = matchesByDate[date];
                 const matchesHTML = matchesOnDate.map(match => {
-                    const team1 = match.team1;
-                    const team2 = match.team2;
-                    const team1WinChance = team1.schedule.find(s => s.opponent === team2.tag)?.winChance || 100 - (team2.schedule.find(s => s.opponent === team1.tag)?.winChance || 50);
+                    const team1 = teamsData.find(t => t.tag === match.team1);
+                    const team2 = teamsData.find(t => t.tag === match.team2);
+                    const team1WinChance = team1.schedule.find(s => s.matchId === match.firestoreId)?.winChance || 50;
                     const team2WinChance = 100 - team1WinChance;
-                    
                     let predictedScore;
-                    if (team1WinChance > 70) {
-                        predictedScore = '2-0';
-                    } else if (team1WinChance >= 50) {
-                        predictedScore = '2-1';
-                    } else if (team1WinChance < 30) {
-                        predictedScore = '0-2';
-                    } else {
-                        predictedScore = '1-2';
-                    }
-
+                    if (team1WinChance > 70) predictedScore = '2-0';
+                    else if (team1WinChance >= 50) predictedScore = '2-1';
+                    else if (team1WinChance < 30) predictedScore = '0-2';
+                    else predictedScore = '1-2';
                     return `
-                        <div class="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition-colors match-card" data-match-id="${match.id}">
+                        <div class="bg-gray-800 rounded-lg p-4">
                             <div class="flex justify-between items-center">
                                 <div class="flex items-center space-x-3 w-2/5 justify-start">
                                     <img src="${team1.logo}" alt="${team1.name}" class="w-10 h-10 object-contain">
@@ -457,150 +659,97 @@
                                 <div class="w-full bg-red-500/20 rounded-r-full h-2" style="width: ${team2WinChance}%"></div>
                             </div>
                             <div class="flex justify-between items-center text-sm font-bold">
-                                <span class="text-green-400">${team1WinChance}%</span>
-                                <span class="text-red-400">${team2WinChance}%</span>
+                                <span class="text-green-400">${team1WinChance.toFixed(0)}%</span>
+                                <button class="set-result-button text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1 px-3 rounded-full transition-colors" data-match-id="${match.firestoreId}">
+                                    Saisir Résultat
+                                </button>
+                                <span class="text-red-400">${team2WinChance.toFixed(0)}%</span>
                             </div>
                         </div>
                     `;
                 }).join('');
-
                 return `
                     <div>
-                        <h3 class="text-2xl font-bold text-indigo-400 mt-8 mb-4">Journée du ${date}</h3>
+                        <h3 class="text-2xl font-bold text-indigo-400 mt-8 mb-4">Journée du ${new Date(date).toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long'})}</h3>
                         <div class="space-y-4">
                             ${matchesHTML}
                         </div>
                     </div>
                 `;
             }).join('');
-
             mainContent.innerHTML = `
                 <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
                     <span>Retour au classement</span>
                 </button>
                 <h2 class="text-3xl font-bold text-white mb-2">Analyse Détaillée des Matchs à Venir</h2>
-                <p class="text-gray-400 mb-6">Retrouvez ici l'analyse détaillée de chaque affrontement restant dans la phase de groupe. Cliquez sur un match pour voir le détail du calcul de puissance.</p>
-                <div>${analysisHTML}</div>
+                <p class="text-gray-400 mb-6">Saisissez un résultat pour mettre à jour les pronostics et les classements.</p>
+                <div>${analysisHTML || '<p class="text-gray-400 text-center mt-8">Tous les matchs de la phase de groupe ont été joués.</p>'}</div>
             `;
             mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
-            mainContent.querySelectorAll('.match-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    renderMatchDetail(card.dataset.matchId);
-                });
+            mainContent.querySelectorAll('.set-result-button').forEach(button => {
+                button.addEventListener('click', () => openResultModal(button.dataset.matchId));
             });
         }
         
-        function renderMatchDetail(matchId) {
-            const teamTags = matchId.split('-');
-            const team1 = teamsData.find(t => t.tag === teamTags[0]);
-            const team2 = teamsData.find(t => t.tag === teamTags[1]);
-            const matchInfo = matchupsAnalysis.find(a => a.teams.sort().join('-') === matchId);
-            if (!team1 || !team2 || !matchInfo) return;
+        function renderQualificationView() {
+            currentView = 'qualif';
+            const groupA = teamsData.filter(t => t.group === 'A').sort((a,b) => b.mathProbabilities.qualif - a.mathProbabilities.qualif);
+            const groupB = teamsData.filter(t => t.group === 'B').sort((a,b) => b.mathProbabilities.qualif - a.mathProbabilities.qualif);
 
-            const team1WinChance = team1.schedule.find(s => s.opponent === team2.tag)?.winChance || 100 - (team2.schedule.find(s => s.opponent === team1.tag)?.winChance || 50);
-            const team2WinChance = 100 - team1WinChance;
-
-            const breakdownHTML = matchInfo.powerScore.breakdown.map(item => {
-                const winnerColor = item.winner === team1.tag ? 'text-green-400' : (item.winner === team2.tag ? 'text-red-400' : 'text-yellow-400');
-                return `
-                    <div class="bg-gray-900/50 p-3 rounded-lg">
-                        <div class="flex justify-between items-center">
-                            <span class="font-semibold">${item.criteria}</span>
-                            <span class="font-bold ${winnerColor}">Avantage ${item.winner}</span>
+            const createGroupHTML = (groupTeams, groupName) => {
+                if (!groupTeams || groupTeams.length === 0) return '';
+                const scenarios = groupTeams[0]?.mathProbabilities?.scenarios || 0;
+                const scenariosText = scenarios > 0 ? `basées sur ${scenarios.toLocaleString('fr-FR')} scénarios restants` : `tous les matchs joués`;
+                const qualifHTML = groupTeams.map(team => `
+                    <div class="qualif-team-container">
+                        <div class="bg-gray-800 rounded-lg p-3 flex items-center space-x-4 cursor-pointer hover:bg-gray-700" data-team-tag="${team.tag}">
+                            <img src="${team.logo}" alt="${team.name}" class="w-10 h-10 object-contain">
+                            <span class="font-bold w-32 flex-shrink-0">${team.name}</span>
+                            <div class="w-full bg-gray-700 rounded-full h-6 relative">
+                                <div class="bg-indigo-500 h-full rounded-full flex items-center justify-center text-xs font-medium text-white" style="width: ${team.mathProbabilities.qualif}%">
+                                    ${team.mathProbabilities.qualif > 15 ? `${team.mathProbabilities.qualif.toFixed(1)}%` : ''}
+                                </div>
+                                ${team.mathProbabilities.qualif <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${team.mathProbabilities.qualif.toFixed(1)}%</span>` : ''}
+                            </div>
                         </div>
-                        <p class="text-sm text-gray-400 mt-1">${item.reason}</p>
+                        <div id="qualif-details-${team.tag}" class="hidden details-row bg-gray-800/50 p-4 rounded-b-lg -mt-2 pt-4"></div>
+                    </div>
+                `).join('');
+                return `
+                    <div class="mt-8">
+                        <h3 class="text-2xl font-bold text-white mb-2">Groupe ${groupName}</h3>
+                        <p class="text-sm text-gray-400 mb-4">Probabilités ${scenariosText} pour ce groupe. Cliquez sur une équipe pour voir le détail par place.</p>
+                        <div class="space-y-3">${qualifHTML}</div>
                     </div>
                 `;
-            }).join('');
-
-            mainContent.innerHTML = `
-                <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="analysis-list">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-                    <span>Retour à la liste des matchs</span>
-                </button>
-                <div class="bg-gray-800 rounded-lg p-4 sm:p-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <div class="flex items-center space-x-3 w-2/5 justify-start">
-                            <img src="${team1.logo}" alt="${team1.name}" class="w-12 h-12 object-contain">
-                            <span class="font-bold text-xl">${team1.name}</span>
-                        </div>
-                        <div class="text-center"><span class="text-lg font-bold text-gray-400">VS</span></div>
-                        <div class="flex items-center space-x-3 w-2/5 justify-end">
-                            <span class="font-bold text-xl text-right">${team2.name}</span>
-                            <img src="${team2.logo}" alt="${team2.name}" class="w-12 h-12 object-contain">
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <div class="w-full bg-green-500/20 rounded-l-full h-2" style="width: ${team1WinChance}%"></div>
-                        <div class="w-full bg-red-500/20 rounded-r-full h-2" style="width: ${team2WinChance}%"></div>
-                    </div>
-                    <div class="flex justify-between items-center text-lg font-bold mb-6">
-                        <span class="text-green-400">${team1WinChance}%</span>
-                        <span class="text-red-400">${team2WinChance}%</span>
-                    </div>
-                    <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-2">Détail du Calcul de Puissance</h3>
-                    <div class="space-y-3 mb-6">${breakdownHTML}</div>
-                    <h3 class="text-xl font-bold text-white mb-2">Conclusion de l'Analyse</h3>
-                    <p class="text-sm text-gray-300 text-justify">${matchInfo.analysis}</p>
-                </div>
-            `;
-            mainContent.querySelector('.back-button').addEventListener('click', renderAnalysisListView);
-        }
-
-        function renderQualificationView() {
-            const qualificationProbs = teamsData.map(team => ({
-                name: team.name,
-                tag: team.tag,
-                logo: team.logo,
-                chance: team.mathProbabilities.qualif,
-                ranks: team.mathProbabilities.ranks
-            })).sort((a,b) => b.chance - a.chance);
-
-            const qualifHTML = qualificationProbs.map(team => `
-                <div class="qualif-team-container">
-                    <div class="bg-gray-800 rounded-lg p-3 flex items-center space-x-4 cursor-pointer hover:bg-gray-700" data-team-tag="${team.tag}">
-                        <img src="${team.logo}" alt="${team.name}" class="w-10 h-10 object-contain">
-                        <span class="font-bold w-32 flex-shrink-0">${team.name}</span>
-                        <div class="w-full bg-gray-700 rounded-full h-6 relative">
-                            <div class="bg-indigo-500 h-full rounded-full flex items-center justify-center text-xs font-medium text-white" style="width: ${team.chance}%">
-                                ${team.chance > 15 ? `${team.chance}%` : ''}
-                            </div>
-                            ${team.chance <= 15 ? `<span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-white">${team.chance}%</span>` : ''}
-                        </div>
-                    </div>
-                    <div id="qualif-details-${team.tag}" class="hidden details-row bg-gray-800/50 p-4 rounded-b-lg -mt-2 pt-4"></div>
-                </div>
-            `).join('');
-
+            };
             mainContent.innerHTML = `
                 <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="home">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
                     <span>Retour au classement</span>
                 </button>
                 <h2 class="text-3xl font-bold text-white mb-2">Probabilités de Qualification aux Playoffs</h2>
-                <p class="text-gray-400 mb-6">Ces pourcentages sont basés sur une analyse purement mathématique des 16 384 scénarios restants, où chaque match est considéré comme un 50/50. Cliquez sur une équipe pour voir le détail par place.</p>
-                <div class="space-y-3">${qualifHTML}</div>
+                <p class="text-gray-400 mb-6">Ces pourcentages sont basés sur une analyse mathématique des scénarios restants pour chaque groupe, où chaque match est considéré comme un 50/50.</p>
+                ${createGroupHTML(groupA, 'A')}
+                ${createGroupHTML(groupB, 'B')}
             `;
-
             mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
             mainContent.querySelectorAll('.qualif-team-container > div:first-child').forEach(row => {
                 row.addEventListener('click', (e) => {
                     const teamTag = e.currentTarget.dataset.teamTag;
                     const detailRow = document.getElementById(`qualif-details-${teamTag}`);
-                    const teamData = qualificationProbs.find(t => t.tag === teamTag);
-
+                    const teamData = teamsData.find(t => t.tag === teamTag);
                     document.querySelectorAll('[id^="qualif-details-"]').forEach(d => {
                         if (d.id !== detailRow.id) {
                             d.classList.add('hidden');
                             d.innerHTML = '';
                         }
                     });
-
                     if (detailRow.classList.toggle('hidden')) {
                         detailRow.innerHTML = '';
                     } else {
-                        const ranksHTML = teamData.ranks.map(r => `
+                        const ranksHTML = teamData.mathProbabilities.ranks.filter(r => r.chance > 0.1).map(r => `
                             <div class="flex items-center space-x-2">
                                 <span class="w-16 text-right text-gray-300 flex-shrink-0">Place ${r.pos}</span>
                                 <div class="w-full bg-gray-700 rounded-full h-6 relative">
@@ -611,13 +760,31 @@
                                 </div>
                             </div>
                         `).join('');
-                        detailRow.innerHTML = `<div class="space-y-2">${ranksHTML}</div>`;
+                        
+                        let eliminationHTML = '';
+                        const scenarios = teamData.mathProbabilities.eliminationScenarios;
+                        if (teamData.mathProbabilities.qualif < 100 && scenarios && scenarios.length > 0) {
+                            const exampleScenario = scenarios[0]; 
+                            const scenarioText = exampleScenario.map(match => `<strong>${match.winner}</strong> bat <strong>${match.loser}</strong>`).join(' ET ');
+                            eliminationHTML = `
+                                <div class="mt-4 pt-3 border-t border-gray-700/50">
+                                    <h4 class="font-semibold text-sm text-yellow-400 mb-2">Exemple de scénario d'élimination</h4>
+                                    <p class="text-xs text-gray-400">
+                                        Pour que ${teamData.name} soit éliminé, il faudrait (entre autres) que : ${scenarioText}.
+                                    </p>
+                                </div>
+                            `;
+                        }
+                        
+                        detailRow.innerHTML = `<div class="space-y-2">${ranksHTML}</div>${eliminationHTML}`;
                     }
                 });
             });
         }
         
         function renderPowerScoreView(container) {
+            currentView = 'rankings-teams';
+            const targetContainer = container || mainContent;
             const tableHeader = `
                 <div class="grid grid-cols-7 gap-4 p-2 font-bold text-sm text-gray-400 border-b border-gray-700">
                     <span>Rang</span>
@@ -628,21 +795,11 @@
                     <span class="text-right">Power Score</span>
                 </div>
             `;
-
             const tableRows = teamsData.map(team => {
-                const wins = parseInt(team.record.split('-')[0]);
-                const currentScore = (wins * 4); // 4 pts per win
-                const predictedWins = team.schedule.reduce((acc, match) => acc + (match.winChance / 100), 0);
+                const currentScore = team.wins * 4;
+                const predictedWins = team.schedule.reduce((acc, match) => acc + ((match.winChance || 0) / 100), 0);
                 const predictedScore = (predictedWins * 3).toFixed(2);
-                let playerPower = 0;
-                team.roster.forEach(playerName => {
-                    const player = playersData.find(p => p.id === playerName);
-                    if (player && player.stats && player.stats.playerScore) {
-                        playerPower += player.stats.playerScore;
-                    }
-                });
-                const avgPlayerPower = (playerPower / 5 / 10).toFixed(2); // Normalisation
-
+                const avgPlayerPower = (team.basePlayerPower / 10).toFixed(2);
                 return `
                     <div class="grid grid-cols-7 gap-4 p-2 items-center border-b border-gray-800">
                         <span class="font-bold text-lg">${team.rank}</span>
@@ -657,8 +814,6 @@
                     </div>
                 `;
             }).join('');
-
-            const targetContainer = container || mainContent;
             targetContainer.innerHTML = `
                 <h2 class="text-3xl font-bold text-white mb-2">Classement des Équipes (Power Score)</h2>
                 <p class="text-gray-400 mb-6">Le "Rang Global" est déterminé par ce score, qui évalue la force de chaque équipe. Voici comment il est calculé :</p>
@@ -675,20 +830,14 @@
         }
 
         function renderPlayerDetail(playerId, fromTeamId) {
+            currentView = `player-${playerId}`;
             const player = playersData.find(p => p.id === playerId);
-            if (!player) {
-                mainContent.innerHTML = `<p>Données du joueur non trouvées.</p><button class="back-button" data-target="team-detail" data-team-id="${fromTeamId}">Retour</button>`;
-                mainContent.querySelector('.back-button').addEventListener('click', (e) => renderTeamDetail(e.currentTarget.dataset.teamId));
-                return;
-            }
-            
+            if (!player) return;
             const playersInRoleCount = playersData.filter(p => p.role === player.role).length;
-
             function createStatCard(label, value, rank, totalInRole) {
                 let rankColor = 'text-yellow-400';
                 if (rank <= 3) rankColor = 'text-green-400';
                 if (rank > 7) rankColor = 'text-red-400';
-
                 return `
                     <div class="bg-gray-700/50 p-4 rounded-lg">
                         <p class="text-sm text-gray-400">${label}</p>
@@ -697,24 +846,21 @@
                     </div>
                 `;
             }
-
+            const kparDisplay = (player.stats.kpar / 10).toFixed(2);
             const playerScoreBreakdown = [
                 { label: 'DPM', value: player.stats.dpm, points: (player.stats.dpm / 100).toFixed(2), formula: '(DPM / 100)' },
                 { label: 'KDA', value: player.stats.kda, points: (player.stats.kda * 2).toFixed(2), formula: '(KDA * 2)' },
-                { label: 'KPAR', value: player.stats.kpar, points: (parseFloat(player.stats.kpar) / 10).toFixed(2), formula: '(KPAR / 10)' },
+                { label: 'KPAR', value: player.stats.kpar, points: kparDisplay, formula: '(KPAR / 10)' },
                 { label: 'CS/M', value: player.stats.csm, points: player.stats.csm.toFixed(2), formula: '(CS/M)' },
                 { label: 'G/M', value: player.stats.gpm, points: (player.stats.gpm / 100).toFixed(2), formula: '(G/M / 100)' },
             ];
             const totalPlayerScore = playerScoreBreakdown.reduce((acc, item) => acc + parseFloat(item.points), 0);
-
             let rankColorRole = 'text-yellow-400';
             if (player.stats.ranks.playerScore <= 3) rankColorRole = 'text-green-400';
             if (player.stats.ranks.playerScore > 7) rankColorRole = 'text-red-400';
-            
             let rankColorOverall = 'text-yellow-400';
             if (player.stats.ranks.playerScoreOverall <= 10) rankColorOverall = 'text-green-400';
             if (player.stats.ranks.playerScoreOverall > 40) rankColorOverall = 'text-red-400';
-
             mainContent.innerHTML = `
                  <button class="back-button flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 mb-6 transition-colors" data-target="team-detail" data-team-id="${fromTeamId}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
@@ -730,26 +876,26 @@
                              <p class="text-3xl font-bold text-orange-400">${totalPlayerScore.toFixed(2)}</p>
                              <div class="flex space-x-4 text-xs font-semibold mt-1">
                                 <span class="${rankColorRole}">#${player.stats.ranks.playerScore}/${playersInRoleCount} ${player.role}</span>
-                                <span class="${rankColorOverall}">#${player.stats.ranks.playerScoreOverall}/50 LEC</span>
+                                <span class="${rankColorOverall}">#${player.stats.ranks.playerScoreOverall}/${playersData.length} LEC</span>
                              </div>
                         </div>
                     </div>
                     <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                        ${createStatCard('DPM', player.stats.dpm, player.stats.ranks.dpm, playersInRoleCount)}
-                        ${createStatCard('KDA', player.stats.kda, player.stats.ranks.kda, playersInRoleCount)}
-                        ${createStatCard('CS/M', player.stats.csm, player.stats.ranks.csm, playersInRoleCount)}
-                        ${createStatCard('G/M', player.stats.gpm, player.stats.ranks.gpm, playersInRoleCount)}
-                        ${createStatCard('KPAR', player.stats.kpar, player.stats.ranks.kpar, playersInRoleCount)}
-                        ${createStatCard('KS%', player.stats.ks_percent, player.stats.ranks.ks_percent, playersInRoleCount)}
-                        ${createStatCard('GS%', player.stats.gold_percent, player.stats.ranks.gold_percent, playersInRoleCount)}
-                        ${createStatCard('Champions Joués', player.stats.champPool, player.stats.ranks.champPool, playersInRoleCount)}
+                        ${createStatCard('DPM', player.stats.dpm.toFixed(0), player.stats.ranks.dpm, playersInRoleCount)}
+                        ${createStatCard('KDA', player.stats.kda.toFixed(2), player.stats.ranks.kda, playersInRoleCount)}
+                        ${createStatCard('CS/M', player.stats.csm.toFixed(2), player.stats.ranks.csm, playersInRoleCount)}
+                        ${createStatCard('G/M', player.stats.gpm.toFixed(0), player.stats.ranks.gpm, playersInRoleCount)}
+                        ${createStatCard('KPAR', `${player.stats.kpar.toFixed(1)}%`, player.stats.ranks.kpar, playersInRoleCount)}
+                        ${createStatCard('KS%', `${player.stats.ks_percent.toFixed(1)}%`, player.stats.ranks.ks_percent, playersInRoleCount)}
+                        ${createStatCard('GS%', `${player.stats.gold_percent.toFixed(1)}%`, player.stats.ranks.gold_percent, playersInRoleCount)}
+                        ${createStatCard('Champions Joués', player.stats.champPool.toFixed(0), player.stats.ranks.champPool, playersInRoleCount)}
                     </div>
                     <div class="mt-8">
                         <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-2">Calcul du Player Score</h3>
                         <div class="bg-gray-900/50 rounded-lg p-4 space-y-2">
                             ${playerScoreBreakdown.map(item => `
                                 <div class="flex justify-between items-center text-sm">
-                                    <span class="text-gray-400">${item.label} (${item.value}):</span>
+                                    <span class="text-gray-400">${item.label} (${typeof item.value === 'number' ? item.value.toFixed(2) : item.value}):</span>
                                     <span class="font-mono text-gray-300">${item.formula} = ${item.points} pts</span>
                                 </div>
                             `).join('')}
@@ -767,8 +913,12 @@
         function setupEventListeners() {
             showAnalysisButton.addEventListener('click', renderAnalysisListView);
             showQualifButton.addEventListener('click', renderQualificationView);
-            showRankingsButton.addEventListener('click', renderRankingsView);
+            showRankingsButton.addEventListener('click', () => renderRankingsView('players'));
             homeTitle.addEventListener('click', renderHomeView);
+            document.getElementById('modal-cancel-button').addEventListener('click', closeResultModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeResultModal();
+            });
         }
         
         function renderRankingsView(activeTab = 'players') {
@@ -784,19 +934,16 @@
                 <div id="rankings-content"></div>
             `;
             mainContent.querySelector('.back-button').addEventListener('click', renderHomeView);
-            
             const rankingsContent = document.getElementById('rankings-content');
-            
             function showTab(tabName) {
                 if (tabName === 'players') {
-                    currentSortKey = 'playerScore';
-                    currentSortDirection = 'desc';
-                    renderPlayerRankingView('All', rankingsContent);
+                    currentView = 'rankings-players';
+                    renderPlayerRankingView(currentRoleFilter, rankingsContent);
                 } else if (tabName === 'power-score') {
+                    currentView = 'rankings-teams';
                     renderPowerScoreView(rankingsContent);
                 }
             }
-
             mainContent.querySelectorAll('.sub-nav-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     mainContent.querySelectorAll('.sub-nav-btn').forEach(b => b.classList.remove('active'));
@@ -804,8 +951,6 @@
                     showTab(e.target.dataset.tab);
                 });
             });
-            
-            // Activer le premier onglet par défaut
             mainContent.querySelector(`.sub-nav-btn[data-tab="${activeTab}"]`).classList.add('active');
             showTab(activeTab);
         }
@@ -816,7 +961,6 @@
             if (role !== 'All') {
                 filteredPlayers = playersData.filter(p => p.role === role);
             }
-
             const sortedPlayers = [...filteredPlayers].sort((a, b) => {
                 let valA, valB;
                 if (currentSortKey === 'name' || currentSortKey === 'role') {
@@ -826,17 +970,12 @@
                     valA = a.stats[currentSortKey];
                     valB = b.stats[currentSortKey];
                 }
-                
-                if (typeof valA === 'string' && valA.includes('%')) valA = parseFloat(valA.replace('%', ''));
-                if (typeof valB === 'string' && valB.includes('%')) valB = parseFloat(valB.replace('%', ''));
-
                 if (currentSortDirection === 'asc') {
-                    return typeof valA === 'string' ? valA.localeCompare(valB) : (valA || 0) - (valB || 0);
+                    return typeof valA === 'string' ? valA.localeCompare(valA) : (valA || 0) - (valB || 0);
                 } else {
                     return typeof valB === 'string' ? valB.localeCompare(valA) : (valB || 0) - (valA || 0);
                 }
             });
-
             const tableRows = sortedPlayers.map((player, index) => {
                 const team = teamsData.find(t => t.tag === player.team);
                 return `
@@ -851,19 +990,15 @@
                     </tr>
                 `;
             }).join('');
-            
             const sortIndicator = (key) => {
-                if (key === currentSortKey) {
-                    return currentSortDirection === 'asc' ? '▲' : '▼';
-                }
+                if (key === currentSortKey) return currentSortDirection === 'asc' ? '▲' : '▼';
                 return '';
             };
-
             const targetContainer = container || mainContent;
             targetContainer.innerHTML = `
                 <h2 class="text-3xl font-bold text-white mb-2">Classement des Joueurs</h2>
                 <p class="text-gray-400 mb-6">Classement basé sur le "Player Score", une note de performance individuelle calculée à partir des statistiques en jeu.</p>
-                <div class="flex space-x-2 mb-4">
+                <div class="flex flex-wrap gap-2 mb-4">
                     <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'All' ? 'active' : 'bg-gray-700'}" data-role="All">Tous</button>
                     <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'Top' ? 'active' : 'bg-gray-700'}" data-role="Top">Top</button>
                     <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'Jungle' ? 'active' : 'bg-gray-700'}" data-role="Jungle">Jungle</button>
@@ -871,8 +1006,8 @@
                     <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'ADC' ? 'active' : 'bg-gray-700'}" data-role="ADC">ADC</button>
                     <button class="filter-btn px-3 py-1 rounded-full text-sm font-semibold ${role === 'Support' ? 'active' : 'bg-gray-700'}" data-role="Support">Support</button>
                 </div>
-                <div class="bg-gray-800 rounded-lg overflow-hidden">
-                    <table class="w-full text-left">
+                <div class="bg-gray-800 rounded-lg overflow-x-auto">
+                    <table class="w-full text-left min-w-max">
                         <thead class="bg-gray-700/50 text-xs text-gray-400 uppercase">
                             <tr>
                                 <th class="p-3 sortable-header" data-sort-key="rank">Rang ${sortIndicator('rank')}</th>
@@ -909,8 +1044,7 @@
                 });
             });
         }
-        // dgkfjhsdkgh
-        // Initialisation
+        
         main();
     </script>
 </body>

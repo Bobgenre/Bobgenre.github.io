@@ -5,14 +5,14 @@
         "team": "KC",
         "role": "Top",
         "stats": {
-            "dpm": 566,
-            "kda": 19.33,
-            "champPool": 4,
-            "csm": 7.86,
-            "gpm": 412,
-            "kpar": "69.4%",
-            "ks_percent": "16.9%",
-            "gold_percent": "21.1%"
+            "dpm": 575,
+            "kda": 8.9,
+            "champPool": 5,
+            "csm": 7.78,
+            "gpm": 403,
+            "kpar": "70.6%",
+            "ks_percent": "19.4%",
+            "gold_percent": "21.2%"
         }
     },
     {
@@ -21,14 +21,14 @@
         "team": "KC",
         "role": "Jungle",
         "stats": {
-            "dpm": 435,
-            "kda": 4.71,
-            "champPool": 5,
-            "csm": 6.31,
-            "gpm": 398,
-            "kpar": "74.5%",
-            "ks_percent": "27.9%",
-            "gold_percent": "20.1%"
+            "dpm": 364,
+            "kda": 4.13,
+            "champPool": 6,
+            "csm": 5.86,
+            "gpm": 363,
+            "kpar": "72.8%",
+            "ks_percent": "23.0%",
+            "gold_percent": "19.1%"
         }
     },
     {
@@ -37,14 +37,14 @@
         "team": "KC",
         "role": "Mid",
         "stats": {
-            "dpm": 673,
-            "kda": 5.33,
-            "champPool": 4,
-            "csm": 8.99,
-            "gpm": 417,
-            "kpar": "61.1%",
-            "ks_percent": "15.4%",
-            "gold_percent": "21.2%"
+            "dpm": 659,
+            "kda": 5.0,
+            "champPool": 5,
+            "csm": 8.9,
+            "gpm": 406,
+            "kpar": "63.6%",
+            "ks_percent": "17.0%",
+            "gold_percent": "21.3%"
         }
     },
     {
@@ -53,14 +53,14 @@
         "team": "KC",
         "role": "ADC",
         "stats": {
-            "dpm": 727,
-            "kda": 20.0,
-            "champPool": 3,
-            "csm": 10.07,
-            "gpm": 487,
-            "kpar": "67.5%",
-            "ks_percent": "33.3%",
-            "gold_percent": "24.7%"
+            "dpm": 743,
+            "kda": 13.43,
+            "champPool": 6,
+            "csm": 10.13,
+            "gpm": 473,
+            "kpar": "69.9%",
+            "ks_percent": "32.0%",
+            "gold_percent": "24.8%"
         }
     },
     {
@@ -69,14 +69,14 @@
         "team": "KC",
         "role": "Support",
         "stats": {
-            "dpm": 174,
-            "kda": 5.33,
-            "champPool": 4,
-            "csm": 1.26,
-            "gpm": 256,
-            "kpar": "77.3%",
-            "ks_percent": "2.2%",
-            "gold_percent": "13.0%"
+            "dpm": 163,
+            "kda": 4.88,
+            "champPool": 6,
+            "csm": 1.16,
+            "gpm": 252,
+            "kpar": "77.9%",
+            "ks_percent": "4.9%",
+            "gold_percent": "13.2%"
         }
     },
     {
@@ -165,14 +165,14 @@
         "team": "MKOI",
         "role": "Top",
         "stats": {
-            "dpm": 686,
-            "kda": 2.92,
+            "dpm": 643,
+            "kda": 2.76,
             "champPool": 4,
-            "csm": 8.25,
-            "gpm": 384,
-            "kpar": "64.2%",
-            "ks_percent": "12.0%",
-            "gold_percent": "20.2%"
+            "csm": 7.99,
+            "gpm": 370,
+            "kpar": "67.7%",
+            "ks_percent": "11.2%",
+            "gold_percent": "19.8%"
         }
     },
     {
@@ -181,14 +181,14 @@
         "team": "MKOI",
         "role": "Jungle",
         "stats": {
-            "dpm": 370,
-            "kda": 3.6,
+            "dpm": 375,
+            "kda": 3.69,
             "champPool": 4,
-            "csm": 6.76,
+            "csm": 6.61,
             "gpm": 354,
-            "kpar": "72.1%",
-            "ks_percent": "12.5%",
-            "gold_percent": "18.8%"
+            "kpar": "74.3%",
+            "ks_percent": "17.6%",
+            "gold_percent": "19.1%"
         }
     },
     {
@@ -197,14 +197,14 @@
         "team": "MKOI",
         "role": "ADC",
         "stats": {
-            "dpm": 1016,
-            "kda": 5.0,
+            "dpm": 913,
+            "kda": 5.25,
             "champPool": 3,
-            "csm": 9.97,
-            "gpm": 497,
-            "kpar": "88.5%",
-            "ks_percent": "51.7%",
-            "gold_percent": "26.2%"
+            "csm": 10.28,
+            "gpm": 487,
+            "kpar": "81.4%",
+            "ks_percent": "51.9%",
+            "gold_percent": "25.9%"
         }
     },
     {
@@ -213,14 +213,14 @@
         "team": "FNC",
         "role": "Top",
         "stats": {
-            "dpm": 622,
-            "kda": 4.0,
-            "champPool": 4,
-            "csm": 7.46,
-            "gpm": 365,
-            "kpar": "65.0%",
-            "ks_percent": "14.6%",
-            "gold_percent": "19.0%"
+            "dpm": 582,
+            "kda": 3.27,
+            "champPool": 5,
+            "csm": 7.79,
+            "gpm": 387,
+            "kpar": "60.6%",
+            "ks_percent": "14.8%",
+            "gold_percent": "19.5%"
         }
     },
     {
@@ -229,14 +229,14 @@
         "team": "FNC",
         "role": "Jungle",
         "stats": {
-            "dpm": 461,
-            "kda": 4.58,
-            "champPool": 4,
-            "csm": 6.15,
-            "gpm": 371,
-            "kpar": "80.1%",
-            "ks_percent": "21.5%",
-            "gold_percent": "19.3%"
+            "dpm": 460,
+            "kda": 5.64,
+            "champPool": 6,
+            "csm": 6.58,
+            "gpm": 381,
+            "kpar": "82.0%",
+            "ks_percent": "22.6%",
+            "gold_percent": "19.2%"
         }
     },
     {
@@ -245,14 +245,14 @@
         "team": "FNC",
         "role": "Mid",
         "stats": {
-            "dpm": 593,
-            "kda": 16.33,
-            "champPool": 4,
-            "csm": 9.93,
-            "gpm": 447,
-            "kpar": "70.3%",
-            "ks_percent": "23.3%",
-            "gold_percent": "23.2%"
+            "dpm": 543,
+            "kda": 23.0,
+            "champPool": 6,
+            "csm": 10.18,
+            "gpm": 462,
+            "kpar": "70.0%",
+            "ks_percent": "25.4%",
+            "gold_percent": "23.3%"
         }
     },
     {
@@ -261,14 +261,14 @@
         "team": "FNC",
         "role": "ADC",
         "stats": {
-            "dpm": 647,
-            "kda": 9.17,
-            "champPool": 4,
-            "csm": 10.08,
-            "gpm": 487,
-            "kpar": "79.7%",
-            "ks_percent": "38.8%",
-            "gold_percent": "25.3%"
+            "dpm": 629,
+            "kda": 12.67,
+            "champPool": 5,
+            "csm": 10.32,
+            "gpm": 491,
+            "kpar": "77.5%",
+            "ks_percent": "33.6%",
+            "gold_percent": "24.7%"
         }
     },
     {
@@ -277,14 +277,14 @@
         "team": "FNC",
         "role": "Support",
         "stats": {
-            "dpm": 242,
-            "kda": 3.86,
+            "dpm": 244,
+            "kda": 4.22,
             "champPool": 4,
-            "csm": 0.87,
-            "gpm": 250,
-            "kpar": "78.9%",
-            "ks_percent": "1.5%",
-            "gold_percent": "13.0%"
+            "csm": 0.97,
+            "gpm": 260,
+            "kpar": "78.2%",
+            "ks_percent": "4.0%",
+            "gold_percent": "13.1%"
         }
     },
     {
@@ -373,13 +373,13 @@
         "team": "BDS",
         "role": "Top",
         "stats": {
-            "dpm": 857,
-            "kda": 6.0,
-            "champPool": 2,
-            "csm": 8.47,
-            "gpm": 469,
-            "kpar": "73.3%",
-            "ks_percent": "24.6%",
+            "dpm": 655,
+            "kda": 5.0,
+            "champPool": 3,
+            "csm": 8.73,
+            "gpm": 422,
+            "kpar": "74.8%",
+            "ks_percent": "21.1%",
             "gold_percent": "22.8%"
         }
     },
@@ -389,14 +389,14 @@
         "team": "BDS",
         "role": "Jungle",
         "stats": {
-            "dpm": 310,
-            "kda": 8.67,
-            "champPool": 2,
-            "csm": 5.58,
-            "gpm": 363,
-            "kpar": "61.4%",
-            "ks_percent": "11.3%",
-            "gold_percent": "17.7%"
+            "dpm": 278,
+            "kda": 4.0,
+            "champPool": 3,
+            "csm": 5.33,
+            "gpm": 328,
+            "kpar": "70.2%",
+            "ks_percent": "20.5%",
+            "gold_percent": "17.9%"
         }
     },
     {
@@ -405,14 +405,14 @@
         "team": "BDS",
         "role": "Mid",
         "stats": {
-            "dpm": 559,
-            "kda": 5.4,
-            "champPool": 2,
-            "csm": 8.86,
-            "gpm": 435,
-            "kpar": "64.7%",
-            "ks_percent": "18.6%",
-            "gold_percent": "21.2%"
+            "dpm": 507,
+            "kda": 3.2,
+            "champPool": 3,
+            "csm": 9.04,
+            "gpm": 387,
+            "kpar": "53.5%",
+            "ks_percent": "12.7%",
+            "gold_percent": "20.9%"
         }
     },
     {
@@ -421,14 +421,14 @@
         "team": "BDS",
         "role": "ADC",
         "stats": {
-            "dpm": 693,
-            "kda": 6.0,
-            "champPool": 2,
-            "csm": 10.46,
-            "gpm": 522,
-            "kpar": "77.3%",
-            "ks_percent": "45.4%",
-            "gold_percent": "25.6%"
+            "dpm": 585,
+            "kda": 3.18,
+            "champPool": 3,
+            "csm": 10.26,
+            "gpm": 471,
+            "kpar": "61.2%",
+            "ks_percent": "37.5%",
+            "gold_percent": "25.4%"
         }
     },
     {
@@ -437,14 +437,14 @@
         "team": "BDS",
         "role": "Support",
         "stats": {
-            "dpm": 137,
-            "kda": 5.33,
-            "champPool": 2,
-            "csm": 0.98,
-            "gpm": 259,
-            "kpar": "81.3%",
-            "ks_percent": "0.0%",
-            "gold_percent": "12.7%"
+            "dpm": 141,
+            "kda": 2.6,
+            "champPool": 4,
+            "csm": 0.99,
+            "gpm": 239,
+            "kpar": "67.5%",
+            "ks_percent": "11.3%",
+            "gold_percent": "13.0%"
         }
     },
     {
