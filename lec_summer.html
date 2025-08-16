@@ -106,6 +106,12 @@
             <h1 class="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500 cursor-pointer" id="home-title">LEC Été 2025</h1>
             <p class="text-lg text-gray-300 mt-2">Classement le plus probable par groupe</p>
             <div class="flex flex-wrap justify-center gap-4 mt-4">
+                 <button id="show-groups-button" class="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors">
+                    Groupes
+                </button>
+                <button id="show-playoffs-button" class="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors">
+                    Playoffs
+                </button>
                 <button id="show-rankings-button" class="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors">
                     Classements
                 </button>
@@ -183,6 +189,8 @@
         const loaderText = document.getElementById('loader-text');
         const appContent = document.getElementById('app-content');
         const mainContent = document.getElementById('main-content');
+        const showGroupsButton = document.getElementById('show-groups-button');
+        const showPlayoffsButton = document.getElementById('show-playoffs-button');
         const showAnalysisButton = document.getElementById('show-analysis-button');
         const showQualifButton = document.getElementById('show-qualif-button');
         const showRankingsButton = document.getElementById('show-rankings-button');
@@ -261,6 +269,8 @@
             submitButton.parentNode.replaceChild(newSubmitButton, submitButton);
             
             newSubmitButton.addEventListener('click', () => handleResultSubmission(match));
+            
+            modalOverlay.classList.add('visible');
         }
 
         function closeResultModal() {
@@ -324,6 +334,7 @@
                 loaderText.textContent = 'Affichage des résultats...';
                 switch(currentView) {
                     case 'home': renderHomeView(); break;
+                    case 'playoffs': renderPlayoffsView(); break;
                     case 'analysis': renderAnalysisListView(); break;
                     case 'qualif': renderQualificationView(); break;
                     case 'rankings-players': renderPlayerRankingView(currentRoleFilter); break;
@@ -508,6 +519,11 @@
         }
 
         function renderHomeView() {
+            currentView = 'home';
+            renderGroupsView();
+        }
+        
+        function renderGroupsView() {
             currentView = 'home';
             const groupA = teamsData.filter(t => t.group === 'A').sort((a, b) => a.rank - b.rank);
             const groupB = teamsData.filter(t => t.group === 'B').sort((a, b) => a.rank - b.rank);
@@ -783,6 +799,78 @@
             });
         }
         
+        function renderPlayoffsView() {
+            currentView = 'playoffs';
+            mainContent.innerHTML = `<h2 class="text-3xl font-bold text-white mb-2">Arbre des Playoffs</h2>`;
+
+            const groupA = teamsData.filter(t => t.group === 'A');
+            const groupB = teamsData.filter(t => t.group === 'B');
+
+            const getTeamBySeed = (group, seed) => {
+                const groupIsFinished = group.every(team => team.schedule.length === 0);
+                if (!groupIsFinished) return { tag: 'TBD', logo: 'https://placehold.co/64x64/1f2937/ffffff?text=?' };
+                
+                const sortedGroup = [...group].sort((a, b) => b.wins - a.wins || (b.powerScore || 0) - (a.powerScore || 0));
+                return sortedGroup[seed - 1] || { tag: 'TBD', logo: 'https://placehold.co/64x64/1f2937/ffffff?text=?' };
+            };
+
+            const A1 = getTeamBySeed(groupA, 1);
+            const A2 = getTeamBySeed(groupA, 2);
+            const A3 = getTeamBySeed(groupA, 3);
+            const A4 = getTeamBySeed(groupA, 4);
+            const B1 = getTeamBySeed(groupB, 1);
+            const B2 = getTeamBySeed(groupB, 2);
+            const B3 = getTeamBySeed(groupB, 3);
+            const B4 = getTeamBySeed(groupB, 4);
+
+            const createMatchCard = (team1, team2, title) => {
+                return `
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h4 class="text-center font-bold text-indigo-400 mb-3 text-sm">${title}</h4>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <img src="${team1.logo}" class="w-8 h-8 object-contain">
+                                <span class="font-semibold">${team1.tag}</span>
+                            </div>
+                            <span class="text-gray-500 font-bold">VS</span>
+                             <div class="flex items-center space-x-2">
+                                <span class="font-semibold">${team2.tag}</span>
+                                <img src="${team2.logo}" class="w-8 h-8 object-contain">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+
+            mainContent.innerHTML = `
+                <h2 class="text-3xl font-bold text-white mb-6">Arbre des Playoffs</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Upper Bracket -->
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-bold text-green-400 border-b-2 border-green-400/50 pb-2">Upper Bracket</h3>
+                        ${createMatchCard(A1, B2, 'Demi-finale UB 1')}
+                        ${createMatchCard(B1, A2, 'Demi-finale UB 2')}
+                    </div>
+
+                    <!-- Lower Bracket -->
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-bold text-red-400 border-b-2 border-red-400/50 pb-2">Lower Bracket</h3>
+                        ${createMatchCard(A3, A4, 'Quart de finale LB 1')}
+                        ${createMatchCard(B3, B4, 'Quart de finale LB 2')}
+                    </div>
+
+                    <!-- Placeholder for next rounds -->
+                    <div class="space-y-6 md:col-span-2 lg:col-span-1">
+                         <h3 class="text-xl font-bold text-gray-500 border-b-2 border-gray-500/50 pb-2">Phases Finales</h3>
+                         <div class="bg-gray-800 rounded-lg p-4 text-center text-gray-400">
+                            Les vainqueurs et perdants avanceront dans l'arbre ici.
+                         </div>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderPowerScoreView(container) {
             currentView = 'rankings-teams';
             const targetContainer = container || mainContent;
@@ -912,6 +1000,8 @@
         }
 
         function setupEventListeners() {
+            showGroupsButton.addEventListener('click', renderGroupsView);
+            showPlayoffsButton.addEventListener('click', renderPlayoffsView);
             showAnalysisButton.addEventListener('click', renderAnalysisListView);
             showQualifButton.addEventListener('click', renderQualificationView);
             showRankingsButton.addEventListener('click', () => renderRankingsView('players'));
