@@ -6,6 +6,9 @@
     <title>Cours NSI - Représentation des Données</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Librairies pour la génération de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -92,6 +95,10 @@
         .summary-style:hover {
             background-color: #374151; /* gray-700 */
         }
+        #pdf-btn:disabled {
+            background-color: #4b5563;
+            cursor: not-allowed;
+        }
 
     </style>
 </head>
@@ -99,9 +106,14 @@
 
     <!-- Header -->
     <header class="bg-gray-800/80 backdrop-blur-sm shadow-lg sticky top-0 z-10 border-b border-gray-700">
-        <div class="container mx-auto px-4 py-4">
-            <h1 id="main-title" class="text-2xl md:text-3xl font-bold text-white">Cours NSI</h1>
-            <p id="main-subtitle" class="text-gray-400 mt-1">Numérique et Sciences Informatiques - Lycée</p>
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+             <div>
+                <h1 id="main-title" class="text-2xl md:text-3xl font-bold text-white">Cours NSI</h1>
+                <p id="main-subtitle" class="text-gray-400 mt-1">Numérique et Sciences Informatiques - Lycée</p>
+            </div>
+            <button id="pdf-btn" class="hidden bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-700 transition">
+                Télécharger en PDF
+            </button>
         </div>
     </header>
 
@@ -204,59 +216,67 @@
                     <p class="mb-6 text-gray-400">Convertir les nombres entre différentes bases est une compétence fondamentale. On apprend ici à passer de notre base 10 habituelle au binaire (la langue des ordinateurs) et à l'hexadécimal (une notation compacte du binaire).</p>
                     <div class="mb-6 border-t border-gray-700 pt-4">
                         <h3>1. La Numération de Position</h3>
-                        <p>Le principe fondamental est que <strong>la valeur d'un chiffre dépend de sa position</strong>. C'est la base de notre système décimal, mais cela s'applique à toutes les autres bases.</p>
+                        <p>Le principe fondamental est que <strong>la valeur d'un chiffre dépend de sa position</strong>. Cette valeur est calculée en multipliant le chiffre par la base élevée à la puissance de sa position (en partant de 0 à droite).</p>
                         <ul>
                             <li><strong>En base 10 (décimal) :</strong> Le nombre 345 signifie (3 × 10²) + (4 × 10¹) + (5 × 10⁰).</li>
-                            <li><strong>En base 2 (binaire) :</strong> Le nombre 1011₂ signifie (1 × 2³) + (0 × 2²) + (1 × 2¹) + (1 × 2⁰) = 8 + 0 + 2 + 1 = 11₁₀.</li>
-                            <li><strong>En base 16 (hexadécimal) :</strong> Le nombre A5₁₆ signifie (10 × 16¹) + (5 × 16⁰) = 160 + 5 = 165₁₀.</li>
+                            <li><strong>En base 2 (binaire) :</strong> Le nombre 1011₂ signifie (1 × 2³) + (0 × 2²) + (1 × 2¹) + (1 × 2⁰).</li>
+                            <li><strong>En base 16 (hexadécimal) :</strong> Le nombre A5₁₆ signifie (10 × 16¹) + (5 × 16⁰).</li>
                         </ul>
-                        <h3>2. Conversion Décimal → Binaire : Divisions par 2</h3>
-                        <p>C'est la méthode la plus fiable. On divise le nombre par 2, on note le reste (qui ne peut être que 0 ou 1), et on recommence avec le quotient jusqu'à obtenir un quotient de 0. Le nombre binaire est la suite des restes lus de bas en haut.</p>
+
+                        <h3>2. Décimal → Binaire : Divisions par 2</h3>
+                        <p>On divise le nombre par 2, on note le reste, et on recommence avec le quotient jusqu'à obtenir 0. Le nombre binaire est la suite des restes lus de bas en haut.</p>
                         <h4>Exemple : Convertir 45₁₀ en binaire</h4>
-                        <table>
-                            <thead><tr><th>Division</th><th>Quotient</th><th>Reste</th></tr></thead>
-                            <tbody>
-                                <tr><td>45 / 2</td><td>22</td><td><strong>1</strong></td></tr>
-                                <tr><td>22 / 2</td><td>11</td><td><strong>0</strong></td></tr>
-                                <tr><td>11 / 2</td><td>5</td><td><strong>1</strong></td></tr>
-                                <tr><td>5 / 2</td><td>2</td><td><strong>1</strong></td></tr>
-                                <tr><td>2 / 2</td><td>1</td><td><strong>0</strong></td></tr>
-                                <tr><td>1 / 2</td><td>0</td><td><strong>1</strong></td></tr>
-                            </tbody>
-                        </table>
+                        <table><thead><tr><th>Division</th><th>Quotient</th><th>Reste</th></tr></thead><tbody><tr><td>45 / 2</td><td>22</td><td><strong>1</strong></td></tr><tr><td>22 / 2</td><td>11</td><td><strong>0</strong></td></tr><tr><td>11 / 2</td><td>5</td><td><strong>1</strong></td></tr><tr><td>5 / 2</td><td>2</td><td><strong>1</strong></td></tr><tr><td>2 / 2</td><td>1</td><td><strong>0</strong></td></tr><tr><td>1 / 2</td><td>0</td><td><strong>1</strong></td></tr></tbody></table>
                         <p>En lisant les restes du bas vers le haut, on obtient : <strong>101101₂</strong>.</p>
-                        <h3>3. L'Hexadécimal : un raccourci pour le binaire</h3>
-                        <p>La base 16 (hexadécimal) utilise 16 symboles : 0-9 et A-F. Son grand intérêt est qu'un chiffre hexadécimal correspond <strong>exactement à 4 bits binaires</strong>. La conversion binaire ↔︎ hexa est donc très rapide.</p>
-                         <h4>Exemple : Convertir 10110101₂ en hexadécimal</h4>
-                         <p>On regroupe les bits par paquets de 4 en partant de la droite.</p>
-                         <p><code>1011</code> | <code>0101</code></p>
-                         <ul>
-                            <li><code>1011₂</code> = 8 + 2 + 1 = 11₁₀ = B₁₆</li>
-                            <li><code>0101₂</code> = 4 + 1 = 5₁₀ = 5₁₆</li>
-                         </ul>
-                         <p>Donc 10110101₂ = <strong>B5₁₆</strong>.</p>
+                        
+                        <h3>3. Binaire → Décimal : Somme des puissances de 2</h3>
+                        <p>C'est l'application directe de la numération de position. On multiplie chaque bit par la puissance de 2 correspondante et on additionne le tout.</p>
+                        <h4>Exemple : Convertir 101101₂ en décimal</h4>
+                        <p>101101₂ = (<strong>1</strong> × 2⁵) + (<strong>0</strong> × 2⁴) + (<strong>1</strong> × 2³) + (<strong>1</strong> × 2²) + (<strong>0</strong> × 2¹) + (<strong>1</strong> × 2⁰)<br>= 32 + 0 + 8 + 4 + 0 + 1 = <strong>45₁₀</strong>.</p>
+
+                        <h3>4. Décimal → Hexadécimal : Divisions par 16</h3>
+                        <p>La méthode est la même que pour le binaire, mais en divisant par 16. Les restes de 10 à 15 sont notés de A à F.</p>
+                        <h4>Exemple : Convertir 267₁₀ en hexadécimal</h4>
+                        <table><thead><tr><th>Division</th><th>Quotient</th><th>Reste</th></tr></thead><tbody><tr><td>267 / 16</td><td>16</td><td>11 (→ <strong>B</strong>)</td></tr><tr><td>16 / 16</td><td>1</td><td><strong>0</strong></td></tr><tr><td>1 / 16</td><td>0</td><td><strong>1</strong></td></tr></tbody></table>
+                        <p>En lisant les restes du bas vers le haut, on obtient : <strong>10B₁₆</strong>.</p>
+
+                        <h3>5. Hexadécimal → Décimal : Somme des puissances de 16</h3>
+                        <p>On applique la formule de la numération de position avec la base 16.</p>
+                        <h4>Exemple : Convertir 10B₁₆ en décimal</h4>
+                        <p>10B₁₆ = (<strong>1</strong> × 16²) + (<strong>0</strong> × 16¹) + (<strong>11</strong> × 16⁰)<br>= 256 + 0 + 11 = <strong>267₁₀</strong>.</p>
+
+                        <h3>6. La conversion rapide : Binaire ↔ Hexadécimal</h3>
+                        <p>La grande force de l'hexadécimal est sa relation directe avec le binaire : <strong>1 chiffre hexadécimal = 4 bits</strong>. Cela rend les conversions entre ces deux bases triviales.</p>
+                        <h4>Binaire → Hexadécimal</h4>
+                        <p>On regroupe les bits par paquets de 4 en partant de la droite. On convertit ensuite chaque paquet.</p>
+                        <p>Exemple : Convertir 10110101₂. On sépare : <code>1011</code> | <code>0101</code>.<br>
+                        - <code>1011₂</code> = 8 + 2 + 1 = 11₁₀ = <strong>B₁₆</strong><br>
+                        - <code>0101₂</code> = 4 + 1 = 5₁₀ = <strong>5₁₆</strong><br>
+                        Le résultat est <strong>B5₁₆</strong>.</p>
+                        <h4>Hexadécimal → Binaire</h4>
+                        <p>On convertit chaque chiffre hexadécimal en son équivalent sur 4 bits, puis on les juxtapose.</p>
+                        <p>Exemple : Convertir B5₁₆.<br>
+                        - B₁₆ = 11₁₀ = <strong>1011₂</strong><br>
+                        - 5₁₆ = 5₁₀ = <strong>0101₂</strong> (attention à bien garder 4 bits)<br>
+                        Le résultat est <strong>10110101₂</strong>.</p>
                     </div>
                 </div>
                 <div class="space-y-4">
                     <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Exercices</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
-                        <h4>Exercice 1 : Décimal vers Binaire</h4>
-                        <p>Convertir le nombre 78₁₀ en binaire.</p>
-                        <h4>Exercice 2 : Binaire vers Décimal</h4>
-                        <p>Convertir le nombre 1101001₂ en décimal.</p>
-                        <h4>Exercice 3 : Binaire vers Hexadécimal</h4>
-                        <p>Convertir le nombre 1110010100011011₂ en hexadécimal.</p>
-                        <h4>Exercice 4 : Hexadécimal vers Binaire</h4>
-                        <p>Convertir le nombre 4AF₁₆ en binaire.</p>
+                        <h4>Exercice 1 : Décimal ↔ Binaire</h4>
+                        <p>a) Convertir 99₁₀ en binaire.<br>b) Convertir 1010101₂ en décimal.</p>
+                        <h4>Exercice 2 : Décimal ↔ Hexadécimal</h4>
+                        <p>a) Convertir 457₁₀ en hexadécimal.<br>b) Convertir 1C9₁₆ en décimal.</p>
+                        <h4>Exercice 3 : Binaire ↔ Hexadécimal</h4>
+                        <p>a) Convertir 1101001011110101₂ en hexadécimal.<br>b) Convertir FAD8₁₆ en binaire.</p>
                     </div></details>
                     <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Corrigé</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
-                        <h4>Exercice 1 : Décimal vers Binaire</h4>
-                        <p>78 / 2 = 39 reste 0<br>39 / 2 = 19 reste 1<br>19 / 2 = 9 reste 1<br>9 / 2 = 4 reste 1<br>4 / 2 = 2 reste 0<br>2 / 2 = 1 reste 0<br>1 / 2 = 0 reste 1<br><strong>Réponse : 1001110₂</strong></p>
-                        <h4>Exercice 2 : Binaire vers Décimal</h4>
-                        <p>1101001₂ = 1×2⁶ + 1×2⁵ + 0×2⁴ + 1×2³ + 0×2² + 0×2¹ + 1×2⁰ = 64 + 32 + 0 + 8 + 0 + 0 + 1 = <strong>105₁₀</strong></p>
-                        <h4>Exercice 3 : Binaire vers Hexadécimal</h4>
-                        <p>On groupe par 4 : <code>1110</code> | <code>0101</code> | <code>0001</code> | <code>1011</code><br>E | 5 | 1 | B<br><strong>Réponse : E51B₁₆</strong></p>
-                        <h4>Exercice 4 : Hexadécimal vers Binaire</h4>
-                        <p>4 → <code>0100</code><br>A → <code>1010</code><br>F → <code>1111</code><br><strong>Réponse : 010010101111₂</strong></p>
+                        <h4>Exercice 1 : Décimal ↔ Binaire</h4>
+                        <p>a) 99₁₀ = <strong>1100011₂</strong><br>b) 1010101₂ = 64 + 16 + 4 + 1 = <strong>85₁₀</strong></p>
+                        <h4>Exercice 2 : Décimal ↔ Hexadécimal</h4>
+                        <p>a) 457 / 16 = 28 reste 9. 28 / 16 = 1 reste 12 (C). 1 / 16 = 0 reste 1. Réponse : <strong>1C9₁₆</strong><br>b) 1C9₁₆ = 1×16² + 12×16¹ + 9×16⁰ = 256 + 192 + 9 = <strong>457₁₀</strong></p>
+                        <h4>Exercice 3 : Binaire ↔ Hexadécimal</h4>
+                        <p>a) <code>1101</code>|<code>0010</code>|<code>1111</code>|<code>0101</code> → D | 2 | F | 5. Réponse : <strong>D2F5₁₆</strong><br>b) F→<code>1111</code>, A→<code>1010</code>, D→<code>1101</code>, 8→<code>1000</code>. Réponse : <strong>1111101011011000₂</strong></p>
                     </div></details>
                 </div>
             </section>
@@ -865,64 +885,245 @@ for cle, valeur in contact.items():
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const { jsPDF } = window.jspdf;
             const menuContainer = document.getElementById('menu-container');
             const contentSections = document.querySelectorAll('.content-section');
             const menuButtons = document.querySelectorAll('.menu-btn');
             const mainTitle = document.getElementById('main-title');
             const mainSubtitle = document.getElementById('main-subtitle');
+            const pdfBtn = document.getElementById('pdf-btn');
             
             const defaultTitle = "Cours NSI";
             const defaultSubtitle = "Numérique et Sciences Informatiques - Lycée";
+            let currentSectionId = 'welcome';
+            let currentTitle = '';
 
             function showSection(targetId, title, subtitle) {
-                // Update header
+                currentSectionId = targetId;
+                currentTitle = title;
                 mainTitle.textContent = 'NSI : ' + title;
                 mainSubtitle.textContent = subtitle;
+                pdfBtn.classList.remove('hidden');
 
-                // Update button styles
                 menuButtons.forEach(btn => {
-                    if(btn.dataset.target === targetId) {
-                        btn.classList.add('active');
-                    } else {
-                        btn.classList.remove('active');
-                    }
+                    btn.classList.toggle('active', btn.dataset.target === targetId);
                 });
 
-                // Update content visibility
                 contentSections.forEach(section => {
-                    if (section.id === targetId) {
-                        section.classList.remove('hidden');
-                    } else {
-                        section.classList.add('hidden');
-                    }
+                    section.classList.toggle('hidden', section.id !== targetId);
                 });
             }
             
             function showWelcome() {
+                currentSectionId = 'welcome';
+                currentTitle = 'Accueil';
                 mainTitle.textContent = defaultTitle;
                 mainSubtitle.textContent = defaultSubtitle;
+                pdfBtn.classList.add('hidden');
+                
                 menuButtons.forEach(btn => btn.classList.remove('active'));
+
                 contentSections.forEach(section => {
-                    if (section.id === 'welcome') {
-                        section.classList.remove('hidden');
-                    } else {
-                        section.classList.add('hidden');
-                    }
+                    section.classList.toggle('hidden', section.id !== 'welcome');
                 });
             }
 
+            function generatePDF() {
+                if (currentSectionId === 'welcome') return;
+
+                const contentElement = document.getElementById(currentSectionId);
+                const prose = contentElement.querySelector('.prose');
+                if (!prose) return;
+
+                pdfBtn.disabled = true;
+                pdfBtn.textContent = 'Génération...';
+
+                const sanitizeText = (text) => {
+                    if (typeof text !== 'string') return '';
+                    return text
+                        .replace(/→/g, '->')
+                        .replace(/↔/g, '<->')
+                        .replace(/₁₀/g, '(base 10)')
+                        .replace(/₂/g, '(base 2)')
+                        .replace(/₁₆/g, '(base 16)')
+                        .replace(/×/g, 'x')
+                        .replace(/²/g, '^2')
+                        .replace(/³/g, '^3')
+                        .replace(/⁴/g, '^4')
+                        .replace(/⁵/g, '^5')
+                        .replace(/⁰/g, '^0')
+                        .replace(/¹/g, '^1')
+                        .replace(/😎/g, '');
+                };
+
+                try {
+                    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                    doc.setFont('Helvetica', 'normal');
+                    
+                    const margin = 15;
+                    let y = margin;
+                    const pageHeight = doc.internal.pageSize.getHeight();
+                    const usableWidth = doc.internal.pageSize.getWidth() - margin * 2;
+
+                    const addPageIfNeeded = (neededHeight) => {
+                        if (y + neededHeight > pageHeight - margin - 10) { // reserve space for footer
+                            doc.addPage();
+                            y = margin;
+                        }
+                    };
+                    
+                    const processNode = (node) => {
+                        const tagName = node.tagName.toLowerCase();
+                        const getSanitizedText = (el) => sanitizeText(el.innerText || "");
+
+                        switch (tagName) {
+                            case 'h2':
+                                {
+                                    const text = getSanitizedText(node);
+                                    const lines = doc.splitTextToSize(text, usableWidth);
+                                    addPageIfNeeded(20);
+                                    doc.setFontSize(20);
+                                    doc.setFont('Helvetica', 'bold');
+                                    doc.setTextColor(45, 45, 45);
+                                    doc.text(lines, margin, y);
+                                    y += lines.length * 8 + 7;
+                                }
+                                break;
+                            case 'p':
+                                {
+                                    const text = getSanitizedText(node);
+                                    if (!text.trim()) break;
+                                    const lines = doc.splitTextToSize(text, usableWidth);
+                                    addPageIfNeeded(lines.length * 5 + 4);
+                                    doc.setFontSize(11);
+                                    doc.setFont('Helvetica', 'normal');
+                                    doc.setTextColor(60, 60, 60);
+                                    doc.text(lines, margin, y);
+                                    y += lines.length * 5 + 4;
+                                }
+                                break;
+                            case 'div':
+                                Array.from(node.children).forEach(processNode);
+                                break;
+                            case 'h3':
+                                 {
+                                    const text = getSanitizedText(node);
+                                    const lines = doc.splitTextToSize(text, usableWidth);
+                                    addPageIfNeeded(lines.length * 7 + 5);
+                                    doc.setFontSize(16);
+                                    doc.setFont('Helvetica', 'bold');
+                                    doc.setTextColor(45, 45, 45);
+                                    doc.text(lines, margin, y);
+                                    y += lines.length * 7 + 5;
+                                }
+                                break;
+                            case 'h4':
+                                {
+                                    const text = getSanitizedText(node);
+                                    const lines = doc.splitTextToSize(text, usableWidth);
+                                    addPageIfNeeded(lines.length * 6 + 4);
+                                    doc.setFontSize(12);
+                                    doc.setFont('Helvetica', 'bold');
+                                    doc.setTextColor(55, 55, 55);
+                                    doc.text(lines, margin, y);
+                                    y += lines.length * 6 + 4;
+                                }
+                                break;
+                            case 'ul':
+                            case 'ol':
+                                doc.setFontSize(11);
+                                doc.setTextColor(60, 60, 60);
+                                Array.from(node.children).forEach(li => {
+                                    const liText = getSanitizedText(li);
+                                    const liLines = doc.splitTextToSize(`• ${liText}`, usableWidth - 5);
+                                    addPageIfNeeded(liLines.length * 5 + 2);
+                                    doc.text(liLines, margin + 5, y);
+                                    y += liLines.length * 5 + 2;
+                                });
+                                y += 3;
+                                break;
+                            case 'table':
+                                const head = Array.from(node.querySelectorAll('th')).map(th => sanitizeText(th.innerText));
+                                const body = Array.from(node.querySelectorAll('tbody tr')).map(tr => 
+                                    Array.from(tr.querySelectorAll('td')).map(td => sanitizeText(td.innerText))
+                                );
+                                addPageIfNeeded(20); 
+                                doc.autoTable({
+                                    head: [head],
+                                    body: body,
+                                    startY: y,
+                                    theme: 'grid',
+                                    headStyles: { fillColor: [75, 85, 99] },
+                                    styles: { font: 'Helvetica', cellPadding: 2, fontSize: 10 },
+                                    didDrawPage: (data) => {
+                                        // Redefine y after a new page is added by autoTable
+                                        y = data.cursor.y + 10;
+                                    }
+                                });
+                                y = doc.autoTable.previous.finalY + 10;
+                                break;
+                            case 'pre':
+                                const codeText = sanitizeText(node.innerText);
+                                const codeLines = doc.splitTextToSize(codeText, usableWidth - 8);
+                                const blockHeight = (codeLines.length * 3.5) + 8;
+                                addPageIfNeeded(blockHeight);
+                                doc.setFont('Courier', 'normal');
+                                doc.setFontSize(9);
+                                doc.setFillColor(243, 244, 246);
+                                doc.rect(margin, y, usableWidth, blockHeight, 'F');
+                                doc.setTextColor(0, 0, 0);
+                                doc.text(codeLines, margin + 4, y + 5);
+                                y += blockHeight + 5;
+                                doc.setFont('Helvetica', 'normal');
+                                break;
+                        }
+                    };
+                    
+                    processNode(prose);
+                    
+                    // Add footer to all pages
+                    const totalPages = doc.internal.getNumberOfPages();
+                    for (let i = 1; i <= totalPages; i++) {
+                        doc.setPage(i);
+                        
+                        doc.setFontSize(9);
+                        doc.setFont('Helvetica', 'italic');
+                        doc.setTextColor(128, 128, 128);
+                        
+                        const pageHeight = doc.internal.pageSize.getHeight();
+                        const pageWidth = doc.internal.pageSize.getWidth();
+
+                        // Chapter title on the left
+                        doc.text(sanitizeText(currentTitle), margin, pageHeight - 10);
+
+                        // Page number on the right
+                        const pageNumText = `Page ${i} / ${totalPages}`;
+                        const pageNumWidth = doc.getTextWidth(pageNumText);
+                        doc.text(pageNumText, pageWidth - margin - pageNumWidth, pageHeight - 10);
+                    }
+                    
+                    const fileName = `${currentTitle.replace(/[\s/]/g, '-')}.pdf`;
+                    doc.save(fileName);
+
+                } catch (err) {
+                    console.error("Erreur lors de la génération du PDF:", err);
+                    pdfBtn.textContent = 'Erreur - Réessayer';
+                } finally {
+                    pdfBtn.disabled = false;
+                    pdfBtn.textContent = 'Télécharger en PDF';
+                }
+            }
+
+
             menuContainer.addEventListener('click', (e) => {
                 const clickedButton = e.target.closest('.menu-btn');
-                if (!clickedButton) return;
-
-                const targetId = clickedButton.dataset.target;
-                const title = clickedButton.dataset.title;
-                const subtitle = clickedButton.dataset.subtitle;
-                
-                showSection(targetId, title, subtitle);
+                if (clickedButton) {
+                    showSection(clickedButton.dataset.target, clickedButton.dataset.title, clickedButton.dataset.subtitle);
+                }
             });
 
-            // Show the welcome section by default
+            pdfBtn.addEventListener('click', generatePDF);
+
             showWelcome();
         });
     </script>
