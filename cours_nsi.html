@@ -938,24 +938,6 @@ for cle, valeur in contact.items():
                 pdfBtn.disabled = true;
                 pdfBtn.textContent = 'Génération...';
 
-                const sanitizeText = (text) => {
-                    if (typeof text !== 'string') return '';
-                    return text
-                        .replace(/→/g, '->')
-                        .replace(/↔/g, '<->')
-                        .replace(/₁₀/g, '(base 10)')
-                        .replace(/₂/g, '(base 2)')
-                        .replace(/₁₆/g, '(base 16)')
-                        .replace(/×/g, 'x')
-                        .replace(/²/g, '^2')
-                        .replace(/³/g, '^3')
-                        .replace(/⁴/g, '^4')
-                        .replace(/⁵/g, '^5')
-                        .replace(/⁰/g, '^0')
-                        .replace(/¹/g, '^1')
-                        .replace(/😎/g, '');
-                };
-
                 try {
                     const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
                     doc.setFont('Helvetica', 'normal');
@@ -972,80 +954,138 @@ for cle, valeur in contact.items():
                         }
                     };
                     
+                    const simpleSanitize = (text) => text.replace(/→/g, '->').replace(/↔/g, '<->').replace(/×/g, 'x').replace(/≠/g, '!=').replace(/😎/g, '');
+
+                    function renderTextWithSubscripts(text, x, y, options) {
+                        const { fontSize, fontStyle, color } = options;
+                        const subChars = '₀₁₂₃₄₅₆₇₈₉';
+                        const supChars = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+                        const subMap = {'₀':'0', '₁':'1', '₂':'2', '₃':'3', '₄':'4', '₅':'5', '₆':'6', '₇':'7', '₈':'8', '₉':'9'};
+                        const supMap = {'⁰':'0', '¹':'1', '²':'2', '³':'3', '⁴':'4', '⁵':'5', '⁶':'6', '⁷':'7', '⁸':'8', '⁹':'9'};
+
+                        const subFontSize = fontSize * 0.7;
+                        const subDrop = 1;
+                        const supLift = 1.5;
+
+                        let currentX = x;
+                        let buffer = '';
+
+                        doc.setFontSize(fontSize);
+                        doc.setFont('Helvetica', fontStyle);
+                        doc.setTextColor(color[0], color[1], color[2]);
+
+                        const flushBuffer = () => {
+                            if (buffer) {
+                                doc.text(buffer, currentX, y);
+                                currentX += doc.getStringUnitWidth(buffer) * fontSize / doc.internal.scaleFactor;
+                                buffer = '';
+                            }
+                        };
+
+                        for (let i = 0; i < text.length; i++) {
+                            const char = text[i];
+                            
+                            if (char === '₁' && text[i+1] === '₀') { // Look ahead for '₁₀'
+                                flushBuffer();
+                                doc.setFontSize(subFontSize);
+                                doc.text('10', currentX, y + subDrop);
+                                currentX += doc.getStringUnitWidth('10') * subFontSize / doc.internal.scaleFactor;
+                                doc.setFontSize(fontSize);
+                                i++; 
+                                continue;
+                            }
+                            if (char === '₁' && text[i+1] === '₆') { // Look ahead for '₁₆'
+                                flushBuffer();
+                                doc.setFontSize(subFontSize);
+                                doc.text('16', currentX, y + subDrop);
+                                currentX += doc.getStringUnitWidth('16') * subFontSize / doc.internal.scaleFactor;
+                                doc.setFontSize(fontSize);
+                                i++;
+                                continue;
+                            }
+
+                            if (subChars.includes(char)) {
+                                flushBuffer();
+                                doc.setFontSize(subFontSize);
+                                doc.text(subMap[char], currentX, y + subDrop);
+                                currentX += doc.getStringUnitWidth(subMap[char]) * subFontSize / doc.internal.scaleFactor;
+                                doc.setFontSize(fontSize);
+                            } else if (supChars.includes(char)) {
+                                flushBuffer();
+                                doc.setFontSize(subFontSize);
+                                doc.text(supMap[char], currentX, y - supLift);
+                                currentX += doc.getStringUnitWidth(supMap[char]) * subFontSize / doc.internal.scaleFactor;
+                                doc.setFontSize(fontSize);
+                            } else {
+                                buffer += char;
+                            }
+                        }
+                        flushBuffer();
+                    }
+
                     const processNode = (node) => {
                         const tagName = node.tagName.toLowerCase();
-                        const getSanitizedText = (el) => sanitizeText(el.innerText || "");
+                        const getRawText = (el) => el.innerText || "";
 
                         switch (tagName) {
-                            case 'h2':
+                            case 'h2': case 'h3': case 'h4': case 'p':
                                 {
-                                    const text = getSanitizedText(node);
-                                    const lines = doc.splitTextToSize(text, usableWidth);
-                                    addPageIfNeeded(20);
-                                    doc.setFontSize(20);
-                                    doc.setFont('Helvetica', 'bold');
-                                    doc.setTextColor(45, 45, 45);
-                                    doc.text(lines, margin, y);
-                                    y += lines.length * 8 + 7;
-                                }
-                                break;
-                            case 'p':
-                                {
-                                    const text = getSanitizedText(node);
+                                    const text = simpleSanitize(getRawText(node));
                                     if (!text.trim()) break;
+
+                                    const isH2 = tagName === 'h2';
+                                    const isH3 = tagName === 'h3';
+                                    const isH4 = tagName === 'h4';
+
+                                    const fontSize = isH2 ? 20 : (isH3 ? 16 : (isH4 ? 12 : 11));
+                                    const fontStyle = isH2 || isH3 || isH4 ? 'bold' : 'normal';
+                                    const color = isH2 || isH3 || isH4 ? [45, 45, 45] : [60, 60, 60];
+                                    const lineHeight = fontSize * 0.4 + (isH2 ? 6 : (isH3 ? 5 : 4)); 
+                                    
+                                    doc.setFontSize(fontSize);
+                                    doc.setFont('Helvetica', fontStyle);
                                     const lines = doc.splitTextToSize(text, usableWidth);
-                                    addPageIfNeeded(lines.length * 5 + 4);
-                                    doc.setFontSize(11);
-                                    doc.setFont('Helvetica', 'normal');
-                                    doc.setTextColor(60, 60, 60);
-                                    doc.text(lines, margin, y);
-                                    y += lines.length * 5 + 4;
+                                    const textBlockHeight = lines.length * lineHeight;
+
+                                    let topMargin = isH2 ? 4 : (isH3 ? 4 : 2); 
+                                    let bottomMargin = isH2 ? 1 : (isH3 ? 0.5 : 0.5);
+
+                                    addPageIfNeeded(topMargin + textBlockHeight + bottomMargin);
+                                    
+                                    y += topMargin;
+                                    
+                                    for (const line of lines) {
+                                        addPageIfNeeded(lineHeight);
+                                        renderTextWithSubscripts(line, margin, y, { fontSize, fontStyle, color });
+                                        y += lineHeight;
+                                    }
+
+                                    y += bottomMargin;
                                 }
                                 break;
+                            
                             case 'div':
                                 Array.from(node.children).forEach(processNode);
                                 break;
-                            case 'h3':
-                                 {
-                                    const text = getSanitizedText(node);
-                                    const lines = doc.splitTextToSize(text, usableWidth);
-                                    addPageIfNeeded(lines.length * 7 + 5);
-                                    doc.setFontSize(16);
-                                    doc.setFont('Helvetica', 'bold');
-                                    doc.setTextColor(45, 45, 45);
-                                    doc.text(lines, margin, y);
-                                    y += lines.length * 7 + 5;
-                                }
-                                break;
-                            case 'h4':
-                                {
-                                    const text = getSanitizedText(node);
-                                    const lines = doc.splitTextToSize(text, usableWidth);
-                                    addPageIfNeeded(lines.length * 6 + 4);
-                                    doc.setFontSize(12);
-                                    doc.setFont('Helvetica', 'bold');
-                                    doc.setTextColor(55, 55, 55);
-                                    doc.text(lines, margin, y);
-                                    y += lines.length * 6 + 4;
-                                }
-                                break;
-                            case 'ul':
-                            case 'ol':
-                                doc.setFontSize(11);
-                                doc.setTextColor(60, 60, 60);
+                            
+                            case 'ul': case 'ol':
                                 Array.from(node.children).forEach(li => {
-                                    const liText = getSanitizedText(li);
-                                    const liLines = doc.splitTextToSize(`• ${liText}`, usableWidth - 5);
-                                    addPageIfNeeded(liLines.length * 5 + 2);
-                                    doc.text(liLines, margin + 5, y);
-                                    y += liLines.length * 5 + 2;
+                                    const liText = simpleSanitize(getRawText(li));
+                                    const liLines = doc.splitTextToSize(`• ${liText}`, usableWidth - 5); 
+                                    addPageIfNeeded(liLines.length * 6);
+                                    
+                                    for(const line of liLines){
+                                        addPageIfNeeded(6);
+                                        renderTextWithSubscripts(line, margin + 5, y, { fontSize: 11, fontStyle: 'normal', color: [60,60,60]});
+                                        y += 6;
+                                    }
                                 });
                                 y += 3;
                                 break;
                             case 'table':
-                                const head = Array.from(node.querySelectorAll('th')).map(th => sanitizeText(th.innerText));
+                                const head = Array.from(node.querySelectorAll('th')).map(th => simpleSanitize(th.innerText));
                                 const body = Array.from(node.querySelectorAll('tbody tr')).map(tr => 
-                                    Array.from(tr.querySelectorAll('td')).map(td => sanitizeText(td.innerText))
+                                    Array.from(tr.querySelectorAll('td')).map(td => simpleSanitize(td.innerText))
                                 );
                                 addPageIfNeeded(20); 
                                 doc.autoTable({
@@ -1056,14 +1096,13 @@ for cle, valeur in contact.items():
                                     headStyles: { fillColor: [75, 85, 99] },
                                     styles: { font: 'Helvetica', cellPadding: 2, fontSize: 10 },
                                     didDrawPage: (data) => {
-                                        // Redefine y after a new page is added by autoTable
                                         y = data.cursor.y + 10;
                                     }
                                 });
                                 y = doc.autoTable.previous.finalY + 10;
                                 break;
                             case 'pre':
-                                const codeText = sanitizeText(node.innerText);
+                                const codeText = simpleSanitize(getRawText(node));
                                 const codeLines = doc.splitTextToSize(codeText, usableWidth - 8);
                                 const blockHeight = (codeLines.length * 3.5) + 8;
                                 addPageIfNeeded(blockHeight);
@@ -1081,25 +1120,19 @@ for cle, valeur in contact.items():
                     
                     processNode(prose);
                     
-                    // Add footer to all pages
                     const totalPages = doc.internal.getNumberOfPages();
                     for (let i = 1; i <= totalPages; i++) {
                         doc.setPage(i);
-                        
                         doc.setFontSize(9);
                         doc.setFont('Helvetica', 'italic');
                         doc.setTextColor(128, 128, 128);
                         
-                        const pageHeight = doc.internal.pageSize.getHeight();
-                        const pageWidth = doc.internal.pageSize.getWidth();
-
-                        // Chapter title on the left
-                        doc.text(sanitizeText(currentTitle), margin, pageHeight - 10);
-
-                        // Page number on the right
-                        const pageNumText = `Page ${i} / ${totalPages}`;
-                        const pageNumWidth = doc.getTextWidth(pageNumText);
-                        doc.text(pageNumText, pageWidth - margin - pageNumWidth, pageHeight - 10);
+                        const pageText = `Page ${i} / ${totalPages}`;
+                        const titleText = simpleSanitize(currentTitle);
+                        
+                        doc.text(titleText, margin, pageHeight - 10);
+                        const pageNumWidth = doc.getTextWidth(pageText);
+                        doc.text(pageText, doc.internal.pageSize.getWidth() - margin - pageNumWidth, pageHeight - 10);
                     }
                     
                     const fileName = `${currentTitle.replace(/[\s/]/g, '-')}.pdf`;
