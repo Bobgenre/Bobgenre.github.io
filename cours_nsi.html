@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours NSI - Représentation des Données</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 #1f2937;
+        }
+        body::-webkit-scrollbar { width: 8px; }
+        body::-webkit-scrollbar-track { background: #1f2937; }
+        body::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 4px;
+        }
+        details > summary {
+            cursor: pointer;
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] > summary .arrow {
+            transform: rotate(90deg);
+        }
+        .arrow {
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 1em;
+            margin-bottom: 1em;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        th, td {
+            border-bottom: 1px solid #4b5563;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: #4b5563;
+            color: #fb923c;
+        }
+        tr:nth-child(even) { 
+            background-color: rgba(255, 255, 255, 0.05); 
+        }
+        pre {
+            background-color: #111827;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-top: 1em;
+            margin-bottom: 1em;
+        }
+        code {
+            background-color: #374151;
+            color: #f9fafb;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre > code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .prose h3 { font-size: 1.5rem; font-weight: bold; color: #fb923c; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #4b5563; padding-bottom: 0.5rem; }
+        .prose h4 { font-size: 1.25rem; font-weight: bold; color: #fdbf6f; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+        .prose ul { list-style-type: disc; padding-left: 1.5rem; }
+        .prose li { margin-bottom: 0.5rem; }
+        .prose strong { color: #fdba74; }
+        .menu-btn.active {
+             background-color: #ea580c; /* Equivalent to orange-600 */
+             color: white;
+        }
+        .summary-style {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #d1d5db; /* gray-300 */
+        }
+        .summary-style:hover {
+            background-color: #374151; /* gray-700 */
+        }
+
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-300">
+
+    <!-- Header -->
+    <header class="bg-gray-800/80 backdrop-blur-sm shadow-lg sticky top-0 z-10 border-b border-gray-700">
+        <div class="container mx-auto px-4 py-4">
+            <h1 id="main-title" class="text-2xl md:text-3xl font-bold text-white">Cours NSI</h1>
+            <p id="main-subtitle" class="text-gray-400 mt-1">Numérique et Sciences Informatiques - Lycée</p>
+        </div>
+    </header>
+
+    <!-- App Content -->
+    <div class="container mx-auto px-4 py-8 flex flex-col md:flex-row md:space-x-8">
+        <!-- Sidebar Menu -->
+        <aside class="w-full md:w-1/4 flex-shrink-0 mb-6 md:mb-0">
+            <div id="menu-container" class="bg-gray-800 p-4 rounded-xl shadow-xl">
+                 <h2 class="text-xl font-bold text-gray-300 mb-4">Programme</h2>
+                 <div class="space-y-2">
+                     <details>
+                        <summary class="summary-style">
+                            <span>Première</span>
+                            <span class="arrow text-gray-500">▶</span>
+                        </summary>
+                        <div class="pt-2 pl-4 space-y-2">
+                            <details>
+                                <summary class="summary-style">
+                                    <span>Représentation des données</span>
+                                    <span class="arrow text-gray-500">▶</span>
+                                </summary>
+                                <div class="pt-2 pl-4 space-y-2">
+                                    <button class="menu-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition" data-target="bases" data-title="Bases Numériques" data-subtitle="Décimal, Binaire et Hexadécimal">
+                                        1. Bases Numériques
+                                    </button>
+                                    <button class="menu-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition" data-target="relatifs" data-title="Nombres Relatifs" data-subtitle="Comprendre le complément à deux">
+                                        2. Nombres Relatifs
+                                    </button>
+                                    <button class="menu-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition" data-target="boole" data-title="Algèbre de Boole" data-subtitle="La logique des ordinateurs">
+                                        3. Algèbre de Boole
+                                    </button>
+                                    <button class="menu-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition" data-target="flottants" data-title="Nombres Flottants" data-subtitle="Gérer l'approximation des nombres réels">
+                                        4. Nombres Flottants
+                                    </button>
+                                    <button class="menu-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition" data-target="encodage" data-title="Encodage du Texte" data-subtitle="De l'ASCII à l'UTF-8">
+                                        5. Encodage du Texte
+                                    </button>
+                                </div>
+                            </details>
+                            <details>
+                                <summary class="summary-style">
+                                    <span>Bases de la programmation</span>
+                                    <span class="arrow text-gray-500">▶</span>
+                                </summary>
+                                <div class="pt-2 pl-4 space-y-2">
+                                     <button class="menu-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition" data-target="variables" data-title="Variables et Types" data-subtitle="Stocker et manipuler des données">
+                                        6. Variables et Types
+                                    </button>
+                                    <button class="menu-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition" data-target="structures" data-title="Structures de Contrôle" data-subtitle="Conditions (if) et Boucles (for, while)">
+                                        7. Structures de Contrôle
+                                    </button>
+                                </div>
+                            </details>
+                             <details>
+                                <summary class="summary-style">
+                                    <span>Types construits</span>
+                                    <span class="arrow text-gray-500">▶</span>
+                                </summary>
+                                <div class="pt-2 pl-4 space-y-2">
+                                    <button class="menu-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition" data-target="tuplets" data-title="p-uplets (Tuples)" data-subtitle="Collections ordonnées et non modifiables">
+                                        8. p-uplets (Tuples)
+                                    </button>
+                                    <button class="menu-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition" data-target="tableaux" data-title="Tableaux (Listes)" data-subtitle="Collections ordonnées et modifiables">
+                                        9. Tableaux (Listes)
+                                    </button>
+                                     <button class="menu-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition" data-target="dictionnaires" data-title="Dictionnaires" data-subtitle="Collections associatives clé-valeur">
+                                        10. Dictionnaires
+                                    </button>
+                                </div>
+                            </details>
+                        </div>
+                     </details>
+                     <details>
+                        <summary class="summary-style">
+                            <span>Terminale</span>
+                             <span class="arrow text-gray-500">▶</span>
+                        </summary>
+                         <div class="pt-2 pl-4">
+                            <!-- Les futurs chapitres de Terminale viendront ici -->
+                            <p class="p-3 text-gray-500 text-sm">Aucun chapitre pour le moment.</p>
+                         </div>
+                     </details>
+                 </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-grow">
+            <!-- Welcome Section -->
+            <section id="welcome" class="content-section bg-gray-800 p-6 rounded-xl shadow-xl">
+                 <h2 class="text-2xl font-bold mb-4 text-orange-400">Bienvenue !</h2>
+                 <p>Ceci est votre plateforme de cours pour la spécialité Numérique et Sciences Informatiques.</p>
+                 <p class="mt-2">Sélectionnez un chapitre dans le menu de gauche pour commencer votre apprentissage ou vos révisions.</p>
+            </section>
+
+            <!-- Section 1: Bases Numériques -->
+            <section id="bases" class="content-section hidden bg-gray-800 p-6 rounded-xl shadow-xl">
+                <div class="prose">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">1. Bases Numériques (Décimal, Binaire, Hexadécimal)</h2>
+                    <p class="mb-6 text-gray-400">Convertir les nombres entre différentes bases est une compétence fondamentale. On apprend ici à passer de notre base 10 habituelle au binaire (la langue des ordinateurs) et à l'hexadécimal (une notation compacte du binaire).</p>
+                    <div class="mb-6 border-t border-gray-700 pt-4">
+                        <h3>1. La Numération de Position</h3>
+                        <p>Le principe fondamental est que <strong>la valeur d'un chiffre dépend de sa position</strong>. C'est la base de notre système décimal, mais cela s'applique à toutes les autres bases.</p>
+                        <ul>
+                            <li><strong>En base 10 (décimal) :</strong> Le nombre 345 signifie (3 × 10²) + (4 × 10¹) + (5 × 10⁰).</li>
+                            <li><strong>En base 2 (binaire) :</strong> Le nombre 1011₂ signifie (1 × 2³) + (0 × 2²) + (1 × 2¹) + (1 × 2⁰) = 8 + 0 + 2 + 1 = 11₁₀.</li>
+                            <li><strong>En base 16 (hexadécimal) :</strong> Le nombre A5₁₆ signifie (10 × 16¹) + (5 × 16⁰) = 160 + 5 = 165₁₀.</li>
+                        </ul>
+                        <h3>2. Conversion Décimal → Binaire : Divisions par 2</h3>
+                        <p>C'est la méthode la plus fiable. On divise le nombre par 2, on note le reste (qui ne peut être que 0 ou 1), et on recommence avec le quotient jusqu'à obtenir un quotient de 0. Le nombre binaire est la suite des restes lus de bas en haut.</p>
+                        <h4>Exemple : Convertir 45₁₀ en binaire</h4>
+                        <table>
+                            <thead><tr><th>Division</th><th>Quotient</th><th>Reste</th></tr></thead>
+                            <tbody>
+                                <tr><td>45 / 2</td><td>22</td><td><strong>1</strong></td></tr>
+                                <tr><td>22 / 2</td><td>11</td><td><strong>0</strong></td></tr>
+                                <tr><td>11 / 2</td><td>5</td><td><strong>1</strong></td></tr>
+                                <tr><td>5 / 2</td><td>2</td><td><strong>1</strong></td></tr>
+                                <tr><td>2 / 2</td><td>1</td><td><strong>0</strong></td></tr>
+                                <tr><td>1 / 2</td><td>0</td><td><strong>1</strong></td></tr>
+                            </tbody>
+                        </table>
+                        <p>En lisant les restes du bas vers le haut, on obtient : <strong>101101₂</strong>.</p>
+                        <h3>3. L'Hexadécimal : un raccourci pour le binaire</h3>
+                        <p>La base 16 (hexadécimal) utilise 16 symboles : 0-9 et A-F. Son grand intérêt est qu'un chiffre hexadécimal correspond <strong>exactement à 4 bits binaires</strong>. La conversion binaire ↔︎ hexa est donc très rapide.</p>
+                         <h4>Exemple : Convertir 10110101₂ en hexadécimal</h4>
+                         <p>On regroupe les bits par paquets de 4 en partant de la droite.</p>
+                         <p><code>1011</code> | <code>0101</code></p>
+                         <ul>
+                            <li><code>1011₂</code> = 8 + 2 + 1 = 11₁₀ = B₁₆</li>
+                            <li><code>0101₂</code> = 4 + 1 = 5₁₀ = 5₁₆</li>
+                         </ul>
+                         <p>Donc 10110101₂ = <strong>B5₁₆</strong>.</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Exercices</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
+                        <h4>Exercice 1 : Décimal vers Binaire</h4>
+                        <p>Convertir le nombre 78₁₀ en binaire.</p>
+                        <h4>Exercice 2 : Binaire vers Décimal</h4>
+                        <p>Convertir le nombre 1101001₂ en décimal.</p>
+                        <h4>Exercice 3 : Binaire vers Hexadécimal</h4>
+                        <p>Convertir le nombre 1110010100011011₂ en hexadécimal.</p>
+                        <h4>Exercice 4 : Hexadécimal vers Binaire</h4>
+                        <p>Convertir le nombre 4AF₁₆ en binaire.</p>
+                    </div></details>
+                    <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Corrigé</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
+                        <h4>Exercice 1 : Décimal vers Binaire</h4>
+                        <p>78 / 2 = 39 reste 0<br>39 / 2 = 19 reste 1<br>19 / 2 = 9 reste 1<br>9 / 2 = 4 reste 1<br>4 / 2 = 2 reste 0<br>2 / 2 = 1 reste 0<br>1 / 2 = 0 reste 1<br><strong>Réponse : 1001110₂</strong></p>
+                        <h4>Exercice 2 : Binaire vers Décimal</h4>
+                        <p>1101001₂ = 1×2⁶ + 1×2⁵ + 0×2⁴ + 1×2³ + 0×2² + 0×2¹ + 1×2⁰ = 64 + 32 + 0 + 8 + 0 + 0 + 1 = <strong>105₁₀</strong></p>
+                        <h4>Exercice 3 : Binaire vers Hexadécimal</h4>
+                        <p>On groupe par 4 : <code>1110</code> | <code>0101</code> | <code>0001</code> | <code>1011</code><br>E | 5 | 1 | B<br><strong>Réponse : E51B₁₆</strong></p>
+                        <h4>Exercice 4 : Hexadécimal vers Binaire</h4>
+                        <p>4 → <code>0100</code><br>A → <code>1010</code><br>F → <code>1111</code><br><strong>Réponse : 010010101111₂</strong></p>
+                    </div></details>
+                </div>
+            </section>
+
+            <!-- Section 2: Nombres Relatifs -->
+            <section id="relatifs" class="content-section hidden bg-gray-800 p-6 rounded-xl shadow-xl">
+                 <div class="prose">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">2. Représentation d'un Nombre Relatif</h2>
+                    <p class="mb-6 text-gray-400">Pour représenter des nombres négatifs, les ordinateurs utilisent principalement la méthode du <strong>complément à deux</strong>. Elle est efficace car elle permet d'utiliser l'addition binaire pour les soustractions.</p>
+                    <div class="mb-6 border-t border-gray-700 pt-4">
+                        <h3>1. Les Limites de la notation "Signe + Valeur absolue"</h3>
+                        <p>L'idée la plus simple serait d'utiliser le premier bit (le bit de poids fort) comme indicateur de signe (0 pour +, 1 pour -). Cependant, cette méthode pose deux problèmes majeurs :</p>
+                        <ul>
+                            <li><strong>Le double zéro :</strong> On se retrouve avec deux représentations pour zéro : <code>0000 0000</code> (+0) et <code>1000 0000</code> (-0). C'est inefficace.</li>
+                            <li><strong>L'arithmétique :</strong> L'addition binaire classique ne fonctionne plus. 5 + (-3) ne donnerait pas 2. Il faudrait des circuits électroniques supplémentaires pour gérer la soustraction.</li>
+                        </ul>
+                        <h3>2. Le Complément à Deux (Cà2)</h3>
+                        <p>Le Cà2 résout ces problèmes. Le bit de poids fort indique toujours le signe (0 pour positif ou nul, 1 pour négatif), il n'y a qu'un seul zéro et l'addition binaire fonctionne directement pour l'addition et la soustraction.</p>
+                        <h4>Comment trouver l'opposé d'un nombre en Cà2 ?</h4>
+                        <p>La méthode est simple et mécanique :</p>
+                        <ol>
+                            <li><strong>On inverse tous les bits</strong> du nombre (les 0 deviennent des 1 et les 1 des 0). C'est le <em>complément à un</em>.</li>
+                            <li><strong>On ajoute 1</strong> au résultat.</li>
+                        </ol>
+                        <h4>Exemple : Trouver -5 sur 8 bits</h4>
+                        <ul>
+                            <li>On part de +5 : <code>0000 0101</code></li>
+                            <li>On inverse les bits : <code>1111 1010</code></li>
+                            <li>On ajoute 1 : <code>1111 1011</code></li>
+                            <li>Donc, -5 en Cà2 sur 8 bits est <strong>1111 1011₂</strong>.</li>
+                        </ul>
+                        <h4>Plage de valeurs</h4>
+                        <p>Sur N bits, un entier en Cà2 peut représenter des valeurs de <strong>-2<sup>N-1</sup></strong> à <strong>+2<sup>N-1</sup> - 1</strong>. Par exemple, sur 8 bits, on peut aller de -128 à +127.</p>
+                    </div>
+                </div>
+                 <div class="space-y-4">
+                    <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Exercices</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
+                        <h4>Exercice 1</h4>
+                        <p>Donner la représentation en complément à deux sur 8 bits du nombre -12₁₀.</p>
+                        <h4>Exercice 2</h4>
+                        <p>Quel est le nombre décimal représenté par 1010 1100₂ en complément à deux sur 8 bits ?</p>
+                    </div></details>
+                    <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Corrigé</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
+                        <h4>Exercice 1</h4>
+                        <p>1. +12 sur 8 bits : <code>0000 1100</code><br>2. Inverser les bits : <code>1111 0011</code><br>3. Ajouter 1 : <code>1111 0100</code><br><strong>Réponse : 1111 0100₂</strong></p>
+                        <h4>Exercice 2</h4>
+                        <p>Le premier bit est 1, donc c'est un nombre négatif. Pour trouver sa valeur absolue, on refait la manipulation inverse :<br>1. Le nombre : <code>1010 1100</code><br>2. Inverser les bits : <code>0101 0011</code><br>3. Ajouter 1 : <code>0101 0100</code><br>Ce résultat vaut 64 + 16 + 4 = 84. Le nombre initial était donc <strong>-84₁₀</strong>.</p>
+                    </div></details>
+                </div>
+            </section>
+
+            <!-- Section 3: Algèbre de Boole -->
+            <section id="boole" class="content-section hidden bg-gray-800 p-6 rounded-xl shadow-xl">
+                <div class="prose">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">3. L'algèbre de Boole</h2>
+                    <p class="mb-6 text-gray-400">La logique des ordinateurs repose sur l'algèbre de Boole, qui manipule des valeurs VRAI (1 ou <code>True</code>) ou FAUX (0 ou <code>False</code>) avec des opérateurs logiques.</p>
+                     <div class="mb-6 border-t border-gray-700 pt-4">
+                        <h3>1. Les Opérateurs Booléens</h3>
+                        <h4>Opérateur ET (<code>and</code>)</h4>
+                        <p>L'expression <code>a and b</code> est vraie <strong>uniquement si a et b sont vraies en même temps</strong>.</p>
+                        <h4>Opérateur OU (<code>or</code>)</h4>
+                        <p>L'expression <code>a or b</code> est vraie <strong>si au moins l'une des deux (a ou b) est vraie</strong>.</p>
+                        <h4>Opérateur NON (<code>not</code>)</h4>
+                        <p>L'opérateur <code>not a</code> inverse la valeur de vérité de a. Vrai devient faux, et faux devient vrai.</p>
+                        <h3>2. Tables de vérité</h3>
+                        <p>Elles permettent de visualiser le résultat d'un opérateur pour toutes les combinaisons possibles.</p>
+                        <table>
+                            <thead><tr><th>a</th><th>b</th><th>a and b</th><th>a or b</th></tr></thead>
+                            <tbody>
+                                <tr><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                                <tr><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+                                <tr><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+                                <tr><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+                            </tbody>
+                        </table>
+                        <h3>3. Expressions booléennes</h3>
+                        <p>Ce sont des combinaisons de variables et d'opérateurs qui s'évaluent à Vrai ou Faux. Par exemple, en Python : <code>(age >= 18) and (a_le_permis == True)</code>.</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Exercices</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
+                        <h4>Exercice</h4>
+                        <p>Soient a=True, b=False, c=True. Évaluez l'expression booléenne suivante : <code>(a or b) and (not c)</code>.</p>
+                    </div></details>
+                    <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Corrigé</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
+                        <h4>Exercice</h4>
+                        <p>1. Évaluation de la première parenthèse : <code>(a or b)</code> → <code>(True or False)</code> → <code>True</code>.<br>2. Évaluation de la deuxième parenthèse : <code>(not c)</code> → <code>(not True)</code> → <code>False</code>.<br>3. Évaluation finale : <code>True and False</code> → <code>False</code>.<br><strong>Réponse : L'expression est Fausse.</strong></p>
+                    </div></details>
+                </div>
+            </section>
+            
+            <!-- Section 4: Nombres Flottants -->
+            <section id="flottants" class="content-section hidden bg-gray-800 p-6 rounded-xl shadow-xl">
+                 <div class="prose">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">4. Les Nombres à Virgule Flottante</h2>
+                    <p class="mb-6 text-gray-400">Contrairement aux entiers, les nombres réels ne peuvent pas tous être représentés de manière exacte en machine avec un nombre fini de bits. Ils sont donc stockés de manière <strong>approximative</strong>. Le programme de NSI ne demande pas de connaître la norme IEEE-754 en détail, mais de comprendre ses conséquences.</p>
+                    <div class="mb-6 border-t border-gray-700 pt-4">
+                        <h3>1. Le Problème de l'Approximation</h3>
+                        <p>Certains nombres très simples en base 10, comme 0.1, ont une représentation infinie en binaire (un peu comme 1/3 = 0.333... en base 10). L'ordinateur est donc obligé de "couper" cette représentation à un certain point, ce qui introduit une minuscule erreur de précision.</p>
+                        <h3>2. L'Exemple Célèbre : 0.1 + 0.2 ≠ 0.3</h3>
+                        <p>C'est la conséquence la plus connue. Si vous testez ce calcul en Python, vous verrez que le résultat n'est pas exactement 0.3.</p>
+                        <pre><code class="language-python">
+print(0.1 + 0.2)
+# Affiche : 0.30000000000000004
+                        </code></pre>
+                        <h3>3. La Règle d'Or : Ne jamais tester l'égalité stricte</h3>
+                        <p>À cause de ces erreurs d'arrondi, il faut <strong>éviter de comparer deux nombres flottants avec l'opérateur `==`</strong>. Le test risque d'être faux alors qu'il semble mathématiquement correct.</p>
+                        <p>La bonne pratique est de vérifier si les nombres sont "suffisamment proches" l'un de l'autre, en testant si la valeur absolue de leur différence est inférieure à une petite marge d'erreur (epsilon).</p>
+                    </div>
+                </div>
+                 <div class="space-y-4">
+                    <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Exercices</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
+                        <h4>Exercice</h4>
+                        <p>Un programme calcule le résultat de <code>(1/10) * 3</code>. Expliquez pourquoi le test <code>(1/10) * 3 == 0.3</code> renverra probablement <code>False</code> en Python.</p>
+                    </div></details>
+                    <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Corrigé</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
+                        <h4>Exercice</h4>
+                        <p>Le nombre 1/10 (soit 0.1) ne peut pas être représenté de manière exacte en binaire. L'ordinateur stocke donc une approximation très proche. Quand on multiplie cette approximation par 3, l'erreur d'arrondi est également multipliée. Le résultat final sera donc un nombre très proche de 0.3, mais pas strictement égal (par exemple 0.30000000000000004). Le test d'égalité stricte <code>==</code> échouera donc.</p>
+                    </div></details>
+                </div>
+            </section>
+
+            <!-- Section 5: Encodage du Texte -->
+            <section id="encodage" class="content-section hidden bg-gray-800 p-6 rounded-xl shadow-xl">
+                <div class="prose">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">5. Encodage du Texte</h2>
+                    <p class="mb-6 text-gray-400">Pour un ordinateur, un texte n'est qu'une suite de nombres. Le processus qui associe un caractère (comme 'A', '€' ou 'é') à un nombre unique s'appelle l'<strong>encodage</strong>. La "table de correspondance" utilisée s'appelle un jeu de caractères.</p>
+                    <div class="mb-6 border-t border-gray-700 pt-4">
+                        <h3>1. ASCII</h3>
+                        <p>L'ASCII (<em>American Standard Code for Information Interchange</em>) est l'un des premiers standards. Il utilise 7 bits (donc 128 positions) pour coder les lettres anglaises non accentuées, les chiffres et les symboles de ponctuation de base. C'est très limité.</p>
+                        <h3>2. ISO-8859-1 (Latin-1)</h3>
+                        <p>C'est une extension de l'ASCII sur 8 bits (256 positions). Il utilise les 128 positions supplémentaires pour coder les caractères accentués des langues d'Europe de l'Ouest, comme le français ('é', 'à', 'ç'...). Il reste cependant incapable de gérer des alphabets non latins.</p>
+                        <h3>3. Unicode et UTF-8</h3>
+                        <p><strong>Unicode</strong> est un standard universel qui vise à donner un numéro unique à <strong>tous les caractères de toutes les langues du monde</strong> (plus de 140 000 caractères, y compris les emojis 😎).<br><strong>UTF-8</strong> est l'encodage le plus courant pour représenter ces numéros Unicode en binaire. Il a l'avantage d'être compatible avec l'ASCII et d'utiliser un nombre variable d'octets : 1 octet pour les caractères ASCII, 2 pour les caractères latins accentués, 3 pour d'autres alphabets, etc. C'est le standard du web aujourd'hui.</p>
+                    </div>
+                </div>
+                 <div class="space-y-4">
+                    <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Exercices</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
+                        <h4>Exercice</h4>
+                        <p>Vous ouvrez un fichier texte censé contenir le mot "élève" et vous voyez à la place "Ã©lÃ¨ve". Quel est le problème d'encodage probable ?</p>
+                    </div></details>
+                    <details class="border border-gray-700 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Corrigé</span><span class="arrow text-gray-500">▶</span></summary><div class="p-4 border-t border-gray-700 prose">
+                        <h4>Exercice</h4>
+                        <p>C'est un problème d'interprétation classique. Le fichier a très probablement été enregistré en <strong>UTF-8</strong> (où 'é' est codé sur deux octets, et 'è' aussi). Cependant, le logiciel qui a ouvert le fichier l'interprète comme s'il était encodé en <strong>ISO-8859-1</strong> ou une norme similaire. Il lit donc chaque octet individuellement et affiche le caractère correspondant dans sa propre table, ce qui produit ces séquences de caractères incorrectes.</p>
+                    </div></details>
+                </div>
+            </section>
+
+             <!-- Section 6: Variables et Types -->
+            <section id="variables" class="content-section hidden bg-gray-800 p-6 rounded-xl shadow-xl">
+                <div class="prose">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">6. Variables et Types de données</h2>
+                    <p class="mb-6 text-gray-400">Une variable est une "boîte" ou une "étiquette" nommée qui permet de stocker une information (une valeur) dans la mémoire de l'ordinateur. On peut ensuite la réutiliser ou la modifier en utilisant son nom.</p>
+                    <div class="mb-6 border-t border-gray-700 pt-4">
+                        <h3>1. Déclaration et Affectation</h3>
+                        <p>En Python, on crée une variable et on lui donne une valeur en une seule étape, avec le signe égal <code>=</code>, qui est l'opérateur d'affectation.</p>
+                        <pre><code class="language-python">
+# On affecte la valeur 17 à la variable nommée 'age'
+age = 17
+
+# On affecte la chaîne de caractères "Alice" à la variable 'prenom'
+prenom = "Alice"
+
+# On peut maintenant utiliser ces variables
+print(prenom, "a", age, "ans.")
+                        </code></pre>
+                        <p>On peut changer la valeur d'une variable en lui affectant une nouvelle valeur :</p>
+                        <pre><code class="language-python">
+age = 17
+print(age) # Affiche 17
+age = 18
+print(age) # Affiche 18
+                        </code></pre>
+
+                        <h3>2. Les Types de base</h3>
+                        <p>Chaque valeur a un type, qui définit la nature de l'information et les opérations qu'on peut faire avec. Python devine le type automatiquement.</p>
+                        <ul>
+                            <li><strong><code>int</code> (entier) :</strong> Nombres entiers, positifs ou négatifs. Ex: <code>10</code>, <code>-5</code>, <code>0</code>.</li>
+                            <li><strong><code>float</code> (flottant) :</strong> Nombres à virgule. Ex: <code>3.14</code>, <code>-0.5</code>.</li>
+                            <li><strong><code>str</code> (chaîne de caractères) :</strong> Texte, toujours entouré de guillemets <code>" "</code> ou d'apostrophes <code>' '</code>. Ex: <code>"Bonjour"</code>, <code>'NSI'</code>.</li>
+                            <li><strong><code>bool</code> (booléen) :</strong> Valeur de vérité, ne peut être que <code>True</code> ou <code>False</code>.</li>
+                        </ul>
+                        
+                        <h3>3. Connaître le type d'une variable</h3>
+                        <p>La fonction <code>type()</code> permet de demander à Python le type d'une variable ou d'une valeur.</p>
+                        <pre><code class="language-python">
+note = 15.5
+nom = "Bob"
+est_majeur = True
+
+print(type(note))       # Affiche <class 'float'>
+print(type(nom))        # Affiche <class 'str'>
+print(type(est_majeur)) # Affiche <class 'bool'>
+                        </code></pre>
+                    </div>
+                </div>
+                 <div class="space-y-4">
+                    <details class="border border-gray-700 rounded-lg">
+                        <summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Exercices</span></summary>
+                        <div class="p-4 border-t border-gray-700 prose">
+                             <h3>Exercice 1</h3>
+                             <p>Créez quatre variables : <code>ville</code> (chaîne de caractères), <code>population</code> (entier), <code>temperature</code> (flottant) et <code>est_capitale</code> (booléen). Affectez-leur des valeurs de votre choix et affichez leur type.</p>
+                             <h3>Exercice 2</h3>
+                             <p>Écrire un script qui demande son nom à l'utilisateur, stocke la réponse dans une variable <code>nom_utilisateur</code>, puis affiche "Bonjour [nom_utilisateur] !".</p>
+                        </div>
+                    </details>
+                    <details class="border border-gray-700 rounded-lg">
+                        <summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Corrigé</span></summary>
+                        <div class="p-4 border-t border-gray-700 prose">
+                             <h3>Exercice 1</h3>
+                             <pre><code class="language-python">
+ville = "Paris"
+population = 2148000
+temperature = 18.5
+est_capitale = True
+
+print(f"Type de 'ville': {type(ville)}")
+print(f"Type de 'population': {type(population)}")
+print(f"Type de 'temperature': {type(temperature)}")
+print(f"Type de 'est_capitale': {type(est_capitale)}")
+                             </code></pre>
+                             <h3>Exercice 2</h3>
+                             <pre><code class="language-python">
+nom_utilisateur = input("Quel est votre nom ? ")
+print(f"Bonjour {nom_utilisateur} !")
+                             </code></pre>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- Section 7: Structures de Contrôle -->
+            <section id="structures" class="content-section hidden bg-gray-800 p-6 rounded-xl shadow-xl">
+                <div class="prose">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">7. Structures de Contrôle (if, for, while)</h2>
+                    <p class="mb-6 text-gray-400">Ce sont les outils qui permettent à un programme de prendre des décisions et de répéter des actions. Sans eux, un programme ne ferait qu'exécuter une suite d'instructions toujours dans le même ordre.</p>
+                    <div class="mb-6 border-t border-gray-700 pt-4">
+                        <h3>1. Les Conditions : <code>if</code>, <code>elif</code>, <code>else</code></h3>
+                        <p>Les conditions permettent d'exécuter des blocs de code uniquement si un critère (une expression booléenne) est vrai. L'indentation (le décalage vers la droite) est cruciale en Python, c'est elle qui définit ce qui fait partie du bloc conditionnel.</p>
+                        <pre><code class="language-python">
+age = 17
+if age >= 18:
+    print("Vous êtes majeur.")
+elif age == 17:
+    print("Plus qu'un an avant la majorité !")
+else:
+    print("Vous êtes mineur.")
+# Affiche "Plus qu'un an avant la majorité !"
+                        </code></pre>
+
+                        <h3>2. La Boucle <code>for</code> : Itérer sur une Séquence</h3>
+                        <p>La boucle <code>for</code> est utilisée pour parcourir tous les éléments d'un objet séquentiel (une liste, un tuple, une chaîne de caractères, etc.).</p>
+                        <pre><code class="language-python">
+notes = [12, 15, 9, 18]
+for note in notes:
+    print(f"Note : {note}")
+
+# La fonction range() est très utile pour répéter une action un nombre défini de fois.
+# range(5) génère les nombres de 0 à 4.
+for i in range(5):
+    print(f"Répétition numéro {i}")
+                        </code></pre>
+                        
+                        <h3>3. La Boucle <code>while</code> : Répéter tant qu'une Condition est Vraie</h3>
+                        <p>La boucle <code>while</code> exécute un bloc de code tant qu'une condition reste vraie. Attention, si la condition ne devient jamais fausse, vous créez une <strong>boucle infinie</strong> !</p>
+                        <pre><code class="language-python">
+compteur = 5
+while compteur > 0:
+    print(f"Décompte : {compteur}")
+    compteur = compteur - 1 # Ne pas oublier de changer la variable de condition !
+print("Décollage !")
+                        </code></pre>
+                    </div>
+                </div>
+                 <div class="space-y-4">
+                    <details class="border border-gray-700 rounded-lg">
+                        <summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Exercices</span></summary>
+                        <div class="p-4 border-t border-gray-700 prose">
+                             <h3>Exercice 1</h3>
+                             <p>Écrire un script qui demande un nombre à l'utilisateur et affiche s'il est pair ou impair.</p>
+                             <h3>Exercice 2</h3>
+                             <p>En utilisant une boucle <code>for</code> et <code>range()</code>, afficher la table de multiplication de 7 (de 7x1 à 7x10).</p>
+                        </div>
+                    </details>
+                    <details class="border border-gray-700 rounded-lg">
+                        <summary class="p-4 font-semibold flex justify-between items-center text-gray-200"><span>Corrigé</span></summary>
+                        <div class="p-4 border-t border-gray-700 prose">
+                             <h3>Exercice 1</h3>
+                             <pre><code class="language-python">
+nombre = int(input("Entrez un nombre : "))
+if nombre % 2 == 0:
+    print("Ce nombre est pair.")
+else:
+    print("Ce nombre est impair.")
+                             </code></pre>
+                             <h3>Exercice 2</h3>
+                             <pre><code class="language-python">
+for i in range(1, 11): # range(1, 11) va de 1 à 10 inclus
+    print(f"7 x {i} = {7 * i}")
+                             </code></pre>
+                        </div>
+                    </details>
+                </div>
+            </section>
+            
+            <!-- Section 8: p-uplets (Tuples) -->
+            <section id="tuplets" class="content-section hidden bg-gray-800 p-6 rounded-xl shadow-xl">
+                <div class="prose">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">8. p-uplets (Tuples)</h2>
+                    <p class="mb-6 text-gray-400">En Python, un p-uplet (ou <code>tuple</code>) est une collection d'éléments ordonnés qui ne peuvent pas être modifiés après leur création. On dit qu'ils sont <strong>immuables</strong> (ou non-mutables).</p>
+
+                    <div class="mb-6 border-t border-gray-700 pt-4">
+                        <h3>1. Création et Accès</h3>
+                        <p>On crée un tuple avec des parenthèses <code>()</code>. On accède à ses éléments avec des crochets <code>[]</code>, comme pour les chaînes de caractères.</p>
+                        <pre><code class="language-python">
+# Création d'un tuple
+coordonnees = (10, 20)
+personne = ("Alice", 25, "Ingénieure")
+
+# Accès aux éléments (l'indexation commence à 0)
+print(coordonnees[0])  # Affiche 10
+print(personne[2])   # Affiche "Ingénieure"
+                        </code></pre>
+                        
+                        <h3>2. L'immuabilité</h3>
+                        <p>C'est la caractéristique principale des tuples. Une fois créé, on ne peut ni changer, ni ajouter, ni supprimer d'élément. Essayer de le faire provoquera une erreur.</p>
+                         <pre><code class="language-python">
+coordonnees = (10, 20)
+coordonnees[0] = 15  # Provoque une TypeError !
+                        </code></pre>
+
+                        <h3>3. Retourner plusieurs valeurs d'une fonction</h3>
+                        <p>C'est l'utilisation la plus fréquente des tuples. Une fonction peut facilement renvoyer plusieurs résultats en les groupant dans un tuple.</p>
+                         <pre><code class="language-python">
+def operations(a, b):
+    """Retourne la somme et le produit de a et b."""
+    somme = a + b
+    produit = a * b
+    return (somme, produit) # Les parenthèses sont optionnelles
+
+# Utilisation de la fonction
+resultats = operations(5, 3)
+print(resultats)         # Affiche (8, 15)
+print(resultats[0])      # Affiche 8
+
+# On peut aussi "déballer" le tuple directement
+s, p = operations(5, 3)
+print(f"Somme: {s}, Produit: {p}") # Affiche Somme: 8, Produit: 15
+                        </code></pre>
+                    </div>
+                </div>
+                
+                 <div class="space-y-4">
+                    <details class="border border-gray-700 rounded-lg">
+                        <summary class="p-4 font-semibold flex justify-between items-center text-gray-200">
+                            <span>Exercices</span>
+                            <span class="arrow text-gray-500">▶</span>
+                        </summary>
+                        <div class="p-4 border-t border-gray-700 prose">
+                             <h3>Exercice</h3>
+                            <p>Écrire une fonction <code>min_max(nombres)</code> qui prend une liste de nombres en paramètre et renvoie un tuple contenant le plus petit et le plus grand nombre de la liste.</p>
+                        </div>
+                    </details>
+                    <details class="border border-gray-700 rounded-lg">
+                        <summary class="p-4 font-semibold flex justify-between items-center text-gray-200">
+                            <span>Corrigé</span>
+                            <span class="arrow text-gray-500">▶</span>
+                        </summary>
+                        <div class="p-4 border-t border-gray-700 prose">
+                            <pre><code class="language-python">
+def min_max(nombres):
+    # On vérifie que la liste n'est pas vide
+    if not nombres:
+        return (None, None)
+    
+    minimum = min(nombres)
+    maximum = max(nombres)
+    return (minimum, maximum)
+
+# Test
+ma_liste = [4, 8, 1, 15, 9]
+print(min_max(ma_liste)) # Doit afficher (1, 15)
+                            </code></pre>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- Section 9: Tableaux (Listes) -->
+            <section id="tableaux" class="content-section hidden bg-gray-800 p-6 rounded-xl shadow-xl">
+                <div class="prose">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">9. Tableaux (Listes)</h2>
+                    <p class="mb-6 text-gray-400">Le type de tableau le plus courant en Python est la <strong>liste</strong> (<code>list</code>). C'est une collection d'éléments ordonnés et <strong>modifiables</strong>. On se concentre ici sur des listes où tous les éléments ont le même type.</p>
+
+                    <div class="mb-6 border-t border-gray-700 pt-4">
+                        <h3>1. Créer, Lire et Modifier par Index</h3>
+                        <p>On crée une liste avec des crochets <code>[]</code>. On lit et modifie les éléments via leur index, qui commence à 0.</p>
+                        <pre><code class="language-python">
+# Création
+notes = [12, 15, 9, 18]
+
+# Lecture
+premiere_note = notes[0] # premiere_note vaut 12
+
+# Modification
+notes[2] = 11 # La liste devient [12, 15, 11, 18]
+print(notes)
+                        </code></pre>
+                        
+                        <h3>2. Ajouter des éléments avec .append()</h3>
+                        <p>La modification par index est utile, mais on a souvent besoin d'ajouter de nouveaux éléments à une liste existante. La méthode <code>.append()</code> est faite pour ça : elle ajoute l'élément à la <strong>fin</strong> de la liste.</p>
+                        <pre><code class="language-python">
+notes = [12, 15]
+print(f"Liste de départ : {notes}")
+
+# Ajout d'une nouvelle note
+notes.append(18)
+print(f"Liste après append : {notes}") # Affiche [12, 15, 18]
+                        </code></pre>
+
+                        <h3>3. Parcourir une liste</h3>
+                        <p>La boucle <code>for</code> est idéale pour itérer sur chaque élément d'un tableau.</p>
+                         <pre><code class="language-python">
+for note in notes:
+    print(note)
+                        </code></pre>
+
+                        <h3>4. Construire par compréhension</h3>
+                        <p>C'est une syntaxe très puissante et concise pour créer une nouvelle liste à partir d'une autre. On la lit comme une phrase : "crée une nouvelle liste avec `expression` pour chaque `element` dans `source`".</p>
+                         <pre><code class="language-python">
+nombres = [1, 2, 3, 4, 5]
+# Créer la liste des carrés
+carres = [x * x for x in nombres] 
+# carres vaut maintenant [1, 4, 9, 16, 25]
+
+# Créer la liste des nombres pairs de 0 à 9
+pairs = [i for i in range(10) if i % 2 == 0]
+# pairs vaut [0, 2, 4, 6, 8]
+                        </code></pre>
+                        
+                        <h3>5. Tableaux de tableaux (Matrices)</h3>
+                        <p>On peut imbriquer des listes pour représenter des structures 2D comme des grilles ou des matrices. On accède aux éléments avec une double indexation <code>[ligne][colonne]</code>.</p>
+                         <pre><code class="language-python">
+# Une matrice 2x3
+matrice = [ [1, 2, 3], [4, 5, 6] ]
+
+# Accéder à l'élément de la 1ère ligne (index 0), 3ème colonne (index 2)
+element = matrice[0][2] # element vaut 3
+
+# Parcourir toute la matrice
+for ligne in matrice:
+    for nombre in ligne:
+        print(nombre, end=" ") # Affiche 1 2 3 4 5 6 
+                        </code></pre>
+                    </div>
+                </div>
+                
+                 <div class="space-y-4">
+                    <details class="border border-gray-700 rounded-lg">
+                        <summary class="p-4 font-semibold flex justify-between items-center text-gray-200">
+                            <span>Exercices</span>
+                            <span class="arrow text-gray-500">▶</span>
+                        </summary>
+                        <div class="p-4 border-t border-gray-700 prose">
+                             <h3>Exercice 1</h3>
+                             <p>Construire une liste des 10 premiers multiples de 3 en utilisant une liste en compréhension.</p>
+                             <h3>Exercice 2</h3>
+                             <p>Écrire une fonction <code>moyenne(notes)</code> qui prend une liste de notes et renvoie leur moyenne.</p>
+                             <h3>Exercice 3</h3>
+                             <p>Créer une liste vide. Écrire une boucle qui demande à l'utilisateur de saisir 3 nombres entiers et les ajoute à la liste en utilisant <code>append()</code>.</p>
+                        </div>
+                    </details>
+                    <details class="border border-gray-700 rounded-lg">
+                        <summary class="p-4 font-semibold flex justify-between items-center text-gray-200">
+                            <span>Corrigé</span>
+                            <span class="arrow text-gray-500">▶</span>
+                        </summary>
+                        <div class="p-4 border-t border-gray-700 prose">
+                             <h3>Exercice 1</h3>
+                             <pre><code class="language-python">multiples_de_3 = [i * 3 for i in range(10)]
+# Résultat: [0, 3, 6, 9, 12, 15, 18, 21, 24, 27]</code></pre>
+                             <h3>Exercice 2</h3>
+                             <pre><code class="language-python">
+def moyenne(notes):
+    if not notes:
+        return 0
+    
+    total = sum(notes)
+    return total / len(notes)
+
+# Test
+print(moyenne([10, 12, 16])) # Affiche 12.666...
+                             </code></pre>
+                             <h3>Exercice 3</h3>
+                             <pre><code class="language-python">
+nombres_saisis = []
+for i in range(3):
+    saisie = input(f"Entrez le nombre n°{i+1}: ")
+    nombre = int(saisie)
+    nombres_saisis.append(nombre)
+
+print("La liste finale est :", nombres_saisis)
+                             </code></pre>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- Section 10: Dictionnaires -->
+            <section id="dictionnaires" class="content-section hidden bg-gray-800 p-6 rounded-xl shadow-xl">
+                <div class="prose">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">10. Dictionnaires</h2>
+                    <p class="mb-6 text-gray-400">Un dictionnaire (<code>dict</code>) est une collection qui stocke des données sous forme de paires <strong>clé-valeur</strong>. Les clés doivent être uniques et immuables (souvent des chaînes de caractères). C'est une structure très flexible pour représenter des objets du monde réel.</p>
+
+                    <div class="mb-6 border-t border-gray-700 pt-4">
+                        <h3>1. Créer et manipuler un dictionnaire</h3>
+                        <p>On crée un dictionnaire avec des accolades <code>{}</code>. On accède, modifie et ajoute des valeurs en utilisant leur clé entre crochets <code>[]</code>.</p>
+                        <pre><code class="language-python">
+# Création d'un dictionnaire pour un élève
+eleve = {
+    "nom": "Durand",
+    "prenom": "Paul",
+    "age": 16
+}
+
+# Lire une valeur
+print(eleve["nom"]) # Affiche "Durand"
+
+# Modifier une valeur
+eleve["age"] = 17
+
+# Ajouter une nouvelle paire clé-valeur
+eleve["classe"] = "1G3"
+
+print(eleve)
+# Affiche {'nom': 'Durand', 'prenom': 'Paul', 'age': 17, 'classe': '1G3'}
+                        </code></pre>
+                        
+                        <h3>2. Itérer sur un dictionnaire</h3>
+                        <p>Il y a plusieurs façons de parcourir un dictionnaire. La plus complète est d'utiliser la méthode <code>.items()</code> qui nous donne accès à la fois à la clé et à la valeur à chaque tour de boucle.</p>
+                         <pre><code class="language-python">
+# Méthode recommandée
+print("--- Clés et valeurs ---")
+for cle, valeur in eleve.items():
+    print(f"{cle}: {valeur}")
+
+# Parcourir uniquement les clés
+print("\n--- Clés seules ---")
+for cle in eleve.keys():
+    print(cle)
+
+# Parcourir uniquement les valeurs
+print("\n--- Valeurs seules ---")
+for valeur in eleve.values():
+    print(valeur)
+                        </code></pre>
+                    </div>
+                </div>
+                
+                 <div class="space-y-4">
+                    <details class="border border-gray-700 rounded-lg">
+                        <summary class="p-4 font-semibold flex justify-between items-center text-gray-200">
+                            <span>Exercices</span>
+                            <span class="arrow text-gray-500">▶</span>
+                        </summary>
+                        <div class="p-4 border-t border-gray-700 prose">
+                             <h3>Exercice</h3>
+                             <p>Créer un dictionnaire pour représenter un contact (nom, prénom, numéro de téléphone). Ajouter ensuite son adresse e-mail. Enfin, parcourir le dictionnaire pour afficher joliment toutes ses informations.</p>
+                        </div>
+                    </details>
+                    <details class="border border-gray-700 rounded-lg">
+                        <summary class="p-4 font-semibold flex justify-between items-center text-gray-200">
+                            <span>Corrigé</span>
+                            <span class="arrow text-gray-500">▶</span>
+                        </summary>
+                        <div class="p-4 border-t border-gray-700 prose">
+                             <pre><code class="language-python">
+# 1. Création
+contact = {
+    "nom": "Martin",
+    "prenom": "Sophie",
+    "telephone": "0612345678"
+}
+
+# 2. Ajout
+contact["email"] = "sophie.martin@email.com"
+
+# 3. Affichage
+print("Informations du contact :")
+for cle, valeur in contact.items():
+    print(f"- {cle.capitalize()}: {valeur}")
+                             </code></pre>
+                        </div>
+                    </details>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 border-t border-gray-700 mt-12">
+        <div class="container mx-auto px-4 py-6 text-center text-gray-500">
+            <p>Plateforme de cours NSI.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuContainer = document.getElementById('menu-container');
+            const contentSections = document.querySelectorAll('.content-section');
+            const menuButtons = document.querySelectorAll('.menu-btn');
+            const mainTitle = document.getElementById('main-title');
+            const mainSubtitle = document.getElementById('main-subtitle');
+            
+            const defaultTitle = "Cours NSI";
+            const defaultSubtitle = "Numérique et Sciences Informatiques - Lycée";
+
+            function showSection(targetId, title, subtitle) {
+                // Update header
+                mainTitle.textContent = 'NSI : ' + title;
+                mainSubtitle.textContent = subtitle;
+
+                // Update button styles
+                menuButtons.forEach(btn => {
+                    if(btn.dataset.target === targetId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+
+                // Update content visibility
+                contentSections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+            }
+            
+            function showWelcome() {
+                mainTitle.textContent = defaultTitle;
+                mainSubtitle.textContent = defaultSubtitle;
+                menuButtons.forEach(btn => btn.classList.remove('active'));
+                contentSections.forEach(section => {
+                    if (section.id === 'welcome') {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+            }
+
+            menuContainer.addEventListener('click', (e) => {
+                const clickedButton = e.target.closest('.menu-btn');
+                if (!clickedButton) return;
+
+                const targetId = clickedButton.dataset.target;
+                const title = clickedButton.dataset.title;
+                const subtitle = clickedButton.dataset.subtitle;
+                
+                showSection(targetId, title, subtitle);
+            });
+
+            // Show the welcome section by default
+            showWelcome();
+        });
+    </script>
+</body>
+</html>
+
