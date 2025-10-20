@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esport Match Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+        }
+        .match-card {
+            background-color: #1f2937; /* bg-gray-800 */
+            border: 1px solid #374151; /* border-gray-700 */
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .match-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        .filter-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-btn.active {
+            background-color: #3b82f6; /* bg-blue-600 */
+            color: white;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+        /* Styles pour le modal et l'authentification */
+        #auth-overlay, .modal-overlay {
+            background-color: rgba(17, 24, 39, 0.95);
+            transition: opacity 0.3s ease;
+        }
+        /* Styles pour le toggle switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3b82f6;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3b82f6;
+        }
+        .btn-loading { position: relative; color: transparent !important; }
+        .btn-loading::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 20px; height: 20px; margin-top: -10px; margin-left: -10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-left-color: #fff;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <!-- Auth Screen -->
+    <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl">
+            <h2 class="text-2xl font-bold text-center text-gray-100 mb-2">Esport Tracker</h2>
+            <p class="text-center text-gray-400 mb-6">Connectez-vous pour sauvegarder vos favoris.</p>
+            <div id="auth-error" class="text-red-500 text-sm text-center mb-4 min-h-[20px]"></div>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="login-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                <input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">Se connecter</button>
+            </form>
+            <div class="my-4 flex items-center">
+                <hr class="w-full border-gray-600"><span class="p-2 text-gray-500 text-sm">OU</span><hr class="w-full border-gray-600">
+            </div>
+            <form id="signup-form" class="space-y-4">
+                <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                <input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                <button type="submit" class="w-full py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Créer un compte</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Content -->
+    <div id="app-content" class="hidden container mx-auto p-4 md:p-8 max-w-7xl">
+        <header class="flex justify-between items-start mb-8">
+             <div class="text-left">
+                <h1 class="text-4xl font-bold text-white">Prochains Matchs Esport</h1>
+                <p class="text-gray-400 mt-2">Suivez vos équipes et jeux préférés.</p>
+            </div>
+            <div id="auth-info" class="text-right flex-shrink-0">
+                <p id="user-email" class="text-sm text-gray-500"></p>
+                <button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button>
+            </div>
+        </header>
+        
+        <!-- Section des contrôles -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <button id="manage-favorites-btn" class="w-full md:w-auto order-2 md:order-1 bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-5 rounded-lg transition">
+                Gérer les favoris
+            </button>
+            <div class="order-1 md:order-2 flex items-center space-x-3">
+                <span class="text-sm font-medium text-gray-300">Tous les matchs</span>
+                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" id="favorites-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                    <label for="favorites-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                </div>
+                <span class="text-sm font-medium text-blue-400">Favoris uniquement</span>
+            </div>
+        </div>
+
+
+        <!-- Filtres par jeu -->
+        <div id="filters" class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+            <p class="w-full text-center text-gray-500">Chargement des filtres...</p>
+        </div>
+
+        <!-- Grille des matchs -->
+        <div id="matches-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             <p id="loading-message" class="col-span-full text-center text-gray-400 text-lg">Chargement des matchs depuis la base de données...</p>
+        </div>
+    </div>
+
+    <!-- Modal des favoris -->
+    <div id="favorites-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="bg-gray-800 w-11/12 md:max-w-md mx-auto rounded-lg shadow-lg z-50 overflow-y-auto">
+            <div class="py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p class="text-2xl font-bold text-white">Sélectionner vos équipes favorites</p>
+                    <button id="close-modal-btn" class="cursor-pointer z-50">
+                        <svg class="fill-current text-white" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"></path></svg>
+                    </button>
+                </div>
+                <div id="favorites-list" class="my-5 max-h-64 overflow-y-auto pr-2 grid grid-cols-2 gap-3">
+                    <!-- La liste des équipes sera insérée ici -->
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button id="save-favorites-btn" class="px-4 bg-blue-600 p-3 rounded-lg text-white hover:bg-blue-700">Sauvegarder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, orderBy, where, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
+            authDomain: "muscu-5e40c.firebaseapp.com",
+            projectId: "muscu-5e40c",
+            storageBucket: "muscu-5e40c.appspot.com",
+            messagingSenderId: "561788112947",
+            appId: "1:561788112947:web:7f2b7c7d74ff328f2b1346"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allMatches = [];
+        let allGames = [];
+        let allTeams = [];
+        let favoriteTeams = [];
+        let showOnlyFavorites = true;
+        let currentUser = null;
+
+        // --- DOM Elements ---
+        const authOverlay = document.getElementById('auth-overlay');
+        const appContent = document.getElementById('app-content');
+
+        // --- Fonctions de gestion des favoris ---
+        
+        async function loadFavoritesFromFirestore() {
+            if (!currentUser) return;
+            const favsRef = doc(db, 'userFavorites', currentUser.uid);
+            const favsSnap = await getDoc(favsRef);
+            if (favsSnap.exists()) {
+                favoriteTeams = favsSnap.data().teams || [];
+            } else {
+                favoriteTeams = [];
+            }
+        }
+
+        async function saveFavoritesToFirestore() {
+            if (!currentUser) return;
+            const favsRef = doc(db, 'userFavorites', currentUser.uid);
+            const saveBtn = document.getElementById('save-favorites-btn');
+            saveBtn.classList.add('btn-loading');
+            try {
+                await setDoc(favsRef, { teams: favoriteTeams });
+            } catch (error) {
+                console.error("Erreur de sauvegarde des favoris:", error);
+                alert("Erreur lors de la sauvegarde. Vérifiez vos règles de sécurité Firestore.");
+            } finally {
+                saveBtn.classList.remove('btn-loading');
+                document.getElementById('favorites-modal').classList.add('hidden');
+            }
+        }
+
+        function loadToggleStateFromLocalStorage() {
+            const showFavs = localStorage.getItem('esportTrackerShowFavorites');
+            showOnlyFavorites = showFavs === null ? true : JSON.parse(showFavs);
+            document.getElementById('favorites-toggle').checked = showOnlyFavorites;
+        }
+
+        function populateFavoritesModal() {
+            const favoritesList = document.getElementById('favorites-list');
+            favoritesList.innerHTML = '';
+            const actualTeams = allTeams.filter(teamName => !teamName.includes("Groupe") && !teamName.includes("Global Finals"));
+            actualTeams.forEach(teamName => {
+                const isChecked = favoriteTeams.includes(teamName);
+                const teamHTML = `
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" value="${teamName}" class="form-checkbox h-5 w-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" ${isChecked ? 'checked' : ''}>
+                        <span class="text-gray-200">${teamName}</span>
+                    </label>
+                `;
+                favoritesList.innerHTML += teamHTML;
+            });
+        }
+        
+        // --- Fonctions d'Affichage ---
+
+        function displayFilters() {
+            const filtersContainer = document.getElementById('filters');
+            filtersContainer.innerHTML = '';
+            const allButton = createFilterButton('Tous', 'all');
+            allButton.classList.add('active');
+            filtersContainer.appendChild(allButton);
+            allGames.forEach(game => {
+                const gameButton = createFilterButton(game.name, game.name);
+                filtersContainer.appendChild(gameButton);
+            });
+        }
+        
+        function createFilterButton(text, filterValue) {
+            const button = document.createElement('button');
+            button.className = 'filter-btn bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold py-2 px-4 rounded-full flex items-center gap-2';
+            button.dataset.filter = filterValue;
+            button.textContent = text;
+            button.addEventListener('click', () => handleFilterClick(button));
+            return button;
+        }
+
+        function displayMatches(filter = 'all') {
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) {
+                loadingMessage.style.display = 'none';
+            }
+
+            const matchesGrid = document.getElementById('matches-grid');
+            matchesGrid.innerHTML = '';
+            let matchesToShow = allMatches;
+
+            if (showOnlyFavorites && favoriteTeams.length > 0) {
+                matchesToShow = allMatches.filter(match => 
+                    favoriteTeams.includes(match.teamA) || favoriteTeams.includes(match.teamB)
+                );
+            }
+            
+            const filteredMatches = filter === 'all' 
+                ? matchesToShow
+                : matchesToShow.filter(match => match.game === filter);
+
+            if (filteredMatches.length === 0) {
+                matchesGrid.innerHTML = `<p class="col-span-full text-center text-gray-400 text-lg">Aucun match à venir pour cette sélection.</p>`;
+                return;
+            }
+
+            filteredMatches.forEach(match => {
+                const matchCard = document.createElement('div');
+                matchCard.className = 'match-card rounded-lg p-5 flex flex-col';
+                const formattedDate = formatMatchDate(match.date);
+                if (match.game === "World of Warcraft") {
+                     const eventTitle = match.teamB === 'Début' ? match.teamA : `${match.teamA} - ${match.teamB}`;
+                     matchCard.innerHTML = `
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><img src="${match.icon}" alt="${match.game}" class="w-6 h-6 rounded-full object-cover"><span class="font-semibold text-yellow-400">${match.game}</span></div>
+                            <span class="text-xs text-gray-400">${match.tournament}</span>
+                        </div>
+                        <div class="flex-grow flex items-center justify-center text-center my-4"><h2 class="font-bold text-xl text-white">${eventTitle}</h2></div>
+                        <div class="border-t border-gray-700 pt-4 mt-auto">
+                             <p class="text-center text-gray-300 mb-4">${formattedDate}</p>
+                             <a href="${match.streamLink}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">Suivre l'événement</a>
+                        </div>`;
+                } else {
+                    matchCard.innerHTML = `
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><img src="${match.icon}" alt="${match.game}" class="w-6 h-6 rounded-full object-cover"><span class="font-semibold text-blue-400">${match.game}</span></div>
+                            <span class="text-xs text-gray-400">${match.tournament}</span>
+                        </div>
+                        <div class="flex-grow flex items-center justify-around text-center my-4">
+                            <div class="flex flex-col items-center justify-center gap-2 w-1/3"><span class="font-bold text-lg">${match.teamA}</span></div>
+                            <span class="text-2xl font-light text-gray-500">VS</span>
+                            <div class="flex flex-col items-center justify-center gap-2 w-1/3"><span class="font-bold text-lg">${match.teamB}</span></div>
+                        </div>
+                        <div class="border-t border-gray-700 pt-4 mt-auto">
+                             <p class="text-center text-gray-300 mb-4">${formattedDate}</p>
+                             <a href="${match.streamLink}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">Regarder le match</a>
+                        </div>`;
+                }
+                matchesGrid.appendChild(matchCard);
+            });
+        }
+
+        function handleFilterClick(clickedButton) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            clickedButton.classList.add('active');
+            const filterValue = clickedButton.dataset.filter;
+            displayMatches(filterValue);
+        }
+        
+        function formatMatchDate(isoString) {
+             const date = new Date(isoString);
+             return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' }).format(date);
+        }
+
+        // --- Auth Functions ---
+        async function handleAuth(e, authFunc) {
+            e.preventDefault();
+            const button = e.target.querySelector('button[type="submit"]');
+            const email = e.target.querySelector('input[type="email"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+            button.classList.add('btn-loading');
+            try {
+                await authFunc(auth, email, password);
+            } catch (error) {
+                handleAuthError(error);
+            } finally {
+                button.classList.remove('btn-loading');
+            }
+        }
+
+        function handleAuthError(error) {
+            const errorElement = document.getElementById('auth-error');
+            const errorMap = {
+                'auth/wrong-password': 'Mot de passe ou e-mail incorrect.', 'auth/invalid-credential': 'Mot de passe ou e-mail incorrect.',
+                'auth/user-not-found': 'Aucun compte trouvé pour cet e-mail.', 'auth/weak-password': 'Le mot de passe doit faire au moins 6 caractères.',
+                'auth/email-already-in-use': 'Cette adresse e-mail est déjà utilisée.'
+            };
+            errorElement.textContent = errorMap[error.code] || 'Une erreur est survenue.';
+        }
+        
+        // --- Setup et Initialisation ---
+        
+        function setupEventListeners() {
+            const modal = document.getElementById('favorites-modal');
+            document.getElementById('manage-favorites-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+            document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.add('hidden'));
+            
+            document.getElementById('save-favorites-btn').addEventListener('click', async () => {
+                const selectedTeams = [];
+                document.querySelectorAll('#favorites-list input[type="checkbox"]:checked').forEach(checkbox => {
+                    selectedTeams.push(checkbox.value);
+                });
+                favoriteTeams = selectedTeams;
+                await saveFavoritesToFirestore();
+                displayMatches(document.querySelector('.filter-btn.active').dataset.filter);
+            });
+
+            document.getElementById('favorites-toggle').addEventListener('change', (e) => {
+                showOnlyFavorites = e.target.checked;
+                localStorage.setItem('esportTrackerShowFavorites', JSON.stringify(showOnlyFavorites));
+                displayMatches(document.querySelector('.filter-btn.active').dataset.filter);
+            });
+            
+            document.getElementById('login-form').addEventListener('submit', (e) => handleAuth(e, signInWithEmailAndPassword));
+            document.getElementById('signup-form').addEventListener('submit', (e) => handleAuth(e, createUserWithEmailAndPassword));
+            document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+        }
+
+        async function startApp() {
+            loadToggleStateFromLocalStorage();
+            try {
+                const gamesSnapshot = await getDocs(collection(db, "games"));
+                allGames = gamesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                displayFilters();
+
+                const teamsQuery = query(collection(db, "teams"), orderBy("name", "asc"));
+                const teamsSnapshot = await getDocs(teamsQuery);
+                allTeams = teamsSnapshot.docs.map(doc => doc.data().name);
+                
+                await loadFavoritesFromFirestore();
+                populateFavoritesModal();
+
+                const matchesQuery = query(collection(db, "matches"), orderBy("date", "asc"));
+                const matchesSnapshot = await getDocs(matchesQuery);
+                allMatches = matchesSnapshot.docs
+                    .map(doc => ({ id: doc.id, ...doc.data() }))
+                    .filter(match => match.teamB !== 'Fin');
+
+                displayMatches();
+
+            } catch (error) {
+                console.error("Erreur d'initialisation:", error);
+                document.getElementById('matches-grid').innerHTML = `<p class="col-span-full text-center text-red-500 text-lg">Erreur de chargement des données. Vérifiez les règles de sécurité de Firestore.</p>`;
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('user-email').textContent = user.email;
+                authOverlay.classList.add('hidden');
+                appContent.classList.remove('hidden');
+                await startApp();
+            } else {
+                currentUser = null;
+                authOverlay.classList.remove('hidden');
+                appContent.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+        });
+
+    </script>
+</body>
+</html>
+
+
