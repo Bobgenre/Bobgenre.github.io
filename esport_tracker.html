@@ -270,7 +270,21 @@
             filteredMatches.forEach(match => {
                 const matchCard = document.createElement('div');
                 matchCard.className = 'match-card rounded-lg p-5 flex flex-col';
+                
+                const matchDate = new Date(match.date);
+                const isMatchToday = isDateToday(matchDate);
                 const formattedDate = formatMatchDate(match.date);
+
+                let streamLink = 'https://www.twitch.tv'; // Default
+                if (match.game === 'League of Legends') streamLink = 'https://www.twitch.tv/traytonlol';
+                else if (match.game === 'Valorant') streamLink = 'https://www.twitch.tv/valorant_fr';
+
+                const dateHtml = `
+                    <p class="text-center text-gray-300 mb-4" ${isMatchToday ? `data-date="${match.date}"` : ''}>
+                        ${formattedDate}
+                        ${isMatchToday ? '<span class="countdown text-gray-400 ml-2"></span>' : ''}
+                    </p>`;
+
                 if (match.game === "World of Warcraft") {
                      const eventTitle = match.teamB === 'Début' ? match.teamA : `${match.teamA} - ${match.teamB}`;
                      matchCard.innerHTML = `
@@ -280,8 +294,8 @@
                         </div>
                         <div class="flex-grow flex items-center justify-center text-center my-4"><h2 class="font-bold text-xl text-white">${eventTitle}</h2></div>
                         <div class="border-t border-gray-700 pt-4 mt-auto">
-                             <p class="text-center text-gray-300 mb-4">${formattedDate}</p>
-                             <a href="${match.streamLink}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">Suivre l'événement</a>
+                             ${dateHtml}
+                             <a href="${streamLink}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">Suivre l'événement</a>
                         </div>`;
                 } else {
                     matchCard.innerHTML = `
@@ -295,12 +309,13 @@
                             <div class="flex flex-col items-center justify-center gap-2 w-1/3"><span class="font-bold text-lg">${match.teamB}</span></div>
                         </div>
                         <div class="border-t border-gray-700 pt-4 mt-auto">
-                             <p class="text-center text-gray-300 mb-4">${formattedDate}</p>
-                             <a href="${match.streamLink}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">Regarder le match</a>
+                             ${dateHtml}
+                             <a href="${streamLink}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">Regarder le match</a>
                         </div>`;
                 }
                 matchesGrid.appendChild(matchCard);
             });
+            updateCountdowns(); // Mettre à jour les comptes à rebours après l'affichage
         }
 
         function handleFilterClick(clickedButton) {
@@ -309,10 +324,49 @@
             const filterValue = clickedButton.dataset.filter;
             displayMatches(filterValue);
         }
+
+        function isDateToday(date) {
+            const today = new Date();
+            return date.getFullYear() === today.getFullYear() &&
+                   date.getMonth() === today.getMonth() &&
+                   date.getDate() === today.getDate();
+        }
         
         function formatMatchDate(isoString) {
              const date = new Date(isoString);
-             return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' }).format(date);
+             if (isDateToday(date)) {
+                 const time = new Intl.DateTimeFormat('fr-FR', { timeStyle: 'short' }).format(date);
+                 return `Aujourd'hui à ${time}`;
+             } else {
+                 return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' }).format(date);
+             }
+        }
+
+        function updateCountdowns() {
+            const countdownElements = document.querySelectorAll('.countdown');
+            const now = new Date();
+
+            countdownElements.forEach(span => {
+                const dateString = span.parentElement.dataset.date;
+                const matchDate = new Date(dateString);
+                const diff = matchDate - now;
+
+                if (diff < 0) {
+                    if (diff > -4 * 60 * 60 * 1000) { // Affiche "En cours" jusqu'à 4h après le début
+                        span.textContent = '(En cours)';
+                        span.classList.add('text-red-400');
+                        span.classList.remove('text-gray-400');
+                    } else {
+                        span.textContent = ''; // Cache pour les matchs plus anciens
+                    }
+                } else {
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    span.textContent = `(${hours}h ${minutes}m)`;
+                    span.classList.remove('text-red-400');
+                    span.classList.add('text-gray-400');
+                }
+            });
         }
 
         // --- Auth Functions ---
@@ -385,8 +439,15 @@
 
                 const matchesQuery = query(collection(db, "matches"), orderBy("date", "asc"));
                 const matchesSnapshot = await getDocs(matchesQuery);
+
+                const gameIconMap = new Map(allGames.map(game => [game.name, game.icon]));
+
                 allMatches = matchesSnapshot.docs
-                    .map(doc => ({ id: doc.id, ...doc.data() }))
+                    .map(doc => {
+                        const matchData = { id: doc.id, ...doc.data() };
+                        matchData.icon = gameIconMap.get(matchData.game) || '';
+                        return matchData;
+                    })
                     .filter(match => match.teamB !== 'Fin');
 
                 displayMatches();
@@ -413,10 +474,10 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
+            setInterval(updateCountdowns, 60000); // Met à jour chaque minute
         });
 
     </script>
 </body>
 </html>
-
 
