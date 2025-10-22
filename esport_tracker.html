@@ -352,7 +352,7 @@
                 const diff = matchDate - now;
 
                 if (diff < 0) {
-                    if (diff > -4 * 60 * 60 * 1000) { // Affiche "En cours" jusqu'à 4h après le début
+                    if (diff > -5 * 60 * 60 * 1000) { // Affiche "En cours" jusqu'à 5h après le début
                         span.textContent = '(En cours)';
                         span.classList.add('text-red-400');
                         span.classList.remove('text-gray-400');
@@ -362,7 +362,7 @@
                 } else {
                     const hours = Math.floor(diff / (1000 * 60 * 60));
                     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    span.textContent = `(${hours}h ${minutes}m)`;
+                    span.textContent = `(dans ${hours}h ${minutes}m)`;
                     span.classList.remove('text-red-400');
                     span.classList.add('text-gray-400');
                 }
@@ -437,7 +437,9 @@
                 await loadFavoritesFromFirestore();
                 populateFavoritesModal();
 
-                const matchesQuery = query(collection(db, "matches"), orderBy("date", "asc"));
+                const cutoffDate = new Date();
+                cutoffDate.setHours(cutoffDate.getHours() - 5);
+                const matchesQuery = query(collection(db, "matches"), where("date", ">=", cutoffDate.toISOString()), orderBy("date", "asc"));
                 const matchesSnapshot = await getDocs(matchesQuery);
 
                 const gameIconMap = new Map(allGames.map(game => [game.name, game.icon]));
