@@ -14,11 +14,19 @@
         .match-card {
             background-color: #1f2937; /* bg-gray-800 */
             border: 1px solid #374151; /* border-gray-700 */
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, opacity 0.3s ease-in-out;
         }
         .match-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        .match-card.hidden {
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            visibility: hidden;
+            transform: scale(0.9);
         }
         .filter-btn {
             transition: all 0.2s ease-in-out;
@@ -280,9 +288,9 @@
                 else if (match.game === 'Valorant') streamLink = 'https://www.twitch.tv/valorant_fr';
 
                 const dateHtml = `
-                    <p class="text-center text-gray-300 mb-4" ${isMatchToday ? `data-date="${match.date}"` : ''}>
+                    <p class="text-center text-gray-300 mb-4" ${isMatchToday || matchDate < new Date() ? `data-date="${match.date}"` : ''}>
                         ${formattedDate}
-                        ${isMatchToday ? '<span class="countdown text-gray-400 ml-2"></span>' : ''}
+                        ${isMatchToday || matchDate < new Date() ? '<span class="countdown text-gray-400 ml-2"></span>' : ''}
                     </p>`;
 
                 if (match.game === "World of Warcraft") {
@@ -350,6 +358,9 @@
                 const dateString = span.parentElement.dataset.date;
                 const matchDate = new Date(dateString);
                 const diff = matchDate - now;
+                
+                const matchCard = span.closest('.match-card');
+                if (!matchCard) return;
 
                 if (diff < 0) {
                     if (diff > -5 * 60 * 60 * 1000) { // Affiche "En cours" jusqu'à 5h après le début
@@ -357,7 +368,9 @@
                         span.classList.add('text-red-400');
                         span.classList.remove('text-gray-400');
                     } else {
-                        span.textContent = ''; // Cache pour les matchs plus anciens
+                        // Le match est terminé depuis 5h, on le cache
+                        span.textContent = ''; 
+                        matchCard.classList.add('hidden');
                     }
                 } else {
                     const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -438,7 +451,7 @@
                 populateFavoritesModal();
 
                 const cutoffDate = new Date();
-                cutoffDate.setHours(cutoffDate.getHours() - 5);
+                cutoffDate.setHours(cutoffDate.getHours() - 5); // Ne charge que les matchs commencés il y a moins de 5h
                 const matchesQuery = query(collection(db, "matches"), where("date", ">=", cutoffDate.toISOString()), orderBy("date", "asc"));
                 const matchesSnapshot = await getDocs(matchesQuery);
 
