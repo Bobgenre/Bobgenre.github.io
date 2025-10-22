@@ -72,45 +72,68 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <!-- Créer un Match -->
+            <!-- Créer une Entrée (Match ou Événement) -->
             <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-bold mb-6 text-white">Créer un Match</h2>
-                <form id="add-match-form" class="space-y-4">
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="match-game" class="block text-sm font-medium text-gray-300 mb-1">Jeu</label>
-                            <select id="match-game" required class="w-full p-2 border rounded-md">
-                                <option value="">Chargement...</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="match-tournament" class="block text-sm font-medium text-gray-300 mb-1">Tournoi</label>
-                            <input type="text" id="match-tournament" placeholder="Ex: LEC Finals" required class="w-full p-2 border rounded-md">
-                        </div>
+                <h2 class="text-2xl font-bold mb-6 text-white">Créer une Entrée</h2>
+                <form id="add-entry-form" class="space-y-4">
+
+                    <!-- Sélecteur de Type -->
+                    <div class="flex space-x-6 mb-4">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" name="entry-type" value="match" class="form-radio text-blue-600 bg-gray-700 border-gray-600" checked>
+                            <span class="text-gray-300">Match (Équipe vs Équipe)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" name="entry-type" value="event" class="form-radio text-blue-600 bg-gray-700 border-gray-600">
+                            <span class="text-gray-300">Événement (Calendrier)</span>
+                        </label>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div>
-                            <label for="match-teamA" class="block text-sm font-medium text-gray-300 mb-1">Équipe A</label>
-                            <select id="match-teamA" required class="w-full p-2 border rounded-md">
+                        <div>
+                            <label for="entry-game" class="block text-sm font-medium text-gray-300 mb-1">Jeu</label>
+                            <select id="entry-game" required class="w-full p-2 border rounded-md">
                                 <option value="">Chargement...</option>
                             </select>
                         </div>
-                         <div>
-                            <label for="match-teamB" class="block text-sm font-medium text-gray-300 mb-1">Équipe B</label>
-                            <select id="match-teamB" required class="w-full p-2 border rounded-md">
-                                <option value="">Chargement...</option>
-                            </select>
+                        <div>
+                            <label for="entry-tournament" class="block text-sm font-medium text-gray-300 mb-1">Tournoi</label>
+                            <input type="text" id="entry-tournament" placeholder="Ex: LEC Finals" required class="w-full p-2 border rounded-md">
+                        </div>
+                    </div>
+
+                    <!-- Champs pour MATCH -->
+                    <div id="match-fields" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="match-teamA" class="block text-sm font-medium text-gray-300 mb-1">Équipe A</label>
+                                <select id="match-teamA" required class="w-full p-2 border rounded-md">
+                                    <option value="">Chargement...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="match-teamB" class="block text-sm font-medium text-gray-300 mb-1">Équipe B</label>
+                                <select id="match-teamB" required class="w-full p-2 border rounded-md">
+                                    <option value="">Chargement...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Champs pour EVENEMENT -->
+                    <div id="event-fields" class="hidden space-y-4">
+                        <div>
+                            <label for="event-name" class="block text-sm font-medium text-gray-300 mb-1">Titre de l'événement</label>
+                            <input type="text" id="event-name" placeholder="Ex: MDI Groupe A" class="w-full p-2 border rounded-md">
                         </div>
                     </div>
 
                     <div>
-                        <label for="match-date" class="block text-sm font-medium text-gray-300 mb-1">Date et Heure (Heure locale)</label>
-                        <input type="datetime-local" id="match-date" required class="w-full p-2 border rounded-md">
+                        <label for="entry-date" class="block text-sm font-medium text-gray-300 mb-1">Date et Heure (Heure locale)</label>
+                        <input type="datetime-local" id="entry-date" required class="w-full p-2 border rounded-md">
                     </div>
 
-                    <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">Ajouter le Match</button>
+                    <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">Ajouter l'Entrée</button>
                 </form>
             </div>
 
@@ -178,9 +201,13 @@
         const loginForm = document.getElementById('login-form');
         const logsContainer = document.getElementById('logs');
         
-        const gameSelect = document.getElementById('match-game');
+        const gameSelect = document.getElementById('entry-game');
         const teamASelect = document.getElementById('match-teamA');
         const teamBSelect = document.getElementById('match-teamB');
+        
+        const matchFields = document.getElementById('match-fields');
+        const eventFields = document.getElementById('event-fields');
+        const eventNameInput = document.getElementById('event-name');
 
         // --- Logger ---
         function log(message, type = 'info') {
@@ -273,6 +300,27 @@
         
         document.getElementById('logout-btn').addEventListener('click', () => auth.signOut());
 
+        // --- Form Toggle Logic ---
+        document.querySelectorAll('input[name="entry-type"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'match') {
+                    matchFields.classList.remove('hidden');
+                    eventFields.classList.add('hidden');
+                    // Rendre les champs de match obligatoires et l'événement non
+                    eventNameInput.required = false;
+                    teamASelect.required = true;
+                    teamBSelect.required = true;
+                } else {
+                    matchFields.classList.add('hidden');
+                    eventFields.classList.remove('hidden');
+                    // Rendre l'événement obligatoire et les champs de match non
+                    eventNameInput.required = true;
+                    teamASelect.required = false;
+                    teamBSelect.required = false;
+                }
+            });
+        });
+
         // --- Form Submissions ---
 
         document.getElementById('add-game-form').addEventListener('submit', async (e) => {
@@ -319,35 +367,57 @@
             }
         });
 
-        document.getElementById('add-match-form').addEventListener('submit', async (e) => {
+        document.getElementById('add-entry-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
             const button = form.querySelector('button[type="submit"]');
-            const match = {
-                game: document.getElementById('match-game').value,
-                tournament: document.getElementById('match-tournament').value,
-                teamA: document.getElementById('match-teamA').value,
-                teamB: document.getElementById('match-teamB').value,
-                date: new Date(document.getElementById('match-date').value).toISOString(),
+            const entryType = document.querySelector('input[name="entry-type"]:checked').value;
+            
+            let teamA, teamB, logMessage;
+
+            if (entryType === 'match') {
+                teamA = teamASelect.value;
+                teamB = teamBSelect.value;
+                if (teamA === teamB) {
+                    log('Les équipes A et B doivent être différentes.', 'error');
+                    return;
+                }
+                logMessage = `Match ${teamA} vs ${teamB} ajouté.`;
+            } else {
+                teamA = eventNameInput.value;
+                teamB = 'Début'; // Mot-clé spécial pour que index.html l'affiche comme un événement
+                logMessage = `Événement "${teamA}" ajouté.`;
+            }
+
+            const entry = {
+                game: gameSelect.value,
+                tournament: document.getElementById('entry-tournament').value,
+                teamA: teamA,
+                teamB: teamB,
+                date: new Date(document.getElementById('entry-date').value).toISOString(),
             };
 
-            if (match.teamA === match.teamB) {
-                log('Les équipes A et B doivent être différentes.', 'error');
-                return;
+            if (!entry.game || !entry.date || !entry.teamA) {
+                 log('Veuillez remplir tous les champs requis.', 'error');
+                 return;
             }
 
             button.classList.add('btn-loading');
             try {
-                await addDoc(collection(db, 'matches'), match);
-                log(`Match ${match.teamA} vs ${match.teamB} ajouté.`, 'success');
+                await addDoc(collection(db, 'matches'), entry);
+                log(logMessage, 'success');
                 form.reset();
-                // Re-sélectionner les valeurs par défaut
-                document.getElementById('match-game').value = "";
-                document.getElementById('match-teamA').value = "";
-                document.getElementById('match-teamB').value = "";
+                // Réinitialiser les champs et les menus
+                matchFields.classList.remove('hidden');
+                eventFields.classList.add('hidden');
+                document.querySelector('input[name="entry-type"][value="match"]').checked = true;
+                gameSelect.value = "";
+                teamASelect.value = "";
+                teamBSelect.value = "";
+                eventNameInput.value = "";
 
             } catch (error) {
-                log(`Erreur lors de l'ajout du match: ${error.message}`, 'error');
+                log(`Erreur lors de l'ajout de l'entrée: ${error.message}`, 'error');
             } finally {
                 button.classList.remove('btn-loading');
             }
