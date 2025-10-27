@@ -43,6 +43,7 @@
         }
         #timer-progress, #warmup-progress-bar { transition: width 0.5s linear; }
         .edit-mode-item { display: none; }
+        /* MODIFICATION : Changé en .edit-mode .edit-mode-item pour cibler tous les items */
         .edit-mode .edit-mode-item { display: flex; }
         .sortable-ghost { background: #2d3748; opacity: 0.5; }
         .drag-handle { cursor: move; }
@@ -154,9 +155,33 @@
                         </div>
                         <div id="warmup-steps-list" class="mt-8 max-w-md mx-auto space-y-2"></div>
                     </div>
-                    <div id="Tirage" class="tab-content"><div id="Tirage-exercises" class="space-y-6 exercise-list"></div><button class="start-workout-btn w-full mt-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition" data-program-type="Tirage">Lancer l'entraînement</button></div>
-                    <div id="Poussée" class="tab-content"><div id="Poussée-exercises" class="space-y-6 exercise-list"></div><button class="start-workout-btn w-full mt-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition" data-program-type="Poussée">Lancer l'entraînement</button></div>
-                    <div id="Jambes" class="tab-content"><div id="Jambes-exercises" class="space-y-6 exercise-list"></div><button class="start-workout-btn w-full mt-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition" data-program-type="Jambes">Lancer l'entraînement</button></div>
+                    <div id="Tirage" class="tab-content">
+                        <div id="Tirage-exercises" class="space-y-6 exercise-list"></div>
+                        <!-- AJOUT : Bouton "Ajouter un exercice" pour le mode édition -->
+                        <button class="add-exercise-btn edit-mode-item w-full mt-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition flex justify-center items-center" data-program-type="Tirage">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Ajouter un exercice
+                        </button>
+                        <button class="start-workout-btn w-full mt-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition" data-program-type="Tirage">Lancer l'entraînement</button>
+                    </div>
+                    <div id="Poussée" class="tab-content">
+                        <div id="Poussée-exercises" class="space-y-6 exercise-list"></div>
+                        <!-- AJOUT : Bouton "Ajouter un exercice" pour le mode édition -->
+                        <button class="add-exercise-btn edit-mode-item w-full mt-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition flex justify-center items-center" data-program-type="Poussée">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Ajouter un exercice
+                        </button>
+                        <button class="start-workout-btn w-full mt-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition" data-program-type="Poussée">Lancer l'entraînement</button>
+                    </div>
+                    <div id="Jambes" class="tab-content">
+                        <div id="Jambes-exercises" class="space-y-6 exercise-list"></div>
+                        <!-- AJOUT : Bouton "Ajouter un exercice" pour le mode édition -->
+                        <button class="add-exercise-btn edit-mode-item w-full mt-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition flex justify-center items-center" data-program-type="Jambes">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Ajouter un exercice
+                        </button>
+                        <button class="start-workout-btn w-full mt-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition" data-program-type="Jambes">Lancer l'entraînement</button>
+                    </div>
                     <div id="suivi" class="tab-content"><div id="suivi-graphs-content" class="space-y-4"></div></div>
                 </div>
             </main>
@@ -343,6 +368,12 @@
         function renderProgram(programData, allLogs) {
             document.getElementById('main-content').classList.toggle('edit-mode', isEditMode);
             document.getElementById('main-content').classList.toggle('workout-mode', isWorkoutActive);
+
+            // Gérer la visibilité des boutons "Lancer" vs "Ajouter"
+            document.querySelectorAll('.start-workout-btn').forEach(btn => {
+                btn.style.display = isEditMode ? 'none' : 'block';
+            });
+            // La visibilité des boutons "add-exercise-btn" est gérée par le CSS (.edit-mode-item)
 
             for (const [type, exercises] of Object.entries(programData)) {
                 const container = document.getElementById(`${type}-exercises`);
@@ -830,7 +861,7 @@
             destroySortables();
             const exerciseLists = document.querySelectorAll('.exercise-list');
             exerciseLists.forEach(list => {
-                const programType = list.parentElement.id.replace('-exercises', '');
+                const programType = list.parentElement.id; // Changé pour prendre l'ID du parent (Tirage, Poussée, Jambes)
                 const sortable = new Sortable(list, {
                     animation: 150,
                     handle: '.drag-handle',
@@ -858,7 +889,7 @@
             btn.classList.toggle('hover:bg-orange-700', isEditMode);
             btn.classList.toggle('bg-gray-600', !isEditMode);
             btn.classList.toggle('hover:bg-gray-500', !isEditMode);
-            renderProgram(currentProgramData, currentLogs);
+            renderProgram(currentProgramData, currentLogs); // renderProgram gère maintenant l'affichage des boutons
             if (isEditMode) { initializeSortables(); } else { destroySortables(); }
         }
         function openExerciseModal(programType, exerciseId = null) {
