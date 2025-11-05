@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards Japonais - Apprentissage Personnalisé</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .japanese-font { font-family: 'Noto Sans JP', sans-serif; }
+        .scene { perspective: 1000px; }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.6s, border-color 0.3s;
+            border: 4px solid transparent;
+        }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card__face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .card__face--front { background-color: #1f2937; color: #f9fafb; }
+        .card__face--back { background-color: #374151; color: white; transform: rotateY(180deg); }
+        
+        .status-new { border-color: #6b7280; }
+        .status-learning { border-color: #f59e0b; }
+        .status-mastered { border-color: #22c55e; }
+
+        /* Écran de chargement et d'authentification */
+        #loader, #auth-overlay, .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.95);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; flex-direction: column;
+            transition: opacity 0.3s;
+        }
+        .spinner, .btn-loading::after {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #f97316;
+            animation: spin 1s ease infinite;
+        }
+        .btn-loading { position: relative; color: transparent !important; }
+        .btn-loading::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 20px; height: 20px; margin-top: -10px; margin-left: -10px;
+            border-width: 2px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .review-mode-btn.active { background-color: #d97706; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+        .deck-btn.active, .lesson-btn.active, .quiz-btn.active { background-color: #ea580c; color: white; }
+        .mobile-deck-nav { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+        .mobile-deck-nav::-webkit-scrollbar { display: none; }
+        .accordion-toggle svg { transition: transform 0.2s ease-in-out; }
+        .accordion-toggle.open svg { transform: rotate(180deg); }
+
+        /* Styles pour les leçons */
+        #lesson-view, .accordion-content {
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 #1f2937;
+        }
+        #lesson-view::-webkit-scrollbar, .accordion-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        #lesson-view::-webkit-scrollbar-track, .accordion-content::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        #lesson-view::-webkit-scrollbar-thumb, .accordion-content::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 4px;
+        }
+        .accordion-content {
+            max-height: 45vh;
+            overflow-y: auto;
+        }
+        #lesson-view {
+             max-height: 65vh;
+        }
+        #lesson-view h3 { font-size: 1.5rem; font-weight: bold; color: #fb923c; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #4b5563; padding-bottom: 0.5rem; }
+        #lesson-view h4 { font-size: 1.25rem; font-weight: bold; color: #fdbf6f; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+        #lesson-view p { color: #d1d5db; line-height: 1.6; margin-bottom: 1rem; }
+        #lesson-view ul { list-style-type: disc; margin-left: 1.5rem; color: #d1d5db; margin-bottom: 1rem; }
+        #lesson-view ol { list-style-type: decimal; margin-left: 1.5rem; color: #d1d5db; margin-bottom: 1rem; }
+        #lesson-view code { background-color: #374151; color: #f9fafb; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: 'Noto Sans JP', sans-serif; font-size: 1.1rem; }
+        #lesson-view strong { color: #fdba74; }
+        #lesson-view table { width: 100%; border-collapse: collapse; margin-top: 1rem; border-radius: 0.5rem; overflow: hidden; }
+        #lesson-view th, #lesson-view td { border-bottom: 1px solid #4b5563; padding: 0.75rem; text-align: left; }
+        #lesson-view th { background-color: #4b5563; color: #fb923c; }
+        #lesson-view td { color: #d1d5db; }
+        #lesson-view tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.05); }
+        /* Style pour centrer le texte dans les tableaux de kana */
+        #lesson-view table.kana-table th, #lesson-view table.kana-table td { text-align: center; font-size: 1.1rem; padding: 0.5rem; }
+
+        /* Correction pour l'autocomplétion en mode sombre */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #374151 inset !important;
+            -webkit-text-fill-color: #f9fafb !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-2 md:p-4">
+
+    <!-- Écran d'authentification -->
+    <div id="auth-overlay">
+        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl">
+            <h2 class="text-2xl font-bold text-center text-gray-100 mb-2">Flashcards Japonais</h2>
+            <p class="text-center text-gray-400 mb-6">Connectez-vous pour sauvegarder votre progression.</p>
+            <div id="auth-error" class="text-red-500 text-sm text-center mb-4 min-h-[20px]"></div>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="login-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+                <input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+                <button type="submit" class="w-full py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Se connecter</button>
+            </form>
+            <div class="my-4 flex items-center">
+                <hr class="w-full border-gray-600"><span class="p-2 text-gray-500 text-sm">OU</span><hr class="w-full border-gray-600">
+            </div>
+            <form id="signup-form" class="space-y-4">
+                <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+                <input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+                <button type="submit" class="w-full py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Créer un compte</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader" style="display: none;">
+        <div class="spinner"></div>
+        <p class="mt-4 text-lg font-semibold text-gray-300">Chargement...</p>
+    </div>
+
+    <!-- Contenu de l'application -->
+    <div id="app-content" class="hidden w-full max-w-6xl mx-auto p-2 md:p-4 flex flex-col md:flex-row md:space-x-8">
+        <aside class="w-full md:w-1/4 flex-shrink-0 mb-6 md:mb-0">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-300">Menu</h2>
+                <button id="add-deck-btn" class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-orange-700 transition">+</button>
+            </div>
+            <div id="deck-sidebar-mobile" class="md:hidden flex space-x-2 pb-2 mobile-deck-nav"></div>
+            <div id="deck-sidebar-desktop" class="hidden md:block space-y-2"></div>
+        </aside>
+
+        <main class="flex-grow">
+            <header class="flex justify-between items-start mb-4">
+                <h1 id="deck-title" class="text-2xl md:text-3xl font-bold text-orange-400"></h1>
+                <div id="auth-info" class="text-right flex-shrink-0">
+                    <p id="user-email" class="text-sm text-gray-500"></p>
+                    <button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button>
+                </div>
+            </header>
+
+            <!-- VUE FLASHCARD (par défaut) -->
+            <div id="flashcard-view">
+                <div id="dashboard" class="flex justify-around bg-gray-800 p-3 rounded-lg mb-4 text-center">
+                    <div><p class="text-xl md:text-2xl font-bold text-green-500" id="mastered-count">0</p><p class="text-xs text-gray-400">Maîtrisé</p></div>
+                    <div><p class="text-xl md:text-2xl font-bold text-amber-500" id="learning-count">0</p><p class="text-xs text-gray-400">En cours</p></div>
+                    <div><p class="text-xl md:text-2xl font-bold text-gray-500" id="new-count">0</p><p class="text-xs text-gray-400">Nouveau</p></div>
+                </div>
+                <button id="add-card-btn" class="w-full mb-4 py-2 bg-gray-700 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 transition">+ Ajouter une carte</button>
+                <div class="scene h-56 md:h-64">
+                    <div id="flashcard" class="card rounded-xl">
+                        <div id="card-front" class="card__face card__face--front"></div>
+                        <div id="card-back" class="card__face card__face--back"></div>
+                    </div>
+                </div>
+                <p id="progress" class="text-center text-gray-500 mt-4"></p>
+                <div id="status-buttons" class="flex justify-center space-x-3 mt-6">
+                    <button data-status="learning" class="status-btn flex-1 py-3 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition">À revoir</button>
+                    <button data-status="mastered" class="status-btn flex-1 py-3 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Maîtrisé</button>
+                </div>
+                <div class="flex justify-between items-center mt-4 space-x-2">
+                    <button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button>
+                    <div class="flex-grow flex justify-center items-center space-x-2">
+                        <button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Révision</button>
+                        <button id="review-all-btn" class="hidden bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Tout réviser</button>
+                    </div>
+                    <button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button>
+                </div>
+            </div>
+            
+            <!-- VUE LEÇON (cachée) -->
+            <div id="lesson-view" class="hidden bg-gray-800 p-6 rounded-lg max-h-[65vh] overflow-y-auto">
+                <div id="lesson-content-intro" class="lesson-content hidden">
+                    <h3>Introduction aux Kana</h3>
+                    <p>Le japonais utilise trois systèmes d'écriture principaux : les <strong>Hiragana</strong>, les <strong>Katakana</strong>, et les <strong>Kanji</strong>.</p>
+                    <h4>Hiragana (ひらがな)</h4>
+                    <p>Utilisés pour la grammaire et les mots japonais purs. Formes arrondies.</p>
+                    <p>Exemple : <code>わたし</code> (watashi) - "Je" / "Moi"</p>
+                    <h4>Katakana (カタカナ)</h4>
+                    <p>Utilisés pour les mots étrangers et l'emphase. Formes angulaires.</p>
+                    <p>Exemple : <code>フランス</code> (furansu) - "France"</p>
+                    <h4>Kanji (漢字)</h4>
+                    <p>Idéogrammes pour les concepts et les radicaux de mots.</p>
+                    <p>Exemple : <code>日本</code> (nihon) - "Japon"</p>
+                </div>
+                <div id="lesson-content-romaji" class="lesson-content hidden">
+                    <h3>Qu'est-ce que le Romaji ?</h3>
+                    <p>Le <strong>Romaji</strong> (ローマ字) est la transcription du japonais en alphabet latin.</p>
+                    <p>C'est un outil essentiel pour les débutants pour apprendre la prononciation et taper sur un clavier, mais l'objectif doit être de passer aux Kana dès que possible.</p>
+                </div>
+                <div id="lesson-content-structure" class="lesson-content hidden">
+                    <h3>Structure de Phrase de Base (A は B です)</h3>
+                    <p>La structure "A est B" se construit ainsi : <strong>A</strong> <code>は</code> <strong>B</strong> <code>です</code></p>
+                    <ul>
+                        <li><code>は</code> (prononcé "wa") marque le sujet "A".</li>
+                        <li><code>です</code> (desu) signifie "être" et se place à la fin.</li>
+                    </ul>
+                    <p>Exemple : <code>わたし は がくせい です。</code> (Watashi wa gakusei desu.) - "Je suis étudiant."</p>
+                    <p>Pour poser une question, ajoutez <code>か</code> (ka) à la fin.</p>
+                </div>
+                <div id="lesson-content-hiragana-table" class="lesson-content hidden">
+                    <h3>Tableau des Hiragana (ひらがな)</h3>
+                    <p>Voici le tableau de base des 46 Hiragana. Lisez-le de droite à gauche, de haut en bas, en commençant par 'a', 'i', 'u', 'e', 'o'.</p>
+                    <table class="japanese-font kana-table">
+                        <thead><tr><th></th><th class="w-1/6">A</th><th class="w-1/6">I</th><th class="w-1/6">U</th><th class="w-1/6">E</th><th class="w-1/6">O</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>-</strong></td><td>あ (a)</td><td>い (i)</td><td>う (u)</td><td>え (e)</td><td>お (o)</td></tr>
+                            <tr><td><strong>K</strong></td><td>か (ka)</td><td>き (ki)</td><td>く (ku)</td><td>け (ke)</td><td>こ (ko)</td></tr>
+                            <tr><td><strong>S</strong></td><td>さ (sa)</td><td>し (shi)</td><td>す (su)</td><td>せ (se)</td><td>そ (so)</td></tr>
+                            <tr><td><strong>T</strong></td><td>た (ta)</td><td>ち (chi)</td><td>つ (tsu)</td><td>て (te)</td><td>と (to)</td></tr>
+                            <tr><td><strong>N</strong></td><td>な (na)</td><td>に (ni)</td><td>ぬ (nu)</td><td>ね (ne)</td><td>の (no)</td></tr>
+                            <tr><td><strong>H</strong></td><td>は (ha)</td><td>ひ (hi)</td><td>ふ (fu)</td><td>へ (he)</td><td>ほ (ho)</td></tr>
+                            <tr><td><strong>M</strong></td><td>ま (ma)</td><td>み (mi)</td><td>む (mu)</td><td>め (me)</td><td>も (mo)</td></tr>
+                            <tr><td><strong>Y</strong></td><td>や (ya)</td><td class="text-gray-700">-</td><td>ゆ (yu)</td><td class="text-gray-700">-</td><td>よ (yo)</td></tr>
+                            <tr><td><strong>R</strong></td><td>ら (ra)</td><td>り (ri)</td><td>る (ru)</td><td>れ (re)</td><td>ろ (ro)</td></tr>
+                            <tr><td><strong>W</strong></td><td>わ (wa)</td><td class="text-gray-700">-</td><td class="text-gray-700">-</td><td class="text-gray-700">-</td><td>を (o/wo)</td></tr>
+                             <tr><td><strong>N</strong></td><td>ん (n)</td><td class="text-gray-700">-</td><td class="text-gray-700">-</td><td class="text-gray-700">-</td><td class="text-gray-700">-</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="mt-4">Ce tableau n'inclut pas les sons modifiés (avec ゛ ou ゜) ni les sons combinés (comme きゃ, 'kya').</p>
+                </div>
+                <div id="lesson-content-katakana-table" class="lesson-content hidden">
+                    <h3>Tableau des Katakana (カタカナ)</h3>
+                    <p>Voici le tableau de base des 46 Katakana. Ils représentent les mêmes sons que les Hiragana mais sont utilisés pour les mots étrangers.</p>
+                     <table class="japanese-font kana-table">
+                        <thead><tr><th></th><th class="w-1/6">A</th><th class="w-1/6">I</th><th class="w-1/6">U</th><th class="w-1/6">E</th><th class="w-1/6">O</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>-</strong></td><td>ア (a)</td><td>イ (i)</td><td>ウ (u)</td><td>エ (e)</td><td>オ (o)</td></tr>
+                            <tr><td><strong>K</strong></td><td>カ (ka)</td><td>キ (ki)</td><td>ク (ku)</td><td>ケ (ke)</td><td>コ (ko)</td></tr>
+                            <tr><td><strong>S</strong></td><td>サ (sa)</td><td>シ (shi)</td><td>ス (su)</td><td>セ (se)</td><td>ソ (so)</td></tr>
+                            <tr><td><strong>T</strong></td><td>タ (ta)</td><td>チ (chi)</td><td>ツ (tsu)</td><td>テ (te)</td><td>ト (to)</td></tr>
+                            <tr><td><strong>N</strong></td><td>ナ (na)</td><td>ニ (ni)</td><td>ヌ (nu)</td><td>ネ (ne)</td><td>ノ (no)</td></tr>
+                            <tr><td><strong>H</strong></td><td>ハ (ha)</td><td>ヒ (hi)</td><td>フ (fu)</td><td>ヘ (he)</td><td>ホ (ho)</td></tr>
+                            <tr><td><strong>M</strong></td><td>マ (ma)</td><td>ミ (mi)</td><td>ム (mu)</td><td>メ (me)</td><td>モ (mo)</td></tr>
+                            <tr><td><strong>Y</strong></td><td>ヤ (ya)</td><td class="text-gray-700">-</td><td>ユ (yu)</td><td class="text-gray-700">-</td><td>ヨ (yo)</td></tr>
+                            <tr><td><strong>R</strong></td><td>ラ (ra)</td><td>リ (ri)</td><td>ル (ru)</td><td>レ (re)</td><td>ロ (ro)</td></tr>
+                            <tr><td><strong>W</strong></td><td>ワ (wa)</td><td class="text-gray-700">-</td><td class="text-gray-700">-</td><td class="text-gray-700">-</td><td>ヲ (o/wo)</td></tr>
+                             <tr><td><strong>N</strong></td><td>ン (n)</td><td class="text-gray-700">-</td><td class="text-gray-700">-</td><td class="text-gray-700">-</td><td class="text-gray-700">-</td></tr>
+                        </tbody>
+                    </table>
+                     <p class="mt-4">Comme pour les Hiragana, ce tableau n'inclut pas les sons modifiés ou combinés, qui sont très courants en Katakana pour les mots étrangers (comme ヴェ 've' or ティ 'ti').</p>
+                </div>
+            </div>
+
+            <!-- NOUVELLE VUE : QUIZ (cachée) -->
+            <div id="quiz-view" class="hidden">
+                <div class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-lg mx-auto">
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 id="quiz-title" class="text-2xl font-bold text-orange-400">Quiz de Lecture</h2>
+                        <button id="quit-quiz-btn" class="py-2 px-4 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-500 transition text-sm">Quitter</button>
+                    </div>
+
+                    <!-- Zone d'affichage du mot -->
+                    <div id="quiz-display" class="japanese-font bg-gray-900 rounded-lg text-center py-12 px-4 mb-6 select-none">
+                        <span class="text-6xl font-bold text-white">...</span>
+                    </div>
+
+                    <!-- Zone de feedback -->
+                    <div id="quiz-feedback-message" class="text-center min-h-[3.5rem] mb-4 p-2 rounded-lg text-lg flex items-center justify-center">
+                        <span class="font-semibold text-gray-300">À vous de jouer !</span>
+                    </div>
+
+                    <!-- Formulaire de réponse -->
+                    <form id="quiz-form">
+                        <label for="quiz-answer-input" class="block text-sm font-medium text-gray-400 mb-2">Votre réponse (en romaji) :</label>
+                        <input type="text" id="quiz-answer-input" name="answer" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" 
+                               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-lg" 
+                               placeholder="Ex: sushi">
+                        
+                        <button type="submit" id="quiz-submit-button" 
+                                class="w-full py-3 mt-4 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition-colors duration-200 text-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+                            Vérifier
+                        </button>
+                    </form>
+
+                    <!-- Affichage du score -->
+                    <div id="quiz-score-display" class="text-center text-gray-500 mt-6 font-semibold">
+                        Score : 0 / 0
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modals -->
+    <div id="add-deck-modal" class="modal-overlay hidden"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4"><h3 class="text-xl font-bold text-center text-white">Nouveau Paquet</h3><input type="text" id="new-deck-name" placeholder="Nom du paquet" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><div class="flex space-x-4"><button id="save-deck-btn" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Créer</button><button id="cancel-deck-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button></div></div></div>
+    <div id="add-card-modal" class="modal-overlay hidden"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4"><h3 class="text-xl font-bold text-center text-white">Nouvelle Carte</h3><input type="text" id="new-card-french" placeholder="Français / Son" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+        <input type="text" id="new-card-kana" placeholder="Kana (あ, カ, etc.)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white japanese-font"><input type="text" id="new-card-romanization" placeholder="Romanisation (a, ka, etc.)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white"><div class="flex space-x-4"><button id="save-card-btn" class="w-full py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition">Sauvegarder</button><button id="cancel-card-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button></div></div></div>
+    <div id="delete-deck-modal" class="modal-overlay hidden"><div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl space-y-4 text-center"><h3 class="text-xl font-bold text-white">Confirmer la suppression</h3><p class="text-gray-300">Êtes-vous sûr de vouloir supprimer ce paquet et toutes ses cartes ? Cette action est irréversible.</p><div class="flex space-x-4"><button id="confirm-delete-deck-btn" class="w-full py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">Supprimer</button><button id="cancel-delete-deck-btn" class="w-full py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Annuler</button></div></div></div>
+
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Imports Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, writeBatch, query, getDocs, addDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
+            authDomain: "muscu-5e40c.firebaseapp.com",
+            projectId: "muscu-5e40c",
+            storageBucket: "muscu-5e40c.appspot.com",
+            messagingSenderId: "561788112947",
+            appId: "1:561788112947:web:7f2b7c7d74ff328f2b1346"
+        };
+
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore(app);
+
+        // --- DONNÉES DE L'APPLICATION ---
+
+        // Données des paquets de flashcards par défaut
+        const defaultDecks = {
+            'deck_hiragana': {
+                name: 'Hiragana de base',
+                cards: [
+                    {id: 'h1', french: 'A', kana: 'あ', romanization: 'a'}, {id: 'h2', french: 'I', kana: 'い', romanization: 'i'}, {id: 'h3', french: 'U', kana: 'う', romanization: 'u'}, {id: 'h4', french: 'E', kana: 'え', romanization: 'e'}, {id: 'h5', french: 'O', kana: 'お', romanization: 'o'},
+                    {id: 'h6', french: 'Ka', kana: 'か', romanization: 'ka'}, {id: 'h7', french: 'Ki', kana: 'き', romanization: 'ki'}, {id: 'h8', french: 'Ku', kana: 'く', romanization: 'ku'}, {id: 'h9', french: 'Ke', kana: 'け', romanization: 'ke'}, {id: 'h10', french: 'Ko', kana: 'こ', romanization: 'ko'},
+                    {id: 'h11', french: 'Sa', kana: 'さ', romanization: 'sa'}, {id: 'h12', french: 'Shi', kana: 'し', romanization: 'shi'}, {id: 'h13', french: 'Su', kana: 'す', romanization: 'su'}, {id: 'h14', french: 'Se', kana: 'せ', romanization: 'se'}, {id: 'h15', french: 'So', kana: 'そ', romanization: 'so'},
+                    {id: 'h16', french: 'Ta', kana: 'た', romanization: 'ta'}, {id: 'h17', french: 'Chi', kana: 'ち', romanization: 'chi'}, {id: 'h18', french: 'Tsu', kana: 'つ', romanization: 'tsu'}, {id: 'h19', french: 'Te', kana: 'て', romanization: 'te'}, {id: 'h20', french: 'To', kana: 'と', romanization: 'to'},
+                    {id: 'h21', french: 'Na', kana: 'な', romanization: 'na'}, {id: 'h22', french: 'Ni', kana: 'に', romanization: 'ni'}, {id: 'h23', french: 'Nu', kana: 'ぬ', romanization: 'nu'}, {id: 'h24', french: 'Ne', kana: 'ね', romanization: 'ne'}, {id: 'h25', french: 'No', kana: 'の', romanization: 'no'},
+                    {id: 'h26', french: 'Ha', kana: 'は', romanization: 'ha'}, {id: 'h27', french: 'Hi', kana: 'ひ', romanization: 'hi'}, {id: 'h28', french: 'Fu', kana: 'ふ', romanization: 'fu'}, {id: 'h29', french: 'He', kana: 'へ', romanization: 'he'}, {id: 'h30', french: 'Ho', kana: 'ほ', romanization: 'ho'},
+                    {id: 'h31', french: 'Ma', kana: 'ま', romanization: 'ma'}, {id: 'h32', french: 'Mi', kana: 'み', romanization: 'mi'}, {id: 'h33', french: 'Mu', kana: 'む', romanization: 'mu'}, {id: 'h34', french: 'Me', kana: 'め', romanization: 'me'}, {id: 'h35', french: 'Mo', kana: 'も', romanization: 'mo'},
+                    {id: 'h36', french: 'Ya', kana: 'や', romanization: 'ya'}, {id: 'h37', french: 'Yu', kana: 'ゆ', romanization: 'yu'}, {id: 'h38', french: 'Yo', kana: 'よ', romanization: 'yo'},
+                    {id: 'h39', french: 'Ra', kana: 'ら', romanization: 'ra'}, {id: 'h40', french: 'Ri', kana: 'り', romanization: 'ri'}, {id: 'h41', french: 'Ru', kana: 'る', romanization: 'ru'}, {id: 'h42', french: 'Re', kana: 'れ', romanization: 're'}, {id: 'h43', french: 'Ro', kana: 'ろ', romanization: 'ro'},
+                    {id: 'h44', french: 'Wa', kana: 'わ', romanization: 'wa'}, {id: 'h45', french: 'Wo', kana: 'を', romanization: 'o (wo)'},
+                    {id: 'h46', french: 'N', kana: 'ん', romanization: 'n'}
+                ]
+            },
+            'deck_katakana': {
+                name: 'Katakana de base',
+                cards: [
+                    {id: 'k1', french: 'A', kana: 'ア', romanization: 'a'}, {id: 'k2', french: 'I', kana: 'イ', romanization: 'i'}, {id: 'k3', french: 'U', kana: 'ウ', romanization: 'u'}, {id: 'k4', french: 'E', kana: 'エ', romanization: 'e'}, {id: 'k5', french: 'O', kana: 'オ', romanization: 'o'},
+                    {id: 'k6', french: 'Ka', kana: 'カ', romanization: 'ka'}, {id: 'k7', french: 'Ki', kana: 'キ', romanization: 'ki'}, {id: 'k8', french: 'Ku', kana: 'ク', romanization: 'ku'}, {id: 'k9', french: 'Ke', kana: 'ケ', romanization: 'ke'}, {id: 'k10', french: 'Ko', kana: 'コ', romanization: 'ko'},
+                    {id: 'k11', french: 'Sa', kana: 'サ', romanization: 'sa'}, {id: 'k12', french: 'Shi', kana: 'シ', romanization: 'shi'}, {id: 'k13', french: 'Su', kana: 'ス', romanization: 'su'}, {id: 'k14', french: 'Se', kana: 'セ', romanization: 'se'}, {id: 'k15', french: 'So', kana: 'ソ', romanization: 'so'},
+                    {id: 'k16', french: 'Ta', kana: 'タ', romanization: 'ta'}, {id: 'k17', french: 'Chi', kana: 'チ', romanization: 'chi'}, {id: 'k18', french: 'Tsu', kana: 'ツ', romanization: 'tsu'}, {id: 'k19', french: 'Te', kana: 'テ', romanization: 'te'}, {id: 'k20', french: 'To', kana: 'ト', romanization: 'to'},
+                    {id: 'k21', french: 'Na', kana: 'ナ', romanization: 'na'}, {id: 'k22', french: 'Ni', kana: 'ニ', romanization: 'ni'}, {id: 'k23', french: 'Nu', kana: 'ヌ', romanization: 'nu'}, {id: 'k24', french: 'Ne', kana: 'ネ', romanization: 'ne'}, {id: 'k25', french: 'No', kana: 'ノ', romanization: 'no'},
+                    {id: 'k26', french: 'Ha', kana: 'ハ', romanization: 'ha'}, {id: 'k27', french: 'Hi', kana: 'ヒ', romanization: 'hi'}, {id: 'k28', french: 'Fu', kana: 'フ', romanization: 'fu'}, {id: 'k29', french: 'He', kana: 'ヘ', romanization: 'he'}, {id: 'k30', french: 'Ho', kana: 'ホ', romanization: 'ho'},
+                    {id: 'k31', french: 'Ma', kana: 'マ', romanization: 'ma'}, {id: 'k32', french: 'Mi', kana: 'ミ', romanization: 'mi'}, {id: 'k33', french: 'Mu', kana: 'ム', romanization: 'mu'}, {id: 'k34', french: 'Me', kana: 'メ', romanization: 'me'}, {id: 'k35', french: 'Mo', kana: 'モ', romanization: 'mo'},
+                    {id: 'k36', french: 'Ya', kana: 'ヤ', romanization: 'ya'}, {id: 'k37', french: 'Yu', kana: 'ユ', romanization: 'yu'}, 
+                    {id: 'k38', french: 'Yo', kana: 'ヨ', romanization: 'yo'},
+                    {id: 'k39', french: 'Ra', kana: 'ラ', romanization: 'ra'}, {id: 'k40', french: 'Ri', kana: 'リ', romanization: 'ri'}, {id: 'k41', french: 'Ru', kana: 'ル', romanization: 'ru'}, {id: 'k42', french: 'Re', kana: 'レ', romanization: 're'}, {id: 'k43', french: 'Ro', kana: 'ロ', romanization: 'ro'},
+                    {id: 'k44', french: 'Wa', kana: 'ワ', romanization: 'wa'}, {id: 'k45', french: 'Wo', kana: 'ヲ', romanization: 'o (wo)'},
+                    {id: 'k46', french: 'N', kana: 'ン', romanization: 'n'}
+                ]
+            }
+        };
+
+        // --- NOUVEAU : Bases de données pour le Quiz ---
+        const quizWordsHiragana = [
+            { kana: 'あおい', romaji: 'aoi', french: 'bleu' }, { kana: 'いえ', romaji: 'ie', french: 'maison' },
+            { kana: 'うし', romaji: 'ushi', french: 'vache' }, { kana: 'えき', romaji: 'eki', french: 'gare' },
+            { kana: 'おかし', romaji: 'okashi', french: 'bonbon' }, { kana: 'かさ', romaji: 'kasa', french: 'parapluie' },
+            { kana: 'くつ', romaji: 'kutsu', french: 'chaussures' }, { kana: 'すし', romaji: 'sushi', french: 'sushi' },
+            { kana: 'ねこ', romaji: 'neko', french: 'chat' }, { kana: 'いぬ', romaji: 'inu', french: 'chien' },
+            { kana: 'さかな', romaji: 'sakana', french: 'poisson' }, { kana: 'わたし', romaji: 'watashi', french: 'je/moi' },
+            { kana: 'そら', romaji: 'sora', french: 'ciel' }, { kana: 'つき', romaji: 'tsuki', french: 'lune' },
+            { kana: 'みず', romaji: 'mizu', french: 'eau' }, { kana: 'やま', romaji: 'yama', french: 'montagne' },
+            { kana: 'かわ', romaji: 'kawa', french: 'rivière' }, { kana: 'なまえ', romaji: 'namae', french: 'nom' },
+            { kana: 'はな', romaji: 'hana', french: 'fleur' }, { kana: 'ひと', romaji: 'hito', french: 'personne' },
+            { kana: 'おはよう', romaji: 'ohayou', french: 'bonjour (matin)' }, { kana: 'こんにちは', romaji: 'konnichiwa', french: 'bonjour' },
+            { kana: 'ありがとう', romaji: 'arigatou', french: 'merci' }, { kana: 'しろい', romaji: 'shiroi', french: 'blanc' },
+            { kana: 'あかい', romaji: 'akai', french: 'rouge' }, { kana: 'よむ', romaji: 'yomu', french: 'lire' },
+            { kana: 'のみもの', romaji: 'nomimono', french: 'boisson' }, { kana: 'くだもの', romaji: 'kudamono', french: 'fruit' },
+            { kana: 'くるま', romaji: 'kuruma', french: 'voiture' }, { kana: 'でんわ', romaji: 'denwa', french: 'téléphone' },
+            { kana: 'てがみ', romaji: 'tegami', french: 'lettre' }, { kana: 'ふゆ', romaji: 'fuyu', french: 'hiver' },
+            { kana: 'なつ', romaji: 'natsu', french: 'été' }, { kana: 'はる', romaji: 'haru', french: 'printemps' },
+            { kana: 'あき', romaji: 'aki', french: 'automne' },
+            
+            // Nouveaux mots ajoutés pour couvrir les 5 kana manquants
+            { kana: 'いけ', romaji: 'ike', french: 'étang' }, // Contient け
+            { kana: 'せかい', romaji: 'sekai', french: 'monde' }, // Contient せ
+            { kana: 'へや', romaji: 'heya', french: 'chambre' }, // Contient へ
+            { kana: 'きれい', romaji: 'kirei', french: 'joli' }, // Contient れ
+            { kana: 'を', romaji: 'o', french: 'particule (wo/o)' } // Le son を
+        ];
+
+        const quizWordsKatakana = [
+            { kana: 'アメリカ', romaji: 'amerika', french: 'Amérique' }, { kana: 'フランス', romaji: 'furansu', french: 'France' },
+            { kana: 'パン', romaji: 'pan', french: 'pain' }, { kana: 'カメラ', romaji: 'kamera', french: 'appareil photo' },
+            { kana: 'トマト', romaji: 'tomato', french: 'tomate' }, { kana: 'コーヒー', romaji: 'koohii', french: 'café' },
+            { kana: 'バス', romaji: 'basu', french: 'bus' }, { kana: 'タクシー', romaji: 'takushii', french: 'taxi' },
+            { kana: 'ホテル', romaji: 'hoteru', french: 'hôtel' }, { kana: 'レストラン', romaji: 'resutoran', french: 'restaurant' },
+            { kana: 'コンピュータ', romaji: 'konpyuuta', french: 'ordinateur' }, { kana: 'テレビ', romaji: 'terebi', french: 'télévision' },
+            { kana: 'ラジオ', romaji: 'rajio', french: 'radio' }, { kana: 'スポーツ', romaji: 'supootsu', french: 'sport' },
+            { kana: 'テニス', romaji: 'tenisu', french: 'tennis' }, { kana: 'サッカー', romaji: 'sakkaa', french: 'football' },
+            { kana: 'ギター', romaji: 'gitaa', french: 'guitare' }, { kana: 'ピアノ', romaji: 'piano', french: 'piano' },
+            { kana: 'ビール', romaji: 'biiru', french: 'bière' }, { kana: 'ワイン', romaji: 'wain', french: 'vin' },
+            { kana: 'チーズ', romaji: 'chiizu', french: 'fromage' }, { kana: 'バナナ', romaji: 'banana', french: 'banane' },
+            { kana: 'メニュー', romaji: 'menyuu', french: 'menu' }, { kana: 'ナイフ', romaji: 'naifu', french: 'couteau' },
+            { kana: 'フォーク', romaji: 'fooku', french: 'fourchette' }, { kana: 'スプーン', romaji: 'supuun', french: 'cuillère' },
+            { kana: 'ドア', romaji: 'doa', french: 'porte' }, { kana: 'ペン', romaji: 'pen', french: 'stylo' },
+            { kana: 'ノート', romaji: 'nooto', french: 'cahier' }, { kana: 'パーティー', romaji: 'paathii', french: 'fête' }
+        ];
+
+
+        // --- VARIABLES GLOBALES ---
+
+        // État principal
+        let userDecks = {};
+        let currentDeckId = null;
+        let userId = null;
+
+        // État des Flashcards
+        let currentCardIndex = 0;
+        let isReviewMode = false;
+        let isReviewAllMode = false;
+        let visibleCards = [];
+
+        // NOUVEAU : État du Quiz
+        let quizWordsToQuiz = [];
+        let currentQuizWord = null;
+        let quizScore = 0;
+        let quizTotal = 0;
+        let isQuizAnswered = false;
+        let currentQuizType = null; // AJOUT : Pour mémoriser le type de quiz
+
+
+        // --- RÉFÉRENCES DOM ---
+
+        // Vues principales
+        const authOverlay = document.getElementById('auth-overlay');
+        const appContent = document.getElementById('app-content');
+        const loader = document.getElementById('loader');
+        const flashcardView = document.getElementById('flashcard-view');
+        const lessonView = document.getElementById('lesson-view');
+        const quizView = document.getElementById('quiz-view'); // NOUVEAU
+
+        // Barre latérale et Titre
+        const deckSidebarDesktop = document.getElementById('deck-sidebar-desktop');
+        const deckSidebarMobile = document.getElementById('deck-sidebar-mobile');
+        const deckTitle = document.getElementById('deck-title');
+
+        // Composants Flashcard
+        const card = document.getElementById('flashcard');
+        const cardFront = document.getElementById('card-front');
+        const cardBack = document.getElementById('card-back');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressText = document.getElementById('progress');
+        const reviewModeBtn = document.getElementById('review-mode-btn');
+        const reviewAllBtn = document.getElementById('review-all-btn');
+        
+        // NOUVEAU : Composants Quiz
+        const quitQuizBtn = document.getElementById('quit-quiz-btn');
+        const quizTitle = document.getElementById('quiz-title');
+        const quizDisplay = document.getElementById('quiz-display').querySelector('span');
+        const quizForm = document.getElementById('quiz-form');
+        const quizAnswerInput = document.getElementById('quiz-answer-input');
+        const quizSubmitButton = document.getElementById('quiz-submit-button');
+        const quizFeedbackMessage = document.getElementById('quiz-feedback-message');
+        const quizScoreDisplay = document.getElementById('quiz-score-display');
+
+        // Modals
+        const addDeckModal = document.getElementById('add-deck-modal');
+        const addCardModal = document.getElementById('add-card-modal');
+        const deleteDeckModal = document.getElementById('delete-deck-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-deck-btn');
+
+        // --- AUTHENTIFICATION ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                userId = user.uid;
+                authOverlay.style.display = 'none';
+                appContent.classList.add('hidden');
+                loader.style.display = 'flex';
+                initializeAppLogic(user);
+            } else {
+                userId = null;
+                authOverlay.style.display = 'flex';
+                appContent.classList.add('hidden');
+                loader.style.display = 'none';
+            }
+        });
+
+        // --- INITIALISATION DE L'APPLICATION ---
+        async function initializeAppLogic(user) {
+            document.getElementById('user-email').textContent = user.email;
+            
+            const defaultCheckRef = doc(db, "users", userId, "japanese_decks", 'deck_hiragana');
+            const defaultCheckSnap = await getDoc(defaultCheckRef);
+
+            if (!defaultCheckSnap.exists()) {
+                console.log("Première configuration : création des paquets japonais par défaut.");
+                const batch = writeBatch(db);
+                for (const deckId in defaultDecks) {
+                    const deckData = defaultDecks[deckId];
+                    const deckRef = doc(db, "users", userId, "japanese_decks", deckId);
+                    batch.set(deckRef, { name: deckData.name, isDefault: true });
+                    deckData.cards.forEach(cardData => {
+                        const cardRef = doc(db, "users", userId, "japanese_decks", deckId, "cards", cardData.id);
+                        const initialCardData = { ...cardData, status: 'new' };
+                        batch.set(cardRef, initialCardData);
+                    });
+                }
+                await batch.commit();
+            }
+
+            const decksCollectionRef = collection(db, "users", userId, "japanese_decks");
+            const finalDecksSnapshot = await getDocs(query(decksCollectionRef));
+            userDecks = {};
+            for (const deckDoc of finalDecksSnapshot.docs) {
+                const deckId = deckDoc.id;
+                const cardsCollectionRef = collection(db, "users", userId, "japanese_decks", deckId, "cards");
+                const cardsSnapshot = await getDocs(query(cardsCollectionRef));
+                userDecks[deckId] = { ...deckDoc.data(), id: deckDoc.id, cards: cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) };
+                userDecks[deckId].cards.sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+            }
+            
+            populateDeckSidebars();
+            const firstDeckId = Object.keys(userDecks).find(id => id !== 'training_session'); 
+            if (firstDeckId) {
+                await loadDeck(firstDeckId);
+            } else {
+                deckTitle.textContent = "Aucun paquet";
+                currentDeckId = null;
+                updateDashboard();
+                updateCardDisplay();
+            }
+            
+            loader.style.display = 'none';
+            appContent.classList.remove('hidden');
+        }
+        
+        // --- LOGIQUE DE NAVIGATION / AFFICHAGE ---
+
+        function showLesson(lessonId, lessonTitle) {
+            flashcardView.classList.add('hidden');
+            quizView.classList.add('hidden'); // Cacher le quiz
+            lessonView.classList.remove('hidden');
+
+            document.querySelectorAll('.lesson-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`lesson-content-${lessonId}`).classList.remove('hidden');
+
+            deckTitle.textContent = lessonTitle;
+
+            document.querySelectorAll('.deck-btn, .lesson-btn, .quiz-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll(`.lesson-btn[data-lesson-id="${lessonId}"]`).forEach(btn => btn.classList.add('active'));
+        }
+        
+        async function loadDeck(deckId) {
+            lessonView.classList.add('hidden');
+            quizView.classList.add('hidden'); // Cacher le quiz
+            flashcardView.classList.remove('hidden');
+
+            document.getElementById('add-card-btn').classList.remove('hidden');
+            reviewModeBtn.disabled = false;
+            reviewAllBtn.classList.add('hidden');
+        
+            currentDeckId = deckId;
+            deckTitle.textContent = userDecks[deckId].name;
+            isReviewMode = false;
+            reviewModeBtn.textContent = "Révision";
+
+            document.querySelectorAll('.deck-btn, .lesson-btn, .quiz-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll(`.deck-btn[data-deck-id="${deckId}"]`).forEach(btn => btn.classList.add('active'));
+
+            updateVisibleCards();
+            updateDashboard();
+            updateCardDisplay();
+        }
+
+        function startTrainingSession(cards, trainingTitle) {
+            if (cards.length === 0) {
+                console.warn("Il n'y a aucune carte à réviser !");
+                return;
+            }
+            
+            lessonView.classList.add('hidden');
+            quizView.classList.add('hidden'); // Cacher le quiz
+            flashcardView.classList.remove('hidden');
+
+            document.getElementById('add-card-btn').classList.add('hidden');
+            reviewModeBtn.disabled = false;
+            reviewAllBtn.classList.remove('hidden'); 
+
+            const virtualDeckId = 'training_session';
+            userDecks[virtualDeckId] = { id: virtualDeckId, name: trainingTitle, cards: cards, isTemporary: true };
+            currentDeckId = virtualDeckId;
+
+            deckTitle.textContent = trainingTitle;
+            isReviewMode = false;
+            reviewModeBtn.textContent = "Révision (20 au hasard)";
+            
+            document.querySelectorAll('.deck-btn, .lesson-btn, .quiz-btn').forEach(btn => btn.classList.remove('active'));
+
+            updateVisibleCards();
+            updateDashboard();
+            updateCardDisplay();
+        }
+
+
+        function populateDeckSidebars() {
+            deckSidebarDesktop.innerHTML = '';
+            deckSidebarMobile.innerHTML = '';
+
+            const createDeckButton = (deckData) => {
+                const allCardsMastered = deckData.cards.length > 0 && deckData.cards.every(c => c.status === 'mastered');
+                const masteredIcon = allCardsMastered ? `<span class="text-green-400" title="Paquet maîtrisé !"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>` : '';
+                const deleteButton = `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`;
+                
+                const button = document.createElement('button');
+                button.dataset.deckId = deckData.id;
+                button.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
+                button.innerHTML = `<span class="flex-grow">${deckData.name}</span> ${masteredIcon} ${deleteButton}`;
+                return button;
+            };
+
+            // --- Barre latérale Mobile ---
+            const trainAllButtonMobile = document.createElement('button');
+            trainAllButtonMobile.id = 'train-all-btn-mobile';
+            trainAllButtonMobile.className = 'flex-shrink-0 py-2 px-4 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition';
+            trainAllButtonMobile.textContent = "Tout réviser";
+            deckSidebarMobile.appendChild(trainAllButtonMobile);
+
+            const sortedDecksMobile = Object.values(userDecks).filter(deck => !deck.isTemporary).sort((a, b) => a.name.localeCompare(b.name));
+            sortedDecksMobile.forEach(deckData => {
+                 const button = document.createElement('button');
+                button.dataset.deckId = deckData.id;
+                button.className = 'deck-btn flex-shrink-0 py-2 px-4 rounded-lg text-gray-400 bg-gray-700 hover:bg-gray-600 transition';
+                button.textContent = deckData.name;
+                deckSidebarMobile.appendChild(button);
+            });
+
+            // --- Barre latérale Desktop ---
+            const trainAllButton = document.createElement('button');
+            trainAllButton.id = 'train-all-btn';
+            trainAllButton.className = 'w-full mb-4 py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition';
+            trainAllButton.textContent = "S'entraîner sur tout";
+            deckSidebarDesktop.appendChild(trainAllButton);
+
+            // Paquets
+            const decksAccordionWrapper = document.createElement('div');
+            decksAccordionWrapper.className = 'space-y-1';
+            const decksToggleBtn = document.createElement('button');
+            decksToggleBtn.className = 'accordion-toggle open w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
+            decksToggleBtn.innerHTML = `<span>Paquets</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+            const decksContentDiv = document.createElement('div');
+            decksContentDiv.className = 'accordion-content pl-4 space-y-1';
+            const sortedDecks = Object.values(userDecks).filter(deck => !deck.isTemporary).sort((a, b) => a.name.localeCompare(b.name));
+            sortedDecks.forEach(deckData => decksContentDiv.appendChild(createDeckButton(deckData)));
+            decksAccordionWrapper.appendChild(decksToggleBtn);
+            decksAccordionWrapper.appendChild(decksContentDiv);
+            deckSidebarDesktop.appendChild(decksAccordionWrapper);
+            
+            // Leçons
+            const lessonData = [
+                { id: 'intro', title: 'Leçon : Intro aux Kana' }, { id: 'romaji', title: 'Leçon : Qu\'est-ce que le Romaji ?' },
+                { id: 'structure', title: 'Leçon : Phrase de Base' }, { id: 'hiragana-table', title: 'Leçon : Tableau Hiragana' },
+                { id: 'katakana-table', title: 'Leçon : Tableau Katakana' }
+            ];
+            const lessonsAccordionWrapper = document.createElement('div');
+            lessonsAccordionWrapper.className = 'space-y-1 mt-2';
+            const lessonsToggleBtn = document.createElement('button');
+            lessonsToggleBtn.className = 'accordion-toggle w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
+            lessonsToggleBtn.innerHTML = `<span>Leçons</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+            const lessonsContentDiv = document.createElement('div');
+            lessonsContentDiv.className = 'accordion-content hidden pl-4 space-y-1';
+            lessonData.forEach(data => {
+                const button = document.createElement('button');
+                button.className = 'lesson-btn w-full text-left p-3 rounded-lg text-blue-400 hover:bg-gray-600 transition';
+                button.dataset.lessonId = data.id; button.dataset.lessonTitle = data.title;
+                button.innerHTML = `<span>${data.title}</span>`;
+                lessonsContentDiv.appendChild(button);
+            });
+            lessonsAccordionWrapper.appendChild(lessonsToggleBtn);
+            lessonsAccordionWrapper.appendChild(lessonsContentDiv);
+            deckSidebarDesktop.appendChild(lessonsAccordionWrapper);
+
+            // NOUVEAU : Section Entraînement (Quiz)
+            const quizData = [
+                { id: 'hiragana', title: 'Quiz Hiragana' }, { id: 'katakana', title: 'Quiz Katakana' }
+            ];
+            const quizAccordionWrapper = document.createElement('div');
+            quizAccordionWrapper.className = 'space-y-1 mt-2';
+            const quizToggleBtn = document.createElement('button');
+            quizToggleBtn.className = 'accordion-toggle w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
+            quizToggleBtn.innerHTML = `<span>Entraînement</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+            const quizContentDiv = document.createElement('div');
+            quizContentDiv.className = 'accordion-content pl-4 space-y-1';
+            quizData.forEach(data => {
+                const button = document.createElement('button');
+                button.className = 'quiz-btn w-full text-left p-3 rounded-lg text-green-400 hover:bg-gray-600 transition';
+                button.dataset.quizType = data.id;
+                button.innerHTML = `<span>${data.title}</span>`;
+                quizContentDiv.appendChild(button);
+            });
+            quizAccordionWrapper.appendChild(quizToggleBtn);
+            quizAccordionWrapper.appendChild(quizContentDiv);
+            deckSidebarDesktop.appendChild(quizAccordionWrapper);
+        }
+        
+        // --- LOGIQUE FLASHCARD ---
+
+        function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
+
+        function updateVisibleCards() {
+            const currentDeck = userDecks[currentDeckId];
+            if (!currentDeck) return;
+            
+            if (isReviewMode) {
+                if (currentDeck.isTemporary) {
+                     if (isReviewAllMode) {
+                        visibleCards = [...currentDeck.cards];
+                        shuffleArray(visibleCards);
+                    } else {
+                        // Logique de révision intelligente (20 cartes)
+                        const allCards = [...currentDeck.cards];
+                        const toReviewCards = allCards.filter(c => c.status === 'learning' || c.status === 'new' || !c.status);
+                        const masteredCards = allCards.filter(c => c.status === 'mastered');
+                        shuffleArray(toReviewCards); shuffleArray(masteredCards);
+                        let finalReviewList = [];
+                        const reviewSize = 20;
+                        const targetToReviewCount = Math.ceil(reviewSize * 0.75);
+                        const actualToReviewCount = Math.min(toReviewCards.length, targetToReviewCount);
+                        finalReviewList.push(...toReviewCards.slice(0, actualToReviewCount));
+                        const remainingSlots = reviewSize - finalReviewList.length;
+                        if (remainingSlots > 0) {
+                            const masteredCount = Math.min(masteredCards.length, remainingSlots);
+                            finalReviewList.push(...masteredCards.slice(0, masteredCount));
+                        }
+                         if (finalReviewList.length < reviewSize && toReviewCards.length > actualToReviewCount) {
+                            const moreToReviewNeeded = reviewSize - finalReviewList.length;
+                            const availableMoreToReview = toReviewCards.slice(actualToReviewCount);
+                            finalReviewList.push(...availableMoreToReview.slice(0, moreToReviewNeeded));
+                        }
+                        shuffleArray(finalReviewList);
+                        visibleCards = finalReviewList;
+                    }
+                } else {
+                    visibleCards = [...currentDeck.cards];
+                    shuffleArray(visibleCards);
+                }
+            } else {
+                if (currentDeck.isTemporary) {
+                    const allCards = [...currentDeck.cards];
+                    const toReview = allCards.filter(c => c.status === 'learning' || c.status === 'new' || !c.status);
+                    const mastered = allCards.filter(c => c.status === 'mastered');
+                    shuffleArray(toReview); shuffleArray(mastered);
+                    visibleCards = [...toReview, ...mastered];
+                } else {
+                    visibleCards = [...currentDeck.cards];
+                }
+            }
+            currentCardIndex = 0;
+        }
+
+        function updateDashboard() {
+            let cardsToCount = [];
+            const realDecks = Object.values(userDecks).filter(d => !d.isTemporary);
+
+            if (currentDeckId && userDecks[currentDeckId] && !userDecks[currentDeckId].isTemporary) {
+                cardsToCount = userDecks[currentDeckId].cards;
+            } else {
+                cardsToCount = realDecks.flatMap(deck => deck.cards);
+            }
+
+            document.getElementById('mastered-count').textContent = cardsToCount.filter(c => c.status === 'mastered').length;
+            document.getElementById('learning-count').textContent = cardsToCount.filter(c => c.status === 'learning').length;
+            document.getElementById('new-count').textContent = cardsToCount.filter(c => !c.status || c.status === 'new').length;
+        }
+
+        function updateCardDisplay() {
+            const showNavButtons = !isReviewMode;
+            prevBtn.style.visibility = showNavButtons ? 'visible' : 'hidden';
+            nextBtn.style.visibility = showNavButtons ? 'visible' : 'hidden';
+            card.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                if (!currentDeckId || !userDecks[currentDeckId] || visibleCards.length === 0) {
+                    cardFront.innerHTML = `<h2 class="text-xl md:text-2xl font-bold text-center p-4">${isReviewMode ? 'Aucune carte à réviser !' : 'Paquet vide.'}</h2>`;
+                    cardBack.innerHTML = '';
+                    progressText.textContent = '0 / 0';
+                    card.classList.remove('status-new', 'status-learning', 'status-mastered');
+                    prevBtn.disabled = true; nextBtn.disabled = true;
+                    return;
+                }
+                const currentCardData = visibleCards[currentCardIndex];
+                cardFront.innerHTML = `<h2 class="text-4xl md:text-6xl font-bold japanese-font">${currentCardData.kana}</h2>`;
+                cardBack.innerHTML = `<h3 class="text-3xl md:text-5xl font-bold">${currentCardData.french}</h3><p class="text-lg md:text-xl mt-2 text-gray-300">${currentCardData.romanization}</p>`;
+                card.classList.remove('status-new', 'status-learning', 'status-mastered');
+                card.classList.add(`status-${currentCardData.status || 'new'}`);
+                progressText.textContent = `Carte ${currentCardIndex + 1} sur ${visibleCards.length}`;
+                prevBtn.disabled = currentCardIndex === 0;
+                nextBtn.disabled = currentCardIndex === visibleCards.length - 1;
+            }, 150);
+        }
+
+        async function updateCardStatus(newStatus) {
+            if (!userId || visibleCards.length === 0) return;
+
+            const currentCard = visibleCards[currentCardIndex];
+            const cardId = currentCard.id;
+            const originalDeckId = currentCard.originalDeckId || currentDeckId;
+
+            if (!originalDeckId || !userDecks[originalDeckId]) {
+                console.error("Impossible de trouver le paquet d'origine pour cette carte.", currentCard);
+                return;
+            }
+
+            const cardInFullDeck = userDecks[originalDeckId]?.cards.find(c => c.id === cardId);
+            if (cardInFullDeck) {
+                cardInFullDeck.status = newStatus;
+            }
+            
+            currentCard.status = newStatus;
+            card.classList.remove('status-new', 'status-learning', 'status-mastered');
+            card.classList.add(`status-${newStatus}`);
+
+            populateDeckSidebars();
+            updateDashboard();
+
+            const docRef = doc(db, "users", userId, "japanese_decks", originalDeckId, "cards", cardId);
+            try {
+                await setDoc(docRef, { status: newStatus }, { merge: true });
+            } catch (error) {
+                console.error("Erreur de mise à jour:", error);
+            }
+        }
+        
+        function flipCard() {
+            const isFlipped = card.classList.contains('is-flipped');
+            if (isReviewMode) {
+                if (isFlipped) {
+                    if (currentCardIndex < visibleCards.length - 1) { 
+                        currentCardIndex++; 
+                        updateCardDisplay(); 
+                    } else { 
+                        isReviewMode = false;
+                        isReviewAllMode = false;
+                        reviewModeBtn.classList.remove('active');
+                        reviewModeBtn.textContent = (currentDeckId === 'training_session') ? "Révision (20 au hasard)" : "Révision";
+                        if (currentDeckId === 'training_session') {
+                            reviewAllBtn.classList.remove('hidden');
+                        }
+                        updateVisibleCards(); 
+                        updateCardDisplay(); 
+                    }
+                } else { 
+                    card.classList.add('is-flipped'); 
+                }
+            } else { 
+                card.classList.toggle('is-flipped'); 
+            }
+        }
+
+        // --- NOUVEAU : LOGIQUE DU QUIZ ---
+
+        /** Lance le quiz avec le type de kana spécifié */
+        function startQuiz(kanaType) {
+            // Changer de vue
+            flashcardView.classList.add('hidden');
+            lessonView.classList.add('hidden');
+            quizView.classList.remove('hidden');
+            
+            currentQuizType = kanaType; // AJOUT : Mémorise le type de quiz lancé
+
+            // Mettre à jour le titre et le bouton actif
+            const title = kanaType === 'hiragana' ? 'Quiz Hiragana' : 'Quiz Katakana';
+            deckTitle.textContent = title;
+            quizTitle.textContent = title;
+            document.querySelectorAll('.deck-btn, .lesson-btn, .quiz-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll(`.quiz-btn[data-quiz-type="${kanaType}"]`).forEach(btn => btn.classList.add('active'));
+
+            // Initialiser l'état du quiz
+            quizScore = 0;
+            quizTotal = 0;
+            quizScoreDisplay.textContent = `Score : 0 / 0`;
+            
+            // Charger les mots
+            shuffleQuizWords(kanaType);
+            loadNextQuizWord();
+        }
+
+        /** Mélange les mots pour le quiz */
+        function shuffleQuizWords(kanaType) {
+            const sourceWords = (kanaType === 'hiragana') ? quizWordsHiragana : quizWordsKatakana;
+            quizWordsToQuiz = [...sourceWords].sort(() => Math.random() - 0.5);
+        }
+
+        /** Charge le mot suivant dans le quiz */
+        function loadNextQuizWord() {
+            if (quizWordsToQuiz.length === 0) {
+                // BUG CORRIGÉ : Utilise la variable 'currentQuizType' pour re-mélanger la bonne liste
+                shuffleQuizWords(currentQuizType); 
+                console.log(`Liste de mots du quiz (${currentQuizType}) re-mélangée !`);
+            }
+
+            currentQuizWord = quizWordsToQuiz.pop();
+            quizDisplay.textContent = currentQuizWord.kana;
+            
+            // Réinitialiser l'état
+            isQuizAnswered = false;
+            quizAnswerInput.value = '';
+            quizAnswerInput.disabled = false;
+            quizSubmitButton.textContent = 'Vérifier';
+            quizSubmitButton.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-red-600', 'hover:bg-red-700');
+            quizSubmitButton.classList.add('bg-orange-600', 'hover:bg-orange-700');
+            
+            quizFeedbackMessage.innerHTML = '<span class="font-semibold text-gray-300">À vous de jouer !</span>';
+            quizFeedbackMessage.className = 'text-center min-h-[3.5rem] mb-4 p-2 rounded-lg text-lg flex items-center justify-center';
+
+            quizAnswerInput.focus();
+        }
+
+        /** Vérifie la réponse du quiz */
+        function checkQuizAnswer() {
+            const userAnswer = quizAnswerInput.value.trim().toLowerCase();
+            const correctAnswer = currentQuizWord.romaji.toLowerCase();
+
+            isQuizAnswered = true;
+            quizAnswerInput.disabled = true;
+            quizTotal++;
+
+            if (userAnswer === correctAnswer) {
+                quizScore++;
+                quizFeedbackMessage.innerHTML = `
+                    <span class="font-bold text-green-400">Correct !</span>
+                    <span class="ml-2 japanese-font">${currentQuizWord.kana}</span>
+                    <span class="text-gray-400 ml-1">(${currentQuizWord.romaji})</span>
+                    <span class="text-gray-400 ml-1">- ${currentQuizWord.french}</span>
+                `;
+                quizFeedbackMessage.className = 'text-center min-h-[3.5rem] mb-4 p-2 rounded-lg text-lg flex items-center justify-center flex-wrap bg-gray-700';
+                quizSubmitButton.textContent = 'Suivant';
+                quizSubmitButton.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+                quizSubmitButton.classList.add('bg-green-600', 'hover:bg-green-700');
+            } else {
+                quizFeedbackMessage.innerHTML = `
+                    <span class="font-bold text-red-400">Incorrect.</span>
+                    <span class="ml-2">La réponse était :</span>
+                    <span class="font-bold text-gray-200 ml-1">${currentQuizWord.romaji}</span>
+                `;
+                quizFeedbackMessage.className = 'text-center min-h-[3.5rem] mb-4 p-2 rounded-lg text-lg flex items-center justify-center flex-wrap bg-gray-700';
+                quizSubmitButton.textContent = 'Suivant';
+                quizSubmitButton.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+                quizSubmitButton.classList.add('bg-red-600', 'hover:bg-red-700');
+            }
+
+            quizScoreDisplay.textContent = `Score : ${quizScore} / ${quizTotal}`;
+            quizSubmitButton.focus();
+        }
+
+        /** Gère la soumission du formulaire de quiz */
+        function handleQuizSubmit(e) {
+            e.preventDefault();
+            if (isQuizAnswered) {
+                loadNextQuizWord();
+            } else {
+                if (quizAnswerInput.value.trim() !== '') {
+                    checkQuizAnswer();
+                }
+            }
+        }
+
+
+        // --- ÉCOUTEURS D'ÉVÉNEMENTS ---
+        function setupEventListeners() {
+            // Clic sur la barre latérale
+            function handleSidebarClick(e) {
+                const deckBtn = e.target.closest('.deck-btn');
+                const lessonBtn = e.target.closest('.lesson-btn');
+                const quizBtn = e.target.closest('.quiz-btn'); // NOUVEAU
+                const deleteBtn = e.target.closest('.delete-deck-btn');
+                const accordionToggle = e.target.closest('.accordion-toggle');
+                const trainAllBtn = e.target.closest('#train-all-btn, #train-all-btn-mobile');
+
+                if (deleteBtn) { e.stopPropagation(); openDeleteConfirmation(deckBtn.dataset.deckId); } 
+                else if (deckBtn) { loadDeck(deckBtn.dataset.deckId); } 
+                else if (lessonBtn) { showLesson(lessonBtn.dataset.lessonId, lessonBtn.dataset.lessonTitle); }
+                else if (quizBtn) { startQuiz(quizBtn.dataset.quizType); } // NOUVEAU
+                else if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); }
+                else if (trainAllBtn) {
+                    const allCards = Object.values(userDecks).filter(d => !d.isTemporary).flatMap(deck => deck.cards.map(card => ({...card, originalDeckId: deck.id})));
+                    startTrainingSession(allCards, "Entraînement : Toutes les cartes");
+                }
+            }
+            deckSidebarDesktop.addEventListener('click', handleSidebarClick);
+            deckSidebarMobile.addEventListener('click', handleSidebarClick);
+
+            // --- Écouteurs Flashcard ---
+            card.addEventListener('click', flipCard);
+            nextBtn.addEventListener('click', () => { if (currentCardIndex < visibleCards.length - 1) { currentCardIndex++; updateCardDisplay(); } });
+            prevBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; updateCardDisplay(); } });
+            document.getElementById('status-buttons').addEventListener('click', (e) => { const statusBtn = e.target.closest('.status-btn'); if (statusBtn) updateCardStatus(statusBtn.dataset.status); });
+            
+            reviewModeBtn.addEventListener('click', () => {
+                if (isReviewMode) { 
+                    isReviewMode = false; isReviewAllMode = false;
+                    reviewModeBtn.classList.remove('active');
+                    reviewModeBtn.textContent = (currentDeckId === 'training_session') ? "Révision (20 au hasard)" : "Révision";
+                    if (currentDeckId === 'training_session') { reviewAllBtn.classList.remove('hidden'); }
+                } else { 
+                    isReviewMode = true; isReviewAllMode = false;
+                    reviewModeBtn.classList.add('active');
+                    reviewModeBtn.textContent = "Quitter la révision";
+                    reviewAllBtn.classList.add('hidden');
+                }
+                updateVisibleCards(); updateCardDisplay();
+            });
+            reviewAllBtn.addEventListener('click', () => {
+                isReviewMode = true; isReviewAllMode = true;
+                reviewModeBtn.classList.add('active');
+                reviewModeBtn.textContent = "Quitter la révision";
+                reviewAllBtn.classList.add('hidden');
+                updateVisibleCards(); updateCardDisplay();
+            });
+
+            // --- Écouteurs Quiz (NOUVEAU) ---
+            quizForm.addEventListener('submit', handleQuizSubmit);
+            quitQuizBtn.addEventListener('click', () => {
+                // Quitte le quiz et retourne au premier paquet de flashcards
+                const firstDeckId = Object.keys(userDecks).find(id => !userDecks[id].isTemporary);
+                if (firstDeckId) { loadDeck(firstDeckId); }
+            });
+
+            // --- Écouteurs Modals ---
+            document.getElementById('add-deck-btn').addEventListener('click', () => addDeckModal.classList.remove('hidden'));
+            document.getElementById('cancel-deck-btn').addEventListener('click', () => addDeckModal.classList.add('hidden'));
+            document.getElementById('save-deck-btn').addEventListener('click', saveNewDeck);
+            document.getElementById('add-card-btn').addEventListener('click', () => addCardModal.classList.remove('hidden'));
+            document.getElementById('cancel-card-btn').addEventListener('click', () => addCardModal.classList.add('hidden'));
+            document.getElementById('save-card-btn').addEventListener('click', saveNewCard);
+            document.getElementById('cancel-delete-deck-btn').addEventListener('click', () => deleteDeckModal.classList.add('hidden'));
+
+            // --- Écouteurs Auth ---
+            document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('signup-form').addEventListener('submit', handleSignup);
+
+            // --- Écouteurs Clavier ---
+            document.addEventListener('keydown', (e) => {
+                const isModalOpen = !!document.querySelector('.modal-overlay:not(.hidden)');
+                const isTyping = e.target.tagName === 'INPUT';
+                if (isModalOpen || isTyping) return;
+
+                // Raccourci Espace pour les flashcards
+                if (!flashcardView.classList.contains('hidden')) {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        flipCard();
+                    }
+                }
+            });
+        }
+        
+        // --- GESTION DES DONNÉES (CRUD) ---
+        function openDeleteConfirmation(deckId) {
+            deleteDeckModal.classList.remove('hidden');
+            confirmDeleteBtn.onclick = () => deleteDeck(deckId, true);
+        }
+
+        async function deleteDeck(deckId, updateUI = true) {
+            if (!userId) return;
+            const batch = writeBatch(db);
+            const cardsSnapshot = await getDocs(collection(db, "users", userId, "japanese_decks", deckId, "cards"));
+            cardsSnapshot.forEach(doc => batch.delete(doc.ref));
+            batch.delete(doc(db, "users", userId, "japanese_decks", deckId));
+            await batch.commit();
+            if (updateUI) {
+                delete userDecks[deckId];
+                deleteDeckModal.classList.add('hidden');
+                populateDeckSidebars();
+                if (currentDeckId === deckId) {
+                    const firstDeckId = Object.keys(userDecks).find(id => !userDecks[id].isTemporary);
+                    if (firstDeckId) { loadDeck(firstDeckId); } 
+                    else { deckTitle.textContent = "Aucun paquet"; currentDeckId = null; updateDashboard(); updateCardDisplay(); }
+                }
+            }
+        }
+
+        async function saveNewDeck() {
+            if (!userId) return;
+            const deckNameInput = document.getElementById('new-deck-name');
+            const deckName = deckNameInput.value.trim();
+            if (!deckName) return;
+            const newDeckRef = doc(collection(db, "users", userId, "japanese_decks"));
+            await setDoc(newDeckRef, { name: deckName, isDefault: false });
+            userDecks[newDeckRef.id] = { id: newDeckRef.id, name: deckName, isDefault: false, cards: [] };
+            populateDeckSidebars();
+            loadDeck(newDeckRef.id);
+            deckNameInput.value = '';
+            addDeckModal.classList.add('hidden');
+        }
+        
+        async function saveNewCard() {
+            if (!userId) return;
+            const newCard = {
+                french: document.getElementById('new-card-french').value.trim(),
+                kana: document.getElementById('new-card-kana').value.trim(),
+                romanization: document.getElementById('new-card-romanization').value.trim(),
+                status: 'new'
+            };
+            if (!newCard.french || !newCard.kana) return;
+            const newCardRef = await addDoc(collection(db, "users", userId, "japanese_decks", currentDeckId, "cards"), newCard);
+            newCard.id = newCardRef.id;
+            userDecks[currentDeckId].cards.push(newCard);
+            updateVisibleCards(); updateDashboard(); updateCardDisplay();
+            document.getElementById('new-card-french').value = '';
+            document.getElementById('new-card-kana').value = '';
+            document.getElementById('new-card-romanization').value = '';
+            addCardModal.classList.add('hidden');
+        }
+
+        // Fonctions d'authentification
+        async function handleAuth(e, authFunc) {
+            e.preventDefault();
+            const button = e.target.querySelector('button[type="submit"]');
+            const email = e.target.querySelector('input[type="email"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+            button.classList.add('btn-loading');
+            try { await authFunc(auth, email, password); } 
+            catch (error) { handleAuthError(error); } 
+            finally { button.classList.remove('btn-loading'); }
+        }
+        const handleLogin = (e) => handleAuth(e, signInWithEmailAndPassword);
+        const handleSignup = (e) => handleAuth(e, createUserWithEmailAndPassword);
+
+        function handleAuthError(error) {
+            const errorElement = document.getElementById('auth-error');
+            const errorMap = {
+                'auth/wrong-password': 'Mot de passe ou e-mail incorrect.', 'auth/invalid-credential': 'Mot de passe ou e-mail incorrect.',
+                'auth/user-not-found': 'Aucun compte trouvé pour cet e-mail.', 'auth/weak-password': 'Le mot de passe doit faire au moins 6 caractères.',
+                'auth/email-already-in-use': 'Cette adresse e-mail est déjà utilisée.'
+            };
+            errorElement.textContent = errorMap[error.code] || 'Une erreur est survenue.';
+        }
+
+        // Lancement !
+        setupEventListeners();
+    </script>
+</body>
+</html>
