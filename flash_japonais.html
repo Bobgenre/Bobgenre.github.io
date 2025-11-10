@@ -64,7 +64,10 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .review-mode-btn.active { background-color: #d97706; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
-        .deck-btn.active, .lesson-btn.active, .quiz-btn.active { background-color: #ea580c; color: white; }
+        /* MODIFIÉ : Le style .active est pour le bouton principal du quiz */
+        .deck-btn.active, .lesson-btn.active { background-color: #ea580c; color: white; }
+        .main-quiz-btn.active { background-color: #16a34a; color: white; } /* Vert pour quiz actif */
+
         .mobile-deck-nav { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
         .mobile-deck-nav::-webkit-scrollbar { display: none; }
         .accordion-toggle svg { transition: transform 0.2s ease-in-out; }
@@ -188,8 +191,10 @@
                 </div>
                 <div class="flex justify-between items-center mt-4 space-x-2">
                     <button id="prev-btn" class="bg-gray-700 text-gray-200 font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-gray-600 transition disabled:opacity-50">Précédent</button>
+                    <!-- MODIFIÉ : Bouton Quiz ajouté ici -->
                     <div class="flex-grow flex justify-center items-center space-x-2">
                         <button id="review-mode-btn" class="review-mode-btn bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Révision</button>
+                        <button id="main-quiz-btn" class="main-quiz-btn bg-green-600 hover:bg-green-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Quiz</button>
                         <button id="review-all-btn" class="hidden bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-3 text-sm md:px-4 md:text-base rounded-lg transition">Tout réviser</button>
                     </div>
                     <button id="next-btn" class="bg-orange-600 text-white font-semibold py-2 px-3 md:px-6 rounded-lg shadow-md hover:bg-orange-700 transition">Suivant</button>
@@ -198,6 +203,7 @@
             
             <!-- VUE LEÇON (cachée) -->
             <div id="lesson-view" class="hidden bg-gray-800 p-6 rounded-lg max-h-[65vh] overflow-y-auto">
+                <!-- Le contenu des leçons reste inchangé -->
                 <div id="lesson-content-intro" class="lesson-content hidden">
                     <h3>Introduction aux Kana</h3>
                     <p>Le japonais utilise trois systèmes d'écriture principaux : les <strong>Hiragana</strong>, les <strong>Katakana</strong>, et les <strong>Kanji</strong>.</p>
@@ -270,7 +276,7 @@
                 </div>
             </div>
 
-            <!-- NOUVELLE VUE : QUIZ (cachée) -->
+            <!-- VUE : QUIZ (cachée) -->
             <div id="quiz-view" class="hidden">
                 <div class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-lg mx-auto">
                     
@@ -379,7 +385,8 @@
             }
         };
 
-        // --- NOUVEAU : Bases de données pour le Quiz ---
+        // --- Bases de données pour le Quiz ---
+        // (Ces listes sont toujours utilisées pour les quiz Hiragana/Katakana par défaut)
         const quizWordsHiragana = [
             { kana: 'あおい', romaji: 'aoi', french: 'bleu' }, { kana: 'いえ', romaji: 'ie', french: 'maison' },
             { kana: 'うし', romaji: 'ushi', french: 'vache' }, { kana: 'えき', romaji: 'eki', french: 'gare' },
@@ -399,13 +406,9 @@
             { kana: 'てがみ', romaji: 'tegami', french: 'lettre' }, { kana: 'ふゆ', romaji: 'fuyu', french: 'hiver' },
             { kana: 'なつ', romaji: 'natsu', french: 'été' }, { kana: 'はる', romaji: 'haru', french: 'printemps' },
             { kana: 'あき', romaji: 'aki', french: 'automne' },
-            
-            // Nouveaux mots ajoutés pour couvrir les 5 kana manquants
-            { kana: 'いけ', romaji: 'ike', french: 'étang' }, // Contient け
-            { kana: 'せかい', romaji: 'sekai', french: 'monde' }, // Contient せ
-            { kana: 'へや', romaji: 'heya', french: 'chambre' }, // Contient へ
-            { kana: 'きれい', romaji: 'kirei', french: 'joli' }, // Contient れ
-            { kana: 'を', romaji: 'o', french: 'particule (wo/o)' } // Le son を
+            { kana: 'いけ', romaji: 'ike', french: 'étang' }, { kana: 'せかい', romaji: 'sekai', french: 'monde' },
+            { kana: 'へや', romaji: 'heya', french: 'chambre' }, { kana: 'きれい', romaji: 'kirei', french: 'joli' },
+            { kana: 'を', romaji: 'o', french: 'particule (wo/o)' }
         ];
 
         const quizWordsKatakana = [
@@ -440,13 +443,13 @@
         let isReviewAllMode = false;
         let visibleCards = [];
 
-        // NOUVEAU : État du Quiz
+        // État du Quiz
         let quizWordsToQuiz = [];
         let currentQuizWord = null;
         let quizScore = 0;
         let quizTotal = 0;
         let isQuizAnswered = false;
-        let currentQuizType = null; // AJOUT : Pour mémoriser le type de quiz
+        let currentQuizType = null; // Mémorise le type: 'hiragana', 'katakana', ou un deckId
 
 
         // --- RÉFÉRENCES DOM ---
@@ -457,7 +460,7 @@
         const loader = document.getElementById('loader');
         const flashcardView = document.getElementById('flashcard-view');
         const lessonView = document.getElementById('lesson-view');
-        const quizView = document.getElementById('quiz-view'); // NOUVEAU
+        const quizView = document.getElementById('quiz-view'); 
 
         // Barre latérale et Titre
         const deckSidebarDesktop = document.getElementById('deck-sidebar-desktop');
@@ -474,7 +477,7 @@
         const reviewModeBtn = document.getElementById('review-mode-btn');
         const reviewAllBtn = document.getElementById('review-all-btn');
         
-        // NOUVEAU : Composants Quiz
+        // Composants Quiz
         const quitQuizBtn = document.getElementById('quit-quiz-btn');
         const quizTitle = document.getElementById('quiz-title');
         const quizDisplay = document.getElementById('quiz-display').querySelector('span');
@@ -518,8 +521,9 @@
                 const batch = writeBatch(db);
                 for (const deckId in defaultDecks) {
                     const deckData = defaultDecks[deckId];
+                    // MODIFIÉ : Ajout de isDefault: true pour les paquets par défaut
                     const deckRef = doc(db, "users", userId, "japanese_decks", deckId);
-                    batch.set(deckRef, { name: deckData.name, isDefault: true });
+                    batch.set(deckRef, { name: deckData.name, isDefault: true }); 
                     deckData.cards.forEach(cardData => {
                         const cardRef = doc(db, "users", userId, "japanese_decks", deckId, "cards", cardData.id);
                         const initialCardData = { ...cardData, status: 'new' };
@@ -537,11 +541,13 @@
                 const cardsCollectionRef = collection(db, "users", userId, "japanese_decks", deckId, "cards");
                 const cardsSnapshot = await getDocs(query(cardsCollectionRef));
                 userDecks[deckId] = { ...deckDoc.data(), id: deckDoc.id, cards: cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) };
+                // Tri pour la cohérence (paquets par défaut)
                 userDecks[deckId].cards.sort((a, b) => (a.id || '').localeCompare(b.id || ''));
             }
             
             populateDeckSidebars();
-            const firstDeckId = Object.keys(userDecks).find(id => id !== 'training_session'); 
+            // Tri des clés pour s'assurer que 'deck_hiragana' vient en premier s'il existe
+            const firstDeckId = Object.keys(userDecks).sort().find(id => id !== 'training_session'); 
             if (firstDeckId) {
                 await loadDeck(firstDeckId);
             } else {
@@ -567,7 +573,8 @@
 
             deckTitle.textContent = lessonTitle;
 
-            document.querySelectorAll('.deck-btn, .lesson-btn, .quiz-btn').forEach(btn => btn.classList.remove('active'));
+            // MODIFIÉ : Inclut .main-quiz-btn dans la réinitialisation
+            document.querySelectorAll('.deck-btn, .lesson-btn, .main-quiz-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll(`.lesson-btn[data-lesson-id="${lessonId}"]`).forEach(btn => btn.classList.add('active'));
         }
         
@@ -576,7 +583,9 @@
             quizView.classList.add('hidden'); // Cacher le quiz
             flashcardView.classList.remove('hidden');
 
+            // MODIFIÉ : Affiche le bouton quiz principal
             document.getElementById('add-card-btn').classList.remove('hidden');
+            document.getElementById('main-quiz-btn').classList.remove('hidden');
             reviewModeBtn.disabled = false;
             reviewAllBtn.classList.add('hidden');
         
@@ -585,7 +594,8 @@
             isReviewMode = false;
             reviewModeBtn.textContent = "Révision";
 
-            document.querySelectorAll('.deck-btn, .lesson-btn, .quiz-btn').forEach(btn => btn.classList.remove('active'));
+            // MODIFIÉ : Inclut .main-quiz-btn dans la réinitialisation
+            document.querySelectorAll('.deck-btn, .lesson-btn, .main-quiz-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll(`.deck-btn[data-deck-id="${deckId}"]`).forEach(btn => btn.classList.add('active'));
 
             updateVisibleCards();
@@ -603,7 +613,9 @@
             quizView.classList.add('hidden'); // Cacher le quiz
             flashcardView.classList.remove('hidden');
 
+            // MODIFIÉ : Cache le bouton quiz principal
             document.getElementById('add-card-btn').classList.add('hidden');
+            document.getElementById('main-quiz-btn').classList.add('hidden');
             reviewModeBtn.disabled = false;
             reviewAllBtn.classList.remove('hidden'); 
 
@@ -615,7 +627,8 @@
             isReviewMode = false;
             reviewModeBtn.textContent = "Révision (20 au hasard)";
             
-            document.querySelectorAll('.deck-btn, .lesson-btn, .quiz-btn').forEach(btn => btn.classList.remove('active'));
+            // MODIFIÉ : Inclut .main-quiz-btn dans la réinitialisation
+            document.querySelectorAll('.deck-btn, .lesson-btn, .main-quiz-btn').forEach(btn => btn.classList.remove('active'));
 
             updateVisibleCards();
             updateDashboard();
@@ -627,15 +640,28 @@
             deckSidebarDesktop.innerHTML = '';
             deckSidebarMobile.innerHTML = '';
 
+            // MODIFIÉ : createDeckButton restauré à l'ancien style (simple bouton)
             const createDeckButton = (deckData) => {
                 const allCardsMastered = deckData.cards.length > 0 && deckData.cards.every(c => c.status === 'mastered');
                 const masteredIcon = allCardsMastered ? `<span class="text-green-400" title="Paquet maîtrisé !"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>` : '';
-                const deleteButton = `<button class="delete-deck-btn p-1 rounded-full hover:bg-red-500/50 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`;
                 
+                // Bouton Supprimer
+                const deleteButton = `<button data-deck-id="${deckData.id}" class="delete-deck-btn p-1 rounded-full text-gray-500 hover:text-red-400 hover:bg-red-500/20 flex-shrink-0 transition" title="Supprimer le paquet">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>`;
+                
+                // Bouton principal
                 const button = document.createElement('button');
                 button.dataset.deckId = deckData.id;
                 button.className = 'deck-btn w-full text-left p-3 rounded-lg text-gray-400 hover:bg-gray-600 transition flex items-center justify-between space-x-2';
-                button.innerHTML = `<span class="flex-grow">${deckData.name}</span> ${masteredIcon} ${deleteButton}`;
+                
+                button.innerHTML = `
+                    <span class="flex-grow flex items-center space-x-2">
+                        <span>${deckData.name}</span>
+                        ${masteredIcon}
+                    </span>
+                    ${deckData.isDefault ? '' : deleteButton}
+                `;
                 return button;
             };
 
@@ -653,6 +679,7 @@
                 button.className = 'deck-btn flex-shrink-0 py-2 px-4 rounded-lg text-gray-400 bg-gray-700 hover:bg-gray-600 transition';
                 button.textContent = deckData.name;
                 deckSidebarMobile.appendChild(button);
+                 // SUPPRIMÉ : Bouton Quiz pour mobile
             });
 
             // --- Barre latérale Desktop ---
@@ -662,7 +689,7 @@
             trainAllButton.textContent = "S'entraîner sur tout";
             deckSidebarDesktop.appendChild(trainAllButton);
 
-            // Paquets
+            // Paquets (MODIFIÉ)
             const decksAccordionWrapper = document.createElement('div');
             decksAccordionWrapper.className = 'space-y-1';
             const decksToggleBtn = document.createElement('button');
@@ -670,7 +697,13 @@
             decksToggleBtn.innerHTML = `<span>Paquets</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
             const decksContentDiv = document.createElement('div');
             decksContentDiv.className = 'accordion-content pl-4 space-y-1';
-            const sortedDecks = Object.values(userDecks).filter(deck => !deck.isTemporary).sort((a, b) => a.name.localeCompare(b.name));
+            // Tri pour avoir Hiragana/Katakana en premier
+            const sortedDecks = Object.values(userDecks).filter(deck => !deck.isTemporary).sort((a, b) => {
+                if (a.isDefault && !b.isDefault) return -1;
+                if (!a.isDefault && b.isDefault) return 1;
+                return a.name.localeCompare(b.name);
+            });
+            // Utilise la fonction createDeckButton restaurée
             sortedDecks.forEach(deckData => decksContentDiv.appendChild(createDeckButton(deckData)));
             decksAccordionWrapper.appendChild(decksToggleBtn);
             decksAccordionWrapper.appendChild(decksContentDiv);
@@ -699,28 +732,6 @@
             lessonsAccordionWrapper.appendChild(lessonsToggleBtn);
             lessonsAccordionWrapper.appendChild(lessonsContentDiv);
             deckSidebarDesktop.appendChild(lessonsAccordionWrapper);
-
-            // NOUVEAU : Section Entraînement (Quiz)
-            const quizData = [
-                { id: 'hiragana', title: 'Quiz Hiragana' }, { id: 'katakana', title: 'Quiz Katakana' }
-            ];
-            const quizAccordionWrapper = document.createElement('div');
-            quizAccordionWrapper.className = 'space-y-1 mt-2';
-            const quizToggleBtn = document.createElement('button');
-            quizToggleBtn.className = 'accordion-toggle w-full text-left p-3 rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 transition flex items-center justify-between';
-            quizToggleBtn.innerHTML = `<span>Entraînement</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-            const quizContentDiv = document.createElement('div');
-            quizContentDiv.className = 'accordion-content pl-4 space-y-1';
-            quizData.forEach(data => {
-                const button = document.createElement('button');
-                button.className = 'quiz-btn w-full text-left p-3 rounded-lg text-green-400 hover:bg-gray-600 transition';
-                button.dataset.quizType = data.id;
-                button.innerHTML = `<span>${data.title}</span>`;
-                quizContentDiv.appendChild(button);
-            });
-            quizAccordionWrapper.appendChild(quizToggleBtn);
-            quizAccordionWrapper.appendChild(quizContentDiv);
-            deckSidebarDesktop.appendChild(quizAccordionWrapper);
         }
         
         // --- LOGIQUE FLASHCARD ---
@@ -877,23 +888,65 @@
             }
         }
 
-        // --- NOUVEAU : LOGIQUE DU QUIZ ---
+        // --- LOGIQUE DU QUIZ ---
 
-        /** Lance le quiz avec le type de kana spécifié */
-        function startQuiz(kanaType) {
+        /** Lance le quiz pour un paquet spécifique */
+        function launchDeckQuiz(deckId) {
+            const deck = userDecks[deckId];
+            if (!deck) return;
+
+            // MODIFIÉ : Mettre en surbrillance le bouton quiz principal
+            document.querySelectorAll('.deck-btn, .lesson-btn, .main-quiz-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('main-quiz-btn').classList.add('active');
+            // Met aussi le paquet en surbrillance
+            document.querySelectorAll(`.deck-btn[data-deck-id="${deckId}"]`).forEach(btn => btn.classList.add('active'));
+
+
+            // Logique de lancement
+            if (deckId === 'deck_hiragana') {
+                startQuiz('hiragana');
+            } else if (deckId === 'deck_katakana') {
+                startQuiz('katakana');
+            } else {
+                // C'est un paquet personnalisé
+                if (!deck.cards || deck.cards.length === 0) {
+                    console.warn("Ce paquet est vide, impossible de lancer un quiz.");
+                    // On pourrait afficher un message modal ici, pour l'instant on quitte
+                    // On retourne au paquet pour éviter de rester sur un quiz vide
+                    loadDeck(deckId); 
+                    return;
+                }
+                const customQuizWords = deck.cards.map(card => ({
+                    kana: card.kana,
+                    romaji: card.romanization,
+                    french: card.french
+                }));
+                // On passe l'ID du paquet comme 'kanaType' pour référence
+                startQuiz(deckId, customQuizWords);
+            }
+        }
+
+        /** * Lance le quiz.
+         * @param {string} kanaType - 'hiragana', 'katakana', ou un deckId pour les quiz personnalisés.
+         * @param {Array|null} customWords - Un tableau de mots pour un quiz personnalisé.
+         */
+        function startQuiz(kanaType, customWords = null) {
             // Changer de vue
             flashcardView.classList.add('hidden');
             lessonView.classList.add('hidden');
             quizView.classList.remove('hidden');
             
-            currentQuizType = kanaType; // AJOUT : Mémorise le type de quiz lancé
+            currentQuizType = kanaType; // Mémorise le type: 'hiragana', 'katakana', ou deckId
 
-            // Mettre à jour le titre et le bouton actif
-            const title = kanaType === 'hiragana' ? 'Quiz Hiragana' : 'Quiz Katakana';
+            // Mettre à jour le titre
+            let title;
+            if (customWords) {
+                title = `Quiz : ${userDecks[kanaType].name}`; // kanaType est le deckId ici
+            } else {
+                title = kanaType === 'hiragana' ? 'Quiz Hiragana' : 'Quiz Katakana';
+            }
             deckTitle.textContent = title;
             quizTitle.textContent = title;
-            document.querySelectorAll('.deck-btn, .lesson-btn, .quiz-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll(`.quiz-btn[data-quiz-type="${kanaType}"]`).forEach(btn => btn.classList.add('active'));
 
             // Initialiser l'état du quiz
             quizScore = 0;
@@ -901,22 +954,50 @@
             quizScoreDisplay.textContent = `Score : 0 / 0`;
             
             // Charger les mots
-            shuffleQuizWords(kanaType);
+            shuffleQuizWords(kanaType, customWords);
             loadNextQuizWord();
         }
 
         /** Mélange les mots pour le quiz */
-        function shuffleQuizWords(kanaType) {
-            const sourceWords = (kanaType === 'hiragana') ? quizWordsHiragana : quizWordsKatakana;
-            quizWordsToQuiz = [...sourceWords].sort(() => Math.random() - 0.5);
+        function shuffleQuizWords(kanaType, customWords = null) {
+            if (customWords) {
+                // Quiz personnalisé
+                quizWordsToQuiz = [...customWords].sort(() => Math.random() - 0.5);
+            } else {
+                // Quiz par défaut
+                const sourceWords = (kanaType === 'hiragana') ? quizWordsHiragana : quizWordsKatakana;
+                quizWordsToQuiz = [...sourceWords].sort(() => Math.random() - 0.5);
+            }
         }
 
         /** Charge le mot suivant dans le quiz */
         function loadNextQuizWord() {
             if (quizWordsToQuiz.length === 0) {
-                // BUG CORRIGÉ : Utilise la variable 'currentQuizType' pour re-mélanger la bonne liste
-                shuffleQuizWords(currentQuizType); 
+                // MODIFIÉ : Logique pour re-mélanger
+                // currentQuizType contient 'hiragana', 'katakana', ou un deckId
+                const deck = userDecks[currentQuizType]; 
+                
+                let customWords = null;
+                // Si currentQuizType est un deckId ET que ce paquet est un paquet personnalisé (isDefault === false)
+                // MODIFICATION : Doit vérifier si deck existe (pour hiragana/katakana) ET s'il n'est PAS par défaut
+                if (deck && (deck.isDefault === false || deck.isDefault === undefined)) { 
+                    customWords = deck.cards.map(card => ({ 
+                        kana: card.kana, 
+                        romaji: card.romanization, 
+                        french: card.french 
+                    }));
+                }
+                
+                // shuffleQuizWords gère customWords (qui sera null pour hiragana/katakana)
+                shuffleQuizWords(currentQuizType, customWords); 
                 console.log(`Liste de mots du quiz (${currentQuizType}) re-mélangée !`);
+            }
+
+            // Vérification si la liste est *toujours* vide (ex: paquet personnalisé vide)
+            if(quizWordsToQuiz.length === 0) {
+                console.error("Aucun mot à quizzer, même après re-mélange. Retour au paquet.");
+                loadDeck(currentDeckId); // Retour sécurisé
+                return;
             }
 
             currentQuizWord = quizWordsToQuiz.pop();
@@ -938,6 +1019,11 @@
 
         /** Vérifie la réponse du quiz */
         function checkQuizAnswer() {
+            if (!currentQuizWord) { // Sécurité
+                console.warn("Aucun mot de quiz en cours, impossible de vérifier.");
+                loadNextQuizWord();
+                return;
+            }
             const userAnswer = quizAnswerInput.value.trim().toLowerCase();
             const correctAnswer = currentQuizWord.romaji.toLowerCase();
 
@@ -988,20 +1074,31 @@
 
         // --- ÉCOUTEURS D'ÉVÉNEMENTS ---
         function setupEventListeners() {
-            // Clic sur la barre latérale
+            // Clic sur la barre latérale (MODIFIÉ)
             function handleSidebarClick(e) {
                 const deckBtn = e.target.closest('.deck-btn');
                 const lessonBtn = e.target.closest('.lesson-btn');
-                const quizBtn = e.target.closest('.quiz-btn'); // NOUVEAU
+                // SUPPRIMÉ : const quizDeckBtn
                 const deleteBtn = e.target.closest('.delete-deck-btn');
                 const accordionToggle = e.target.closest('.accordion-toggle');
                 const trainAllBtn = e.target.closest('#train-all-btn, #train-all-btn-mobile');
 
-                if (deleteBtn) { e.stopPropagation(); openDeleteConfirmation(deckBtn.dataset.deckId); } 
-                else if (deckBtn) { loadDeck(deckBtn.dataset.deckId); } 
-                else if (lessonBtn) { showLesson(lessonBtn.dataset.lessonId, lessonBtn.dataset.lessonTitle); }
-                else if (quizBtn) { startQuiz(quizBtn.dataset.quizType); } // NOUVEAU
-                else if (accordionToggle) { accordionToggle.classList.toggle('open'); accordionToggle.nextElementSibling.classList.toggle('hidden'); }
+                // L'ordre est important pour la propagation
+                if (deleteBtn) { 
+                    e.stopPropagation(); // Empêche le clic sur le paquet
+                    openDeleteConfirmation(deleteBtn.dataset.deckId); 
+                } 
+                // SUPPRIMÉ : else if (quizDeckBtn)
+                else if (deckBtn) { 
+                    loadDeck(deckBtn.dataset.deckId); 
+                } 
+                else if (lessonBtn) { 
+                    showLesson(lessonBtn.dataset.lessonId, lessonBtn.dataset.lessonTitle); 
+                }
+                else if (accordionToggle) { 
+                    accordionToggle.classList.toggle('open'); 
+                    accordionToggle.nextElementSibling.classList.toggle('hidden'); 
+                }
                 else if (trainAllBtn) {
                     const allCards = Object.values(userDecks).filter(d => !d.isTemporary).flatMap(deck => deck.cards.map(card => ({...card, originalDeckId: deck.id})));
                     startTrainingSession(allCards, "Entraînement : Toutes les cartes");
@@ -1038,12 +1135,27 @@
                 updateVisibleCards(); updateCardDisplay();
             });
 
-            // --- Écouteurs Quiz (NOUVEAU) ---
+            // NOUVEAU : Écouteur pour le bouton Quiz principal
+            document.getElementById('main-quiz-btn').addEventListener('click', () => {
+                if (currentDeckId && userDecks[currentDeckId] && !userDecks[currentDeckId].isTemporary) {
+                    launchDeckQuiz(currentDeckId);
+                } else {
+                    console.warn("Impossible de lancer le quiz : aucun paquet sélectionné ou paquet temporaire.");
+                }
+            });
+
+
+            // --- Écouteurs Quiz ---
             quizForm.addEventListener('submit', handleQuizSubmit);
             quitQuizBtn.addEventListener('click', () => {
-                // Quitte le quiz et retourne au premier paquet de flashcards
-                const firstDeckId = Object.keys(userDecks).find(id => !userDecks[id].isTemporary);
-                if (firstDeckId) { loadDeck(firstDeckId); }
+                // Quitte le quiz et retourne au paquet de flashcards
+                if (currentDeckId) {
+                    loadDeck(currentDeckId);
+                } else {
+                    // Fallback au premier paquet
+                    const firstDeckId = Object.keys(userDecks).sort().find(id => !userDecks[id].isTemporary);
+                    if (firstDeckId) { loadDeck(firstDeckId); }
+                }
             });
 
             // --- Écouteurs Modals ---
@@ -1078,23 +1190,33 @@
         
         // --- GESTION DES DONNÉES (CRUD) ---
         function openDeleteConfirmation(deckId) {
+            // Empêche la suppression des paquets par défaut
+            if (userDecks[deckId] && userDecks[deckId].isDefault) {
+                console.warn("Les paquets par défaut ne peuvent pas être supprimés.");
+                // On pourrait afficher un modal d'info ici
+                return; 
+            }
             deleteDeckModal.classList.remove('hidden');
+            // Assure que le bouton est lié à ce deckId spécifique
             confirmDeleteBtn.onclick = () => deleteDeck(deckId, true);
         }
 
         async function deleteDeck(deckId, updateUI = true) {
-            if (!userId) return;
+            // Double vérification pour la sécurité
+            if (!userId || (userDecks[deckId] && userDecks[deckId].isDefault)) return;
+            
             const batch = writeBatch(db);
             const cardsSnapshot = await getDocs(collection(db, "users", userId, "japanese_decks", deckId, "cards"));
             cardsSnapshot.forEach(doc => batch.delete(doc.ref));
             batch.delete(doc(db, "users", userId, "japanese_decks", deckId));
             await batch.commit();
+            
             if (updateUI) {
                 delete userDecks[deckId];
                 deleteDeckModal.classList.add('hidden');
                 populateDeckSidebars();
                 if (currentDeckId === deckId) {
-                    const firstDeckId = Object.keys(userDecks).find(id => !userDecks[id].isTemporary);
+                    const firstDeckId = Object.keys(userDecks).sort().find(id => !userDecks[id].isTemporary);
                     if (firstDeckId) { loadDeck(firstDeckId); } 
                     else { deckTitle.textContent = "Aucun paquet"; currentDeckId = null; updateDashboard(); updateCardDisplay(); }
                 }
@@ -1107,6 +1229,7 @@
             const deckName = deckNameInput.value.trim();
             if (!deckName) return;
             const newDeckRef = doc(collection(db, "users", userId, "japanese_decks"));
+            // MODIFIÉ : Ajout de isDefault: false pour les nouveaux paquets
             await setDoc(newDeckRef, { name: deckName, isDefault: false });
             userDecks[newDeckRef.id] = { id: newDeckRef.id, name: deckName, isDefault: false, cards: [] };
             populateDeckSidebars();
@@ -1117,6 +1240,12 @@
         
         async function saveNewCard() {
             if (!userId) return;
+            // Sécurité : ne pas ajouter de carte à un paquet temporaire
+            if (!currentDeckId || userDecks[currentDeckId].isTemporary) {
+                 console.warn("Impossible d'ajouter une carte à un paquet temporaire.");
+                 addCardModal.classList.add('hidden');
+                 return;
+            }
             const newCard = {
                 french: document.getElementById('new-card-french').value.trim(),
                 kana: document.getElementById('new-card-kana').value.trim(),
