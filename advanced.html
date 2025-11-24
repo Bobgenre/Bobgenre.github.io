@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGST - Guide Expert</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { background-color: #0f141f; font-family: 'Segoe UI', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeInUp 0.5s ease-out forwards; }
+        
+        /* Background Hexagone Expert */
+        .bg-hex-pattern {
+            background-color: #0f141f;
+            background-image: radial-gradient(#312e81 1px, transparent 1px); /* Indigo très sombre */
+            background-size: 20px 20px;
+        }
+
+        /* Styles Inputs */
+        .input-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin-right: 2px; border-radius: 4px; font-weight: bold; font-family: monospace; font-size: 12px; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+        .dir-icon { background-color: #374151; color: #9ca3af; border: 1px solid #4b5563; border-radius: 50%; }
+        .btn-P { background-color: #ec4899; color: white; border: 1px solid #be185d; border-radius: 50%; }
+        .btn-K { background-color: #3b82f6; color: white; border: 1px solid #1d4ed8; border-radius: 50%; }
+        .btn-S { background-color: #10b981; color: #064e3b; border: 1px solid #047857; border-radius: 50%; color: white; }
+        .btn-HS { background-color: #ef4444; color: white; border: 1px solid #b91c1c; border-radius: 50%; }
+        .btn-D { background-color: #f97316; color: white; border-color: #c2410c; border-radius: 50%; }
+    </style>
+</head>
+<body class="text-slate-200">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- ICONS ---
+        const Icons = {
+            ArrowLeft: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
+            Cpu: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>,
+            Shield: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>,
+            Timer: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>,
+            Move: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="22"/></svg>,
+            Crosshair: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>,
+            Layers: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        };
+
+        const { ArrowLeft, Cpu, Shield, Timer, Move, Crosshair, Layers } = Icons;
+
+        // --- COMPOSANTS ---
+
+        const RenderInput = ({ input }) => {
+            if (!input) return null;
+            const items = input.split(" ");
+            const directions = { "1": "↙", "2": "↓", "3": "↘", "4": "←", "5": "•", "6": "→", "7": "↖", "8": "↑", "9": "↗" };
+            const buttons = { "P": "btn-P", "K": "btn-K", "S": "btn-S", "HS": "btn-HS", "D": "btn-D" };
+
+            return (
+                <div className="flex flex-wrap items-center gap-1">
+                    {items.map((key, i) => {
+                        if (directions[key]) return <span key={i} className="input-icon dir-icon">{directions[key]}</span>;
+                        if (buttons[key]) return <span key={i} className={`input-icon ${buttons[key]}`}>{key}</span>;
+                        if (key === "+") return <span key={i} className="text-slate-500 text-xs font-bold mx-1">+</span>;
+                        if (key === "~") return <span key={i} className="text-purple-400 text-xs font-bold mx-1">~</span>; // Kara link
+                        return <span key={i} className="text-gray-400 text-xs font-mono uppercase">{key}</span>;
+                    })}
+                </div>
+            );
+        };
+
+        const SectionTitle = ({ icon, title, subtitle }) => (
+            <div className="mb-8 border-b border-purple-900/50 pb-4">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <span className="p-2 bg-slate-900 rounded-lg text-purple-400 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)]">{icon}</span>
+                    {title}
+                </h2>
+                <p className="text-slate-400 mt-1 ml-12 text-sm">{subtitle}</p>
+            </div>
+        );
+
+        // Carte technique détaillée
+        const ExpertCard = ({ title, badge, children, steps, training }) => (
+            <div className="bg-slate-900/80 rounded-xl border border-purple-500/30 shadow-lg overflow-hidden hover:border-purple-500/60 transition-all duration-300">
+                <div className="p-6 border-b border-slate-800/50">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            {title}
+                        </h3>
+                        {badge && <span className="bg-purple-900/40 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-purple-300 border border-purple-500/50">{badge}</span>}
+                    </div>
+                    <div className="text-sm text-slate-300 space-y-4 leading-relaxed">
+                        {children}
+                    </div>
+                </div>
+                
+                {/* Zone "Comment faire" */}
+                <div className="bg-slate-950/50 p-5 border-b border-slate-800/50">
+                    <h4 className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <Cpu size={14}/> Exécution
+                    </h4>
+                    <div className="space-y-2">
+                        {steps.map((step, idx) => (
+                            <div key={idx} className="flex items-start gap-3 text-xs text-slate-400">
+                                <span className="bg-slate-800 text-slate-500 font-mono w-5 h-5 flex items-center justify-center rounded shrink-0">{idx + 1}</span>
+                                <div>{step}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Zone "Training Mode" */}
+                <div className="bg-purple-900/10 p-4">
+                    <div className="flex items-start gap-3">
+                        <div className="mt-0.5 text-purple-400"><Crosshair size={16}/></div>
+                        <div>
+                            <strong className="text-purple-300 text-xs block mb-1">SETUP TRAINING</strong>
+                            <p className="text-xs text-slate-400 italic">{training}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        function App() {
+            return (
+                <div className="min-h-screen pb-20 bg-[#0f141f] relative font-sans">
+                    {/* NAVBAR */}
+                    <nav className="bg-[#111827] border-b border-slate-800 px-6 py-4 sticky top-0 z-50 shadow-lg">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <h1 className="text-2xl font-black text-white tracking-tighter italic">
+                                <span className="text-purple-500">GG</span>ST <span className="text-slate-400 text-lg not-italic font-normal ml-2">/// Advanced Guide</span>
+                            </h1>
+                            <a href="ggst.html" className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors">
+                                <ArrowLeft size={18} />
+                                Retour au Roster
+                            </a>
+                        </div>
+                    </nav>
+
+                    <div className="absolute inset-0 bg-hex-pattern pointer-events-none z-0 opacity-40 h-full"></div>
+
+                    <main className="max-w-6xl mx-auto p-6 relative z-10">
+                        
+                        <header className="text-center py-16 animate-fade-up">
+                            <span className="inline-block py-1 px-3 rounded-full bg-purple-900/50 border border-purple-500/50 text-purple-300 text-xs font-bold uppercase tracking-widest mb-4 shadow-[0_0_15px_rgba(168,85,247,0.3)]">Celestia Floor Only</span>
+                            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">Techniques <span className="text-purple-500">Expertes</span></h2>
+                            <p className="text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
+                                Manipuler les frames, tricher avec les inputs et rendre la défense impénétrable. 
+                                Voici le manuel technique pour optimiser chaque interaction.
+                            </p>
+                        </header>
+
+                        {/* SECTION 1 : DÉFENSE JUST FRAME */}
+                        <section className="mb-24 animate-fade-up" style={{animationDelay: '0.1s'}}>
+                            <SectionTitle icon={<Shield size={20}/>} title="Défense Just Frame" subtitle="Gagner des frames en bloquant" />
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <ExpertCard 
+                                    title="Instant Block (IB)" 
+                                    badge="Fenêtre : 2 Frames"
+                                    training="Enregistrez Ky faire 'Stun Dipper'. Essayez de faire IB sur le deuxième coup. Si vous réussissez, vous pouvez le punir avec un 2K."
+                                    steps={[
+                                        <span className="flex items-center gap-2">Attendez que l'attaque adverse soit sur le point de toucher votre personnage (visuellement).</span>,
+                                        <span className="flex items-center gap-2">Appuyez sur <RenderInput input="4"/> (Arrière) ou <RenderInput input="1"/> (Bas-Arrière) <strong>moins de 2 frames</strong> avant l'impact.</span>,
+                                        <span className="text-purple-300">Succès : Votre personnage flash en blanc + Bruit métallique distinct.</span>,
+                                        <span>Gain : Le "Pushback" est annulé. Vous restez proche pour punir.</span>
+                                    ]}
+                                >
+                                    <p>Bloquer au dernier moment. Extrêmement risqué (si vous ratez, vous prenez le coup), mais permet de punir des attaques normalement "Safe" en annulant le recul.</p>
+                                </ExpertCard>
+
+                                <ExpertCard 
+                                    title="Instant Block FD (IBFD)" 
+                                    badge="Input Complexe"
+                                    training="Contre Sol Badguy (Fafnir). Essayez de faire IBFD. Si réussi, Sol sera repoussé à l'autre bout de l'écran, réinitialisant le neutral."
+                                    steps={[
+                                        <span>Préparez le timing d'un Instant Block classique.</span>,
+                                        <span className="flex items-center gap-2">Au moment de l'impact, faites <RenderInput input="4 + P + K"/> (ou deux autres boutons sauf D).</span>,
+                                        <span>L'input de garde (4) et l'activation de la FD (P+K) doivent être simultanés.</span>,
+                                        <span>Résultat : L'adversaire est repoussé au maximum possible. C'est le bouton "Dégage de là".</span>
+                                    ]}
+                                >
+                                    <p>La défense ultime. Combine le timing de l'IB avec la propriété de repoussement de la Faultless Defense. Crée un espace gigantesque entre vous et l'adversaire.</p>
+                                </ExpertCard>
+                            </div>
+                        </section>
+
+                        {/* SECTION 2 : MANIPULATION D'INPUT */}
+                        <section className="mb-24 animate-fade-up" style={{animationDelay: '0.2s'}}>
+                            <SectionTitle icon={<Cpu size={20}/>} title="Tricher avec les Inputs" subtitle="Kara Cancels & Option Selects" />
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <ExpertCard 
+                                    title="Kara Cancel" 
+                                    badge="Plinking"
+                                    training="Prenez Potemkin. Essayez de faire un Buster normal, notez la portée. Puis faites le Kara Buster (6K~P). Vous verrez Potemkin glisser vers l'avant avant d'attraper."
+                                    steps={[
+                                        <span className="flex items-center gap-2">Commencez un coup qui avance (ex: Potemkin <RenderInput input="6 K"/>).</span>,
+                                        <span className="flex items-center gap-2">Pendant les <strong>frames de démarrage</strong> (Startup), entrez l'input d'un coup spécial.</span>,
+                                        <span className="flex items-center gap-2">Exemple (Kara Buster) : <RenderInput input="6 3 2 1 4 6 K ~ P"/>.</span>,
+                                        <span>Astuce : Faites glisser votre doigt du bouton K vers P très vite (Plinking). Le jeu enregistre le mouvement du 6K, puis l'annule immédiatement par le Buster, mais conserve l'élan.</span>
+                                    ]}
+                                >
+                                    <p>Annuler le début d'une attaque normale par une attaque spéciale. Cela permet de transférer la propriété de mouvement du coup normal au coup spécial.</p>
+                                </ExpertCard>
+                                
+                                <ExpertCard 
+                                    title="Throw Option Select" 
+                                    badge="OS Défensif"
+                                    training="Enregistrez le mannequin pour faire : Slot 1 = Courir et choper. Slot 2 = Courir et attaquer. Essayez l'OS."
+                                    steps={[
+                                        <span className="flex items-center gap-2">Situation : L'ennemi court vers vous pour un mixup (Chope ou Frappe ?).</span>,
+                                        <span className="flex items-center gap-2">Au dernier moment : Faites <RenderInput input="1 D"/> (Bas-Arrière + Dust) ou <RenderInput input="4 D"/>.</span>,
+                                        <span className="text-green-400">Scénario A (Il chope) :</span>,
+                                        <span>Votre input de chope (4D) sort et vous déchopez (Tech).</span>,
+                                        <span className="text-green-400">Scénario B (Il frappe) :</span>,
+                                        <span>L'ennemi vous met en "Blockstun" avant que votre chope ne sorte. Le jeu ignore le bouton D et vous bloquez (car vous maintenez 4 ou 1).</span>
+                                    ]}
+                                >
+                                    <p>Une manipulation unique qui couvre deux options adverses. Vous tentez de déchoper, mais si l'adversaire tape, vous bloquez automatiquement grâce au timing.</p>
+                                </ExpertCard>
+                            </div>
+                        </section>
+
+                        {/* SECTION 3 : THÉORIE DES FRAMES */}
+                        <section className="mb-24 animate-fade-up" style={{animationDelay: '0.3s'}}>
+                            <SectionTitle icon={<Layers size={20}/>} title="Théorie Avancée" subtitle="Fuzzy & Safe Jumps" />
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <ExpertCard 
+                                    title="Fuzzy Guard" 
+                                    badge="Anti-Mixup"
+                                    training="Contre Millia. Enregistrez : Slot 1 = Low. Slot 2 = Overhead. Le Low est rapide, l'Overhead est lent. Pratiquez le changement de garde rythmique."
+                                    steps={[
+                                        <span>La théorie : Les coups bas (Low) sont rapides. Les coups hauts (Overhead) sont lents.</span>,
+                                        <span className="flex items-center gap-2">1. Commencez par bloquer <strong>BAS</strong> <RenderInput input="1"/>. (Couvre l'option rapide).</span>,
+                                        <span className="flex items-center gap-2">2. Après un court instant (timing précis), passez en garde <strong>HAUTE</strong> <RenderInput input="4"/>.</span>,
+                                        <span>Si c'était un Low, vous l'avez déjà bloqué à l'étape 1. Si c'est un Overhead, vous serez debout à temps pour l'étape 2.</span>
+                                    ]}
+                                >
+                                    <p>Une technique de garde basée sur le timing pour bloquer les 50/50 (Haut/Bas) sans avoir à deviner, en exploitant la différence de vitesse des coups.</p>
+                                </ExpertCard>
+
+                                <ExpertCard 
+                                    title="Safe Jump" 
+                                    badge="Oki Parfait"
+                                    training="Mettez Ky au sol (2D). Sautez immédiatement et faites j.H juste avant d'atterrir. Réglez Ky pour faire 'Vapor Thrust' (DP) à la relevée."
+                                    steps={[
+                                        <span>Situation : Vous avez mis l'ennemi au sol (Hard Knockdown).</span>,
+                                        <span>Action : Sautez et attaquez de façon à ce que votre coup touche à la <strong>dernière frame</strong> avant votre atterrissage.</span>,
+                                        <span className="text-purple-300">Mathématiques :</span>,
+                                        <span>Votre atterrissage annule l'animation de votre attaque.</span>,
+                                        <span>Si l'ennemi pife un DP (invincible au début mais lent à sortir) : Vous atterrissez et pouvez bloquer AVANT que son coup ne devienne actif.</span>,
+                                        <span>Si l'ennemi garde : Votre coup le touche et vous continuez la pression.</span>
+                                    ]}
+                                >
+                                    <p>Attaquer à la relevée de manière mathématiquement sûre. Permet de presser tout en étant immunisé aux pifs invincibles (DP).</p>
+                                </ExpertCard>
+                            </div>
+                        </section>
+
+                        <footer className="text-center text-slate-600 text-sm pb-8 border-t border-slate-800 pt-8">
+                            <p>Guilty Gear Strive est une marque déposée par Arc System Works.</p>
+                            <div className="mt-4 flex justify-center gap-4">
+                                <a href="intermediate.html" className="px-4 py-2 rounded bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">❮ Revenir au Guide Intermédiaire</a>
+                                <a href="ggst.html" className="px-4 py-2 rounded bg-orange-600 text-white hover:bg-orange-500 transition-colors font-bold">Retourner au Roster</a>
+                            </div>
+                        </footer>
+
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

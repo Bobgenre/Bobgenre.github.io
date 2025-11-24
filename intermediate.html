@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGST - Guide Intermédiaire Détaillé</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { background-color: #0f141f; font-family: 'Segoe UI', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeInUp 0.5s ease-out forwards; }
+        
+        /* Background Grid Bleu pour le niveau Intermédiaire */
+        .bg-grid-pattern {
+            background-color: #0f141f;
+            background-image: linear-gradient(to right, #1e3a8a 1px, transparent 1px),
+                              linear-gradient(to bottom, #1e3a8a 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+
+        /* Styles Inputs */
+        .input-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin-right: 2px; border-radius: 4px; font-weight: bold; font-family: monospace; font-size: 12px; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+        .dir-icon { background-color: #374151; color: #9ca3af; border: 1px solid #4b5563; border-radius: 50%; }
+        .btn-P { background-color: #ec4899; color: white; border: 1px solid #be185d; border-radius: 50%; }
+        .btn-K { background-color: #3b82f6; color: white; border: 1px solid #1d4ed8; border-radius: 50%; }
+        .btn-S { background-color: #10b981; color: #064e3b; border: 1px solid #047857; border-radius: 50%; color: white; }
+        .btn-HS { background-color: #ef4444; color: white; border: 1px solid #b91c1c; border-radius: 50%; }
+        .btn-D { background-color: #f97316; color: white; border-color: #c2410c; border-radius: 50%; }
+    </style>
+</head>
+<body class="text-slate-200">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- ICONS ---
+        const Icons = {
+            ArrowLeft: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
+            Clock: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            Scale: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>,
+            Activity: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+            Cpu: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>,
+            Crosshair: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>,
+            Shield: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>,
+            Target: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+            Foot: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M10 20v-6h4v6"/><path d="M8 14h8"/></svg>,
+            Link: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+            Check: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+            X: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
+        };
+
+        const { ArrowLeft, Clock, Scale, Activity, Cpu, Crosshair, Shield, Target, Foot, Link, Check, X } = Icons;
+
+        // --- COMPOSANTS ---
+
+        const RenderInput = ({ input }) => {
+            if (!input) return null;
+            const items = input.split(" ");
+            const directions = { "1": "↙", "2": "↓", "3": "↘", "4": "←", "5": "•", "6": "→", "7": "↖", "8": "↑", "9": "↗" };
+            const buttons = { "P": "btn-P", "K": "btn-K", "S": "btn-S", "HS": "btn-HS", "D": "btn-D" };
+
+            return (
+                <div className="flex flex-wrap items-center gap-1">
+                    {items.map((key, i) => {
+                        if (directions[key]) return <span key={i} className="input-icon dir-icon">{directions[key]}</span>;
+                        if (buttons[key]) return <span key={i} className={`input-icon ${buttons[key]}`}>{key}</span>;
+                        if (key === "+") return <span key={i} className="text-slate-500 text-xs font-bold mx-1">+</span>;
+                        return <span key={i} className="text-gray-400 text-xs font-mono uppercase">{key}</span>;
+                    })}
+                </div>
+            );
+        };
+
+        const SectionTitle = ({ icon, title, subtitle }) => (
+            <div className="mb-8 border-b border-blue-900/50 pb-4">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <span className="p-2 bg-slate-900 rounded-lg text-blue-400 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]">{icon}</span>
+                    {title}
+                </h2>
+                <p className="text-slate-400 mt-1 ml-12 text-sm">{subtitle}</p>
+            </div>
+        );
+
+        // Carte Détaillée (Style Bleu)
+        const DetailedCard = ({ title, badge, children, steps, training }) => (
+            <div className="bg-slate-900/80 rounded-xl border border-blue-500/30 shadow-lg overflow-hidden hover:border-blue-500/60 transition-all duration-300 h-full flex flex-col">
+                <div className="p-6 border-b border-slate-800/50 flex-1">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            {title}
+                        </h3>
+                        {badge && <span className="bg-blue-900/40 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-blue-300 border border-blue-500/50">{badge}</span>}
+                    </div>
+                    <div className="text-sm text-slate-300 space-y-4 leading-relaxed">
+                        {children}
+                    </div>
+                </div>
+                
+                {/* Zone "Comment faire" */}
+                <div className="bg-slate-950/50 p-5 border-b border-slate-800/50">
+                    <h4 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <Cpu size={14}/> Exécution
+                    </h4>
+                    <div className="space-y-2">
+                        {steps.map((step, idx) => (
+                            <div key={idx} className="flex items-start gap-3 text-xs text-slate-400">
+                                <span className="bg-slate-800 text-slate-500 font-mono w-5 h-5 flex items-center justify-center rounded shrink-0">{idx + 1}</span>
+                                <div>{step}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Zone "Training Mode" */}
+                <div className="bg-blue-900/10 p-4">
+                    <div className="flex items-start gap-3">
+                        <div className="mt-0.5 text-blue-400"><Crosshair size={16}/></div>
+                        <div>
+                            <strong className="text-blue-300 text-xs block mb-1">SETUP TRAINING</strong>
+                            <p className="text-xs text-slate-400 italic">{training}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const FrameDataVisualizer = () => (
+            <div className="bg-slate-900/80 p-6 rounded-xl border border-slate-700 mb-8">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                    <div className="text-center flex-1">
+                        <div className="text-green-400 text-4xl font-black mb-2">+ (Plus)</div>
+                        <div className="text-sm font-bold text-white mb-1">C'est encore votre tour</div>
+                        <p className="text-xs text-slate-400">Si vous tapez, vous gagnez. L'adversaire DOIT bloquer.</p>
+                    </div>
+                    <div className="text-2xl text-slate-600 font-bold">VS</div>
+                    <div className="text-center flex-1">
+                        <div className="text-red-400 text-4xl font-black mb-2">- (Moins)</div>
+                        <div className="text-sm font-bold text-white mb-1">C'est le tour de l'adversaire</div>
+                        <p className="text-xs text-slate-400">Si vous tapez, vous vous faites contrer. VOUS devez bloquer.</p>
+                    </div>
+                </div>
+                <div className="mt-6 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded text-xs text-center text-yellow-200">
+                    <strong>Règle d'or :</strong> La plupart des coups spéciaux sont "Négatifs" (-). Si vous bloquez un coup spécial, c'est généralement à vous de jouer !
+                </div>
+            </div>
+        );
+
+        const ConceptCard = ({ title, color, badge, children }) => (
+            <div className={`bg-slate-800 p-6 rounded-xl border-l-4 ${color} shadow-lg hover:shadow-xl transition-shadow duration-300`}>
+                <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-bold text-white">{title}</h3>
+                    {badge && <span className="bg-slate-900 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-slate-400 border border-slate-700">{badge}</span>}
+                </div>
+                <div className="text-sm text-slate-300 space-y-3 leading-relaxed">
+                    {children}
+                </div>
+            </div>
+        );
+
+        const GameStateSection = () => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                {/* Carte Avantage */}
+                <div className="bg-green-900/10 border border-green-500/30 p-5 rounded-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-2 opacity-20"><Check size={64} className="text-green-500"/></div>
+                    <h4 className="text-lg font-bold text-green-400 mb-4 flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        SITUATION D'AVANTAGE
+                    </h4>
+                    <ul className="space-y-3 text-sm text-slate-300 relative z-10">
+                        <li className="flex gap-3">
+                            <strong className="text-green-500 shrink-0">Close Slash (c.S) :</strong>
+                            <span>Si l'adversaire bloque ce coup, vous êtes "Plus". Continuez d'attaquer ou chopez !</span>
+                        </li>
+                        <li className="flex gap-3">
+                            <strong className="text-green-500 shrink-0">Hard Knockdown :</strong>
+                            <span>L'ennemi est au sol (ex: après 2D). Courez vers lui pour lui mettre la pression à la relevée (Oki).</span>
+                        </li>
+                        <li className="flex gap-3">
+                            <strong className="text-green-500 shrink-0">Counter Hit :</strong>
+                            <span>L'écran a ralenti ? C'est le moment de lâcher votre plus gros combo.</span>
+                        </li>
+                    </ul>
+                    <div className="mt-4 pt-3 border-t border-green-500/20 text-xs text-green-300 font-bold text-center uppercase tracking-widest">
+                        → AGRESSEZ L'ADVERSAIRE !
+                    </div>
+                </div>
+
+                {/* Carte Désavantage */}
+                <div className="bg-red-900/10 border border-red-500/30 p-5 rounded-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-2 opacity-20"><X size={64} className="text-red-500"/></div>
+                    <h4 className="text-lg font-bold text-red-400 mb-4 flex items-center gap-2">
+                        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                        SITUATION DE DÉSAVANTAGE
+                    </h4>
+                    <ul className="space-y-3 text-sm text-slate-300 relative z-10">
+                        <li className="flex gap-3">
+                            <strong className="text-red-500 shrink-0">Relevée (Wake-up) :</strong>
+                            <span>Vous vous levez du sol. Bloquez immédiatement ! Ne tapez JAMAIS (sauf Invincible DP).</span>
+                        </li>
+                        <li className="flex gap-3">
+                            <strong className="text-red-500 shrink-0">Whiff :</strong>
+                            <span>Vous avez tapé dans le vide. Vous êtes sans défense jusqu'à la fin de l'animation.</span>
+                        </li>
+                        <li className="flex gap-3">
+                            <strong className="text-red-500 shrink-0">Fin de Combo :</strong>
+                            <span>Vous avez fait un coup spécial (ex: Stun Dipper) et il a été bloqué. C'est le tour de l'ennemi.</span>
+                        </li>
+                    </ul>
+                    <div className="mt-4 pt-3 border-t border-red-500/20 text-xs text-red-300 font-bold text-center uppercase tracking-widest">
+                        → DÉFENDEZ ET ATTENDEZ !
+                    </div>
+                </div>
+            </div>
+        );
+
+        function App() {
+            return (
+                <div className="min-h-screen pb-20 bg-[#0f141f] relative font-sans">
+                    {/* NAVBAR */}
+                    <nav className="bg-[#111827] border-b border-slate-800 px-6 py-4 sticky top-0 z-50 shadow-lg">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <h1 className="text-2xl font-black text-white tracking-tighter italic">
+                                <span className="text-blue-500">GG</span>ST <span className="text-slate-400 text-lg not-italic font-normal ml-2">/// Intermediate Guide</span>
+                            </h1>
+                            <a href="ggst.html" className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors">
+                                <ArrowLeft size={18} />
+                                Retour au Roster
+                            </a>
+                        </div>
+                    </nav>
+
+                    <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0 opacity-20 h-[500px]"></div>
+
+                    <main className="max-w-6xl mx-auto p-6 relative z-10">
+                        
+                        <header className="text-center py-16 animate-fade-up">
+                            <span className="inline-block py-1 px-3 rounded-full bg-blue-900/50 border border-blue-500/50 text-blue-300 text-xs font-bold uppercase tracking-widest mb-4">Niveau 2 Détaillé</span>
+                            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">Comprendre le <span className="text-blue-500">Jeu</span></h2>
+                            <p className="text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
+                                Voici le manuel technique pour maîtriser la Frame Data, le Neutral et les options défensives.
+                                Ne jouez plus au hasard.
+                            </p>
+                        </header>
+
+                        {/* SECTION 1 : FRAME DATA */}
+                        <section className="mb-24 animate-fade-up" style={{animationDelay: '0.1s'}}>
+                            <SectionTitle icon={<Clock size={20}/>} title="Frame Data & Avantage" subtitle="Savoir quand c'est votre tour" />
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                                <DetailedCard 
+                                    title="Le Concept de 'Tour' (Plus/Moins)" 
+                                    badge="Théorie"
+                                    training="Dans le mode Training, activez 'Afficher Frame Data'. Faites 'f.S' avec Ky sur un garde. Regardez la couleur."
+                                    steps={[
+                                        <span className="text-green-400">Vous êtes PLUS (+) : Vous avez récupéré avant l'adversaire. Si vous tapez immédiatement, vous gagnez.</span>,
+                                        <span className="text-red-400">Vous êtes MOINS (-) : L'adversaire a récupéré avant vous. Si vous tapez, vous vous faites Counter Hit.</span>,
+                                        <span>Règle : La plupart des coups normaux sont + ou neutres. La plupart des spéciaux sont -.</span>
+                                    ]}
+                                >
+                                    <p>Les jeux de combat sont du tour par tour rapide. Comprendre si vous êtes positif (+) ou négatif (-) après un coup bloqué est la base de tout.</p>
+                                </DetailedCard>
+
+                                <DetailedCard 
+                                    title="Le Frame Trap" 
+                                    badge="Piège"
+                                    training="Enregistrez Ky faire : c.S > Délai > 6H. En tant que Sol, essayez de taper avec 2P entre les deux. Vous devriez vous faire Counter."
+                                    steps={[
+                                        <span>Faites un coup qui vous laisse positif ou légèrement négatif (ex: c.S).</span>,
+                                        <span>Attendez une fraction de seconde (2-3 frames).</span>,
+                                        <span>Lancez votre coup suivant.</span>,
+                                        <span>Résultat : Si l'adversaire bourrine, son coup commence à sortir mais se fait écraser par le vôtre (Counter Hit).</span>
+                                    ]}
+                                >
+                                    <p>Laisser volontairement un minuscule trou dans votre enchaînement pour inciter l'adversaire à taper, puis le punir automatiquement.</p>
+                                </DetailedCard>
+                            </div>
+
+                            <GameStateSection />
+                        </section>
+
+                        {/* SECTION 2 : LE NEUTRAL */}
+                        <section className="mb-24 animate-fade-up" style={{animationDelay: '0.2s'}}>
+                            <SectionTitle icon={<Scale size={20}/>} title="Le Neutral Game" subtitle="Gagner le terrain" />
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <DetailedCard 
+                                    title="Le Poke" 
+                                    badge="Contrôle"
+                                    training="Contre Sol. Restez à mi-distance. Essayez de le toucher avec le bout de votre f.S ou 2S dès qu'il bouge."
+                                    steps={[
+                                        <span>Identifiez votre coup avec la meilleure portée et vitesse (souvent f.S ou 2S).</span>,
+                                        <span>Restez à la limite maximale de sa portée.</span>,
+                                        <span>Lancez-le pour occuper l'espace devant vous.</span>,
+                                        <span>But : Empêcher l'adversaire d'avancer.</span>
+                                    ]}
+                                >
+                                    <p>Utiliser des coups à longue portée pour contrôler l'espace. C'est l'outil de base pour stopper les approches.</p>
+                                </DetailedCard>
+
+                                <DetailedCard 
+                                    title="Le Whiff Punish" 
+                                    badge="Réaction"
+                                    training="Enregistrez Ky faire f.S dans le vide. Reculez pour être hors de portée, attendez qu'il tape, puis faites f.S."
+                                    steps={[
+                                        <span>L'adversaire lance une attaque (Poke).</span>,
+                                        <span>Vous êtes juste en dehors de sa portée (grâce au spacing).</span>,
+                                        <span>Pendant que son bras/épée est étendu (et vulnérable), vous tapez dessus.</span>,
+                                        <span>Vous obtenez souvent un Counter Hit.</span>
+                                    ]}
+                                >
+                                    <p>La technique la plus élégante. Faire rater l'adversaire en reculant, puis frapper son membre étendu avant qu'il ne le rétracte.</p>
+                                </DetailedCard>
+
+                                <DetailedCard 
+                                    title="L'Approche (Dash Block)" 
+                                    badge="Sécurité"
+                                    training="Contre Axl Low qui spamme ses chaînes. Avancez vers lui en utilisant uniquement le Dash Block sans vous faire toucher."
+                                    steps={[
+                                        <span>Faites un Dash <RenderInput input="6 6"/>.</span>,
+                                        <span>Immédiatement après, maintenez Arrière <RenderInput input="4"/>.</span>,
+                                        <span>Vous parcourez une petite distance tout en étant prêt à bloquer instantanément.</span>,
+                                        <span>Répétez pour gagner du terrain centimètre par centimètre.</span>
+                                    ]}
+                                >
+                                    <p>Courir vers l'ennemi est suicidaire. Le Dash Block permet d'avancer par à-coups tout en restant protégé.</p>
+                                </DetailedCard>
+                            </div>
+
+                            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <DetailedCard 
+                                    title="L'Anti-Air Universel (6P)" 
+                                    badge="Invincible"
+                                    training="Enregistrez l'adversaire pour qu'il saute vers vous avec une attaque. Attendez, et faites 6P."
+                                    steps={[
+                                        <span>L'adversaire est en l'air et tombe vers vous.</span>,
+                                        <span>Appuyez sur <RenderInput input="6 P"/> (Avant + Punch).</span>,
+                                        <span>Votre personnage devient invulnérable sur le haut du corps.</span>,
+                                        <span>L'attaque aérienne passe à travers vous, et vous tapez ses jambes.</span>
+                                    ]}
+                                >
+                                    <p>Dans GGST, tous les personnages ont un 6P invincible sur le haut du corps. C'est la réponse absolue aux sauts.</p>
+                                </DetailedCard>
+
+                                <DetailedCard 
+                                    title="La Conversion (Hit Confirm)" 
+                                    badge="Optimisation"
+                                    training="Tapez aléatoirement le mannequin (Block/Hit random). Si ça touche -> Combo. Si ça bloque -> Arrêt."
+                                    steps={[
+                                        <span>Vous lancez un Poke (ex: f.S).</span>,
+                                        <span>Pendant l'animation, regardez si l'ennemi a bloqué ou non.</span>,
+                                        <span className="text-green-400">Si HIT : Annulez immédiatement en Coup Spécial ou Red RC.</span>,
+                                        <span className="text-red-400">Si BLOCK : Ne faites rien ou faites un coup safe.</span>
+                                    ]}
+                                >
+                                    <p>Ne gaspillez pas vos touches. Savoir transformer un petit coup de pied "au hasard" en un combo dévastateur est la marque des bons joueurs.</p>
+                                </DetailedCard>
+                            </div>
+                        </section>
+
+                        {/* SECTION 3 : OUTILS AVANCÉS */}
+                        <section className="mb-24 animate-fade-up" style={{animationDelay: '0.3s'}}>
+                            <SectionTitle icon={<Activity size={20}/>} title="Outils Avancés" subtitle="Utiliser votre jauge intelligemment" />
+                            
+                            {/* MODIFICATION : Grid 2 colonnes pour 2 lignes de cartes */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <DetailedCard 
+                                    title="Faultless Defense (FD)" 
+                                    badge="Défense"
+                                    training="Mettez-vous dans le coin. Faites bloquer le mannequin avec FD. Voyez comment l'attaquant est repoussé loin."
+                                    steps={[
+                                        <span className="flex items-center gap-2">Maintenez <RenderInput input="4"/> (Arrière) pour bloquer.</span>,
+                                        <span className="flex items-center gap-2">Maintenez DEUX boutons d'attaque (sauf D). Ex: <RenderInput input="P + K"/>.</span>,
+                                        <span>Une bulle verte apparaît. Votre tension baisse lentement.</span>,
+                                        <span>Gain : Vous ne prenez pas de dégâts de gratte et l'adversaire est repoussé deux fois plus loin.</span>
+                                    ]}
+                                >
+                                    <p>La défense parfaite pour créer de la distance et faire rater (Whiff) la prochaine attaque de l'adversaire.</p>
+                                </DetailedCard>
+
+                                <DetailedCard 
+                                    title="Yellow Roman Cancel (YRC)" 
+                                    badge="Panic Button"
+                                    training="Enregistrez un combo infini dans le coin avec le mannequin. Bloquez, et utilisez YRC pour l'interrompre."
+                                    steps={[
+                                        <span>Vous êtes en train de bloquer une attaque (Blockstun).</span>,
+                                        <span className="flex items-center gap-2">Appuyez sur 3 boutons (ex: <RenderInput input="P + K + S"/>).</span>,
+                                        <span>Une onde de choc jaune sort.</span>,
+                                        <span>L'adversaire est repoussé et ralenti. C'est VOTRE tour de jouer.</span>
+                                    ]}
+                                >
+                                    <p>Coûte 50% de tension. C'est le bouton "Lâche-moi" ultime quand vous êtes coincé dans le coin et que vous allez mourir.</p>
+                                </DetailedCard>
+
+                                <DetailedCard 
+                                    title="RC Drift" 
+                                    badge="Mouvement"
+                                    training="Faites un coup (f.S), activez le RC et maintenez immédiatement Avant (6) ou Haut (8). Votre personnage glissera."
+                                    steps={[
+                                        <span>Lancez une attaque (touche ou bloque).</span>,
+                                        <span className="flex items-center gap-2">Activez le Roman Cancel (3 boutons).</span>,
+                                        <span className="flex items-center gap-2">PENDANT l'activation (avant le flash), faites un Dash <RenderInput input="6 6"/> ou maintenez une direction.</span>,
+                                        <span>Vous glissez dans cette direction pendant le ralentissement du temps.</span>
+                                    ]}
+                                >
+                                    <p>Permet de se repositionner pendant le Roman Cancel. Vital pour les mix-ups ou pour continuer un combo à distance.</p>
+                                </DetailedCard>
+
+                                <DetailedCard 
+                                    title="Tick Throw" 
+                                    badge="Offense"
+                                    training="Avec Sol, faites 5K sur un ennemi qui bloque, avancez d'un micro-pas et faites la chope (6D). L'ennemi s'attend à un autre coup."
+                                    steps={[
+                                        <span className="flex items-center gap-2">Faites un coup rapide et safe (ex: <RenderInput input="5 P"/> ou <RenderInput input="2 K"/>).</span>,
+                                        <span>L'adversaire bloque.</span>,
+                                        <span className="flex items-center gap-2">Attendez une fraction de seconde (le temps que le Blockstun finisse) et faites <RenderInput input="6 D"/>.</span>,
+                                        <span>L'adversaire essaie de continuer à bloquer... mais se fait choper.</span>
+                                    ]}
+                                >
+                                    <p>Conditionner l'adversaire à bloquer avec des coups rapides, puis le surprendre avec une chope immédiate. Diabolique.</p>
+                                </DetailedCard>
+                            </div>
+                        </section>
+
+                        <footer className="text-center text-slate-600 text-sm pb-8 border-t border-slate-800 pt-8">
+                            <p>Guilty Gear Strive est une marque déposée par Arc System Works.</p>
+                            <div className="mt-4 flex justify-center gap-4">
+                                <a href="guide.html" className="px-4 py-2 rounded bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">❮ Revenir au Guide Débutant</a>
+                                <a href="ggst.html" className="px-4 py-2 rounded bg-orange-600 text-white hover:bg-orange-500 transition-colors font-bold">Retourner au Roster</a>
+                            </div>
+                        </footer>
+
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
