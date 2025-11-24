@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGST - Guide des Archétypes</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { background-color: #0f172a; font-family: 'Segoe UI', sans-serif; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body class="text-slate-200">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- ICÔNES SVG ---
+        const Icons = {
+            Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>,
+            Zap: () => <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            Crosshair: () => <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>,
+            Skull: () => <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></svg>,
+            Swords: () => <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/></svg>,
+            BrainCircuit: () => <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a3 3 0 1 1 5.997.129 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.555 6.588 4 4 0 1 1-2.971-3.487"/><path d="M12 18v4"/><path d="M12 5V2"/><path d="M5 8 2 5"/><path d="M19 8l3-3"/></svg>,
+            ArrowLeft: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
+            Gamepad2: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="2"/></svg>
+        };
+
+        const { Shield, Zap, Crosshair, Skull, Swords, BrainCircuit, ArrowLeft, Gamepad2 } = Icons;
+
+        // --- DONNÉES PRINCIPALES ---
+        const archetypes = [
+            {
+                id: "balance",
+                name: "All-Rounder",
+                frName: "Polyvalent",
+                icon: <Shield />,
+                color: "text-blue-400",
+                bgColor: "bg-blue-500/10",
+                borderColor: "border-blue-500/30",
+                desc: "Les maîtres de l'équilibre. Ils possèdent un outil pour chaque situation : un projectile pour la distance, un anti-air pour la défense, et de bons coups au corps-à-corps.",
+                pros: ["S'adapte à tout", "Facile à apprendre", "Jamais vraiment désavantagé"],
+                cons: ["Pas de force écrasante spécialisée"],
+                chars: ["Sol Badguy", "Ky Kiske", "Leo Whitefang", "Sin Kiske", "Bridget"]
+            },
+            {
+                id: "rushdown",
+                name: "Rushdown",
+                frName: "Agression / Vitesse",
+                icon: <Zap />,
+                color: "text-yellow-400",
+                bgColor: "bg-yellow-500/10",
+                borderColor: "border-yellow-500/30",
+                desc: "La vitesse avant tout. Ils veulent coller l'adversaire et ne jamais le lâcher. Ils possèdent des mix-ups rapides (frapper en haut/en bas/derrière) pour ouvrir la garde.",
+                pros: ["Dégâts mentaux élevés", "Rapide et insaisissable", "Ouvre la garde facilement"],
+                cons: ["Souvent peu de points de vie", "Portée très courte"],
+                chars: ["Chipp Zanuff", "Millia Rage", "Giovanna", "I-No", "Elphelt", "Jam", "Lucy"]
+            },
+            {
+                id: "zoner",
+                name: "Zoner",
+                frName: "Contrôle à Distance",
+                icon: <Crosshair />,
+                color: "text-green-400",
+                bgColor: "bg-green-500/10",
+                borderColor: "border-green-500/30",
+                desc: "Pourquoi s'approcher quand on peut gagner d'ici ? Ils contrôlent l'espace avec des projectiles ou des membres extensibles pour empêcher l'adversaire de jouer.",
+                pros: ["Frustrant pour l'adversaire", "Domine l'écran", "Sécuritaire"],
+                cons: ["Faible au corps-à-corps", "Demande de la patience"],
+                chars: ["Axl Low", "Testament", "Happy Chaos", "Johnny", "Queen Dizzy", "Asuka R#"]
+            },
+            {
+                id: "grappler",
+                name: "Grappler",
+                frName: "Chopeur",
+                icon: <Skull />,
+                color: "text-red-500",
+                bgColor: "bg-red-500/10",
+                borderColor: "border-red-500/30",
+                desc: "Lents, effrayants, et dévastateurs. Leur plan de jeu tourne autour d'une prise spéciale (Command Grab) imparable qui retire 40% de la vie adverse.",
+                pros: ["Dégâts explosifs", "Fait peur en permanence", "Beaucoup de vie"],
+                cons: ["Très lent", "Gros corps facile à toucher", "Difficile contre les Zoners"],
+                chars: ["Potemkin"]
+            },
+            {
+                id: "power",
+                name: "Power / Gorilla",
+                frName: "Puissance Brute",
+                icon: <Swords />,
+                color: "text-orange-500",
+                bgColor: "bg-orange-500/10",
+                borderColor: "border-orange-500/30",
+                desc: "Ils n'ont pas besoin de vitesse ni de chopes complexes. Ils ont juste d'énormes épées ou des coups qui couvrent la moitié de l'écran et font mal. Très mal.",
+                pros: ["Portée immense", "Dégâts très élevés", "Pression facile"],
+                cons: ["Souvent risqué (Ressources à gérer)", "Mouvements lourds"],
+                chars: ["Goldlewis Dickinson", "Nagoriyuki", "Ramlethal", "May", "Slayer", "A.B.A"]
+            },
+            {
+                id: "technical",
+                name: "Technical / Puppet",
+                frName: "Technique / Marionnettiste",
+                icon: <BrainCircuit />,
+                color: "text-purple-400",
+                bgColor: "bg-purple-500/10",
+                borderColor: "border-purple-500/30",
+                desc: "Pour les joueurs qui aiment les défis. Ils contrôlent souvent deux entités à la fois ou gèrent des ressources complexes (cartes, billard, objets).",
+                pros: ["Potentiel infini", "Imprévisible", "Crée des situations injustes"],
+                cons: ["Très difficile à maîtriser", "Demande beaucoup d'entraînement"],
+                chars: ["Zato-1", "Jack-O", "Faust", "Bedman?", "Venom"]
+            }
+        ];
+
+        // --- NOUVELLE SECTION : STYLES D'INPUTS ---
+        const inputStyles = [
+            {
+                name: "Charge",
+                desc: "Maintenir arrière/bas 1 seconde, puis avant/haut + Attaque.",
+                examples: "Mr. Dolphin (May), Sickle Flash (Axl), Ball Set (Venom)",
+                chars: ["May", "Leo", "Potemkin", "Axl", "Venom"]
+            },
+            {
+                name: "Rekka / Stance",
+                desc: "Enchaînements de coups spéciaux ou postures. Nécessite de ré-appuyer ou choisir une suite.",
+                examples: "Resshou (Chipp), Chain Lollipop (Elphelt), Dandy Step (Slayer)",
+                chars: ["Chipp", "Anji", "Elphelt", "Slayer"]
+            },
+            {
+                name: "Motion (Classique)",
+                desc: "Quarts de cercles (236) et Dragons (623). Le standard du genre.",
+                examples: "Gun Flame (Sol), Stun Edge (Ky), Sepultura (Giovanna)",
+                chars: ["Sol", "Ky", "Giovanna", "I-No", "Baiken", "Sin", "Ramlethal", "Unika"]
+            },
+            {
+                name: "Negative Edge / Complexe",
+                desc: "Relâcher le bouton pour attaquer ou gestions de ressources uniques.",
+                examples: "Eddie (Zato), Tirs (Happy Chaos), Cartes (Asuka)",
+                chars: ["Zato-1", "Happy Chaos", "Asuka", "Jack-O"]
+            },
+             {
+                name: "Overdrive Facile (236236)",
+                desc: "Possèdent au moins un Overdrive avec un input simple : ↓↘→ ↓↘→ + Attaque.",
+                examples: "Ride the Lightning (Ky), Sickle Storm (Axl), W-W-What Could This Be? (Faust)",
+                chars: ["Ky", "May", "Axl", "Chipp", "Faust", "Millia", "Ramlethal", "Nagoriyuki", "Giovanna", "I-No", "Goldlewis", "Jack-O", "Baiken", "Testament", "Sin", "Bedman?", "Asuka", "Elphelt", "Slayer", "Venom", "Lucy", "Unika", "Potemkin"]
+            },
+             {
+                name: "Overdrive Complexe (632146)",
+                desc: "Leurs Overdrives principaux demandent souvent la manipulation 'Demi-cercle arrière -> avant'.",
+                examples: "Tyrant Rave (Sol), Heavenly Potemkin Buster (Potemkin), Amorphous (Zato)",
+                chars: ["Sol", "Potemkin", "Zato-1", "Leo", "Anji", "Happy Chaos", "Johnny", "A.B.A", "Queen Dizzy"]
+            }
+        ];
+
+        function App() {
+            return (
+                <div className="min-h-screen pb-20 bg-[#0f141f]">
+                    <nav className="bg-[#111827] border-b border-slate-800 px-6 py-4 sticky top-0 z-50 shadow-lg">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <h1 className="text-2xl font-black text-white tracking-tighter italic">
+                                <span className="text-orange-500">GG</span>ST <span className="text-slate-400 text-lg not-italic font-normal ml-2">/// Guide des Styles</span>
+                            </h1>
+                            {/* MODIFICATION ICI : LIEN VERS GGST.HTML */}
+                            <a href="ggst.html" className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors">
+                                <ArrowLeft />
+                                Retour au Roster
+                            </a>
+                        </div>
+                    </nav>
+
+                    <div className="max-w-4xl mx-auto text-center py-16 px-4">
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Quel est votre <span className="text-orange-500">Style de Combat</span> ?</h2>
+                        <p className="text-lg text-slate-400 leading-relaxed">
+                            Guilty Gear Strive propose 32 personnages uniques. Pour trouver votre "Main", commencez par identifier l'archétype qui correspond à votre personnalité de joueur.
+                        </p>
+                    </div>
+
+                    {/* Grid Archétypes Principaux */}
+                    <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+                        {archetypes.map((type) => (
+                            <div key={type.id} className={`card-hover relative overflow-hidden rounded-2xl border ${type.borderColor} bg-slate-800/50 p-8 transition-all duration-300`}>
+                                <div className={`absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 rounded-full ${type.bgColor} blur-3xl opacity-50`}></div>
+                                <div className="relative z-10">
+                                    <div className={`mb-6 inline-flex p-3 rounded-xl ${type.bgColor} ${type.color} ring-1 ring-white/10`}>
+                                        {type.icon}
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-white mb-1">{type.frName}</h3>
+                                    <p className="text-xs font-mono text-slate-500 uppercase tracking-widest mb-4">{type.name}</p>
+                                    <p className="text-slate-300 mb-6 leading-relaxed min-h-[80px]">{type.desc}</p>
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <span className="block font-bold text-green-400 mb-1 text-xs uppercase">Forces</span>
+                                                <ul className="list-disc list-inside text-slate-400 space-y-1">
+                                                    {type.pros.map((p, i) => <li key={i}>{p}</li>)}
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <span className="block font-bold text-red-400 mb-1 text-xs uppercase">Faiblesses</span>
+                                                <ul className="list-disc list-inside text-slate-400 space-y-1">
+                                                    {type.cons.map((c, i) => <li key={i}>{c}</li>)}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div className="pt-6 mt-6 border-t border-slate-700">
+                                            <span className="block text-xs font-bold text-slate-500 uppercase mb-3">Personnages Clés</span>
+                                            <div className="flex flex-wrap gap-2">
+                                                {type.chars.map(char => (
+                                                    <span key={char} className="px-2 py-1 bg-slate-900 rounded border border-slate-700 text-xs text-slate-300 hover:border-slate-500 hover:text-white transition-colors cursor-default">{char}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Nouvelle Section : Styles d'Inputs */}
+                    <div className="bg-[#111827] py-16 border-t border-slate-800">
+                        <div className="max-w-6xl mx-auto px-4">
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="p-3 bg-slate-800 rounded-xl text-orange-500">
+                                    <Gamepad2 size={32} />
+                                </div>
+                                <div>
+                                    <h2 className="text-3xl font-bold text-white">Comment ils se jouent ?</h2>
+                                    <p className="text-slate-400">Au-delà de l'archétype, le type de commandes (inputs) change radicalement la prise en main.</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Changed to 3 cols for better fit with 6 items */}
+                                {inputStyles.map((style, idx) => (
+                                    <div key={idx} className="bg-slate-900/50 border border-slate-800 rounded-xl p-6 hover:border-slate-600 transition-colors">
+                                        <h3 className="text-xl font-bold text-white mb-2">{style.name}</h3>
+                                        <p className="text-sm text-slate-400 mb-4 h-16">{style.desc}</p>
+                                        
+                                        <div className="mb-4">
+                                            <span className="text-xs font-bold text-slate-500 uppercase">Exemples de Coups</span>
+                                            <p className="text-sm text-slate-300 italic">{style.examples}</p>
+                                        </div>
+
+                                        <div>
+                                            <span className="text-xs font-bold text-slate-500 uppercase">Personnages</span>
+                                            <div className="flex flex-wrap gap-1.5 mt-2">
+                                                {style.chars.map(char => (
+                                                    <span key={char} className="text-[10px] px-2 py-1 bg-slate-800 text-slate-300 rounded border border-slate-700">
+                                                        {char}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

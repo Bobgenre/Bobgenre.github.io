@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guilty Gear Strive - Roster Dashboard</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { background-color: #0B1120; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-in { animation: slideIn 0.4s ease-out forwards; }
+        .loader { border: 4px solid #1e293b; border-top: 4px solid #f97316; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Badge Overlay (Sur l'image - Grille) */
+        .badge-overlay { 
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 8px; border-radius: 4px;
+            font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* --- NOUVEAUX STYLES FICHE DÉTAIL (CORRIGÉS) --- */
+
+        /* 1. Archétype Principal (Style "Power" Photo : Bordure Colorée, Texte Blanc) */
+        .tile-main {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 14px; /* Taille Moyenne */
+            background-color: #1f2024; /* Fond très sombre */
+            border-radius: 6px;
+            color: #f3f4f6; /* Texte Blanc !important */
+            font-size: 0.8rem;
+            font-weight: 800; /* Très gras comme sur la photo */
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-width: 1px; /* La couleur de bordure est injectée dynamiquement via border-color */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            transition: transform 0.2s;
+        }
+        .tile-main:hover { transform: translateY(-1px); }
+
+        /* 2. Style de Jeu (Style "Motion" Photo : Bordure Grise, Texte Blanc) */
+        .tile-input {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 14px;
+            background-color: #1f2024;
+            border: 1px solid #4b5563; /* Bordure Grise (Gray 600) */
+            border-radius: 6px;
+            color: #f3f4f6; /* Texte Blanc !important */
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .tile-input:hover { border-color: #9ca3af; transform: translateY(-1px); }
+
+        /* 3. Traits Secondaires (L'entre-deux : Bordure Grise, Texte Coloré) */
+        .tile-sec {
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 12px; /* Un peu plus petit */
+            background-color: #1f2024;
+            border: 1px solid #374151; /* Bordure Grise Sombre */
+            border-radius: 6px;
+            /* La couleur du texte est injectée dynamiquement */
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        .tile-sec:hover { border-color: #6b7280; }
+
+        /* Classes Utilitaires pour les Couleurs */
+        /* BORDURES (Pour Archétype Principal) */
+        .border-balance { border-color: #60a5fa; } /* Blue 400 */
+        .border-rushdown { border-color: #facc15; } /* Yellow 400 */
+        .border-speed { border-color: #22d3ee; } /* Cyan 400 */
+        .border-power { border-color: #fb923c; } /* Orange 400 */
+        .border-zoner { border-color: #4ade80; } /* Green 400 */
+        .border-grappler { border-color: #f87171; } /* Red 400 */
+        .border-technical { border-color: #c084fc; } /* Purple 400 */
+        .border-unique { border-color: #f472b6; } /* Pink 400 */
+
+        /* TEXTES (Pour Traits Secondaires & Icônes) */
+        .text-balance { color: #60a5fa; }
+        .text-rushdown { color: #facc15; }
+        .text-speed { color: #22d3ee; }
+        .text-power { color: #fb923c; }
+        .text-zoner { color: #4ade80; }
+        .text-grappler { color: #f87171; }
+        .text-technical { color: #c084fc; }
+        .text-unique { color: #f472b6; }
+        
+        /* Input Icons */
+        .input-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin-right: 2px; border-radius: 4px; font-weight: bold; font-family: monospace; font-size: 12px; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+        .dir-icon { background-color: #374151; color: #9ca3af; border: 1px solid #4b5563; border-radius: 50%; }
+        .btn-P { background-color: #ec4899; color: white; border: 1px solid #be185d; border-radius: 50%; }
+        .btn-K { background-color: #3b82f6; color: white; border: 1px solid #1d4ed8; border-radius: 50%; }
+        .btn-S { background-color: #10b981; color: #064e3b; border: 1px solid #047857; border-radius: 50%; color: white; }
+        .btn-HS { background-color: #ef4444; color: white; border: 1px solid #b91c1c; border-radius: 50%; }
+        .btn-D { background-color: #f97316; color: white; border: 1px solid #c2410c; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
+            authDomain: "muscu-5e40c.firebaseapp.com",
+            projectId: "muscu-5e40c",
+            storageBucket: "muscu-5e40c.appspot.com",
+            messagingSenderId: "561788112947",
+            appId: "1:561788112947:web:7f2b7c7d74ff328f2b1346"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // --- ICONS ---
+        const Icons = {
+            Search: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>,
+            Info: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
+            Zap: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            ArrowLeft: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
+            ChevronRight: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
+            ChevronDown: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>,
+            Filter: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>,
+            Menu: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>,
+            Gamepad: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="2"/></svg>,
+            Shield: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>,
+            Crosshair: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>,
+            Skull: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></svg>,
+            Heart: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
+            Grid: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>,
+            Sword: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/></svg>,
+            Brain: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>,
+            Star: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        };
+
+        const { Search, Info, Zap, ArrowLeft, ChevronRight, ChevronDown, Filter, Menu, Gamepad, Shield, Crosshair, Skull, Sword, Brain, Star } = Icons;
+
+        // --- HELPERS ---
+        const getTypeConfig = (type) => {
+            const t = type ? type.trim() : '';
+            const config = {
+                'Balance': { border: 'border-balance', text: 'text-balance', icon: <Shield size={16} className="text-blue-400" /> },
+                'All-Rounder': { border: 'border-balance', text: 'text-balance', icon: <Shield size={16} className="text-blue-400" /> },
+                'Rushdown': { border: 'border-rushdown', text: 'text-rushdown', icon: <Zap size={16} className="text-yellow-400" /> },
+                'Speed': { border: 'border-speed', text: 'text-speed', icon: <Zap size={16} className="text-cyan-400" /> },
+                'Power': { border: 'border-power', text: 'text-power', icon: <Sword size={16} className="text-orange-400" /> },
+                'Zoning': { border: 'border-zoner', text: 'text-zoner', icon: <Crosshair size={16} className="text-green-400" /> },
+                'Zoner': { border: 'border-zoner', text: 'text-zoner', icon: <Crosshair size={16} className="text-green-400" /> },
+                'Grappler': { border: 'border-grappler', text: 'text-grappler', icon: <Skull size={16} className="text-red-400" /> },
+                'Technical': { border: 'border-technical', text: 'text-technical', icon: <Brain size={16} className="text-purple-400" /> },
+                'Unique': { border: 'border-unique', text: 'text-unique', icon: <Info size={16} className="text-pink-400" /> },
+                'Mix-up': { border: 'border-unique', text: 'text-unique', icon: <Zap size={16} className="text-fuchsia-400" /> },
+                'Mid-Range': { border: 'border-zoner', text: 'text-zoner', icon: <Crosshair size={16} className="text-teal-400" /> },
+                'Brawler': { border: 'border-power', text: 'text-power', icon: <Sword size={16} className="text-rose-400" /> }
+            };
+            return config[t] || { border: 'border-slate-600', text: 'text-gray-400', icon: <Star size={16} className="text-gray-400" /> };
+        };
+
+        const RenderInput = ({ input }) => {
+            if (!input || !Array.isArray(input)) return null;
+            const directions = { "1": "↙", "2": "↓", "3": "↘", "4": "←", "5": "•", "6": "→", "7": "↖", "8": "↑", "9": "↗" };
+            const buttons = { "P": "btn-P", "K": "btn-K", "S": "btn-S", "HS": "btn-HS", "D": "btn-D" };
+
+            return (
+                <div className="flex flex-wrap items-center gap-1">
+                    {input.map((key, i) => {
+                        if (key.startsWith("j.")) {
+                            const dir = key.split(".")[1];
+                            return <div key={i} className="inline-flex items-center mr-1 bg-blue-900/30 border border-blue-800 rounded px-1"><span className="text-[10px] font-bold text-blue-400 uppercase mr-1">Air</span><span className={`input-icon dir-icon`}>{directions[dir] || dir}</span></div>;
+                        }
+                        if (directions[key]) return <span key={i} className="input-icon dir-icon">{directions[key]}</span>;
+                        if (buttons[key]) return <span key={i} className={`input-icon ${buttons[key]}`}>{key}</span>;
+                        if (key === "hold") return <span key={i} className="text-[10px] text-gray-500 uppercase font-bold">[HOLD]</span>;
+                        return <span key={i} className="text-gray-400 text-xs font-mono">{key}</span>;
+                    })}
+                </div>
+            );
+        };
+
+        // --- CARTE PERSONNAGE ---
+        const CharacterCard = ({ char, onClick }) => {
+            const type = Array.isArray(char.type) ? char.type[0] : char.type;
+            const secondary = Array.isArray(char.secondary_type) ? char.secondary_type : [];
+            const mainConfig = getTypeConfig(type);
+
+            return (
+                <div onClick={() => onClick(char)} className="group bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-900/20 transition-all duration-300 cursor-pointer hover:-translate-y-1 flex flex-col h-full">
+                    <div className="relative h-48 overflow-hidden bg-slate-900">
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10 opacity-90"></div>
+                        <img src={char.image} alt={char.name} className="w-full h-full object-cover object-top transform group-hover:scale-110 transition-transform duration-500" loading="lazy" onError={(e) => e.target.src = `https://placehold.co/400x600/1e293b/cbd5e1?text=${char.name}`} />
+                        
+                        <div className="absolute top-2 left-2 z-20 flex flex-wrap gap-1.5 max-w-[90%]">
+                            <span className="badge-overlay">{mainConfig.icon} {type}</span>
+                        </div>
+                    </div>
+
+                    <div className="p-4 flex-1 flex flex-col">
+                        <h3 className="text-lg font-bold text-white mb-2 group-hover:text-orange-400 transition-colors truncate">{char.name}</h3>
+                        
+                        {secondary.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mb-3">
+                                {secondary.slice(0, 3).map((t, i) => (
+                                    <span key={i} className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-slate-700/50 text-slate-400 border border-slate-600 uppercase">
+                                        {t}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+
+                        <p className="text-slate-400 text-xs line-clamp-2 mb-3 flex-1">{char.desc}</p>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- SIDEBAR SECTION ---
+        const SidebarSection = ({ title, items, selected, setSelected, isOpen, toggle }) => {
+            return (
+                <div className="border-b border-slate-800 pb-4">
+                    <button 
+                        onClick={toggle}
+                        className="w-full flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 hover:text-slate-300 transition-colors"
+                    >
+                        {title}
+                        {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                    </button>
+                    
+                    {isOpen && (
+                        <div className="space-y-1 animate-slide-in pl-2 border-l border-slate-800 ml-1">
+                            {items.map(item => (
+                                <button
+                                    key={item}
+                                    onClick={() => setSelected(item)}
+                                    className={`w-full text-left px-3 py-2 rounded text-sm transition-all flex justify-between items-center ${
+                                        selected === item ? 'bg-orange-600 text-white font-bold shadow-lg shadow-orange-900/20' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                                    }`}
+                                >
+                                    {item.replace('_', ' ')}
+                                    {selected === item && <ChevronRight size={14}/>}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const CharacterDetail = ({ char, onBack }) => {
+             const type = Array.isArray(char.type) ? char.type[0] : char.type;
+             const secondary = Array.isArray(char.secondary_type) ? char.secondary_type : [];
+             const styles = Array.isArray(char.input_style) ? char.input_style : [];
+             const mainConfig = getTypeConfig(type);
+ 
+             return (
+                 <div className="h-full flex flex-col bg-[#0f141f] animate-slide-in overflow-hidden">
+                     <div className="h-16 border-b border-slate-800 flex items-center px-4 md:px-8 bg-[#0f141f]/95 sticky top-0 z-30 justify-between shrink-0">
+                         <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
+                             <div className="p-2 bg-slate-800 rounded group-hover:bg-slate-700"><ArrowLeft /></div>
+                             <span className="font-medium hidden md:inline">Retour</span>
+                         </button>
+                         <h2 className="text-xl font-bold text-orange-500 uppercase tracking-wider">{char.name}</h2>
+                     </div>
+                     <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+                         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+                             <div className="lg:col-span-1 space-y-6">
+                                 <div className="bg-slate-800 rounded-2xl p-1 border border-slate-700 shadow-2xl">
+                                     <div className="relative rounded-xl overflow-hidden aspect-[3/4] bg-slate-900">
+                                         <img src={char.image} alt={char.name} className="w-full h-full object-cover object-top" />
+                                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
+                                         <div className="absolute bottom-0 left-0 w-full p-6">
+                                             <h1 className="text-3xl font-black text-white italic mb-2">{char.name}</h1>
+                                             <p className="text-slate-300 text-sm leading-relaxed">{char.desc}</p>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 
+                                 <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg">
+                                     <h4 className="text-sm font-black text-slate-400 uppercase mb-6 flex items-center gap-2 tracking-widest">
+                                         <Info size={16}/> Profil de Combat
+                                     </h4>
+                                     
+                                     <div className="space-y-6">
+                                         {/* ARCHETYPE PRINCIPAL (Style Tuile Colorée) */}
+                                         <div>
+                                             <span className="text-xs font-bold text-slate-500 block mb-2 uppercase">Archétype Principal</span>
+                                             <div className="flex flex-wrap gap-2">
+                                                 <span className={`tile-main ${mainConfig.border}`}>
+                                                     {mainConfig.icon} <span className="font-bold">{type}</span>
+                                                 </span>
+                                             </div>
+                                         </div>
+                                         
+                                         {/* TRAITS SECONDAIRES (Style Tuile Sombre - Entre-deux) */}
+                                         {secondary.length > 0 && (
+                                            <div>
+                                                <span className="text-xs font-bold text-slate-500 block mb-2 uppercase">Traits Secondaires</span>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {secondary.map((t, i) => {
+                                                        const secConfig = getTypeConfig(t);
+                                                        return (
+                                                            <span key={i} className={`tile-sec ${secConfig.text}`}>
+                                                                {secConfig.icon} <span>{t}</span>
+                                                            </span>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                         )}
+
+                                         {/* STYLE DE JEU (Style Tuile Sombre - Grise) */}
+                                         {styles.length > 0 && (
+                                             <div>
+                                                 <span className="text-xs font-bold text-slate-500 block mb-2 uppercase">Style de Jeu (Inputs)</span>
+                                                 <div className="flex flex-wrap gap-2">
+                                                     {styles.map((s, i) => (
+                                                         <span key={i} className="tile-input">
+                                                             <Gamepad size={16} className="text-orange-400"/>
+                                                             <span>{s.replace('_', ' ')}</span>
+                                                         </span>
+                                                     ))}
+                                                 </div>
+                                             </div>
+                                         )}
+
+                                         <div>
+                                             <span className="text-xs font-bold text-slate-500 block mb-2 uppercase">Difficulté</span>
+                                             <div className="flex gap-1.5">
+                                                 {[...Array(5)].map((_, i) => (
+                                                     <div key={i} className={`h-2 w-8 rounded-full transition-colors ${i < char.difficulty ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]' : 'bg-slate-700/50'}`}></div>
+                                                 ))}
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
+ 
+                             <div className="lg:col-span-2">
+                                 <div className="bg-slate-800/30 border border-slate-700 rounded-xl overflow-hidden">
+                                     <div className="p-4 border-b border-slate-700 bg-slate-800/80 flex items-center justify-between">
+                                         <h3 className="font-bold text-white flex items-center gap-2"><Zap className="text-yellow-500" size={18}/> Command List</h3>
+                                         <span className="text-xs text-slate-500 bg-slate-900 px-2 py-1 rounded">{char.moves ? char.moves.length : 0} techniques</span>
+                                     </div>
+                                     <div className="divide-y divide-slate-700/50">
+                                         {char.moves && char.moves.length > 0 ? char.moves.map((move, idx) => {
+                                             const isFollowUp = move.type === 'Follow-up';
+                                             const isOverdrive = move.type === 'Overdrive';
+                                             return (
+                                                 <div key={idx} className={`p-4 hover:bg-slate-700/30 transition-colors ${isFollowUp ? 'bg-slate-800/30 pl-8 border-l-2 border-l-slate-600' : ''}`}>
+                                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                                         <div className="flex items-center gap-2">
+                                                             {isFollowUp && <span className="text-slate-500 text-sm">↳</span>}
+                                                             <div>
+                                                                 <h4 className={`font-bold text-sm ${isFollowUp ? 'text-slate-300' : 'text-white'}`}>{move.name}</h4>
+                                                                 <span className={`text-[10px] uppercase tracking-wider font-bold ${isOverdrive ? 'text-red-400' : 'text-slate-500'}`}>{isFollowUp ? 'Enchaînement' : move.type}</span>
+                                                             </div>
+                                                         </div>
+                                                         <div className="bg-slate-900/50 px-3 py-2 rounded border border-slate-700/50 flex items-center"><RenderInput input={move.input} /></div>
+                                                     </div>
+                                                 </div>
+                                             );
+                                         }) : <div className="p-10 text-center text-slate-500"><p>Aucune donnée de coups disponible.</p></div>}
+                                     </div>
+                                 </div>
+                                 <div className="mt-4 p-4 bg-blue-900/10 border border-blue-800/30 rounded-lg text-xs text-blue-300/80 flex gap-3">
+                                     <Info size={16} className="shrink-0 mt-0.5"/>
+                                     <p>Lisez les inputs comme sur un pavé numérique (1-9). 2 = Bas, 6 = Avant, 236 = Quart de cercle avant.</p>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             );
+         };
+
+        function App() {
+            const [characters, setCharacters] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [searchTerm, setSearchTerm] = useState("");
+            const [selectedChar, setSelectedChar] = useState(null);
+            
+            // FILTRES
+            const [selectedArchetype, setSelectedArchetype] = useState("Tous");
+            const [selectedSecondary, setSelectedSecondary] = useState("Tous");
+            const [selectedStyle, setSelectedStyle] = useState("Tous");
+            
+            // MENUS (Fermés par défaut)
+            const [openMenus, setOpenMenus] = useState({
+                archetype: false,
+                secondary: false,
+                style: false
+            });
+
+            const toggleMenu = (menu) => {
+                setOpenMenus(prev => ({ ...prev, [menu]: !prev[menu] }));
+            };
+
+            // Données de filtres dynamiques (seront peuplées depuis la DB)
+            const [archetypesList, setArchetypesList] = useState(["Tous"]);
+            const [secondaryList, setSecondaryList] = useState(["Tous"]);
+            const [stylesList, setStylesList] = useState(["Tous"]);
+
+            useEffect(() => {
+                const fetchCharacters = async () => {
+                    try {
+                        const snapshot = await db.collection("ggst_characters").get();
+                        const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        list.sort((a, b) => a.name.localeCompare(b.name));
+                        
+                        setCharacters(list);
+                        
+                        // Extraction dynamique des listes de filtres pour la sidebar
+                        const allArch = new Set();
+                        const allSec = new Set();
+                        const allStyles = new Set();
+                        
+                        // 1. Récupérer d'abord tous les styles d'input pour l'exclusion
+                        list.forEach(c => {
+                             if (Array.isArray(c.input_style)) c.input_style.forEach(s => allStyles.add(s));
+                        });
+
+                        // 2. Récupérer les autres et filtrer les secondaires
+                        list.forEach(c => {
+                            // Principal
+                            if (Array.isArray(c.type)) allArch.add(c.type[0]);
+                            else if (c.type) allArch.add(c.type);
+                            
+                            // Secondaire (Exclure si présent dans Input Styles OU si présent dans Archétype Principal)
+                            if (Array.isArray(c.secondary_type)) {
+                                c.secondary_type.forEach(s => {
+                                    // On n'ajoute pas si c'est déjà un style d'input (ex: Charge) ou un archétype principal
+                                    if (!allStyles.has(s) && !allArch.has(s)) {
+                                        allSec.add(s);
+                                    }
+                                });
+                            }
+                        });
+                        
+                        const formatList = (set) => {
+                            const items = Array.from(set).filter(i => i !== "Tous");
+                            items.sort();
+                            return ["Tous", ...items];
+                        };
+
+                        setArchetypesList(formatList(allArch));
+                        setSecondaryList(formatList(allSec));
+                        setStylesList(formatList(allStyles));
+                        
+                        setLoading(false);
+                    } catch (err) { console.error("Erreur:", err); setLoading(false); }
+                };
+                fetchCharacters();
+            }, []);
+
+            const filteredCharacters = characters.filter(char => {
+                const matchesSearch = char.name.toLowerCase().includes(searchTerm.toLowerCase());
+                
+                // Filtre Principal (Type unique)
+                let matchesArchetype = selectedArchetype === "Tous";
+                if (selectedArchetype !== "Tous") {
+                    const charType = Array.isArray(char.type) ? char.type[0] : char.type;
+                    matchesArchetype = charType === selectedArchetype;
+                }
+
+                // Filtre Secondaire (Array)
+                let matchesSecondary = selectedSecondary === "Tous";
+                if (selectedSecondary !== "Tous") {
+                    if (Array.isArray(char.secondary_type)) matchesSecondary = char.secondary_type.includes(selectedSecondary);
+                    else matchesSecondary = false;
+                }
+
+                // Filtre Style (Array)
+                let matchesStyle = selectedStyle === "Tous";
+                if (selectedStyle !== "Tous") {
+                     if (Array.isArray(char.input_style)) matchesStyle = char.input_style.includes(selectedStyle);
+                     else matchesStyle = false;
+                }
+                
+                return matchesSearch && matchesArchetype && matchesSecondary && matchesStyle;
+            });
+
+            if (loading) return <div className="h-screen flex items-center justify-center bg-[#0B1120]"><div className="loader"></div></div>;
+            if (selectedChar) return <CharacterDetail char={selectedChar} onBack={() => setSelectedChar(null)} />;
+
+            return (
+                <div className="flex h-screen bg-[#0B1120] text-slate-200 font-sans overflow-hidden">
+                    <aside className="w-72 bg-[#111827] border-r border-slate-800 flex flex-col shrink-0 z-20 hidden md:flex">
+                        <div className="p-6 border-b border-slate-800">
+                            <h1 className="text-2xl font-black text-white italic tracking-tighter"><span className="text-orange-500">GG</span>ST <span className="text-sm not-italic font-normal text-slate-500 ml-2">Dashboard</span></h1>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                            
+                            <SidebarSection 
+                                title="Archétype Principal" 
+                                items={archetypesList} 
+                                selected={selectedArchetype} 
+                                setSelected={setSelectedArchetype}
+                                isOpen={openMenus.archetype}
+                                toggle={() => toggleMenu('archetype')}
+                            />
+
+                            <SidebarSection 
+                                title="Trait Secondaire" 
+                                items={secondaryList} 
+                                selected={selectedSecondary} 
+                                setSelected={setSelectedSecondary}
+                                isOpen={openMenus.secondary}
+                                toggle={() => toggleMenu('secondary')}
+                            />
+
+                            <SidebarSection 
+                                title="Mécanique / Input" 
+                                items={stylesList} 
+                                selected={selectedStyle} 
+                                setSelected={setSelectedStyle}
+                                isOpen={openMenus.style}
+                                toggle={() => toggleMenu('style')}
+                            />
+
+                            <div className="pt-4 border-t border-slate-800 space-y-3">
+                                <a href="guide.html" className="block w-full bg-orange-600 border border-orange-500 text-center py-3 rounded-lg text-sm font-bold text-white hover:bg-orange-500 transition-colors shadow-lg shadow-orange-900/20">🔰 Guide du Débutant</a>
+                                <a href="archetypes.html" className="block w-full bg-slate-800 border border-slate-700 text-center py-3 rounded-lg text-sm text-slate-300 hover:border-orange-500 hover:text-white transition-colors">📖 Guide des Styles</a>
+                            </div>
+                        </div>
+                    </aside>
+                    <main className="flex-1 flex flex-col min-w-0 bg-[#0f141f]">
+                        <div className="h-20 border-b border-slate-800 flex items-center px-8 justify-between bg-[#0f141f]/95 backdrop-blur sticky top-0 z-10">
+                            <div className="flex items-center gap-4">
+                                <button className="md:hidden p-2 text-slate-400 bg-slate-800 rounded"><Menu /></button>
+                                <div>
+                                    <h2 className="text-white font-bold text-lg">Roster</h2>
+                                    <p className="text-xs text-slate-500">{filteredCharacters.length} combattants trouvés</p>
+                                </div>
+                            </div>
+                            <div className="relative group w-full max-w-md">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Search className="text-slate-500 group-focus-within:text-orange-500 transition-colors"/></div>
+                                <input type="text" placeholder="Rechercher un personnage..." className="block w-full pl-10 pr-3 py-2.5 border border-slate-700 rounded-lg leading-5 bg-slate-900 text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-800 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 sm:text-sm transition-all" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                            {filteredCharacters.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                                    {filteredCharacters.map(char => <CharacterCard key={char.name} char={char} onClick={setSelectedChar} />)}
+                                </div>
+                            ) : (
+                                <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-50"><Filter size={64} className="mb-4"/><p className="text-xl font-medium">Aucun résultat</p><p className="text-sm">Essayez de modifier vos filtres.</p></div>
+                            )}
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

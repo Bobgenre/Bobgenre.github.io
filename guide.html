@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGST - Guide du Débutant</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { background-color: #0f141f; font-family: 'Segoe UI', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeInUp 0.5s ease-out forwards; }
+        
+        .btn-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 900; font-family: sans-serif; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn-P { background-color: #ec4899; color: white; border-color: #be185d; }
+        .btn-K { background-color: #3b82f6; color: white; border-color: #1d4ed8; }
+        .btn-S { background-color: #10b981; color: #064e3b; color: white; border-color: #047857; }
+        .btn-HS { background-color: #ef4444; color: white; border-color: #b91c1c; }
+        .btn-D { background-color: #f97316; color: white; border-color: #c2410c; }
+        
+        /* Style miniature pour l'insertion dans le texte */
+        .btn-icon.btn-sm { width: 32px; height: 32px; font-size: 12px; border-width: 2px; }
+
+        .numpad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; max-width: 120px; }
+        .numpad-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #1e293b; border-radius: 4px; font-weight: bold; color: #64748b; border: 1px solid #334155; transition: all 0.2s; }
+        .numpad-cell.active { background: #f97316; color: white; border-color: #c2410c; box-shadow: 0 0 10px rgba(249, 115, 22, 0.5); }
+    </style>
+</head>
+<body class="text-slate-200">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const Icons = {
+            ArrowLeft: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
+            Gamepad: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="2"/></svg>,
+            Zap: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            Clock: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            Shield: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>,
+            Swords: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/></svg>,
+            Hand: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>,
+            Brain: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>,
+            Alert: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>,
+            Book: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        };
+
+        const { ArrowLeft, Gamepad, Zap, Clock, Shield, Swords, Hand, Brain, Alert, Book } = Icons;
+
+        const SectionTitle = ({ icon, title, subtitle }) => (
+            <div className="mb-8 border-b border-slate-700 pb-4">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <span className="p-2 bg-slate-800 rounded-lg text-orange-500">{icon}</span>
+                    {title}
+                </h2>
+                <p className="text-slate-400 mt-1 ml-12 text-sm">{subtitle}</p>
+            </div>
+        );
+
+        const NumpadNotation = () => (
+            <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 flex flex-col items-center gap-4">
+                <h3 className="font-bold text-white">La Notation "Numpad"</h3>
+                <div className="flex gap-8 items-center">
+                    <div className="numpad-grid">
+                        <div className="numpad-cell">7</div><div className="numpad-cell">8</div><div className="numpad-cell">9</div>
+                        <div className="numpad-cell">4</div><div className="numpad-cell active">5</div><div className="numpad-cell">6</div>
+                        <div className="numpad-cell">1</div><div className="numpad-cell">2</div><div className="numpad-cell">3</div>
+                    </div>
+                    <div className="text-sm text-slate-300 space-y-2">
+                        <p>On utilise le pavé numérique pour les directions (ex: clavier).</p>
+                        <ul className="list-disc pl-4 text-slate-400">
+                            <li><strong>5</strong> = Neutre (Rien toucher)</li>
+                            <li><strong>6</strong> = Avant / <strong>4</strong> = Arrière</li>
+                            <li><strong>2</strong> = Bas / <strong>8</strong> = Haut</li>
+                            <li><strong>236</strong> = Quart de cercle avant</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const ButtonsGuide = () => {
+            const btns = [
+                { key: "P", name: "Punch", color: "btn-P", desc: "Rapide, courte portée. Idéal pour interrompre (Mashing) ou Anti-Air (6P)." },
+                { key: "K", name: "Kick", color: "btn-K", desc: "Rapide. Souvent utilisé pour démarrer un combo ou avec Dust." },
+                { key: "S", name: "Slash", color: "btn-S", desc: "Le bouton principal. Moyenne portée. Sert pour le Poke et les combos." },
+                { key: "HS", name: "Heavy Slash", color: "btn-HS", desc: "Lent mais puissant. Gros dégâts et grosse portée. Punition idéale." },
+                { key: "D", name: "Dust", color: "btn-D", desc: "Universel. Maintenir pour Overhead (Casser la garde basse), Bas+D pour Balayette." }
+            ];
+            return (
+                <div className="grid grid-cols-1 gap-3">
+                    {btns.map((b, i) => (
+                        <div key={i} className="flex items-center gap-4 bg-slate-900/40 p-3 rounded-lg border border-slate-800 hover:border-slate-600 transition-colors">
+                            <div className={`btn-icon ${b.color} shrink-0`}>{b.key}</div>
+                            <div>
+                                <h4 className="font-bold text-white">{b.name}</h4>
+                                <p className="text-xs text-slate-400">{b.desc}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const InputTypeCard = ({ title, input, desc, chars }) => (
+            <div className="bg-slate-800 p-5 rounded-xl border-l-4 border-orange-500 shadow-lg hover:translate-y-[-2px] transition-transform">
+                <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-bold text-white text-lg">{title}</h4>
+                    <span className="bg-slate-900 px-2 py-1 rounded text-orange-400 font-mono font-bold text-xs tracking-wider">{input}</span>
+                </div>
+                <p className="text-sm text-slate-400 mb-3">{desc}</p>
+                <div className="text-xs text-slate-500">Ex: {chars}</div>
+            </div>
+        );
+
+        const TriangleSystem = () => (
+            <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-12">
+                <h3 className="text-xl font-bold text-white mb-6 text-center flex justify-center items-center gap-2">
+                    <span className="text-orange-500">⚠️</span> Le Shifumi du Combat <span className="text-orange-500">⚠️</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center relative">
+                    <div className="p-6 bg-slate-900 rounded-xl border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+                        <div className="text-4xl mb-3">🛡️</div>
+                        <h4 className="font-bold text-blue-400 text-lg mb-2">La Garde</h4>
+                        <p className="text-sm text-slate-300 mb-2">Bloque les <strong>Coups</strong>.</p>
+                        <div className="bg-red-500/20 text-red-300 text-xs py-1 px-2 rounded mt-2 font-bold">Perd contre la Chope</div>
+                    </div>
+                    <div className="p-6 bg-slate-900 rounded-xl border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+                        <div className="text-4xl mb-3">✋</div>
+                        <h4 className="font-bold text-red-400 text-lg mb-2">La Chope</h4>
+                        <p className="text-sm text-slate-300 mb-2">Bat la <strong>Garde</strong>.</p>
+                        <div className="bg-orange-500/20 text-orange-300 text-xs py-1 px-2 rounded mt-2 font-bold">Perd contre les Coups (et Sauts)</div>
+                    </div>
+                    <div className="p-6 bg-slate-900 rounded-xl border border-orange-500/30 shadow-[0_0_15px_rgba(249,115,22,0.1)]">
+                        <div className="text-4xl mb-3">👊</div>
+                        <h4 className="font-bold text-orange-400 text-lg mb-2">Le Coup (Strike)</h4>
+                        <p className="text-sm text-slate-300 mb-2">Bat la <strong>Chope</strong> (si actif).</p>
+                        <div className="bg-blue-500/20 text-blue-300 text-xs py-1 px-2 rounded mt-2 font-bold">Perd contre la Garde</div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const ThrowSection = () => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div className="bg-slate-800 p-6 rounded-xl border-l-4 border-red-500 flex flex-col">
+                    <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                        <span className="bg-red-500/20 p-2 rounded text-red-500"><Hand size={20}/></span> La Chope Normale
+                    </h3>
+                    <p className="text-slate-300 text-sm mb-4 flex-1">
+                        L'outil universel pour punir un adversaire qui se protège trop. Si vous êtes collé à l'adversaire, c'est instantané (2 frames).
+                    </p>
+                    <ul className="space-y-3 text-sm text-slate-400 bg-slate-900/50 p-4 rounded">
+                        <li className="flex justify-between items-center">
+                            <strong>Input :</strong> 
+                            <div className="flex items-center gap-3">
+                                <span className="flex items-center bg-slate-800 rounded px-2 py-1 border border-slate-600 text-white font-mono">
+                                    <span>4</span>
+                                    <span className="mx-1 text-slate-500">+</span>
+                                    <span className="btn-icon btn-sm btn-D">D</span>
+                                </span>
+                                <span className="text-xs text-slate-500">ou</span>
+                                <span className="flex items-center bg-slate-800 rounded px-2 py-1 border border-slate-600 text-white font-mono">
+                                    <span>6</span>
+                                    <span className="mx-1 text-slate-500">+</span>
+                                    <span className="btn-icon btn-sm btn-D">D</span>
+                                </span>
+                            </div>
+                        </li>
+                        <li className="flex justify-between">
+                            <strong>Condition :</strong> 
+                            <span>Être <b>collé</b> à l'adversaire (au sol ou en l'air).</span>
+                        </li>
+                        <li className="flex justify-between">
+                            <strong>Risque :</strong> 
+                            <span className="text-red-400">Animation de raté (Whiff) très longue !</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div className="bg-slate-800 p-6 rounded-xl border-l-4 border-purple-500 flex flex-col">
+                    <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                        <span className="bg-purple-500/20 p-2 rounded text-purple-500">☠️</span> Le Command Grab
+                    </h3>
+                    <p className="text-slate-300 text-sm mb-4 flex-1">
+                        Une chope spéciale propre à certains persos (Potemkin, Sol, May...). Elle fait beaucoup plus mal et a souvent plus de portée.
+                    </p>
+                    <ul className="space-y-3 text-sm text-slate-400 bg-slate-900/50 p-4 rounded">
+                        <li className="flex justify-between">
+                            <strong>Propriété :</strong> 
+                            <span className="text-purple-300">Imparable (Ignore la garde)</span>
+                        </li>
+                        <li className="flex justify-between">
+                            <strong>Contre :</strong> 
+                            <span><b>INTECHABLE</b>. Il faut Sauter !</span>
+                        </li>
+                        <li className="flex justify-between">
+                            <strong>Exemples :</strong> 
+                            <span>Potemkin Buster, Wild Throw (Sol)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        );
+
+        const MatchDynamics = () => (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <div className="flex flex-col gap-6">
+                    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 flex-1">
+                         <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <span className="text-orange-500 text-2xl">⛓️</span> Système de Gatling
+                        </h3>
+                        <p className="text-slate-300 text-sm mb-6">
+                            Dans Guilty Gear, on ne tape pas au hasard. Il existe une hiérarchie ("Gatling") pour créer des combos basiques sans utiliser de jauge.
+                        </p>
+                        <div className="space-y-4">
+                            <div className="bg-slate-900/50 p-3 rounded border border-slate-700">
+                                <strong className="text-slate-400 text-xs uppercase block mb-2">Combo Universel</strong>
+                                <div className="flex flex-wrap items-center gap-2">
+                                     <span className="btn-icon btn-sm btn-S">S</span>
+                                     <span className="text-slate-500">➔</span>
+                                     <span className="btn-icon btn-sm btn-HS">HS</span>
+                                     <span className="text-slate-500">➔</span>
+                                     <span className="text-orange-400 font-bold text-sm px-2 py-1 bg-orange-500/10 rounded border border-orange-500/30">Coup Spécial</span>
+                                </div>
+                            </div>
+                            <div className="bg-slate-900/50 p-3 rounded border border-slate-700">
+                                <strong className="text-slate-400 text-xs uppercase block mb-2">Mise au sol (Hard Knockdown)</strong>
+                                <div className="flex items-center gap-2">
+                                     <span className="text-slate-400 font-mono text-sm">2</span><span className="btn-icon btn-sm btn-K">K</span>
+                                     <span className="text-slate-500">➔</span>
+                                     <span className="text-slate-400 font-mono text-sm">2</span><span className="btn-icon btn-sm btn-D">D</span>
+                                </div>
+                            </div>
+                            <div className="text-xs text-slate-400 mt-2 bg-blue-900/20 p-2 rounded border border-blue-900/50">
+                                <strong className="text-blue-300">c.S (Close Slash)</strong> : Si vous êtes collé à l'adversaire, votre bouton S change. C'est votre meilleur coup pour démarrer un gros combo !
+                            </div>
+                        </div>
+                    </div>
+
+                     <div className="bg-emerald-900/20 p-6 rounded-xl border border-emerald-500/40">
+                        <h3 className="text-xl font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                            <Alert size={20} /> L'OKIZEME (Jeu de Relevée)
+                        </h3>
+                        <p className="text-sm text-slate-300 mb-3">
+                            Quand vous mettez l'adversaire au sol (Hard Knockdown), c'est votre plus gros avantage. C'est l'Okizeme.
+                        </p>
+                        <div className="space-y-2 text-xs">
+                            <div className="bg-slate-900/50 p-2 rounded border-l-2 border-emerald-500">
+                                <strong className="text-emerald-300 block">Le "Meaty"</strong>
+                                <span className="text-slate-400">Attaquer pile au moment où l'ennemi se relève. S'il essaie de taper, il perdra (Counter Hit). Il est obligé de bloquer.</span>
+                            </div>
+                            <div className="bg-slate-900/50 p-2 rounded border-l-2 border-emerald-500">
+                                <strong className="text-emerald-300 block">Le Mix-up</strong>
+                                <span className="text-slate-400">L'obliger à deviner : Allez-vous taper en bas ? En haut ? Ou faire une chope ?</span>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+
+                <div className="flex flex-col gap-6 h-full">
+                    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 flex-1">
+                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <span className="text-orange-500 text-2xl">💥</span> Wall Break
+                        </h3>
+                        <p className="text-slate-300 text-sm mb-3">
+                            Si vous frappez l'ennemi contre le bord de l'écran, le mur se brise (Wall Splat).
+                        </p>
+                        <div className="h-48 w-full bg-black rounded mb-3 overflow-hidden border border-slate-600">
+                            <img 
+                                src="GGST présentation/GGST_WallDamageCracks.jpg" 
+                                alt="Wall Break" 
+                                className="w-full h-full object-cover opacity-80"
+                            />
+                        </div>
+                        <div className="space-y-2 text-sm text-slate-400 bg-slate-900/50 p-3 rounded">
+                            <div className="flex gap-2 items-start">
+                                <span className="text-slate-500 mt-0.5">➔</span>
+                                <span>Retour au centre de l'arène (Neutre).</span>
+                            </div>
+                            <div className="flex gap-2 items-start">
+                                <span className="text-slate-500 mt-0.5">➔</span>
+                                <span>L'adversaire prend des dégâts bonus.</span>
+                            </div>
+                            <div className="flex gap-2 items-start">
+                                <span className="text-yellow-500 mt-0.5">★</span>
+                                <span className="text-yellow-400 font-bold">Positive Bonus : Tension infinie (ou presque) !</span>
+                            </div>
+                            <div className="flex gap-2 items-start border-t border-slate-700 pt-2 mt-2">
+                                <span className="text-red-500 mt-0.5">⚠️</span>
+                                <span>Si cassé avec un <strong>Overdrive</strong> : L'adversaire reste au sol (Hard Knockdown). C'est votre tour d'attaquer !</span>
+                            </div>
+                        </div>
+                     </div>
+
+                    <div className="bg-red-900/20 p-6 rounded-xl border border-red-500/40 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl text-red-500 italic pointer-events-none">COUNTER</div>
+                        <h3 className="text-xl font-bold text-red-400 mb-3 flex items-center gap-2 relative z-10">
+                            <Zap size={20} /> LE COUNTER HIT
+                        </h3>
+                        <p className="text-sm text-slate-300 mb-3 relative z-10">
+                            Si vous tapez l'adversaire <strong>pendant le début de son attaque</strong>, le jeu ralentit et affiche "COUNTER".
+                        </p>
+                        <ul className="list-disc pl-4 text-xs text-red-200 space-y-1 relative z-10">
+                            <li>L'adversaire est figé plus longtemps.</li>
+                            <li>Vous faites plus de dégâts.</li>
+                            <li>C'est le moment de lancer votre plus gros combo !</li>
+                        </ul>
+                        
+                    </div>
+                 </div>
+            </div>
+        );
+
+        // --- NOUVEAU : SECTION LEXIQUE ---
+        const GlossarySection = () => {
+            const terms = [
+                { word: "Whiff", def: "Rater une attaque complètement (taper dans le vide). Vous êtes vulnérable." },
+                { word: "Poke", def: "Un coup rapide et à longue portée pour harceler l'adversaire à distance (ex: f.S)." },
+                { word: "Safe / Unsafe", def: "Safe = Si l'ennemi bloque, vous ne risquez rien. Unsafe = Si l'ennemi bloque, il peut vous punir gratuitement." },
+                { word: "Mix-up", def: "Une situation où l'adversaire doit deviner comment bloquer (Haut/Bas, ou Gauche/Droite/Chope)." },
+                { word: "Zoning", def: "Style de jeu consistant à garder l'adversaire à distance avec des projectiles." },
+                { word: "DP (Dragon Punch)", def: "Une attaque invincible au démarrage (ex: Volcanic Viper). Risqué mais bat tout." },
+                { word: "Frame Trap", def: "Laisser un tout petit délai entre deux coups pour piéger l'adversaire s'il essaie de taper." },
+                { word: "Chip Damage", def: "Les dégâts minuscules que l'on prend même en bloquant (sauf si Faultless Defense)." }
+            ];
+
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+                    {terms.map((t, i) => (
+                        <div key={i} className="bg-slate-900/50 border border-slate-700 p-3 rounded-lg hover:border-slate-500 transition-colors">
+                            <strong className="text-orange-400 block text-sm mb-1">{t.word}</strong>
+                            <p className="text-xs text-slate-400">{t.def}</p>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const MechanicCard = ({ title, color, image, children }) => (
+            <div className={`bg-slate-800/60 rounded-xl border border-slate-700 relative overflow-hidden group flex flex-col h-full`}>
+                <div className={`absolute top-0 left-0 w-1 h-full ${color}`}></div>
+                {image && (
+                    <div className="h-32 w-full overflow-hidden border-b border-slate-700/50 bg-slate-900">
+                        <img 
+                            src={image} 
+                            alt={title} 
+                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
+                            onError={(e) => e.target.src = "https://placehold.co/600x200/1e293b/cbd5e1?text=Image+Manquante"}
+                        />
+                    </div>
+                )}
+                <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-orange-400 transition-colors">{title}</h3>
+                    <div className="text-sm text-slate-300 space-y-2 leading-relaxed flex-1">
+                        {children}
+                    </div>
+                </div>
+            </div>
+        );
+
+        function App() {
+            return (
+                <div className="min-h-screen pb-20 bg-[#0f141f]">
+                    <nav className="bg-[#111827] border-b border-slate-800 px-6 py-4 sticky top-0 z-50 shadow-lg">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <h1 className="text-2xl font-black text-white tracking-tighter italic">
+                                <span className="text-orange-500">GG</span>ST <span className="text-slate-400 text-lg not-italic font-normal ml-2">/// Starter Guide</span>
+                            </h1>
+                            <a href="ggst.html" className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors">
+                                <ArrowLeft size={18} />
+                                Retour au Roster
+                            </a>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-5xl mx-auto p-6">
+                        
+                        <header className="text-center py-12 animate-fade-up">
+                            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Les Bases du <span className="text-orange-500">Combat</span></h2>
+                            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+                                Tout ce qu'il faut savoir pour comprendre l'écran de jeu, gérer ses jauges et lancer vos premières attaques.
+                            </p>
+                        </header>
+
+                        {/* SECTION 1 : MANETTE & ASTUCE DASH */}
+                        <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20 animate-fade-up" style={{animationDelay: '0.1s'}}>
+                            <div className="flex flex-col gap-6">
+                                <div>
+                                    <SectionTitle icon={<Gamepad size={20}/>} title="Les 5 Boutons" subtitle="Comprendre votre manette" />
+                                    <ButtonsGuide />
+                                </div>
+                                {/* Astuce Pro */}
+                                <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/30">
+                                    <h4 className="text-blue-400 font-bold text-sm mb-2 flex items-center gap-2">
+                                        💡 Astuce Pro : Le Bouton de Dash
+                                    </h4>
+                                    <p className="text-xs text-blue-200">
+                                        Par défaut, on dash avec <span className="bg-slate-800 px-1 rounded border border-slate-600">6</span><span className="bg-slate-800 px-1 rounded border border-slate-600">6</span>. 
+                                        Mais dans les options, vous pouvez configurer un <strong>Bouton Unique</strong> pour dasher. C'est indispensable pour être réactif et faire des micros-dashs !
+                                    </p>
+                                </div>
+                            </div>
+                            <div><SectionTitle icon={<Clock size={20}/>} title="Les Directions" subtitle="Lire les guides et la notation" /><NumpadNotation /></div>
+                        </section>
+
+                        {/* SECTION 2 : INPUTS */}
+                        <section className="mb-20 animate-fade-up" style={{animationDelay: '0.2s'}}>
+                            <SectionTitle icon={<Zap size={20}/>} title="Types d'Inputs" subtitle="Comment lancer une attaque spéciale" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <InputTypeCard title="Motion" input="236 / 214" desc="Le classique 'Quart de Cercle'. Faites glisser le stick de bas vers l'avant (ou l'arrière)." chars="Sol, Ky, Gio" />
+                                <InputTypeCard title="Dragon (DP)" input="623" desc="Mouvement en 'Z' : Avant, Bas, Diagonale Avant-Bas. Souvent utilisé pour les anti-airs invincibles." chars="Sol, Chipp" />
+                                <InputTypeCard title="Charge" input="[4]6 / [2]8" desc="Maintenez une direction (Arrière ou Bas) pendant ~1sec, puis faites l'opposé + Attaque." chars="May, Leo, Axl" />
+                                <InputTypeCard title="Demi-Cercle" input="632146" desc="Souvent utilisé pour les Supers (Overdrives). Demande un mouvement fluide et complet." chars="Potemkin, Nago" />
+                            </div>
+                        </section>
+
+                        {/* SECTION 3 : FONDAMENTAUX */}
+                        <section className="mb-20 animate-fade-up" style={{animationDelay: '0.25s'}}>
+                            <SectionTitle icon={<Shield size={20}/>} title="Fondamentaux du Système" subtitle="Comprendre la structure du jeu" />
+                            <TriangleSystem />
+                            <ThrowSection />
+                        </section>
+
+                        {/* SECTION 4 : STRUCTURE & ENVIRONNEMENT */}
+                        <section className="mb-20 animate-fade-up" style={{animationDelay: '0.28s'}}>
+                            <SectionTitle icon={<Brain size={20}/>} title="Structure & Environnement" subtitle="Comment construire son jeu" />
+                            <MatchDynamics />
+                        </section>
+
+                        {/* SECTION 5 : MECANIQUES */}
+                        <section className="mb-20 animate-fade-up" style={{animationDelay: '0.3s'}}>
+                            <SectionTitle icon={<Swords size={20}/>} title="Jauges & Mécaniques" subtitle="Ressources vitales" />
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                                {/* 1. Jauge de Burst */}
+                                <div className="lg:col-span-2">
+                                    <MechanicCard 
+                                        title="Jauge de Burst & Wild Assault" 
+                                        color="bg-blue-500"
+                                        image="GGST présentation/Barre_Burst_RISC.png"
+                                    >
+                                        <p className="mb-4">La barre bleue sous la vie. Elle se remplit avec le temps ou en prenant des dégâts. Elle est vitale pour la défense ET l'attaque.</p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div className="bg-slate-900/80 p-3 rounded border border-blue-500/30">
+                                                <div className="h-28 w-full bg-black rounded mb-2 overflow-hidden flex items-center justify-center p-1"><img src="GGST présentation/GGST_Blue_Psych_Burst.PNG" className="max-h-full max-w-full object-contain" /></div>
+                                                <strong className="text-blue-400 text-xs uppercase block mb-1">Blue Burst</strong>
+                                                <p className="text-[10px] text-slate-400">Défensif (pendant block/hit). Repousse l'ennemi. Consomme 100%.</p>
+                                            </div>
+                                            <div className="bg-slate-900/80 p-3 rounded border border-yellow-500/30">
+                                                <div className="h-28 w-full bg-black rounded mb-2 overflow-hidden flex items-center justify-center p-1"><img src="GGST présentation/GGST_Gold_Psych_Burst.PNG" className="max-h-full max-w-full object-contain" /></div>
+                                                <strong className="text-yellow-500 text-xs uppercase block mb-1">Gold Burst</strong>
+                                                <p className="text-[10px] text-slate-400">Offensif (au neutre). Remplit 100% Tension si touche. Consomme 100%.</p>
+                                            </div>
+                                            <div className="bg-slate-900/80 p-3 rounded border border-orange-500/30">
+                                                <div className="h-28 w-full bg-black rounded mb-2 overflow-hidden flex items-center justify-center p-1"><img src="GGST présentation/GGST_Sol_Badguy_236D.png" className="max-h-full max-w-full object-contain" /></div>
+                                                <strong className="text-orange-500 text-xs uppercase block mb-1">Wild Assault (236D)</strong>
+                                                <p className="text-[10px] text-slate-400">Dash offensif très rapide. Brise la garde ou étend un combo. Consomme 50%.</p>
+                                            </div>
+                                            <div className="bg-slate-900/80 p-3 rounded border border-green-500/30">
+                                                <div className="h-28 w-full bg-black rounded mb-2 overflow-hidden flex items-center justify-center p-1"><img src="GGST présentation/GGST_DeflectShield.png" className="max-h-full max-w-full object-contain" /></div>
+                                                <strong className="text-green-500 text-xs uppercase block mb-1">Deflect Shield (214D)</strong>
+                                                <p className="text-[10px] text-slate-400">Bouclier défensif absolu. Repousse l'attaquant très loin. Consomme 50%.</p>
+                                            </div>
+                                        </div>
+                                    </MechanicCard>
+                                </div>
+
+                                {/* 2. Roman Cancel */}
+                                <div className="lg:col-span-2">
+                                    <MechanicCard title="Roman Cancel (RC)" color="bg-purple-500">
+                                        <p className="mb-3 text-sm">Appuyez sur <strong>3 boutons</strong> (sauf Dust) pour dépenser 50% de Tension et annuler n'importe quelle action. Le temps ralentit brièvement.</p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div className="bg-slate-900/50 p-2 rounded border border-red-900/30">
+                                                <div className="h-28 w-full bg-black rounded mb-2 overflow-hidden flex items-center justify-center p-1"><img src="GGST présentation/GGST_RedRC.png" className="max-h-full max-w-full object-contain" /></div>
+                                                <strong className="text-red-400 text-xs uppercase block mb-1">Rouge (Hit)</strong>
+                                                <p className="text-[10px] text-slate-400">Étend un combo.</p>
+                                            </div>
+                                            <div className="bg-slate-900/50 p-2 rounded border border-purple-900/30">
+                                                <div className="h-28 w-full bg-black rounded mb-2 overflow-hidden flex items-center justify-center p-1"><img src="GGST présentation/GGST_PurpleRC.png" className="max-h-full max-w-full object-contain" /></div>
+                                                <strong className="text-purple-400 text-xs uppercase block mb-1">Violet (Whiff)</strong>
+                                                <p className="text-[10px] text-slate-400">Annule une erreur.</p>
+                                            </div>
+                                            <div className="bg-slate-900/50 p-2 rounded border border-yellow-900/30">
+                                                <div className="h-28 w-full bg-black rounded mb-2 overflow-hidden flex items-center justify-center p-1"><img src="GGST présentation/GGST_YellowRC.png" className="max-h-full max-w-full object-contain" /></div>
+                                                <strong className="text-yellow-400 text-xs uppercase block mb-1">Jaune (Startup)</strong>
+                                                <p className="text-[10px] text-slate-400">Feinte / Mix-up.</p>
+                                            </div>
+                                            <div className="bg-slate-900/50 p-2 rounded border border-blue-900/30">
+                                                <div className="h-28 w-full bg-black rounded mb-2 overflow-hidden flex items-center justify-center p-1"><img src="GGST présentation/GGST_BlueRC.png" className="max-h-full max-w-full object-contain" /></div>
+                                                <strong className="text-blue-400 text-xs uppercase block mb-1">Bleu (Neutre)</strong>
+                                                <p className="text-[10px] text-slate-400">Ralentit l'ennemi.</p>
+                                            </div>
+                                        </div>
+                                    </MechanicCard>
+                                </div>
+
+                                {/* 3. Jauge de Tension */}
+                                <MechanicCard 
+                                    title="Jauge de Tension" 
+                                    color="bg-red-500"
+                                    image="GGST présentation/Barre_tension.PNG" 
+                                >
+                                    <p>C'est votre barre de "Super" en bas de l'écran. Elle se remplit en avançant vers l'ennemi ou en attaquant agressivement.</p>
+                                    <ul className="list-disc pl-4 mt-2 space-y-1 text-slate-400 text-xs">
+                                        <li><strong>50% Tension :</strong> Nécessaire pour utiliser un Overdrive, un Roman Cancel, ou un Wild Assault.</li>
+                                        <li><strong>100% Tension :</strong> Maximum de stock.</li>
+                                        <li><strong>Faultless Defense :</strong> Maintenez 2 boutons en gardant (4). Repousse l'adversaire.</li>
+                                    </ul>
+                                </MechanicCard>
+
+                                {/* 4. RISC Gauge */}
+                                <MechanicCard 
+                                    title="Jauge R.I.S.C." 
+                                    color="bg-pink-500"
+                                    image="GGST présentation/Barre_RISC.png"
+                                >
+                                    <p>La petite jauge rose sous la barre de vie. Elle se remplit quand on bloque trop d'attaques consécutivesment.</p>
+                                    <div className="mt-3 bg-pink-900/20 border border-pink-500/30 p-3 rounded">
+                                        <strong className="text-pink-400 text-xs uppercase block mb-1">Danger Critique</strong>
+                                        <p className="text-xs text-slate-300">
+                                            Si la jauge est haute, le prochain coup reçu sera un <strong>Forced Counter Hit</strong>. Ne gardez pas éternellement !
+                                        </p>
+                                    </div>
+                                </MechanicCard>
+
+                            </div>
+                        </section>
+
+                        {/* SECTION 6 : LEXIQUE (NOUVEAU) */}
+                        <section className="mb-20 animate-fade-up" style={{animationDelay: '0.35s'}}>
+                            <SectionTitle icon={<Book size={20}/>} title="Lexique de Survie" subtitle="Les termes à connaître" />
+                            <GlossarySection />
+                        </section>
+
+                        <footer className="text-center text-slate-600 text-sm pb-8 border-t border-slate-800 pt-8">
+                            <p>Guilty Gear Strive est une marque déposée par Arc System Works.</p>
+                            <div className="mt-3 space-x-4">
+                                <a href="ggst.html" className="text-orange-500 hover:underline">Retourner au Roster</a>
+                                <span className="text-slate-600">|</span>
+                                <a href="https://www.dustloop.com/w/GGST" target="_blank" className="text-blue-400 hover:underline">Bible du Jeu (Dustloop) ↗</a>
+                            </div>
+                        </footer>
+
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
