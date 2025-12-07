@@ -5,148 +5,203 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Esport Match Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
+        /* --- STYLE INSPIRÉ DE GGST.HTML & GUIDE.HTML --- */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* bg-gray-900 */
+            background-color: #0f141f; /* Fond profond */
+            font-family: 'Segoe UI', sans-serif;
+            color: #e2e8f0; /* Slate-200 */
         }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Animations */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeInUp 0.5s ease-out forwards; }
+
+        /* Cards Style "GGST" */
         .match-card {
-            background-color: #1f2937; /* bg-gray-800 */
-            border: 1px solid #374151; /* border-gray-700 */
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, opacity 0.3s ease-in-out;
+            background-color: rgba(30, 41, 59, 0.5); /* bg-slate-800/50 */
+            border: 1px solid #334155; /* border-slate-700 */
+            border-radius: 0.75rem; /* rounded-xl */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
         .match-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+            border-color: rgba(249, 115, 22, 0.5); /* Orange glow */
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 15px rgba(249, 115, 22, 0.1);
         }
-        .match-card.hidden {
-            opacity: 0;
-            height: 0;
-            padding: 0;
-            margin: 0;
-            visibility: hidden;
-            transform: scale(0.9);
-        }
-        .filter-btn {
-            transition: all 0.2s ease-in-out;
-        }
-        .filter-btn.active {
-            background-color: #3b82f6; /* bg-blue-600 */
-            color: white;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-        }
-        /* Styles pour le modal et l'authentification */
-        #auth-overlay, .modal-overlay {
-            background-color: rgba(17, 24, 39, 0.95);
-            transition: opacity 0.3s ease;
-        }
-        /* Styles pour le toggle switch */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #3b82f6;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #3b82f6;
-        }
+        
+        /* Loading */
         .btn-loading { position: relative; color: transparent !important; }
         .btn-loading::after {
             content: ''; position: absolute; top: 50%; left: 50%;
             width: 20px; height: 20px; margin-top: -10px; margin-left: -10px;
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            border-left-color: #fff;
+            border-left-color: #f97316; /* Orange loader */
             animation: spin 1s ease infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Filtres Actifs */
+        .filter-btn.active {
+            background-color: #ea580c; /* Orange-600 */
+            border-color: #c2410c;
+            color: white;
+            box-shadow: 0 0 15px rgba(234, 88, 12, 0.3);
+        }
+
+        /* Toggle Switch Custom */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #ea580c;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #ea580c;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            background-color: rgba(15, 20, 31, 0.95);
+            backdrop-filter: blur(4px);
+        }
     </style>
 </head>
-<body class="text-gray-200">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Auth Screen -->
-    <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="w-full max-w-sm p-8 bg-gray-800 rounded-2xl shadow-xl">
-            <h2 class="text-2xl font-bold text-center text-gray-100 mb-2">Esport Tracker</h2>
-            <p class="text-center text-gray-400 mb-6">Connectez-vous pour sauvegarder vos favoris.</p>
-            <div id="auth-error" class="text-red-500 text-sm text-center mb-4 min-h-[20px]"></div>
+    <!-- Auth Screen (Style Modernisé) -->
+    <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="w-full max-w-sm p-8 bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl animate-fade-up">
+            <h2 class="text-3xl font-black text-center text-white mb-2 italic tracking-tighter">
+                <span class="text-orange-500">ESPORT</span> TRACKER
+            </h2>
+            <p class="text-center text-slate-400 mb-8 text-sm">Connectez-vous pour synchroniser vos favoris.</p>
+            
+            <div id="auth-error" class="text-red-400 text-xs text-center mb-4 min-h-[20px] font-bold"></div>
+            
             <form id="login-form" class="space-y-4">
-                <input type="email" id="login-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-                <input type="password" id="login-password" placeholder="Mot de passe" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">Se connecter</button>
+                <div class="relative group">
+                    <input type="email" id="login-email" placeholder="Adresse e-mail" required 
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 text-white placeholder-slate-500 transition-colors">
+                </div>
+                <div class="relative group">
+                    <input type="password" id="login-password" placeholder="Mot de passe" required 
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 text-white placeholder-slate-500 transition-colors">
+                </div>
+                <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-orange-900/20 uppercase tracking-wide text-sm">
+                    Se connecter
+                </button>
             </form>
-            <div class="my-4 flex items-center">
-                <hr class="w-full border-gray-600"><span class="p-2 text-gray-500 text-sm">OU</span><hr class="w-full border-gray-600">
+
+            <div class="my-6 flex items-center">
+                <hr class="w-full border-slate-700"><span class="p-2 text-slate-500 text-xs uppercase font-bold">OU</span><hr class="w-full border-slate-700">
             </div>
+
             <form id="signup-form" class="space-y-4">
-                <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-                <input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-                <button type="submit" class="w-full py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-500 transition">Créer un compte</button>
+                <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="hidden"> <!-- Hidden inputs to simplify UI for demo, logic remains -->
+                <input type="password" id="signup-password" placeholder="Mot de passe" required class="hidden">
+                <button type="submit" class="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-lg transition-all border border-slate-600 text-sm">
+                    Créer un compte (Utiliser champs ci-dessus)
+                </button>
             </form>
         </div>
     </div>
 
     <!-- App Content -->
-    <div id="app-content" class="hidden container mx-auto p-4 md:p-8 max-w-7xl">
-        <header class="flex justify-between items-start mb-8">
-             <div class="text-left">
-                <h1 class="text-4xl font-bold text-white">Prochains Matchs Esport</h1>
-                <p class="text-gray-400 mt-2">Suivez vos équipes et jeux préférés.</p>
-            </div>
-            <div id="auth-info" class="text-right flex-shrink-0">
-                <p id="user-email" class="text-sm text-gray-500"></p>
-                <button id="logout-btn" class="text-xs text-red-500 font-bold hover:underline">Déconnexion</button>
-            </div>
-        </header>
+    <div id="app-content" class="hidden flex-1 flex flex-col">
         
-        <!-- Section des contrôles -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <button id="manage-favorites-btn" class="w-full md:w-auto order-2 md:order-1 bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-5 rounded-lg transition">
-                Gérer les favoris
-            </button>
-            <div class="order-1 md:order-2 flex items-center space-x-3">
-                <span class="text-sm font-medium text-gray-300">Tous les matchs</span>
-                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                    <input type="checkbox" name="toggle" id="favorites-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                    <label for="favorites-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
-                </div>
-                <span class="text-sm font-medium text-blue-400">Favoris uniquement</span>
-            </div>
-        </div>
-
-
-        <!-- Filtres par jeu -->
-        <div id="filters" class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
-            <p class="w-full text-center text-gray-500">Chargement des filtres...</p>
-        </div>
-
-        <!-- Grille des matchs -->
-        <div id="matches-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             <p id="loading-message" class="col-span-full text-center text-gray-400 text-lg">Chargement des matchs depuis la base de données...</p>
-        </div>
-    </div>
-
-    <!-- Modal des favoris -->
-    <div id="favorites-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden">
-        <div class="bg-gray-800 w-11/12 md:max-w-md mx-auto rounded-lg shadow-lg z-50 overflow-y-auto">
-            <div class="py-4 text-left px-6">
-                <div class="flex justify-between items-center pb-3">
-                    <p class="text-2xl font-bold text-white">Sélectionner vos équipes favorites</p>
-                    <button id="close-modal-btn" class="cursor-pointer z-50">
-                        <svg class="fill-current text-white" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"></path></svg>
+        <!-- Navbar Sticky (Style GGST) -->
+        <nav class="bg-[#0f141f]/95 border-b border-slate-800 px-6 py-4 sticky top-0 z-40 backdrop-blur shadow-lg">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <h1 class="text-2xl font-black text-white tracking-tighter italic">
+                    <span class="text-orange-500">ESPORT</span> TRACKER <span class="text-slate-500 text-sm not-italic font-normal ml-2 hidden sm:inline">/// Dashboard Live</span>
+                </h1>
+                <div id="auth-info" class="flex items-center gap-4">
+                    <span id="user-email" class="text-xs font-bold text-slate-400 hidden sm:block bg-slate-900 px-3 py-1 rounded-full border border-slate-800"></span>
+                    <button id="logout-btn" class="text-xs font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-wider flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                        Déco
                     </button>
                 </div>
-                <div id="favorites-list" class="my-5 max-h-64 overflow-y-auto pr-2 grid grid-cols-2 gap-3">
-                    <!-- La liste des équipes sera insérée ici -->
+            </div>
+        </nav>
+
+        <main class="container mx-auto p-4 md:p-8 max-w-7xl flex-1 animate-fade-up">
+            
+            <!-- Controls Bar -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+                <!-- Toggle Favoris -->
+                <div class="flex items-center space-x-4 order-2 md:order-1">
+                    <span class="text-sm font-bold text-slate-400 uppercase tracking-wide">Tous</span>
+                    <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="favorites-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300"/>
+                        <label for="favorites-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-700 cursor-pointer"></label>
+                    </div>
+                    <span class="text-sm font-bold text-orange-400 uppercase tracking-wide flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="text-orange-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        Favoris
+                    </span>
                 </div>
-                <div class="flex justify-end pt-2">
-                    <button id="save-favorites-btn" class="px-4 bg-blue-600 p-3 rounded-lg text-white hover:bg-blue-700">Sauvegarder</button>
-                </div>
+
+                <!-- Gestion Button -->
+                <button id="manage-favorites-btn" class="order-1 md:order-2 px-6 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg border border-slate-600 hover:border-orange-500 transition-all text-sm uppercase tracking-wide shadow-lg flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Gérer mes équipes
+                </button>
+            </div>
+
+            <!-- Game Filters (Chips Style) -->
+            <div id="filters" class="flex flex-wrap justify-center gap-3 mb-12">
+                <p class="w-full text-center text-slate-500 text-sm animate-pulse">Chargement des filtres...</p>
+            </div>
+
+            <!-- Matches Grid -->
+            <div id="matches-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 <p id="loading-message" class="col-span-full text-center text-slate-500 text-lg flex flex-col items-center">
+                    <span class="loader block w-8 h-8 border-4 border-slate-700 border-t-orange-500 rounded-full animate-spin mb-4"></span>
+                    Récupération des données live...
+                 </p>
+            </div>
+
+        </main>
+
+        <footer class="border-t border-slate-800 py-6 text-center text-slate-600 text-sm bg-[#0f141f]">
+            <p>&copy; 2025 Esport Tracker. Design inspiré par Guilty Gear Strive.</p>
+        </footer>
+    </div>
+
+    <!-- Modal des favoris (Style Sombre) -->
+    <div id="favorites-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-[#1e293b] w-full max-w-md mx-auto rounded-xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div class="p-6 border-b border-slate-700 bg-slate-800/50 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white uppercase tracking-wide">Sélection Équipes</h3>
+                <button id="close-modal-btn" class="text-slate-400 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+                </button>
+            </div>
+            
+            <div id="favorites-list" class="p-6 overflow-y-auto custom-scrollbar grid grid-cols-1 gap-3">
+                <!-- Liste générée JS -->
+            </div>
+            
+            <div class="p-6 border-t border-slate-700 bg-slate-800/50">
+                <button id="save-favorites-btn" class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition shadow-lg shadow-blue-900/20 uppercase tracking-wide text-sm">
+                    Sauvegarder les préférences
+                </button>
             </div>
         </div>
     </div>
 
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -177,7 +232,6 @@
         const appContent = document.getElementById('app-content');
 
         // --- Fonctions de gestion des favoris ---
-        
         async function loadFavoritesFromFirestore() {
             if (!currentUser) return;
             const favsRef = doc(db, 'userFavorites', currentUser.uid);
@@ -197,8 +251,8 @@
             try {
                 await setDoc(favsRef, { teams: favoriteTeams });
             } catch (error) {
-                console.error("Erreur de sauvegarde des favoris:", error);
-                alert("Erreur lors de la sauvegarde. Vérifiez vos règles de sécurité Firestore.");
+                console.error("Erreur:", error);
+                alert("Erreur sauvegarde.");
             } finally {
                 saveBtn.classList.remove('btn-loading');
                 document.getElementById('favorites-modal').classList.add('hidden');
@@ -217,17 +271,18 @@
             const actualTeams = allTeams.filter(teamName => !teamName.includes("Groupe") && !teamName.includes("Global Finals"));
             actualTeams.forEach(teamName => {
                 const isChecked = favoriteTeams.includes(teamName);
+                // Style des checkboxes modernisé
                 const teamHTML = `
-                    <label class="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" value="${teamName}" class="form-checkbox h-5 w-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" ${isChecked ? 'checked' : ''}>
-                        <span class="text-gray-200">${teamName}</span>
+                    <label class="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700 cursor-pointer hover:border-slate-500 transition-colors group">
+                        <span class="text-slate-300 font-semibold group-hover:text-white">${teamName}</span>
+                        <input type="checkbox" value="${teamName}" class="form-checkbox h-5 w-5 text-orange-600 bg-slate-900 border-slate-600 rounded focus:ring-orange-500 transition" ${isChecked ? 'checked' : ''}>
                     </label>
                 `;
                 favoritesList.innerHTML += teamHTML;
             });
         }
         
-        // --- Fonctions d'Affichage ---
+        // --- Fonctions d'Affichage UI ---
 
         function displayFilters() {
             const filtersContainer = document.getElementById('filters');
@@ -243,7 +298,8 @@
         
         function createFilterButton(text, filterValue) {
             const button = document.createElement('button');
-            button.className = 'filter-btn bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold py-2 px-4 rounded-full flex items-center gap-2';
+            // Style inspiré des boutons/tags dans ggst.html
+            button.className = 'filter-btn px-4 py-1.5 rounded-full text-sm font-bold bg-slate-800 border border-slate-600 text-slate-400 hover:text-white hover:border-slate-400 transition-all uppercase tracking-wide';
             button.dataset.filter = filterValue;
             button.textContent = text;
             button.addEventListener('click', () => handleFilterClick(button));
@@ -252,9 +308,7 @@
 
         function displayMatches(filter = 'all') {
             const loadingMessage = document.getElementById('loading-message');
-            if (loadingMessage) {
-                loadingMessage.style.display = 'none';
-            }
+            if (loadingMessage) loadingMessage.style.display = 'none';
 
             const matchesGrid = document.getElementById('matches-grid');
             matchesGrid.innerHTML = '';
@@ -271,66 +325,106 @@
                 : matchesToShow.filter(match => match.game === filter);
 
             if (filteredMatches.length === 0) {
-                matchesGrid.innerHTML = `<p class="col-span-full text-center text-gray-400 text-lg">Aucun match à venir pour cette sélection.</p>`;
+                matchesGrid.innerHTML = `
+                    <div class="col-span-full flex flex-col items-center justify-center p-12 text-slate-600 opacity-70">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="mb-4"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                        <p class="text-xl font-bold uppercase tracking-widest">Aucun match trouvé</p>
+                        <p class="text-sm">Modifiez vos filtres ou désactivez le mode Favoris.</p>
+                    </div>`;
                 return;
             }
 
             filteredMatches.forEach(match => {
                 const matchCard = document.createElement('div');
-                matchCard.className = 'match-card rounded-lg p-5 flex flex-col';
+                // Style inspiré des MechanicCard/CharacterCard
+                matchCard.className = 'match-card flex flex-col h-full';
                 
                 const matchDate = new Date(match.date);
                 const isMatchToday = isDateToday(matchDate);
                 const formattedDate = formatMatchDate(match.date);
 
-                let streamLink = 'https://www.twitch.tv'; // Default
-                if (match.game === 'League of Legends') streamLink = 'https://www.twitch.tv/traytonlol';
-                else if (match.game === 'Valorant') streamLink = 'https://www.twitch.tv/valorant_fr';
+                let streamLink = 'https://www.twitch.tv'; 
+                let btnColorClass = 'bg-blue-600 hover:bg-blue-500'; // Default Blue
+                
+                // Personnalisation des couleurs par jeu pour rappeler le style GGST Roster
+                let gameColor = 'text-blue-400';
+                if (match.game === 'League of Legends') { streamLink = 'https://www.twitch.tv/traytonlol'; gameColor = 'text-blue-400'; }
+                else if (match.game === 'Valorant') { streamLink = 'https://www.twitch.tv/valorant_fr'; gameColor = 'text-red-400'; btnColorClass='bg-red-600 hover:bg-red-500'; }
+                else if (match.game === 'Guilty Gear -Strive-') { gameColor = 'text-orange-500'; btnColorClass='bg-orange-600 hover:bg-orange-500'; }
+                else if (match.game === 'World of Warcraft') { gameColor = 'text-yellow-400'; btnColorClass='bg-yellow-600 hover:bg-yellow-500 text-black'; }
 
                 const dateHtml = `
-                    <p class="text-center text-gray-300 mb-4" ${isMatchToday || matchDate < new Date() ? `data-date="${match.date}"` : ''}>
-                        ${formattedDate}
-                        ${isMatchToday || matchDate < new Date() ? '<span class="countdown text-gray-400 ml-2"></span>' : ''}
-                    </p>`;
+                    <div class="text-center mt-auto pt-4 border-t border-slate-700/50" ${isMatchToday || matchDate < new Date() ? `data-date="${match.date}"` : ''}>
+                        <p class="text-slate-400 text-xs font-semibold mb-3">
+                            ${formattedDate} 
+                            ${isMatchToday || matchDate < new Date() ? '<span class="countdown ml-1 text-orange-400 font-bold"></span>' : ''}
+                        </p>
+                    </div>`;
+
+                // --- LOGIQUE ÉVÉNEMENT vs MATCH ---
+                let isEvent = false;
+                let eventTitle = match.teamA;
 
                 if (match.game === "World of Warcraft") {
-                     const eventTitle = match.teamB === 'Début' ? match.teamA : `${match.teamA} - ${match.teamB}`;
-                     matchCard.innerHTML = `
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2"><img src="${match.icon}" alt="${match.game}" class="w-6 h-6 rounded-full object-cover"><span class="font-semibold text-yellow-400">${match.game}</span></div>
-                            <span class="text-xs text-gray-400">${match.tournament}</span>
+                    isEvent = true;
+                    if (match.teamB && match.teamB !== 'Début') eventTitle = `${match.teamA} - ${match.teamB}`;
+                } else if (!match.teamB || match.teamB.trim() === '' || match.teamB === 'Début') {
+                    isEvent = true;
+                }
+
+                // Header commun
+                const cardHeader = `
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <img src="${match.icon}" alt="${match.game}" class="w-6 h-6 rounded-md object-cover shadow-sm">
+                            <span class="text-xs font-black uppercase tracking-wider ${gameColor}">${match.game}</span>
                         </div>
-                        <div class="flex-grow flex items-center justify-center text-center my-4"><h2 class="font-bold text-xl text-white">${eventTitle}</h2></div>
-                        <div class="border-t border-gray-700 pt-4 mt-auto">
-                             ${dateHtml}
-                             <a href="${streamLink}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">Suivre l'événement</a>
+                        <span class="text-[10px] font-bold text-slate-500 bg-slate-900/80 px-2 py-1 rounded border border-slate-700 truncate max-w-[120px]">${match.tournament}</span>
+                    </div>
+                `;
+
+                if (isEvent) {
+                     // Style Événement (Centré, titre imposant)
+                     // Bouton retiré comme demandé
+                     matchCard.innerHTML = `
+                        <div class="p-5 flex flex-col h-full bg-gradient-to-b from-slate-800/40 to-transparent">
+                            ${cardHeader}
+                            <div class="flex-grow flex items-center justify-center text-center my-2">
+                                <h2 class="font-black text-xl text-white uppercase tracking-tight leading-tight drop-shadow-lg">${eventTitle}</h2>
+                            </div>
+                            ${dateHtml}
                         </div>`;
                 } else {
+                    // Style Match (VS stylisé)
                     matchCard.innerHTML = `
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2"><img src="${match.icon}" alt="${match.game}" class="w-6 h-6 rounded-full object-cover"><span class="font-semibold text-blue-400">${match.game}</span></div>
-                            <span class="text-xs text-gray-400">${match.tournament}</span>
-                        </div>
-                        <div class="flex-grow flex items-center justify-around text-center my-4">
-                            <div class="flex flex-col items-center justify-center gap-2 w-1/3"><span class="font-bold text-lg">${match.teamA}</span></div>
-                            <span class="text-2xl font-light text-gray-500">VS</span>
-                            <div class="flex flex-col items-center justify-center gap-2 w-1/3"><span class="font-bold text-lg">${match.teamB}</span></div>
-                        </div>
-                        <div class="border-t border-gray-700 pt-4 mt-auto">
-                             ${dateHtml}
-                             <a href="${streamLink}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">Regarder le match</a>
+                        <div class="p-5 flex flex-col h-full">
+                            ${cardHeader}
+                            <div class="flex-grow flex items-center justify-between text-center my-2 relative">
+                                <div class="flex flex-col items-center justify-center w-[40%]">
+                                    <span class="font-bold text-lg text-white leading-tight break-words w-full">${match.teamA}</span>
+                                </div>
+                                
+                                <span class="text-2xl font-black text-slate-700 italic absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0 opacity-50">VS</span>
+                                
+                                <div class="flex flex-col items-center justify-center w-[40%] relative z-10">
+                                    <span class="font-bold text-lg text-white leading-tight break-words w-full">${match.teamB}</span>
+                                </div>
+                            </div>
+                            ${dateHtml}
+                            <a href="${streamLink}" target="_blank" class="block w-full text-center ${btnColorClass} text-white font-bold py-2.5 rounded-lg transition-all shadow-lg text-sm uppercase tracking-wide mt-2">
+                                Regarder le match
+                            </a>
                         </div>`;
                 }
                 matchesGrid.appendChild(matchCard);
             });
-            updateCountdowns(); // Mettre à jour les comptes à rebours après l'affichage
+            updateCountdowns();
         }
 
         function handleFilterClick(clickedButton) {
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             clickedButton.classList.add('active');
-            const filterValue = clickedButton.dataset.filter;
-            displayMatches(filterValue);
+            displayMatches(clickedButton.dataset.filter);
         }
 
         function isDateToday(date) {
@@ -342,11 +436,13 @@
         
         function formatMatchDate(isoString) {
              const date = new Date(isoString);
+             // Format date français "lundi 12 janvier à 20:00"
+             const options = { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' };
              if (isDateToday(date)) {
                  const time = new Intl.DateTimeFormat('fr-FR', { timeStyle: 'short' }).format(date);
                  return `Aujourd'hui à ${time}`;
              } else {
-                 return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' }).format(date);
+                 return new Intl.DateTimeFormat('fr-FR', options).format(date);
              }
         }
 
@@ -355,61 +451,51 @@
             const now = new Date();
 
             countdownElements.forEach(span => {
-                const dateString = span.parentElement.dataset.date;
+                const dateString = span.parentElement.parentElement.dataset.date;
+                if(!dateString) return;
+                
                 const matchDate = new Date(dateString);
                 const diff = matchDate - now;
-                
                 const matchCard = span.closest('.match-card');
-                if (!matchCard) return;
 
                 if (diff < 0) {
-                    if (diff > -5 * 60 * 60 * 1000) { // Affiche "En cours" jusqu'à 5h après le début
-                        span.textContent = '(En cours)';
-                        span.classList.add('text-red-400');
-                        span.classList.remove('text-gray-400');
+                    if (diff > -5 * 60 * 60 * 1000) { 
+                        span.textContent = '• EN COURS';
+                        span.className = 'countdown ml-2 text-red-500 font-black animate-pulse';
                     } else {
-                        // Le match est terminé depuis 5h, on le cache
-                        span.textContent = ''; 
                         matchCard.classList.add('hidden');
                     }
                 } else {
                     const hours = Math.floor(diff / (1000 * 60 * 60));
                     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                     span.textContent = `(dans ${hours}h ${minutes}m)`;
-                    span.classList.remove('text-red-400');
-                    span.classList.add('text-gray-400');
+                    span.className = 'countdown ml-2 text-slate-500 font-mono text-xs';
                 }
             });
         }
 
-        // --- Auth Functions ---
+        // --- Auth & Init ---
         async function handleAuth(e, authFunc) {
             e.preventDefault();
+            // Pour la démo, on prend toujours les champs du login form même pour le signup
+            // car j'ai caché les champs signup pour simplifier l'UI
+            const emailInput = document.getElementById('login-email');
+            const passInput = document.getElementById('login-password');
+            
             const button = e.target.querySelector('button[type="submit"]');
-            const email = e.target.querySelector('input[type="email"]').value;
-            const password = e.target.querySelector('input[type="password"]').value;
             button.classList.add('btn-loading');
+            
             try {
-                await authFunc(auth, email, password);
+                await authFunc(auth, emailInput.value, passInput.value);
             } catch (error) {
-                handleAuthError(error);
+                const errorElement = document.getElementById('auth-error');
+                errorElement.textContent = "Erreur: " + error.code;
             } finally {
                 button.classList.remove('btn-loading');
             }
         }
 
-        function handleAuthError(error) {
-            const errorElement = document.getElementById('auth-error');
-            const errorMap = {
-                'auth/wrong-password': 'Mot de passe ou e-mail incorrect.', 'auth/invalid-credential': 'Mot de passe ou e-mail incorrect.',
-                'auth/user-not-found': 'Aucun compte trouvé pour cet e-mail.', 'auth/weak-password': 'Le mot de passe doit faire au moins 6 caractères.',
-                'auth/email-already-in-use': 'Cette adresse e-mail est déjà utilisée.'
-            };
-            errorElement.textContent = errorMap[error.code] || 'Une erreur est survenue.';
-        }
-        
-        // --- Setup et Initialisation ---
-        
+        // --- Event Listeners ---
         function setupEventListeners() {
             const modal = document.getElementById('favorites-modal');
             document.getElementById('manage-favorites-btn').addEventListener('click', () => modal.classList.remove('hidden'));
@@ -432,7 +518,23 @@
             });
             
             document.getElementById('login-form').addEventListener('submit', (e) => handleAuth(e, signInWithEmailAndPassword));
-            document.getElementById('signup-form').addEventListener('submit', (e) => handleAuth(e, createUserWithEmailAndPassword));
+            
+            // Redirection du signup vers les champs visibles pour l'esthétique
+            document.getElementById('signup-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const pass = document.getElementById('login-password').value;
+                if(!email || !pass) {
+                    document.getElementById('auth-error').textContent = "Remplissez les champs ci-dessus pour créer un compte.";
+                    return;
+                }
+                const btn = e.target.querySelector('button');
+                btn.classList.add('btn-loading');
+                createUserWithEmailAndPassword(auth, email, pass)
+                    .catch(err => document.getElementById('auth-error').textContent = err.message)
+                    .finally(() => btn.classList.remove('btn-loading'));
+            });
+
             document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
         }
 
@@ -451,7 +553,7 @@
                 populateFavoritesModal();
 
                 const cutoffDate = new Date();
-                cutoffDate.setHours(cutoffDate.getHours() - 5); // Ne charge que les matchs commencés il y a moins de 5h
+                cutoffDate.setHours(cutoffDate.getHours() - 5); 
                 const matchesQuery = query(collection(db, "matches"), where("date", ">=", cutoffDate.toISOString()), orderBy("date", "asc"));
                 const matchesSnapshot = await getDocs(matchesQuery);
 
@@ -468,8 +570,8 @@
                 displayMatches();
 
             } catch (error) {
-                console.error("Erreur d'initialisation:", error);
-                document.getElementById('matches-grid').innerHTML = `<p class="col-span-full text-center text-red-500 text-lg">Erreur de chargement des données. Vérifiez les règles de sécurité de Firestore.</p>`;
+                console.error("Erreur init:", error);
+                document.getElementById('matches-grid').innerHTML = `<p class="col-span-full text-center text-red-400">Erreur chargement. Vérifiez console.</p>`;
             }
         }
 
@@ -489,10 +591,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
-            setInterval(updateCountdowns, 60000); // Met à jour chaque minute
+            setInterval(updateCountdowns, 60000);
         });
 
     </script>
 </body>
 </html>
-
