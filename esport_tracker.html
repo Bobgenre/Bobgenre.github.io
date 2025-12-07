@@ -73,11 +73,36 @@
             background-color: rgba(15, 20, 31, 0.95);
             backdrop-filter: blur(4px);
         }
+
+        /* --- Styles Spécifiques Calendrier --- */
+        .calendar-cell {
+            background-color: rgba(30, 41, 59, 0.3);
+            border: 1px solid #334155;
+            min-height: 120px;
+            transition: background-color 0.2s;
+        }
+        .calendar-cell:hover {
+            background-color: rgba(30, 41, 59, 0.6);
+        }
+        .calendar-cell.today {
+            background-color: rgba(30, 41, 59, 0.8);
+            border-color: #ea580c;
+            box-shadow: inset 0 0 10px rgba(234, 88, 12, 0.2);
+        }
+        .event-pill {
+            font-size: 0.7rem;
+            line-height: 1.1;
+            transition: transform 0.1s;
+        }
+        .event-pill:hover {
+            transform: scale(1.02);
+            z-index: 10;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Auth Screen (Style Modernisé) -->
+    <!-- Auth Screen -->
     <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
         <div class="w-full max-w-sm p-8 bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl animate-fade-up">
             <h2 class="text-3xl font-black text-center text-white mb-2 italic tracking-tighter">
@@ -106,7 +131,7 @@
             </div>
 
             <form id="signup-form" class="space-y-4">
-                <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="hidden"> <!-- Hidden inputs to simplify UI for demo, logic remains -->
+                <input type="email" id="signup-email" placeholder="Adresse e-mail" required class="hidden">
                 <input type="password" id="signup-password" placeholder="Mot de passe" required class="hidden">
                 <button type="submit" class="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-lg transition-all border border-slate-600 text-sm">
                     Créer un compte (Utiliser champs ci-dessus)
@@ -120,10 +145,21 @@
         
         <!-- Navbar Sticky (Style GGST) -->
         <nav class="bg-[#0f141f]/95 border-b border-slate-800 px-6 py-4 sticky top-0 z-40 backdrop-blur shadow-lg">
-            <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                 <h1 class="text-2xl font-black text-white tracking-tighter italic">
                     <span class="text-orange-500">ESPORT</span> TRACKER <span class="text-slate-500 text-sm not-italic font-normal ml-2 hidden sm:inline">/// Dashboard Live</span>
                 </h1>
+                
+                <!-- View Switcher -->
+                <div class="flex bg-slate-900/50 p-1 rounded-lg border border-slate-700">
+                    <button id="btn-view-dashboard" class="px-4 py-1.5 rounded-md text-sm font-bold bg-slate-700 text-white shadow transition-all">
+                        Tableau de bord
+                    </button>
+                    <button id="btn-view-calendar" class="px-4 py-1.5 rounded-md text-sm font-bold text-slate-400 hover:text-white transition-all">
+                        Calendrier
+                    </button>
+                </div>
+
                 <div id="auth-info" class="flex items-center gap-4">
                     <span id="user-email" class="text-xs font-bold text-slate-400 hidden sm:block bg-slate-900 px-3 py-1 rounded-full border border-slate-800"></span>
                     <button id="logout-btn" class="text-xs font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-wider flex items-center gap-1">
@@ -136,39 +172,71 @@
 
         <main class="container mx-auto p-4 md:p-8 max-w-7xl flex-1 animate-fade-up">
             
-            <!-- Controls Bar -->
-            <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
-                <!-- Toggle Favoris -->
-                <div class="flex items-center space-x-4 order-2 md:order-1">
-                    <span class="text-sm font-bold text-slate-400 uppercase tracking-wide">Tous</span>
-                    <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
-                        <input type="checkbox" name="toggle" id="favorites-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300"/>
-                        <label for="favorites-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-700 cursor-pointer"></label>
+            <!-- VUE TABLEAU DE BORD -->
+            <div id="view-dashboard-content">
+                <!-- Controls Bar -->
+                <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+                    <!-- Toggle Favoris -->
+                    <div class="flex items-center space-x-4 order-2 md:order-1">
+                        <span class="text-sm font-bold text-slate-400 uppercase tracking-wide">Tous</span>
+                        <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="favorites-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300"/>
+                            <label for="favorites-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-700 cursor-pointer"></label>
+                        </div>
+                        <span class="text-sm font-bold text-orange-400 uppercase tracking-wide flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="text-orange-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            Favoris
+                        </span>
                     </div>
-                    <span class="text-sm font-bold text-orange-400 uppercase tracking-wide flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="text-orange-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        Favoris
-                    </span>
+
+                    <!-- Gestion Button -->
+                    <button id="manage-favorites-btn" class="order-1 md:order-2 px-6 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg border border-slate-600 hover:border-orange-500 transition-all text-sm uppercase tracking-wide shadow-lg flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        Gérer mes équipes
+                    </button>
                 </div>
 
-                <!-- Gestion Button -->
-                <button id="manage-favorites-btn" class="order-1 md:order-2 px-6 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg border border-slate-600 hover:border-orange-500 transition-all text-sm uppercase tracking-wide shadow-lg flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                    Gérer mes équipes
-                </button>
+                <!-- Game Filters (Chips Style) -->
+                <div id="filters" class="flex flex-wrap justify-center gap-3 mb-12">
+                    <p class="w-full text-center text-slate-500 text-sm animate-pulse">Chargement des filtres...</p>
+                </div>
+
+                <!-- Matches Grid -->
+                <div id="matches-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                     <p id="loading-message" class="col-span-full text-center text-slate-500 text-lg flex flex-col items-center">
+                        <span class="loader block w-8 h-8 border-4 border-slate-700 border-t-orange-500 rounded-full animate-spin mb-4"></span>
+                        Récupération des données live...
+                     </p>
+                </div>
             </div>
 
-            <!-- Game Filters (Chips Style) -->
-            <div id="filters" class="flex flex-wrap justify-center gap-3 mb-12">
-                <p class="w-full text-center text-slate-500 text-sm animate-pulse">Chargement des filtres...</p>
-            </div>
+            <!-- VUE CALENDRIER -->
+            <div id="view-calendar-content" class="hidden">
+                <div class="flex justify-between items-center mb-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                    <button id="cal-prev-btn" class="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <h2 id="calendar-month-year" class="text-2xl font-bold text-white uppercase tracking-wider"></h2>
+                    <button id="cal-next-btn" class="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
 
-            <!-- Matches Grid -->
-            <div id="matches-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                 <p id="loading-message" class="col-span-full text-center text-slate-500 text-lg flex flex-col items-center">
-                    <span class="loader block w-8 h-8 border-4 border-slate-700 border-t-orange-500 rounded-full animate-spin mb-4"></span>
-                    Récupération des données live...
-                 </p>
+                <!-- Jours de la semaine -->
+                <div class="grid grid-cols-7 gap-2 mb-2">
+                    <div class="text-center font-bold text-slate-500 uppercase text-xs">Lun</div>
+                    <div class="text-center font-bold text-slate-500 uppercase text-xs">Mar</div>
+                    <div class="text-center font-bold text-slate-500 uppercase text-xs">Mer</div>
+                    <div class="text-center font-bold text-slate-500 uppercase text-xs">Jeu</div>
+                    <div class="text-center font-bold text-slate-500 uppercase text-xs">Ven</div>
+                    <div class="text-center font-bold text-slate-500 uppercase text-xs">Sam</div>
+                    <div class="text-center font-bold text-slate-500 uppercase text-xs">Dim</div>
+                </div>
+
+                <!-- Grille du calendrier -->
+                <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+                    <!-- Généré par JS -->
+                </div>
             </div>
 
         </main>
@@ -178,7 +246,7 @@
         </footer>
     </div>
 
-    <!-- Modal des favoris (Style Sombre) -->
+    <!-- Modal des favoris -->
     <div id="favorites-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden p-4">
         <div class="bg-[#1e293b] w-full max-w-md mx-auto rounded-xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
             <div class="p-6 border-b border-slate-700 bg-slate-800/50 flex justify-between items-center">
@@ -226,10 +294,38 @@
         let favoriteTeams = [];
         let showOnlyFavorites = true;
         let currentUser = null;
+        
+        // État du Calendrier
+        let currentCalendarDate = new Date();
 
         // --- DOM Elements ---
         const authOverlay = document.getElementById('auth-overlay');
         const appContent = document.getElementById('app-content');
+        
+        // --- Navigation Vues ---
+        const btnDashboard = document.getElementById('btn-view-dashboard');
+        const btnCalendar = document.getElementById('btn-view-calendar');
+        const viewDashboard = document.getElementById('view-dashboard-content');
+        const viewCalendar = document.getElementById('view-calendar-content');
+
+        function switchView(viewName) {
+            if (viewName === 'dashboard') {
+                viewDashboard.classList.remove('hidden');
+                viewCalendar.classList.add('hidden');
+                btnDashboard.classList.add('bg-slate-700', 'text-white', 'shadow');
+                btnDashboard.classList.remove('text-slate-400');
+                btnCalendar.classList.remove('bg-slate-700', 'text-white', 'shadow');
+                btnCalendar.classList.add('text-slate-400');
+            } else {
+                viewDashboard.classList.add('hidden');
+                viewCalendar.classList.remove('hidden');
+                btnCalendar.classList.add('bg-slate-700', 'text-white', 'shadow');
+                btnCalendar.classList.remove('text-slate-400');
+                btnDashboard.classList.remove('bg-slate-700', 'text-white', 'shadow');
+                btnDashboard.classList.add('text-slate-400');
+                renderCalendar(); // Refresh calendar when switching
+            }
+        }
 
         // --- Fonctions de gestion des favoris ---
         async function loadFavoritesFromFirestore() {
@@ -271,7 +367,6 @@
             const actualTeams = allTeams.filter(teamName => !teamName.includes("Groupe") && !teamName.includes("Global Finals"));
             actualTeams.forEach(teamName => {
                 const isChecked = favoriteTeams.includes(teamName);
-                // Style des checkboxes modernisé
                 const teamHTML = `
                     <label class="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700 cursor-pointer hover:border-slate-500 transition-colors group">
                         <span class="text-slate-300 font-semibold group-hover:text-white">${teamName}</span>
@@ -298,7 +393,6 @@
         
         function createFilterButton(text, filterValue) {
             const button = document.createElement('button');
-            // Style inspiré des boutons/tags dans ggst.html
             button.className = 'filter-btn px-4 py-1.5 rounded-full text-sm font-bold bg-slate-800 border border-slate-600 text-slate-400 hover:text-white hover:border-slate-400 transition-all uppercase tracking-wide';
             button.dataset.filter = filterValue;
             button.textContent = text;
@@ -336,7 +430,6 @@
 
             filteredMatches.forEach(match => {
                 const matchCard = document.createElement('div');
-                // Style inspiré des MechanicCard/CharacterCard
                 matchCard.className = 'match-card flex flex-col h-full';
                 
                 const matchDate = new Date(match.date);
@@ -344,10 +437,9 @@
                 const formattedDate = formatMatchDate(match.date);
 
                 let streamLink = 'https://www.twitch.tv'; 
-                let btnColorClass = 'bg-blue-600 hover:bg-blue-500'; // Default Blue
-                
-                // Personnalisation des couleurs par jeu pour rappeler le style GGST Roster
+                let btnColorClass = 'bg-blue-600 hover:bg-blue-500'; 
                 let gameColor = 'text-blue-400';
+                
                 if (match.game === 'League of Legends') { streamLink = 'https://www.twitch.tv/traytonlol'; gameColor = 'text-blue-400'; }
                 else if (match.game === 'Valorant') { streamLink = 'https://www.twitch.tv/valorant_fr'; gameColor = 'text-red-400'; btnColorClass='bg-red-600 hover:bg-red-500'; }
                 else if (match.game === 'Guilty Gear -Strive-') { gameColor = 'text-orange-500'; btnColorClass='bg-orange-600 hover:bg-orange-500'; }
@@ -361,7 +453,6 @@
                         </p>
                     </div>`;
 
-                // --- LOGIQUE ÉVÉNEMENT vs MATCH ---
                 let isEvent = false;
                 let eventTitle = match.teamA;
 
@@ -372,7 +463,6 @@
                     isEvent = true;
                 }
 
-                // Header commun
                 const cardHeader = `
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
@@ -384,8 +474,6 @@
                 `;
 
                 if (isEvent) {
-                     // Style Événement (Centré, titre imposant)
-                     // Bouton retiré comme demandé
                      matchCard.innerHTML = `
                         <div class="p-5 flex flex-col h-full bg-gradient-to-b from-slate-800/40 to-transparent">
                             ${cardHeader}
@@ -395,7 +483,6 @@
                             ${dateHtml}
                         </div>`;
                 } else {
-                    // Style Match (VS stylisé)
                     matchCard.innerHTML = `
                         <div class="p-5 flex flex-col h-full">
                             ${cardHeader}
@@ -403,9 +490,7 @@
                                 <div class="flex flex-col items-center justify-center w-[40%]">
                                     <span class="font-bold text-lg text-white leading-tight break-words w-full">${match.teamA}</span>
                                 </div>
-                                
                                 <span class="text-2xl font-black text-slate-700 italic absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0 opacity-50">VS</span>
-                                
                                 <div class="flex flex-col items-center justify-center w-[40%] relative z-10">
                                     <span class="font-bold text-lg text-white leading-tight break-words w-full">${match.teamB}</span>
                                 </div>
@@ -419,6 +504,94 @@
                 matchesGrid.appendChild(matchCard);
             });
             updateCountdowns();
+        }
+
+        // --- FONCTIONS CALENDRIER ---
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            // Titre mois
+            const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+            document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
+
+            // Calcul des jours
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+            
+            const daysInMonth = lastDayOfMonth.getDate();
+            // 0 = Dimanche, 1 = Lundi... on veut que Lundi soit 0 pour le grid CSS
+            let startDay = firstDayOfMonth.getDay() - 1; 
+            if (startDay === -1) startDay = 6; // Dimanche devient 6
+
+            // Cases vides début
+            for (let i = 0; i < startDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = "calendar-cell opacity-50 bg-slate-900/20";
+                grid.appendChild(emptyCell);
+            }
+
+            // Jours du mois
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cell = document.createElement('div');
+                cell.className = "calendar-cell p-2 flex flex-col gap-1 overflow-hidden relative";
+                
+                // Highlight today
+                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    cell.classList.add('today');
+                }
+
+                const dateNumber = document.createElement('span');
+                dateNumber.className = "text-slate-400 font-bold text-sm mb-1";
+                dateNumber.textContent = day;
+                cell.appendChild(dateNumber);
+
+                // Trouver les matchs pour ce jour
+                // Attention au fuseau horaire, on compare juste YYYY-MM-DD local
+                const currentDayStart = new Date(year, month, day);
+                const currentDayEnd = new Date(year, month, day, 23, 59, 59);
+
+                const dayMatches = allMatches.filter(m => {
+                    const mDate = new Date(m.date);
+                    return mDate >= currentDayStart && mDate <= currentDayEnd;
+                });
+
+                dayMatches.forEach(match => {
+                    const pill = document.createElement('div');
+                    
+                    // Code couleur par jeu
+                    let colorClass = "bg-slate-700 text-slate-200 border-slate-600";
+                    if (match.game === 'League of Legends') colorClass = "bg-blue-900/80 text-blue-200 border-blue-700";
+                    if (match.game === 'Valorant') colorClass = "bg-red-900/80 text-red-200 border-red-700";
+                    if (match.game === 'Guilty Gear -Strive-') colorClass = "bg-orange-900/80 text-orange-200 border-orange-700";
+                    if (match.game === 'World of Warcraft') colorClass = "bg-yellow-900/80 text-yellow-200 border-yellow-700";
+
+                    pill.className = `event-pill px-1.5 py-1 rounded border truncate cursor-help ${colorClass}`;
+                    
+                    // Contenu pillule
+                    let content = match.teamA;
+                    if (match.teamB && match.teamB !== 'Début') {
+                        content = `${match.teamA} vs ${match.teamB}`;
+                    }
+                    
+                    const time = new Date(match.date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                    pill.textContent = `${time} ${content}`;
+                    pill.title = `${match.game} - ${match.tournament}`; // Tooltip simple
+
+                    cell.appendChild(pill);
+                });
+
+                grid.appendChild(cell);
+            }
+        }
+
+        function changeMonth(offset) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offset);
+            renderCalendar();
         }
 
         function handleFilterClick(clickedButton) {
@@ -436,7 +609,6 @@
         
         function formatMatchDate(isoString) {
              const date = new Date(isoString);
-             // Format date français "lundi 12 janvier à 20:00"
              const options = { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' };
              if (isDateToday(date)) {
                  const time = new Intl.DateTimeFormat('fr-FR', { timeStyle: 'short' }).format(date);
@@ -477,14 +649,10 @@
         // --- Auth & Init ---
         async function handleAuth(e, authFunc) {
             e.preventDefault();
-            // Pour la démo, on prend toujours les champs du login form même pour le signup
-            // car j'ai caché les champs signup pour simplifier l'UI
             const emailInput = document.getElementById('login-email');
             const passInput = document.getElementById('login-password');
-            
             const button = e.target.querySelector('button[type="submit"]');
             button.classList.add('btn-loading');
-            
             try {
                 await authFunc(auth, emailInput.value, passInput.value);
             } catch (error) {
@@ -497,6 +665,7 @@
 
         // --- Event Listeners ---
         function setupEventListeners() {
+            // Modal Favoris
             const modal = document.getElementById('favorites-modal');
             document.getElementById('manage-favorites-btn').addEventListener('click', () => modal.classList.remove('hidden'));
             document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.add('hidden'));
@@ -517,9 +686,16 @@
                 displayMatches(document.querySelector('.filter-btn.active').dataset.filter);
             });
             
-            document.getElementById('login-form').addEventListener('submit', (e) => handleAuth(e, signInWithEmailAndPassword));
+            // Switch Vues
+            btnDashboard.addEventListener('click', () => switchView('dashboard'));
+            btnCalendar.addEventListener('click', () => switchView('calendar'));
             
-            // Redirection du signup vers les champs visibles pour l'esthétique
+            // Navigation Calendrier
+            document.getElementById('cal-prev-btn').addEventListener('click', () => changeMonth(-1));
+            document.getElementById('cal-next-btn').addEventListener('click', () => changeMonth(1));
+
+            // Auth
+            document.getElementById('login-form').addEventListener('submit', (e) => handleAuth(e, signInWithEmailAndPassword));
             document.getElementById('signup-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const email = document.getElementById('login-email').value;
@@ -568,6 +744,7 @@
                     .filter(match => match.teamB !== 'Fin');
 
                 displayMatches();
+                renderCalendar(); // Init calendar with loaded data
 
             } catch (error) {
                 console.error("Erreur init:", error);
