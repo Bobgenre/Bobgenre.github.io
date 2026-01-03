@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bobgenre Anime Lab - Local</title>
+    
+    <!-- 1. CHARGEMENT DE REACT & DOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- 2. FIX CRITIQUE : S'assurer que React est global pour les librairies tierces -->
+    <script>
+        window.React = React;
+        window.ReactDOM = ReactDOM;
+    </script>
+
+    <!-- 3. CHARGEMENT DE BABEL (COMPILATEUR JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 4. CHARGEMENT DE TAILWIND CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 5. CHARGEMENT DES ICONES (METHODE NATIVE ROBUSTE) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { background-color: #080a0f; color: white; margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.01); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.4); }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        /* Fix pour les icônes Lucide */
+        .lucide { vertical-align: middle; display: inline-block; stroke-width: 2.5px; }
+        
+        /* Fix bugs d'affichage listes */
+        .sticky-header { top: 73px; }
+        @media (min-width: 768px) { .sticky-header { top: 65px; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect, useCallback, useRef } = React;
+
+        // Composant Icône utilisant Lucide Core (évite les erreurs de forwardRef)
+        const Icon = ({ name, size = 18, className = "" }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (iconRef.current && window.lucide) {
+                    window.lucide.createIcons({
+                        targets: [iconRef.current]
+                    });
+                }
+            }, [name, size, className]);
+
+            return <i data-lucide={name} style={{ width: size, height: size }} className={`lucide ${className}`} ref={iconRef}></i>;
+        };
+
+        const CLIENT_ID = "0167bb06ad08b311afde983e15fc4bae301960f8df18b58a33217897a8fc912b";
+        const USERNAME = "Bobgenre";
+
+        const App = () => {
+            const [animeList, setAnimeList] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState(null);
+            const [syncStep, setSyncStep] = useState("");
+            const [progress, setProgress] = useState(0);
+            const [activeTab, setActiveTab] = useState('list');
+            const [searchTerm, setSearchTerm] = useState("");
+            const [filterYear, setFilterYear] = useState("All");
+            const [manualInput, setManualInput] = useState("");
+
+            // Fonction Fetch améliorée avec multi-proxy
+            const fetchSimkl = useCallback(async (endpoint) => {
+                const targetUrl = `https://api.simkl.com/${endpoint}${endpoint.includes('?') ? '&' : '?'}client_id=${CLIENT_ID}`;
+                
+                // Tentative via Proxy AllOrigins (Format Raw pour éviter le parsing contents)
+                try {
+                    const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
+                    if (res.ok) return await res.json();
+                } catch (e) {
+                    console.warn("Proxy AllOrigins a échoué...");
+                }
+
+                // Tentative via CorsProxy.io
+                try {
+                    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+                    if (res.ok) return await res.json();
+                } catch (e) {
+                    throw new Error("Connexion bloquée par le navigateur (CORS). Simkl refuse l'accès direct depuis un fichier local.");
+                }
+
+                throw new Error("Impossible de joindre les serveurs Simkl.");
+            }, []);
+
+            const processData = useCallback(async (library) => {
+                if (!Array.isArray(library)) throw new Error("Les données reçues sont invalides. Votre profil est-il bien public ?");
+                
+                const initialList = library.map(item => ({
+                    id: item.show?.ids?.simkl || item.ids?.simkl,
+                    title: item.show?.title || item.title,
+                    year: item.show?.year || item.year || 0,
+                    userRating: item.user_rating || item.rating || 0,
+                    dateWatched: item.last_watched_at ? item.last_watched_at.split('T')[0] : "Inconnue",
+                    genres: [],
+                    studios: []
+                })).filter(a => a.id);
+
+                if (initialList.length === 0) throw new Error("Aucun anime terminé n'a été trouvé.");
+
+                setAnimeList(initialList);
+                setProgress(20);
+
+                const enrichedList = [...initialList];
+                for (let i = 0; i < enrichedList.length; i++) {
+                    try {
+                        const details = await fetchSimkl(`anime/${enrichedList[i].id}`);
+                        enrichedList[i].genres = details.genres ? details.genres.map(g => typeof g === 'string' ? g : (g.name || g)) : [];
+                        enrichedList[i].studios = details.studios ? details.studios.map(s => typeof s === 'string' ? s : (s.name || s)) : [];
+                    } catch (e) {}
+                    
+                    setProgress(20 + Math.round(((i + 1) / enrichedList.length) * 80));
+                    if (i % 15 === 0 || i === enrichedList.length - 1) {
+                        setSyncStep(`Enrichissement des données... (${i + 1}/${enrichedList.length})`);
+                        setAnimeList([...enrichedList]);
+                    }
+                    // Respecter le rate-limit
+                    await new Promise(r => setTimeout(r, 70));
+                }
+                setSyncStep("");
+            }, [fetchSimkl]);
+
+            const startSync = useCallback(async () => {
+                setLoading(true); setError(null); setProgress(5);
+                setSyncStep("Vérification du profil Bobgenre...");
+                try {
+                    const library = await fetchSimkl(`users/${USERNAME}/library/anime/completed`);
+                    await processData(library);
+                } catch (err) { 
+                    setError(err.message); 
+                } finally { 
+                    setLoading(false); 
+                }
+            }, [fetchSimkl, processData]);
+
+            useEffect(() => { startSync(); }, []);
+
+            const handleManualLoad = () => {
+                try {
+                    const json = JSON.parse(manualInput);
+                    setError(null); setLoading(true);
+                    processData(json).then(() => setLoading(false));
+                } catch (e) { alert("Format JSON invalide. Copiez bien l'intégralité du texte."); }
+            };
+
+            const stats = useMemo(() => {
+                if (!animeList.length) return null;
+                const s = { years: {}, studios: {}, genres: {}, score: 0, rated: 0 };
+                animeList.forEach(a => {
+                    if (a.userRating > 0) { s.score += a.userRating; s.rated++; }
+                    if (a.year > 0) {
+                        if (!s.years[a.year]) s.years[a.year] = { total: 0, top: 0 };
+                        s.years[a.year].total++;
+                        if (a.userRating > 8) s.years[a.year].top++;
+                    }
+                    a.studios?.forEach(st => {
+                        if (!s.studios[st]) s.studios[st] = { count: 0, sum: 0, r: 0 };
+                        s.studios[st].count++;
+                        if (a.userRating > 0) { s.studios[st].sum += a.userRating; s.studios[st].r++; }
+                    });
+                    a.genres?.forEach(g => {
+                        if (!s.genres[g]) s.genres[g] = { count: 0, sum: 0, r: 0 };
+                        s.genres[g].count++;
+                        if (a.userRating > 0) { s.genres[g].sum += a.userRating; s.genres[g].r++; }
+                    });
+                });
+
+                return {
+                    avg: (s.score / (s.rated || 1)).toFixed(1),
+                    total: animeList.length,
+                    excellence: Object.keys(s.years).map(y => ({
+                        year: y, percent: Math.round((s.years[y].top / s.years[y].total) * 100), count: s.years[y].total
+                    })).sort((a,b) => b.year - a.year),
+                    topStudios: Object.keys(s.studios).map(name => ({
+                        name, count: s.studios[name].count, avg: (s.studios[name].sum / (s.studios[name].r || 1)).toFixed(1)
+                    })).sort((a,b) => b.count - a.count).slice(0, 10),
+                    topGenres: Object.keys(s.genres).map(name => ({
+                        name, count: s.genres[name].count, avg: (s.genres[name].sum / (s.genres[name].r || 1)).toFixed(1)
+                    })).sort((a,b) => b.count - a.count).slice(0, 10),
+                    yList: Object.keys(s.years).sort((a,b) => b-a)
+                };
+            }, [animeList]);
+
+            const filtered = useMemo(() => {
+                return animeList
+                    .filter(a => a.title.toLowerCase().includes(searchTerm.toLowerCase()) && (filterYear === "All" || a.year.toString() === filterYear))
+                    .sort((a,b) => b.year !== a.year ? b.year - a.year : b.userRating - a.userRating);
+            }, [animeList, searchTerm, filterYear]);
+
+            return (
+                <div className="min-h-screen text-slate-100 font-sans selection:bg-indigo-500/30 pb-20 overflow-x-hidden">
+                    <header className="sticky top-0 z-50 bg-[#080a0f]/90 backdrop-blur-xl border-b border-white/5 px-6 py-4 shadow-2xl">
+                        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-indigo-600 p-2.5 rounded-2xl shadow-lg shadow-indigo-900/40">
+                                    <Icon name="trending-up" size={24} className="text-white" />
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-black uppercase tracking-tighter text-white leading-none">Bobgenre Lab</h1>
+                                    <div className="flex items-center gap-1.5 mt-1">
+                                        <Icon name="shield-check" size={10} className="text-emerald-500" />
+                                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Multi-Proxy Stable v8.3</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {stats && (
+                                <nav className="flex bg-[#121620] p-1.5 rounded-2xl border border-white/5 shadow-inner">
+                                    <button onClick={() => setActiveTab('list')} className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'list' ? 'bg-white text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}>Liste</button>
+                                    <button onClick={() => setActiveTab('stats')} className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'stats' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/40' : 'text-slate-500 hover:text-white'}`}>Stats</button>
+                                </nav>
+                            )}
+                        </div>
+                    </header>
+
+                    {!stats && !error && (
+                        <div className="flex flex-col items-center justify-center min-h-[75vh] p-6 text-center animate-in">
+                            <div className="relative mb-10">
+                                <div className="w-24 h-24 border-4 border-white/5 border-t-indigo-600 rounded-full animate-spin"></div>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <Icon name="database" size={32} className="text-indigo-400 animate-pulse" />
+                                </div>
+                            </div>
+                            <h2 className="text-2xl font-black uppercase tracking-tighter mb-2 italic">Chargement des données...</h2>
+                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">{syncStep || "Contact des serveurs"}</p>
+                            <div className="w-64 h-2 bg-white/5 rounded-full mt-8 overflow-hidden border border-white/5 p-0.5">
+                                <div className="h-full bg-indigo-600 rounded-full transition-all duration-500 shadow-[0_0_15px_#6366f1]" style={{width: `${progress}%`}}></div>
+                            </div>
+                        </div>
+                    )}
+
+                    {error && !stats && (
+                        <div className="max-w-xl mx-auto mt-20 p-10 bg-[#121620] border border-red-500/20 rounded-[3rem] shadow-2xl text-center animate-in">
+                            <Icon name="alert-circle" size={56} className="text-red-500 mx-auto mb-6" />
+                            <h2 className="text-xl font-black uppercase mb-4 tracking-tight text-white leading-tight font-bold">Connexion restreinte</h2>
+                            <p className="text-slate-400 text-sm leading-relaxed mb-10 px-4">Votre navigateur ou Simkl bloque la connexion automatique depuis un fichier local (CORS).<br/><br/>Bobgenre, utilise la <b>méthode de secours</b> pour débloquer ton Labo :</p>
+                            <div className="space-y-5 text-left bg-black/30 p-6 rounded-3xl border border-white/5">
+                                <a href={`https://api.simkl.com/users/${USERNAME}/library/anime/completed?client_id=${CLIENT_ID}`} target="_blank" 
+                                   className="flex items-center justify-center gap-3 w-full bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 py-4 rounded-2xl font-bold text-sm hover:bg-indigo-600 hover:text-white transition-all no-underline">
+                                    <Icon name="external-link" size={18} /> 1. Ouvrir mes données brutes
+                                </a>
+                                <p className="text-[10px] text-slate-500 uppercase font-black px-2 mt-4 tracking-widest">2. Copie et colle le texte ici :</p>
+                                <textarea className="w-full bg-[#080a0f] border border-white/10 rounded-2xl p-4 text-[10px] font-mono text-indigo-300 h-32 outline-none focus:border-indigo-500 transition-all shadow-inner"
+                                    placeholder="Colle le contenu de la page blanche ici..." value={manualInput} onChange={(e) => setManualInput(e.target.value)} />
+                                <button disabled={!manualInput} onClick={handleManualLoad}
+                                    className="w-full bg-white text-black disabled:opacity-30 py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl cursor-pointer hover:bg-indigo-400 transition-all active:scale-95">
+                                    Charger manuellement
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {stats && (
+                        <main className="max-w-6xl mx-auto px-6 py-12 animate-in">
+                            {activeTab === 'list' ? (
+                                <div className="space-y-12">
+                                    <div className="flex flex-col md:flex-row gap-4 bg-[#121620] p-3 rounded-3xl border border-white/5 shadow-2xl">
+                                        <div className="relative flex-grow">
+                                            <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
+                                            <input type="text" placeholder="Rechercher par titre..." className="w-full bg-[#080a0f] rounded-2xl py-3.5 pl-12 pr-4 text-sm outline-none text-white border-none focus:ring-2 focus:ring-indigo-600/50" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                        </div>
+                                        <select className="bg-[#080a0f] text-xs font-black uppercase tracking-widest px-6 py-3.5 rounded-2xl outline-none text-white cursor-pointer border-none focus:ring-2 focus:ring-indigo-600/50" value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
+                                            <option value="All">Millésimes : Tous</option>
+                                            {stats.yList.map(y => <option key={y} value={y}>{y}</option>)}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-20">
+                                        {Array.from(new Set(filtered.map(d => d.year))).map(year => (
+                                            <div key={year} className="relative">
+                                                <div className="sticky top-[86px] z-40 bg-[#080a0f]/95 backdrop-blur-md py-5 mb-8 border-b border-white/5 flex items-center justify-between">
+                                                    <div className="flex items-center gap-6">
+                                                        <span className="text-5xl font-black italic text-white/5 leading-none">{year || "Inconnu"}</span>
+                                                        <div className="h-0.5 w-12 bg-indigo-600/30 rounded-full"></div>
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">{filtered.filter(d => d.year === year).length} TITRES</span>
+                                                </div>
+                                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                                    {filtered.filter(d => d.year === year).map((a, idx) => (
+                                                        <a key={idx} href={`https://simkl.com/anime/${a.id}`} target="_blank" rel="noopener noreferrer" 
+                                                           className="bg-[#121620] border border-white/5 rounded-[2.5rem] p-6 flex items-center gap-6 group hover:border-indigo-500/40 transition-all shadow-xl no-underline hover:-translate-y-1">
+                                                            <div className="w-8 text-center text-slate-800 font-black text-xs group-hover:text-indigo-400 italic transition-colors">#{idx + 1}</div>
+                                                            <div className="flex-grow min-w-0 text-left">
+                                                                <h3 className="text-white font-bold truncate text-base mb-2 group-hover:text-indigo-100 transition-colors tracking-tight">{a.title}</h3>
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {a.genres?.slice(0, 2).map((g, i) => <span key={i} className="text-[9px] font-bold text-slate-500 uppercase bg-white/5 px-2.5 py-1 rounded-lg border border-white/5 tracking-widest">{g}</span>)}
+                                                                    {a.studios?.[0] && <span className="text-[9px] font-bold text-indigo-400 uppercase bg-indigo-950/20 px-2.5 py-1 rounded-lg border border-indigo-500/20 tracking-widest">Studio {a.studios[0]}</span>}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex flex-col items-center gap-1.5 bg-black/40 px-4 py-2.5 rounded-3xl border border-white/5 min-w-[65px] justify-center shadow-inner group-hover:border-indigo-600/30 transition-all">
+                                                                <Icon name="star" size={14} className={a.userRating >= 9 ? 'text-yellow-500 fill-yellow-500' : 'text-slate-700'} />
+                                                                <span className={`text-sm font-black ${a.userRating >= 9 ? 'text-yellow-400' : 'text-slate-400'}`}>{a.userRating || '-'}</span>
+                                                            </div>
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-in">
+                                    <div className="bg-[#121620] p-12 rounded-[3.5rem] border border-white/5 shadow-2xl flex flex-col justify-center text-center group overflow-hidden relative">
+                                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-600/10 rounded-full blur-3xl group-hover:bg-indigo-600/20 transition-colors"></div>
+                                        <h3 className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.5em] mb-8 relative z-10">Moyenne Globale</h3>
+                                        <div className="text-[7.5rem] font-black text-white tracking-tighter leading-none relative z-10">{stats.avg}</div>
+                                        <div className="text-indigo-400 font-black uppercase text-[11px] mt-6 flex items-center justify-center gap-3 italic tracking-widest relative z-10">
+                                            <Icon name="award" size={16} /> Bobgenre Profile
+                                        </div>
+                                    </div>
+
+                                    <div className="md:col-span-2 bg-[#121620] p-12 rounded-[3.5rem] border border-white/5 shadow-2xl relative group">
+                                        <h3 className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.5em] mb-12 text-left">Studios Favoris</h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                            {stats.topStudios.map((s, i) => (
+                                                <div key={i} className="flex justify-between items-center p-6 bg-black/30 rounded-[2rem] border border-white/5 hover:border-indigo-500/40 transition-all hover:bg-[#1a1f2e] group/card">
+                                                    <div className="flex flex-col text-left"><span className="text-white font-bold uppercase text-xs tracking-tight group-hover/card:text-indigo-200 transition-colors">{s.name}</span><span className="text-[10px] text-slate-600 font-bold uppercase mt-1.5 tracking-wider">{s.count} terminés</span></div>
+                                                    <div className="bg-indigo-600/5 px-4 py-2 rounded-2xl border border-indigo-600/10">
+                                                        <span className="text-indigo-400 font-black text-2xl group-hover/card:scale-110 block transition-transform">{s.avg}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="md:col-span-3 bg-[#121620] p-14 rounded-[4rem] border border-white/5 shadow-2xl">
+                                        <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-10">
+                                            <div>
+                                                <div className="flex items-center gap-4 text-indigo-400 font-black text-[10px] tracking-[0.6em] uppercase mb-4">
+                                                    <Icon name="trophy" size={20} /> Taux d'Excellence
+                                                </div>
+                                                <h3 className="text-white text-5xl font-black uppercase tracking-tighter italic leading-tight">Ratio de Masterpieces ({" > "} 8)</h3>
+                                                <p className="text-slate-500 text-sm mt-5 max-w-lg font-medium leading-relaxed">Le pourcentage de titres notés <span className="text-indigo-400 font-black">9 ou 10</span> par millésime.</p>
+                                            </div>
+                                            <div className="hidden lg:flex flex-col items-end">
+                                                <span className="text-slate-700 text-[10px] font-black uppercase tracking-[0.4em] mb-4 italic italic">Simkl Intelligence System</span>
+                                                <div className="h-1 w-64 bg-white/5 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-gradient-to-r from-indigo-950 via-indigo-600 to-indigo-400 w-full animate-pulse shadow-[0_0_20px_#6366f1]"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-12 max-h-[800px] overflow-y-auto pr-10 custom-scrollbar">
+                                            {stats.excellence.map((item, i) => (
+                                                <div key={i} className="group relative">
+                                                    <div className="flex justify-between items-end mb-5">
+                                                        <div className="flex items-baseline gap-6"><span className="text-white font-black text-5xl tracking-tighter group-hover:text-indigo-400 transition-all duration-300">{item.year}</span><span className="text-slate-600 text-[11px] font-bold uppercase tracking-[0.3em] italic">{item.count} productions</span></div>
+                                                        <span className="text-indigo-400 font-black text-5xl group-hover:text-white transition-colors tracking-tighter">{item.percent}%</span>
+                                                    </div>
+                                                    <div className="w-full h-5 bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner p-1 group-hover:border-indigo-600/20 transition-all">
+                                                        <div className="h-full bg-gradient-to-r from-indigo-950 via-indigo-700 to-indigo-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_30px_rgba(99,102,241,0.5)]" style={{ width: `${item.percent}%` }}></div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </main>
+                    )}
+
+                    <footer className="py-24 text-center border-t border-white/5 mt-20 opacity-50">
+                        <p className="text-slate-600 text-[10px] font-black uppercase tracking-[0.6em] leading-relaxed">Bobgenre Exclusive Lab • Simkl Analytics v8.3<br/>
+                        <span className="text-slate-700 mt-4 block italic">Powered by Proxy-Secured Cloud Automation</span></p>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
