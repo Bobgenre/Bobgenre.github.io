@@ -2,52 +2,138 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import time
-import re
 
-# Dictionnaire complet des rosters du LEC.
+# Dictionnaire complet des rosters du LEC 2026 (Format Versus).
+# Inclut les 10 équipes partenaires + 2 équipes invitées (Los Ratones & KC Blue).
 PLAYER_ROSTER = {
-    "KC": [{"name": "Canna", "role": "Top"}, {"name": "Yike", "role": "Jungle"}, {"name": "Vladi", "role": "Mid"}, {"name": "Caliste", "role": "ADC"}, {"name": "Targamas", "role": "Support"}],
-    "G2": [{"name": "BrokenBlade", "role": "Top"}, {"name": "SkewMond", "role": "Jungle"}, {"name": "Caps", "role": "Mid"}, {"name": "Hans Sama", "role": "ADC"}, {"name": "Labrov", "role": "Support"}],
-    "MKOI": [{"name": "Myrwn", "role": "Top"}, {"name": "Elyoya", "role": "Jungle"}, {"name": "Jojopyun", "role": "Mid"}, {"name": "Supa", "role": "ADC"}, {"name": "Alvaro", "role": "Support", "url_name": "Alvaro_(Álvaro_Fernández)"}],
-    "FNC": [{"name": "Oscarinin", "role": "Top"}, {"name": "Razork", "role": "Jungle"}, {"name": "Poby", "role": "Mid"}, {"name": "Upset", "role": "ADC"}, {"name": "Mikyx", "role": "Support"}],
-    "VIT": [{"name": "Naak Nako", "role": "Top"}, {"name": "Lyncas", "role": "Jungle"}, {"name": "Czajek", "role": "Mid"}, {"name": "Carzzy", "role": "ADC"}, {"name": "Fleshy", "role": "Support"}],
-    "BDS": [{"name": "Rooster", "role": "Top"}, {"name": "Boukada", "role": "Jungle"}, {"name": "nuc", "role": "Mid"}, {"name": "Ice", "role": "ADC", "url_name": "Ice_(Yoon_Sang-hoon)"}, {"name": "Parus", "role": "Support"}],
-    "TH": [{"name": "Carlsen", "role": "Top"}, {"name": "Sheo", "role": "Jungle"}, {"name": "Kamiloo", "role": "Mid"}, {"name": "Flakked", "role": "ADC"}, {"name": "Stend", "role": "Support"}],
-    "GX": [{"name": "Lot", "role": "Top"}, {"name": "Isma", "role": "Jungle", "url_name": "ISMA"}, {"name": "Jackies", "role": "Mid"}, {"name": "Noah", "role": "ADC", "url_name": "Noah_(Oh_Hyeon-taek)"}, {"name": "Jun", "role": "Support", "url_name": "Jun_(Yoon_Se-jun)"}],
-    "SK": [{"name": "DnDn", "role": "Top"}, {"name": "Skeanz", "role": "Jungle"}, {"name": "Abbedagge", "role": "Mid"}, {"name": "Keduii", "role": "ADC"}, {"name": "Loopy", "role": "Support"}],
-    "NAVI": [{"name": "Adam", "role": "Top", "url_name": "Adam_(Adam_Maanane)"}, {"name": "Thayger", "role": "Jungle"}, {"name": "Larssen", "role": "Mid"}, {"name": "Hans SamD", "role": "ADC"}, {"name": "Malrang", "role": "Support"}]
+    "G2": [
+        {"name": "BrokenBlade", "role": "Top"},
+        {"name": "SkewMond", "role": "Jungle"},
+        {"name": "Caps", "role": "Mid"},
+        {"name": "Hans Sama", "role": "ADC"},
+        {"name": "Labrov", "role": "Support"}
+    ],
+    "KC": [
+        {"name": "Canna", "role": "Top"},
+        {"name": "Yike", "role": "Jungle"},
+        {"name": "Kyeahoo", "role": "Mid"},
+        {"name": "Caliste", "role": "ADC"},
+        {"name": "Busio", "role": "Support"}
+    ],
+    "MKOI": [ # MAD Lions KOI -> Movistar KOI
+        {"name": "Myrwn", "role": "Top"},
+        {"name": "Elyoya", "role": "Jungle"},
+        {"name": "Jojopyun", "role": "Mid"},
+        {"name": "Supa", "role": "ADC"},
+        {"name": "Alvaro", "role": "Support", "url_name": "Alvaro_(Álvaro_Fernández)"}
+    ],
+    "VIT": [
+        {"name": "Naak Nako", "role": "Top"},
+        {"name": "Lyncas", "role": "Jungle"},
+        {"name": "Humanoid", "role": "Mid"},
+        {"name": "Carzzy", "role": "ADC"},
+        {"name": "Fleshy", "role": "Support"}
+    ],
+    "SH": [ # Ex-BDS (Shifters)
+        {"name": "Rooster", "role": "Top"},
+        {"name": "Boukada", "role": "Jungle"},
+        {"name": "nuc", "role": "Mid"},
+        {"name": "Paduck", "role": "ADC"},
+        {"name": "Trymbi", "role": "Support"}
+    ],
+    "TH": [
+        {"name": "Tracyn", "role": "Top"},
+        {"name": "Sheo", "role": "Jungle"},
+        {"name": "Serin", "role": "Mid"},
+        {"name": "Ice", "role": "ADC", "url_name": "Ice_(Yoon_Sang-hoon)"},
+        {"name": "Stend", "role": "Support"}
+    ],
+    "SK": [
+        {"name": "Wunder", "role": "Top"},
+        {"name": "Skeanz", "role": "Jungle"},
+        {"name": "LIDER", "role": "Mid"},
+        {"name": "Jopa", "role": "ADC"},
+        {"name": "Mikyx", "role": "Support"}
+    ],
+    "GX": [
+        {"name": "Lot", "role": "Top"},
+        {"name": "ISMA", "role": "Jungle"},
+        {"name": "Jackies", "role": "Mid"},
+        {"name": "Noah", "role": "ADC", "url_name": "Noah_(Oh_Hyeon-taek)"},
+        {"name": "Jun", "role": "Support", "url_name": "Jun_(Yoon_Se-jun)"}
+    ],
+    "NAVI": [ # A pris le spot de Rogue
+        {"name": "Maynter", "role": "Top"},
+        {"name": "Rhilech", "role": "Jungle"},
+        {"name": "Poby", "role": "Mid"},
+        {"name": "SamD", "role": "ADC", "url_name": "Hans_SamD"},
+        {"name": "Parus", "role": "Support"}
+    ],
+    "FNC": [
+        {"name": "Oscarinin", "role": "Top"},
+        {"name": "Razork", "role": "Jungle"},
+        {"name": "Smolder", "role": "Mid"}, # Rumeur la plus probable/Placeholder si non confirmé
+        {"name": "Upset", "role": "ADC"}, 
+        {"name": "Empyros", "role": "Support"} # Nouveau support cité dans les leaks récents
+    ],
+    "LRA": [ # Los Ratones (Invité)
+        {"name": "Thebausffs", "role": "Top", "url_name": "Baus"},
+        {"name": "Velja", "role": "Jungle"},
+        {"name": "Nemesis", "role": "Mid"},
+        {"name": "Crownie", "role": "ADC"},
+        {"name": "Rekkles", "role": "Support"}
+    ],
+    "KCB": [ # KC Blue (Invité)
+        {"name": "Tao", "role": "Top"},
+        {"name": "Yukino", "role": "Jungle"},
+        {"name": "Kamiloo", "role": "Mid"},
+        {"name": "Hazel", "role": "ADC"},
+        {"name": "Prime", "role": "Support"}
+    ]
 }
 
 def scrape_player_stats(player_info, team_tag):
     """
-    Scrape les statistiques d'un joueur en lisant toutes les lignes de champion
-    et en calculant les moyennes nous-mêmes.
+    Scrape les statistiques d'un joueur pour l'année 2026.
     """
     player_name = player_info['name']
     url_name = player_info.get('url_name', player_name)
     role = player_info['role']
     
-    url = f"https://lol.fandom.com/wiki/{url_name}/Statistics/2025"
+    # URL ciblée pour 2026
+    url = f"https://lol.fandom.com/wiki/{url_name}/Statistics/2026"
     print(f"  - Récupération des stats pour {player_name}...")
 
     try:
         response = requests.get(url)
+        if response.status_code == 404:
+            print(f"    -> Page non trouvée pour {player_name} (404).")
+            return create_empty_stats(player_name, team_tag, role)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"    -> Erreur HTTP pour {player_name}: {e}")
-        return None
+        return create_empty_stats(player_name, team_tag, role)
 
     soup = BeautifulSoup(response.content, 'html.parser')
     
-    table_title_link = soup.find('a', string="LEC/2025 Season/Summer Season")
+    # On cherche en priorité le tableau "Versus Season" (Format Hiver 2026)
+    target_seasons = ["LEC/2026 Season/Versus Season", "LEC/2026 Season/Winter Season"]
+    
+    table_title_link = None
+    for season_name in target_seasons:
+        found_link = soup.find('a', string=season_name)
+        if found_link:
+            table_title_link = found_link
+            print(f"    -> Tableau trouvé : {season_name}")
+            break
+    
     if not table_title_link:
-        print(f"    -> Avertissement : Tableau pour 'Summer Season' non trouvé pour {player_name}.")
-        return None
+        print(f"    -> Avertissement : Pas de stats 'Versus/Winter 2026' pour {player_name}. (Utilisation de stats vides)")
+        return create_empty_stats(player_name, team_tag, role)
 
     stats_table = table_title_link.find_parent('table')
     if not stats_table:
-        print(f"    -> Avertissement : Impossible de trouver le tableau parent pour {player_name}.")
-        return None
+        return create_empty_stats(player_name, team_tag, role)
 
     total_kills, total_deaths, total_assists = 0, 0, 0
     total_dpm, total_games, total_csm, total_gpm = 0, 0, 0, 0
@@ -56,27 +142,39 @@ def scrape_player_stats(player_info, team_tag):
     
     tbody = stats_table.find('tbody')
     if not tbody:
-        print(f"    -> Erreur : Corps du tableau (tbody) non trouvé pour {player_name}.")
-        return None
+        return create_empty_stats(player_name, team_tag, role)
 
     for row in tbody.find_all('tr'):
-        if row.find('th'):
-            continue
+        if row.find('th'): continue
         
-        champion_rows_count += 1
         cols = row.find_all('td')
+        if not cols or len(cols) < 15: continue
+
+        champion_rows_count += 1
         try:
-            # Utilisation d'indices de colonnes fixes pour plus de fiabilité
+            # Indices basés sur le format standard Leaguepedia 2025/2026
+            # Games: col 1, K/D/A: 5,6,7, CSM: 10, GPM: 12, DPM: 14, KP%: 15
             games = int(cols[1].text.strip())
-            kills = float(cols[5].text.strip()) * games
-            deaths = float(cols[6].text.strip()) * games
-            assists = float(cols[7].text.strip()) * games
-            csm = float(cols[10].text.strip()) * games
-            gpm = float(cols[12].text.strip()) * games
-            dpm = float(cols[14].text.strip()) * games
-            kpar = float(cols[15].text.strip().replace('%','')) * games
-            ks_percent = float(cols[16].text.strip().replace('%','')) * games
-            gold_percent = float(cols[17].text.strip().replace('%','')) * games
+            if games == 0: continue
+
+            def get_val(index, is_percent=False):
+                txt = cols[index].text.strip()
+                if is_percent: txt = txt.replace('%', '')
+                try:
+                    return float(txt) if txt and txt != '-' else 0.0
+                except ValueError:
+                    return 0.0
+
+            # Extraction
+            kills = get_val(5) * games
+            deaths = get_val(6) * games
+            assists = get_val(7) * games
+            csm = get_val(10) * games
+            gpm = get_val(12) * games
+            dpm = get_val(14) * games
+            kpar = get_val(15, True) * games
+            ks_percent = get_val(16, True) * games
+            gold_percent = get_val(17, True) * games
 
             total_kills += kills
             total_deaths += deaths
@@ -89,66 +187,68 @@ def scrape_player_stats(player_info, team_tag):
             total_ks_percent += ks_percent
             total_gold_percent += gold_percent
 
-        except (ValueError, IndexError) as e:
-            print(f"    -> Avertissement : Impossible de traiter une ligne pour {player_name}. Erreur : {e}")
+        except (ValueError, IndexError):
             continue
 
     if total_games == 0:
-        print(f"    -> Avertissement : Aucune partie jouée trouvée pour {player_name}.")
-        return None
+        return create_empty_stats(player_name, team_tag, role)
 
     final_kda = (total_kills + total_assists) / max(1, total_deaths)
-    final_dpm = total_dpm / total_games
-    final_csm = total_csm / total_games
-    final_gpm = total_gpm / total_games
-    final_kpar = total_kpar / total_games
-    final_ks_percent = total_ks_percent / total_games
-    final_gold_percent = total_gold_percent / total_games
-
+    
     return {
         "id": player_name,
         "name": player_name,
         "team": team_tag,
         "role": role,
         "stats": {
-            "dpm": int(final_dpm),
+            "dpm": int(total_dpm / total_games),
             "kda": round(final_kda, 2),
             "champPool": champion_rows_count,
-            "csm": round(final_csm, 2),
-            "gpm": int(final_gpm),
-            "kpar": f"{round(final_kpar, 1)}%",
-            "ks_percent": f"{round(final_ks_percent, 1)}%",
-            "gold_percent": f"{round(final_gold_percent, 1)}%"
+            "csm": round(total_csm / total_games, 2),
+            "gpm": int(total_gpm / total_games),
+            "kpar": f"{round(total_kpar / total_games, 1)}%",
+            "ks_percent": f"{round(total_ks_percent / total_games, 1)}%",
+            "gold_percent": f"{round(total_gold_percent / total_games, 1)}%"
+        }
+    }
+
+def create_empty_stats(name, team, role):
+    """Génère des stats par défaut si le joueur n'a pas encore joué."""
+    return {
+        "id": name,
+        "name": name,
+        "team": team,
+        "role": role,
+        "stats": {
+            "dpm": 0, "kda": 0, "champPool": 0, "csm": 0, "gpm": 0,
+            "kpar": "0%", "ks_percent": "0%", "gold_percent": "0%"
         }
     }
 
 def get_all_player_stats():
-    """
-    Itère sur tous les joueurs du roster et récupère leurs statistiques.
-    """
     all_players_data = []
     total_players = sum(len(players) for players in PLAYER_ROSTER.values())
     count = 0
     
-    print(f"Début du scraping pour {total_players} joueurs...")
+    print(f"Début du scraping LEC 2026 ({total_players} joueurs attendus)...")
 
     for team_tag, players in PLAYER_ROSTER.items():
         for player_info in players:
             count += 1
-            print(f"Traitement du joueur {count}/{total_players} : {player_info['name']} ({team_tag})")
+            print(f"[{count}/{total_players}] {player_info['name']} ({team_tag})")
             player_data = scrape_player_stats(player_info, team_tag)
-            if player_data:
-                all_players_data.append(player_data)
-            time.sleep(0.5)
+            all_players_data.append(player_data)
+            time.sleep(0.5) 
             
     return all_players_data
 
 if __name__ == "__main__":
     final_data = get_all_player_stats()
     if final_data:
-        with open('player_stats.json', 'w', encoding='utf-8') as f:
+        filename = 'player_stats_2026.json'
+        with open(filename, 'w', encoding='utf-8') as f:
             json.dump(final_data, f, ensure_ascii=False, indent=4)
-        print(f"\nOpération terminée. {len(final_data)} profils de joueurs ont été enregistrés dans 'player_stats.json'")
+        print(f"\nTerminé ! Données sauvegardées dans '{filename}'.")
+        print("Note : Importez ce fichier dans Firestore (collection 'lec-players') pour mettre à jour le site.")
     else:
-        print("\nAucune donnée n'a pu être récupérée. Le fichier n'a pas été créé.")
-
+        print("\nErreur critique : Aucune donnée générée.")

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - LEC 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #111827; color: white; font-family: sans-serif; }
+        .card { background-color: #1f2937; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        textarea { width: 100%; height: 200px; background: #374151; color: #fff; font-family: monospace; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body class="p-8 max-w-4xl mx-auto">
+
+    <h1 class="text-3xl font-bold mb-8 text-blue-400">Panneau d'Administration BDD - LEC 2026</h1>
+
+    <!-- Status Log -->
+    <div id="status-log" class="mb-6 p-4 bg-gray-900 rounded border border-gray-700 font-mono text-sm h-32 overflow-y-auto">
+        Waiting for actions...
+    </div>
+
+    <!-- 1. Upload Players -->
+    <div class="card">
+        <h2 class="text-xl font-bold mb-4 flex items-center">
+            <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">1</span>
+            Importer les Joueurs (JSON)
+        </h2>
+        <p class="text-gray-400 mb-2">Colle ici le contenu du fichier <code>player_stats_2026.json</code> généré par ton script Python.</p>
+        <textarea id="json-input" placeholder='[{"id": "Caps", "name": "Caps", ...}]'></textarea>
+        <div class="mt-4">
+            <button onclick="uploadPlayers()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded transition">
+                Envoyer les Joueurs vers Firebase
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. Reset Teams -->
+    <div class="card">
+        <h2 class="text-xl font-bold mb-4 flex items-center">
+            <span class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">2</span>
+            Initialiser les Équipes 2026
+        </h2>
+        <p class="text-gray-400 mb-4">Crée ou écrase les 12 équipes officielles (G2, KC, Los Ratones, etc.) dans la collection <code>lec-teams</code>.</p>
+        <button onclick="uploadTeams2026()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded transition">
+            Réinitialiser Équipes (Hardcodé)
+        </button>
+    </div>
+
+    <!-- 3. Generate Schedule -->
+    <div class="card">
+        <h2 class="text-xl font-bold mb-4 flex items-center">
+            <span class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">3</span>
+            Générer le Calendrier
+        </h2>
+        <p class="text-gray-400 mb-4">Génère un calendrier Round-Robin (tout le monde affronte tout le monde) pour les 12 équipes dans <code>lec-matches</code>.</p>
+        <button onclick="generateSchedule()" class="bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded transition">
+            Générer Matchs & Calendrier
+        </button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, doc, writeBatch, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKR5xMIcH89Pn5ktjtepRGQNWe6Dd_PsU",
+            authDomain: "muscu-5e40c.firebaseapp.com",
+            projectId: "muscu-5e40c",
+            storageBucket: "muscu-5e40c.appspot.com",
+            messagingSenderId: "561788112947",
+            appId: "1:561788112947:web:7f2b7c7d74ff328f2b1346"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore(app);
+
+        // Connexion auto
+        signInAnonymously(auth).then(() => log("Connecté à Firebase (Anonyme)")).catch(e => log("Erreur Auth: " + e));
+
+        // --- Fonctions Globales ---
+
+        window.log = function(msg) {
+            const el = document.getElementById('status-log');
+            const time = new Date().toLocaleTimeString();
+            el.innerHTML += `<div>[${time}] ${msg}</div>`;
+            el.scrollTop = el.scrollHeight;
+        }
+
+        async function clearCollection(collectionName) {
+            log(`Nettoyage de la collection '${collectionName}'...`);
+            const q = collection(db, collectionName);
+            const snapshot = await getDocs(q);
+            const batch = writeBatch(db);
+            let count = 0;
+            snapshot.forEach(doc => {
+                batch.delete(doc.ref);
+                count++;
+            });
+            await batch.commit();
+            log(`Supprimé ${count} documents de '${collectionName}'.`);
+        }
+
+        // --- 1. Upload Players ---
+
+        window.uploadPlayers = async function() {
+            const jsonStr = document.getElementById('json-input').value;
+            if (!jsonStr) return alert("Colle le JSON d'abord !");
+
+            try {
+                const players = JSON.parse(jsonStr);
+                if (!Array.isArray(players)) throw new Error("Le JSON doit être une liste []");
+
+                log(`Début de l'upload de ${players.length} joueurs...`);
+                
+                // On nettoie d'abord pour éviter les doublons d'anciennes saisons
+                await clearCollection('lec-players');
+
+                const batch = writeBatch(db);
+                players.forEach(p => {
+                    // On utilise le nom comme ID pour faciliter la lecture, ou un auto-ID
+                    const ref = doc(collection(db, 'lec-players')); 
+                    batch.set(ref, p);
+                });
+
+                await batch.commit();
+                log("Succès ! Joueurs mis à jour.");
+                alert("Joueurs importés avec succès !");
+
+            } catch (e) {
+                log("Erreur: " + e.message);
+                console.error(e);
+                alert("Erreur JSON. Vérifie la console.");
+            }
+        }
+
+        // --- 2. Upload Teams (Hardcoded 2026 Data) ---
+
+        window.uploadTeams2026 = async function() {
+            // Liste officielle des 12 équipes du format Versus
+            const teams2026 = [
+                { tag: "G2", name: "G2 Esports", logo: "https://am-a.akamaihd.net/image?resize=64:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1631819669150_G2-Esports-Logo-2019.png", group: "Unified", rank: 1, wins: 0, losses: 0 },
+                { tag: "FNC", name: "Fnatic", logo: "https://am-a.akamaihd.net/image?resize=64:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1631820032548_Fnatic-Logo-2020-01.png", group: "Unified", rank: 2, wins: 0, losses: 0 },
+                { tag: "KC", name: "Karmine Corp", logo: "https://am-a.akamaihd.net/image?resize=64:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1704375161752_KC_LOGO_2024_RED_BACKGROUND.png", group: "Unified", rank: 3, wins: 0, losses: 0 },
+                { tag: "MKOI", name: "Movistar KOI", logo: "https://am-a.akamaihd.net/image?resize=64:&f=https%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1704375080061_MKOI_LOGO_RED_BACKGROUND.png", group: "Unified", rank: 4, wins: 0, losses: 0 },
+                { tag: "VIT", name: "Team Vitality", logo: "https://am-a.akamaihd.net/image?resize=64:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1631820083626_Team-Vitality-Logo-2020.png", group: "Unified", rank: 5, wins: 0, losses: 0 },
+                { tag: "SH", name: "Shifters (ex-BDS)", logo: "https://am-a.akamaihd.net/image?resize=64:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1643292446739_BDS_logo_pink2.png", group: "Unified", rank: 6, wins: 0, losses: 0 }, // Placeholder logo BDS pour l'instant
+                { tag: "TH", name: "Team Heretics", logo: "https://am-a.akamaihd.net/image?resize=64:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1672912448375_TeamHeretics_logo_2023.png", group: "Unified", rank: 7, wins: 0, losses: 0 },
+                { tag: "SK", name: "SK Gaming", logo: "https://am-a.akamaihd.net/image?resize=64:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1631820124376_SK-Gaming-Logo-2020.png", group: "Unified", rank: 8, wins: 0, losses: 0 },
+                { tag: "GX", name: "GIANTX", logo: "https://am-a.akamaihd.net/image?resize=64:&f=https%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1704374929848_GX_LOGO_RED_BACKGROUND.png", group: "Unified", rank: 9, wins: 0, losses: 0 },
+                { tag: "NAVI", name: "Natus Vincere", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/a/ac/NaVi_logo.svg/1200px-NaVi_logo.svg.png", group: "Unified", rank: 10, wins: 0, losses: 0 },
+                { tag: "LRA", name: "Los Ratones", logo: "https://placehold.co/64x64/000000/FFF?text=LRA", group: "Unified", rank: 11, wins: 0, losses: 0 },
+                { tag: "KCB", name: "KC Blue", logo: "https://am-a.akamaihd.net/image?resize=64:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1704375161752_KC_LOGO_2024_RED_BACKGROUND.png", group: "Unified", rank: 12, wins: 0, losses: 0 }
+            ];
+
+            try {
+                log("Mise à jour des équipes...");
+                await clearCollection('lec-teams');
+                const batch = writeBatch(db);
+                
+                teams2026.forEach(team => {
+                    const ref = doc(collection(db, 'lec-teams'));
+                    batch.set(ref, team);
+                });
+
+                await batch.commit();
+                log("Équipes 2026 créées avec succès !");
+                alert("Équipes réinitialisées !");
+            } catch (e) {
+                log("Erreur Teams: " + e.message);
+            }
+        }
+
+        // --- 3. Generate Schedule (Round Robin) ---
+
+        window.generateSchedule = async function() {
+            try {
+                log("Génération du calendrier...");
+                // Récupérer d'abord les tags des équipes existantes
+                const teamsSnapshot = await getDocs(collection(db, 'lec-teams'));
+                const teams = teamsSnapshot.docs.map(d => d.data().tag);
+
+                if (teams.length < 2) return alert("Pas assez d'équipes. Lance l'étape 2 d'abord.");
+
+                await clearCollection('lec-matches');
+                const batch = writeBatch(db);
+                let matchCount = 0;
+                let dateCounter = new Date("2026-01-17T17:00:00"); // Date fictive début saison
+
+                // Simple algorithme Round Robin
+                for (let i = 0; i < teams.length; i++) {
+                    for (let j = i + 1; j < teams.length; j++) {
+                        const t1 = teams[i];
+                        const t2 = teams[j];
+                        
+                        // On décale la date tous les 6 matchs (une journée de LEC = 6 matchs)
+                        if (matchCount > 0 && matchCount % 6 === 0) {
+                            dateCounter.setDate(dateCounter.getDate() + 1); 
+                            // Sauter les jours de semaine si on veut être réaliste (optionnel, ici on enchaine)
+                        }
+
+                        const matchData = {
+                            team1: t1,
+                            team2: t2,
+                            status: 'scheduled',
+                            winner: null,
+                            date: dateCounter.toISOString(),
+                            result: null
+                        };
+
+                        const ref = doc(collection(db, 'lec-matches'));
+                        batch.set(ref, matchData);
+                        matchCount++;
+                    }
+                }
+
+                await batch.commit();
+                log(`Calendrier généré : ${matchCount} matchs créés.`);
+                alert(`${matchCount} matchs ajoutés au calendrier !`);
+
+            } catch (e) {
+                log("Erreur Schedule: " + e.message);
+                console.error(e);
+            }
+        }
+
+    </script>
+</body>
+</html>
