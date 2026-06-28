@@ -1,0 +1,39 @@
+1)
+(a) alter table Restaurant ADD PRIMARY KEY (rID)
+
+(b) ALTER TABLE Evaluateur ADD PRIMARY KEY (eID)
+ALTER TABLE Evaluateur ADD UNIQUE (pseudonyme, dateInscription)
+
+(c) 
+Select rID
+From Evaluation
+Where eID = 135
+
+(d)
+Select V1.pseudonyme, V2.pseudonyme
+From Evaluation E1
+Join Evaluation E2 on E1.rID = E2.rID and E1.eID < E2.eID
+Join Evaluateur V1 on E1.eID = V1.eID
+Join Evaluateur V2 on E2.eID = V2.eID
+
+(e) 
+Select V.pseudonyme, R.nom
+From Evaluation E1
+Join Evaluation E2 on E1.rID = E2.rID AND E1.eID = E2.eID
+join Evaluateur V on E1.eID = V.eID
+Join Restaurant R on E1.rID = R.rID
+Where E1.dateEval < E2.dateEval
+AND E1.note < E2.note
+
+(f)
+select pseudonyme
+from Evaluateur
+join Evaluation on Evaluateur.eID = Evaluation.eID
+group by pseudonyme
+having count(*) >= 3
+
+(g) 
+ALTER TABLE Evaluation ADD FOREIGN KEY (rID) REFERENCE Restaurant(rID)
+ALTER TABLE Evaluation ADD FOREIGN KEY (eID) REFERENCE Evaluateur(eID)
+
+2)

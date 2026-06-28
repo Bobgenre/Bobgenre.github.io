@@ -1,0 +1,36 @@
+Sujet 2020
+Problème 1
+
+1) il existe !n mots de longueur l dans une sequence de longueur n
+
+2) 
+def calcul_mots(n, S, l):
+    lst = []
+    mot = ""
+    for i in range(n-l+1):
+        for j in range(i, i+l):
+            mot += S[j]
+        lst.append(mot)
+        mot = ""
+    return lst
+
+3) On parcours toute la sequence ADN moins la taille du mot qu'on veut. On regarde une fois le premier et le dernier élément de la liste, 
+2 fois le deuxième et l'avant dernier, et ainsi jusqu'a l, ett ous les autres, on les regarde l fois. On est donc sur une complexite en O(n*l) environ'
+
+4) Il existe au plus n-l+1 mots de longueur l dans une dequence de longueur n
+
+5) On peut utiliser un dictionnaire pour stocker sans répétition
+
+6) 
+def liste_mots(S, n, l):
+    dico = {}
+    lst = []
+    mot = ""
+    for i in range(n-l+1):
+        for j in range(i, i+l):
+            mot += S[j]
+        dico[mot] = 1
+        mot = ""
+    for k in dico.keys():
+        lst.append(k)
+    return lst

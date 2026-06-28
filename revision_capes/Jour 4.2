@@ -1,0 +1,41 @@
+14)
+Le saut de valeur maximal se trouve forcement entre 2 indices à gauche de la médiane, ou à droite de la médiane, ou alor savec un point a gauche et un point a droite de la médiane
+Donc forcement dans un des 3 cas de l'énoncé
+
+15)
+Comme la valeur de im est plus petite que la valeur se trouvant à la médiane, alors l'indice im est forcement à gauche de la médiane
+
+16)
+def saut_max_aux(li, a, b):
+    n = a + b
+    if b - a == 1:
+        return (a, a, a, a)
+    
+    m = n // 2
+
+    ig, jg, min_g, max_g = saut_max_aux(li, a, m)
+    id, jd, min_d, max_d = saut_max_aux(li, m, b)
+
+    im = min_g
+    jm = max_d
+
+    val_m = li[jm] - li[im]
+
+    val_g = li[jg] - li[ig]
+    val_d = li[jd] - li[id]
+
+    best_i, best_j = im, jm
+    max_val = val_m
+
+    if val_g > max_val:
+        best_i, best_j = ig, jg
+        max_val = val_g
+    
+    if val_d > max_val:
+        best_i, best_j = id, jd
+        max_val = max_d
+    
+    min_global = min_g if li[min_g] < li[min_d] else min_d
+    max_global = max_d if li[max_d] > li[max_g] else max_g
+
+    return (best_i, best_j, min_global, max_global)

@@ -1,0 +1,53 @@
+11)
+def gauche(cl):
+    m = coords_x[cl[0][0]]
+    return sous_cl(cl, 0, m)
+
+def droite(cl):
+    m = mediane(cl)
+    return sous_cl(cl, m, len(cl[0]))
+
+12)
+Il n'est pas necessaire de chercher plus loin car la distance serait forcement plus grande vu que par exemple, 
+les points plus a droites seraient plus loin que les premiers points a droite après la médiane
+
+13)
+def bande_centrale(cl, d0):
+    m = mediane(cl)
+    x_min = m-d0
+    x_max = m+d0
+    return sous_cl(cl, x_min, x_max)
+
+14)
+
+
+15)
+def fusion(cl, d0):
+    dist_min = d0
+    n = len(cl[0])
+    for i in range(n-1):
+        test_dist = distance(cl[0][i], cl[0][i+1])
+        if test_dist < dist_min:
+            dist_min = test_dist
+    return dist_min
+
+16)
+def distance_minimale(cl):
+    n = len(cl[0])
+    dist_min = distance(cl[0][0], cl[0][1])
+
+    if n < 4:
+        return fusion(cl, dist_min)
+
+    g = gauche(cl)
+    d = droite(cl)
+    d0 = min(distance_minimale(g), distance_minimale(d))
+    
+    bande = bande_centrale(cl, d0)
+
+    return fusion(bande, d0)
+
+17) On parcours la moitié du cluster 2 fois (gauche et droite) d'où le 2C(n/2). 
+    On doit tout de même parcourir tout le cluster pour faire les fusions
+
+18)

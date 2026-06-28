@@ -1,0 +1,54 @@
+Fonction fusion(gauche, droite):
+    Créer une liste vide "resultat"
+    i <- 0
+    j <- 0
+    
+    // On compare les elements des deux listes
+    Tant que i < longueur(gauche) et j < longueur(droite) faire :
+        Si gauche[i] <= droite[j] alors :
+            Ajouter gauche[i] à "resultat"
+            i <- i + 1
+        Sinon :
+            Ajouter droite[j] à "resultat"
+            j <- j + 1
+        Fin Si
+    Fin Tant que
+        
+    // On ajoute les elements restants (s'il y en a)
+    Pour k allant de i à longueur(gauche) - 1 faire :
+        Ajouter gauche[k] à "resultat"
+    Fin Pour
+        
+    Pour k allant de j à longueur(droite) - 1 faire :
+        Ajouter droite[k] à "resultat"
+    Fin Pour
+    
+    Renvoyer resultat
+
+
+Fonction tri_fusion(liste):
+    // Cas de base : une liste de taille 0 ou 1 est deja triee
+    Si longueur(liste) <= 1 alors :
+        Renvoyer liste
+    Fin Si
+    
+    // DIVISER : On coupe la liste en deux
+    milieu <- partie entiere de (longueur(liste) / 2)
+    
+    Créer une liste vide "gauche"
+    Pour k allant de 0 à milieu - 1 faire :
+        Ajouter liste[k] à "gauche"
+    Fin Pour
+    
+    Créer une liste vide "droite"
+    Pour k allant de milieu à longueur(liste) - 1 faire :
+        Ajouter liste[k] à "droite"
+    Fin Pour
+    
+    // REGNER : Appels recursifs
+    gauche_triee <- tri_fusion(gauche)
+    droite_triee <- tri_fusion(droite)
+    
+    // COMBINER : On fusionne les resultats
+    Renvoyer fusion(gauche_triee, droite_triee)
+

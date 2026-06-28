@@ -1,0 +1,48 @@
+def tri(liste):
+    n = len(liste)
+    for i in range(n):
+        pos = i
+        while pos > 0 and liste[pos] < liste[pos-1]:
+            liste[pos], liste[pos-1] = liste[pos-1], liste[pos]
+            pos-= 1
+
+5)
+La fonction ne renvoie rien.
+La fonction effectue un tri par insertion
+Invariant :
+la liste est toujours trié entre les indices 0 et pos car on a liste[pos] toujours supérieur à liste[pos-1]
+
+6)
+A chaque itération de la boucle for, on parcours la les indices précédent de la liste. On a donc un O(n^2)
+
+7)
+
+8)
+Le tri par selection
+
+9)
+def sous_cluster(cl, x_min, x_max):
+    sous_cl = [[]]
+    ind_enlever = []
+    ind_x_max = 0
+    ind_x_min = 0
+
+    for i in range(len(cl[0])):
+        if cl[0][i] == x_min:
+            ind_x_min = i
+        if cl[0][i] == x_max:
+            ind_x_max = i
+    
+    for i in range(ind_x_min, ind_x_max+1):
+        sous_cl[0].append(cl[0][i])
+
+    for i in range(len(sous_cl[0])):
+        if cl[1][i] in sous_cl[0]:
+            sous_cl[1].append(cl[1][i])
+
+    return sous_cl
+
+10)
+def mediane(cl):
+    m = len(cl[0]) // 2
+    return cl[0][m]

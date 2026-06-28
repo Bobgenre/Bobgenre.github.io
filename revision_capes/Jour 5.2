@@ -1,0 +1,28 @@
+25)
+def adjacences(n, li):
+    adj = [[] for i in range(n)]
+
+    for u,v un li:
+        adj[u].append(v)
+    
+    return adj
+
+26)
+La fonction parcrous renvoie une liste de tous les sommets explorer à partir du sommet donné, donc la composante connexe dont le sommet de base fait parti
+C'est un parcours en profondeur
+
+27)
+Dans la fonction parcours, on va parcourir tous les sommets E une fois chacun et toutes les arrêtes V une fois également. On a donc une complexité en O(|V| + |E|)
+
+28)
+La connexité d'un graphe est le fait de pouvoir aller vers n'importe que l sommet à partir de n'importe quel autre sommet de ce graphe.
+
+29)
+def connexe(liste_adjacences):
+    return len(parcours(liste_adjacences)) == len(liste_adjacences)
+
+30)
+def composantes_connexes(p_graphe):
+
+31)
+Python ne peut pas faire autant d'appel recursif qu'il le veut et va planter à un moment (1000 appels)

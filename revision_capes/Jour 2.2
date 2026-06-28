@@ -1,0 +1,39 @@
+- users(id,numTel)
+- traces(id,epoque,latitude,longitude)
+- traces.idREFERENCESusers.id
+
+2.1)
+Select id
+From users
+Where numTel = 0123456789
+
+2.2)
+Select count(id)
+From users
+Group By numTel
+
+2.3)
+Select traces.latitude, traces.longitude
+From traces
+Join users on users.id = traces.id
+Where users.numTel = 0123456789
+
+2.4)
+Select count(traces.latitude)
+From traces
+join users on users.id = traces.id
+group by users.numTel
+
+2.5)
+Select count(*)
+From users
+join traces on users.id = traces.id
+group by users.numTel
+Having count(*) > 1000
+
+2.6)
+A la fin de l'execution, il n'y a que le INSERT INTO users VALUES(1, 0123456789) qui c'est bien exectuer, car le user n'existe pas encore quand on veut inserer les traces avec l'id 1
+
+2.7)
+Il y a 2 Users avec id 1 et 2 et numTel 0123456789 et 0987654321 respectivement
+Il y a 3 Traces 2 pour le user 1 et 1 pour le user 2 car la dernière trace ne fera rien car elle a le même couple "id, epoque" que la trace juste avant

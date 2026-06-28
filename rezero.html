@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayamatsu IF - Traduction Française</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    },
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            surface: '#1e293b',
+                            text: '#cbd5e1',
+                            heading: '#f8fafc',
+                            accent: '#38bdf8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #cbd5e1;
+            scroll-behavior: smooth;
+        }
+        .story-content p {
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            font-size: 1.125rem;
+        }
+        .story-content .dialogue {
+            color: #f8fafc;
+            font-weight: 400;
+        }
+        .story-content .thought {
+            font-style: italic;
+            color: #94a3b8;
+        }
+        .page-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 4rem 0;
+            color: #475569;
+        }
+        .page-divider::before, .page-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #334155;
+        }
+        .page-divider:not(:empty)::before { margin-right: 1em; }
+        .page-divider:not(:empty)::after { margin-left: 1em; }
+        
+        /* Progress bar */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #38bdf8;
+            width: 0%;
+            z-index: 50;
+            transition: width 0.2s ease-out;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="antialiased selection:bg-sky-900 selection:text-sky-50 flex flex-col md:flex-row min-h-screen">
+
+    <div id="progress-bar"></div>
+
+    <aside class="w-full md:w-64 lg:w-80 bg-dark-surface border-r border-slate-700/50 flex-shrink-0 flex flex-col fixed md:sticky top-0 h-auto md:h-screen z-40">
+        <div class="p-6 border-b border-slate-700/50">
+            <h1 class="text-xl font-bold text-dark-heading tracking-tight mb-2">Ayamatsu IF</h1>
+            <p class="text-sm text-slate-400">Re:Zero - Histoire Alternative</p>
+            
+            <div class="mt-6 flex items-center space-x-3">
+                <button onclick="changeFontSize(-1)" class="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Réduire le texte">A-</button>
+                <button onclick="changeFontSize(1)" class="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Agrandir le texte">A+</button>
+            </div>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto p-4 hidden md:block">
+            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 px-2">Navigation</h2>
+            <ul class="space-y-1">
+                <li><a href="#page-1" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 1 (Intro)</a></li>
+                <li><a href="#page-2" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 2</a></li>
+                <li><a href="#page-3" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 3</a></li>
+                <li><a href="#page-4" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 4</a></li>
+                <li><a href="#page-5" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 5</a></li>
+                <li><a href="#page-6" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 6</a></li>
+                <li><a href="#page-7" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 7</a></li>
+                <li><a href="#page-8" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 8</a></li>
+                <li><a href="#page-9" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 9</a></li>
+                <li><a href="#page-10" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 10</a></li>
+                <li><a href="#page-11" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 11</a></li>
+                <li><a href="#page-12" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 12</a></li>
+                <li><a href="#page-13" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 13</a></li>
+                <li><a href="#page-14" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 14</a></li>
+                <li><a href="#page-15" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 15</a></li>
+                <li><a href="#page-16" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 16</a></li>
+                <li><a href="#page-17" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 17</a></li>
+                <li><a href="#page-18" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 18</a></li>
+                <li><a href="#page-19" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 19</a></li>
+                <li><a href="#page-20" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 20</a></li>
+                <li><a href="#page-21" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 21</a></li>
+                <li><a href="#page-22" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 22</a></li>
+                <li><a href="#page-23" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 23</a></li>
+                <li><a href="#page-24" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 24</a></li>
+                <li><a href="#page-25" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 25</a></li>
+                <li><a href="#page-26" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 26</a></li>
+                <li><a href="#page-27" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 27</a></li>
+                <li><a href="#page-28" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 28</a></li>
+                <li><a href="#page-29" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 29</a></li>
+                <li><a href="#page-30" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 30</a></li>
+                <li><a href="#page-31" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 31</a></li>
+                <li><a href="#page-32" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 32</a></li>
+                <li><a href="#page-33" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 33</a></li>
+                <li><a href="#page-34" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 34</a></li>
+                <li><a href="#page-35" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 35</a></li>
+                <li><a href="#page-36" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 36</a></li>
+                <li><a href="#page-37" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 37</a></li>
+                <li><a href="#page-38" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 38</a></li>
+                <li><a href="#page-39" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 39</a></li>
+                <li><a href="#page-40" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 40</a></li>
+                <li><a href="#page-41" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Page 41 & 42</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="flex-1 w-full max-w-4xl mx-auto p-6 md:p-12 lg:p-16 mt-32 md:mt-0">
+        <article id="story-container" class="story-content font-serif">
+            
+            <!-- PAGE 1 -->
+            <div id="page-1" class="pt-8">
+                <h2 class="text-3xl font-bold text-dark-heading mb-8 font-sans">AYAMATSU IF</h2>
+                <p>Ceci est une traduction de l'histoire IF qui a été publiée pour le poisson d'avril 2017. C'est une histoire séparée de la chronologie « principale » des événements. Elle diverge considérablement de la façon dont l'histoire se déroule dans la chronologie principale.</p>
+                <p class="text-red-400 font-sans text-sm p-4 bg-red-900/20 border border-red-900/50 rounded-lg"><strong>Avertissement :</strong> Cette histoire contient des spoilers pour l'Arc 5. Si vous êtes virginal et pur, sans tache de spoilers, vous devriez peut-être fermer ce document. Si les spoilers ne vous dérangent pas, ou si vous avez lu le résumé du Wiki de l'Arc 5, ou si vous avez lu l'Arc 5, ou si vous fréquentez une communauté qui discute régulièrement de Re: Zero, tout ira probablement bien pour vous. (Les spoilers concernent l'astuce derrière le pouvoir de l'un des personnages ennemis dans l'Arc 5).</p>
+                <p>J'ai choisi de ne pas utiliser d'incises de dialogue pour cette histoire, en partie par curiosité, et en partie pour la séparer des chapitres de la chronologie principale. Je pourrais revenir et changer cela un jour si je décide que je ne l'aime pas.</p>
+            </div>
+
+            <div class="page-divider font-sans text-sm tracking-widest">PAGE 2</div>
+
+            <!-- PAGE 2 -->
+            <div id="page-2">
+                <h3 class="text-xl font-bold text-slate-300 mb-6 font-sans">RE ZERO EX : LA VIE DANS UN AUTRE MONDE ERRANT À PARTIR DE ZÉRO</h3>
+                <p>— Ce qui envahit son esprit, c'est la violente CHALEUR au niveau de son estomac.</p>
+                <p class="dialogue">« Ghhgg ! Chaud ! »</p>
+                <p>Avec son visage subissant la surface dure du sol, Subaru sait qu'il est tombé à plat ventre. Mais ses membres ne l'aident pas à se relever, et restent immobiles.</p>
+                <p>C'est comme s'il n'était plus lui-même, comme si on lui avait volé son corps.</p>
+                <p>Et pourtant, le brasier brûle Subaru de manière persistante. Donc rien dans cette situation n'est illusoire.</p>
+                <p class="thought">— Chaud, chaud chaud chaudchaudchaudchaudchaudchaud.</p>
+                <p>Il ouvre la bouche, et au lieu d'un hurlement, ce sont des ruisselets de sang qui s'écoulent. Dans la douleur et l'angoisse, se noyant presque dans son propre sang alors qu'il est soumis au summum de l'agonie.</p>
+                <p class="thought">— Qu'est-ce qu'il a bien pu faire ?</p>
+                <p>Il formule des supplications évasives comme moyen de fuir la souffrance, la plainte pleurnicharde se répétant dans sa tête.</p>
+                <p>Qu'est-ce qu'il a bien pu faire ?</p>
+                <p>Il savait que sa vie n'en était pas une qui méritait des éloges sans réserve. Mais cette affirmation s'appliquait à bien d'autres personnes que Subaru. Personne ne pouvait vivre une vie si pure qu'il pourrait s'en vanter auprès de toute l'humanité. Les gens ressentaient de la culpabilité, les gens ressentaient des remords, les gens feignaient l'ignorance, et les gens faisaient des compromis.</p>
+                <p>Alors pourquoi était-il le seul à devoir souffrir de cela ?</p>
+                <p>Pourquoi le destin que toutes les autres personnes pouvaient ignorer s'imposait-il uniquement à lui ?</p>
+                <p class="dialogue">« Ahh, putain... »</p>
+                <p>Le murmure s'échappe d'entre les coulées de sang. Il porte ses remords, son dégoût pour son impuissance, sa haine pour le destin — et son exaspération envers lui-même.</p>
+                <p>Même avec toutes ces blessures, même avec toute cette agonie, même avec toute cette souffrance mortelle. Même si le feu le calcine, même si la douleur le brise, même si elle menace sa vie.</p>
+                <p>La fille gravée dans son esprit fera face, en souriant, aux répétitions inexorables d'une mort affligeante. Ainsi,</p>
+                <p class="dialogue">« Je, »</p>
+                <p>Une fois de plus, il exprime sa détermination. Exprime sa résolution. Exprime sa tristesse, et ses regrets.</p>
+                <p>Tout en cherchant un avenir que, avec d'innombrables tentatives, d'innombrables luttes, et d'innombrables souhaits, il n'atteindra pourtant jamais.</p>
+                <p>La DOULEUR, la CHALEUR et la totalité deviennent distantes, et comme le chien geignard qu'il est, il hurle.</p>
+            </div>
+
+            <div class="page-divider font-sans text-sm tracking-widest">PAGE 3</div>
+
+            <!-- PAGE 3 -->
+            <div id="page-3">
+                <p class="dialogue">« Quoi qu'il arrive, »</p>
+                <p>Le mouvement d'une lame s'abat impitoyablement sur sa dernière braise de vie mourante.</p>
+                <p>Mais même cette lame n'entre pas dans son champ de vision. Il a déjà pris sa décision.</p>
+                <p class="thought">— Te sauverai.</p>
+                <p>À l'instant où il a renouvelé ce souhait, Natsuki Subaru a perdu la vie.</p>
+                <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※※<br>※※<br>※※</p>
+                <p>— Être témoin de cette scène familière donne à Subaru un sentiment d'étrange soulagement, et d'épuisement.</p>
+                <p class="dialogue">« Tu es rentré sain et sauf, il n'y a rien à craindre, je suppose. »</p>
+                <p>Tout en regardant le trafic de la Capitale Royale, Subaru trace de nombreuses marques « 正 » sur le sol avec un bâton. Il continue de le faire jusqu'à ce qu'il soit satisfait, puis les efface avec son pied et soupire.</p>
+                <p>Natsuki Subaru vient de la Troisième Planète à Partir du Soleil Qu'Est la Terre, son statut étant celui d'un lycéen de troisième année ordinaire faisant l'école buissonnière.</p>
+                <p>Si quiconque observait sa tenue décontractée composée d'un survêtement et de baskets, et le sac en plastique de supérette dans sa main, il ne douterait sûrement pas de ce fait.</p>
+                <p>Cependant, ce principe ne s'applique qu'à ceux issus de régions familières avec des concepts tels que « survêtements », « baskets » et « supérettes ».</p>
+                <p>Donc, pour en venir à ce qu'il essayait vraiment de dire —</p>
+                <p class="dialogue">« — Toute cette histoire d'être 'invoqué dans un monde parallèle' est plus rude que je ne le pensais. »</p>
+                <p>Une calèche tirée par un lézard de la taille d'un cheval soulève la poussière en passant à toute vitesse devant Subaru.</p>
+                <p>Une telle vision était bien sûr impossible dans le monde que Subaru connaissait. On pourrait donc suggérer qu'il s'agissait d'un cheval déguisé avec des cosmétiques spéciaux, comme une sorte de personnage de parc d'attractions. Mais Subaru ne serait pas d'accord.</p>
+                <p>Parce que les lézards étaient plus d'un — les rues de la ville en grouillaient et les gens qui dirigeaient ces lézards présentaient également une proportion massive de cosmétiques spéciaux.</p>
+                <p>Des animaux anthropomorphiques — des personnes portant les attributs de ce que l'on appelle des hommes-bêtes ou des demi-humains. Peut-être que vingt ou trente d'entre eux étaient présents dans le champ visuel de Subaru. Naturellement, il y en avait aussi beaucoup d'autres autour qui partageaient la constitution de Subaru, mais le chaos infligé à la moitié 'individuelle' de 'l'apparence individuelle' les noyait et les bloquait généralement de l'attention de Subaru.</p>
+                <p>Mais il ne peut pas rester ici à essayer de fuir la réalité pour toujours.</p>
+                <p>Ni les hommes-bêtes ni les lézards ne font partie d'un tournage de film ou d'une production. Cette scène est ordinaire en ce lieu, et l'extraterrestre ici ce n'est pas eux, c'est Subaru.</p>
+                <p>— Après la dizaine de jours que Subaru a passés à vivre cela, il comprend ce fait à un point douloureux.</p>
+            </div>
+
+            <div class="page-divider font-sans text-sm tracking-widest">PAGE 4</div>
+
+            <!-- PAGE 4 -->
+            <div id="page-4">
+                <p class="dialogue">« ...Il est temps d'y aller. »</p>
+                <p>Ayant terminé ses contemplations inutiles, Subaru se tapote le derrière et se lève.</p>
+                <p>Il garde le bâton dans sa main droite alors qu'il serpente jusqu'à la rue — pas la rue principale où il disparaîtra dans la foule, mais dans les ruelles.</p>
+                <p>Contrairement à la rue principale animée, la ruelle est dépeuplée alors qu'elle repose coincée entre de grands bâtiments. L'endroit pourrait être justement appelé une ruelle sombre, simplement une voie unique isolée du monde extérieur par son silence.</p>
+                <p>Pour faire court, il pourrait se passer quelque chose ici, et les cris n'atteindraient pas la route principale.</p>
+                <p>Donc, si un étranger flagrant comme Subaru s'aventurait ici, des voyous le ciblant feraient naturellement leur apparition.</p>
+                <p class="dialogue">« Hé, mon pote. Viens jouer avec nous une seconde. »</p>
+                <p>Subaru se tourne vers la voix, pour trouver trois silhouettes bloquant la ruelle.</p>
+                <p>Ils se présentent dans un ensemble soigné et tout-terrain composé d'un grand, d'un moyen et d'un petit, et Subaru peut sentir leurs capacités d'examen. Aucune idée de ce qu'ils examinent cependant.</p>
+                <p>Subaru penche la tête pour regarder le chemin opposé aux trois. La ruelle aboutit à une impasse derrière Subaru, donc la seule sortie de cette ruelle implique que le trio le laisse passer.</p>
+                <p>Et si l'on se demande si le trio a ou non l'intention de laisser Subaru retourner dans la rue principale —</p>
+                <p class="dialogue">« Pourquoi t'as l'air si dans la lune, bon sang ? »</p>
+                <p class="dialogue">« Il comprend pas c'qui s'passe. Faisons-lui découvrir ça. »</p>
+                <p>Le comportement négligent de Subaru pousse les trois à sourire de manière obscène, des idées pour le malmener se mettant en place dans leurs têtes. De leur point de vue, Subaru est un débutant évident.</p>
+                <p>On ne peut pas blâmer quelqu'un de se lécher les babines face à une proie aussi facile.</p>
+                <p>Mais ils ont absolument et totalement tort.</p>
+                <p>C'est vrai, Subaru manque de véritable expérience en matière de combat, et il n'a pas d'histoire secrète où il a appris les arts martiaux. Débutant, c'était la partie de leurs estimations où ils n'avaient pas tort.</p>
+                <p>Mais si on parle en termes de combattre ces trois personnes spécifiquement, alors Subaru est déjà un vétéran.</p>
+                <p class="dialogue">« — Hein ? »</p>
+                <p>Vers le géant inattentif — Tom, du trio Tom, Dick et Larry — Subaru tend le bras.</p>
+                <p>Dans la poigne de Subaru reste le bâton qu'il a ramassé plus tôt, et bien qu'il n'ait pas de pointe acérée, il s'enfonce dans une partie molle de la gorge de Tom et avec seulement une légère résistance, l'empale dans le cou.</p>
+                <p class="dialogue">« Quoi ? »</p>
+                <p>Les yeux de Tom s'écarquillent face à cette action instantanée, tandis que Dick et Larry se figent d'un coup.</p>
+            </div>
+
+            <div class="page-divider font-sans text-sm tracking-widest">PAGE 5</div>
+
+            <!-- PAGE 5 -->
+            <div id="page-5">
+                <p>Tom ne peut plus se battre. Pendant que les autres sont encore pétrifiés, la main libre de Subaru file vers le moyen — Dick. Il l'attrape par les cheveux et l'oreille, et le balance. Subaru ne permet aucune résistance. Profitant de l'élan, il fracasse la tête de Dick contre le mur.</p>
+                <p>Quelque chose de solide craque, se brise, et Dick laisse une traînée de sang sur le mur en s'effondrant.</p>
+                <p>Simultanément, Subaru donne un coup de genou au Tom empalé, dont les yeux sont exorbités alors qu'il bascule en arrière. La direction dans laquelle il tombe est mauvaise. Il tombe en avant, et donc le bâton s'enfonce encore plus profondément en lui.</p>
+                <p>Maintenant, deux d'entre eux ne peuvent plus se battre. Il n'en reste plus qu'un —</p>
+                <p class="dialogue">« Eep. »</p>
+                <p>Le petit, Larry, pâlit alors qu'il regarde la défaite instantanée de ses deux alliés.</p>
+                <p>S'il procédait à abandonner les autres et courait vers les rues, cela se transformerait en un concours de la force de ses jambes contre celles de Subaru et il pourrait avoir une chance de survivre.</p>
+                <p>Au lieu de cela, il regarde le duo à terre et hésite à s'enfuir. Ignorant qu'il est déjà trop tard pour eux, il gaspille la seule seconde de temps qu'il a.</p>
+                <p>Idiot. Imbécile. Il recevrait sa récompense pour cette décision stupide.</p>
+                <p class="dialogue">« Ghau, ghhg... »</p>
+                <p>Subaru ferme ses mains autour du cou maigre de Larry, en serrant fort tout en pressant le dos de Larry contre le mur. Larry se débat alors qu'il est soulevé contre le mur, la force sur son cou s'intensifiant alors que Subaru l'étrangle.</p>
+                <p>Il est soulevé jusqu'à être au même niveau que les yeux de Subaru. Les yeux de Larry sortent de leurs orbites alors qu'il est étouffé, sa bouche s'ouvrant et se fermant à la recherche d'oxygène. Mais sa trachée a été bloquée de force, et Larry ne sera pas sauvé.</p>
+                <p class="dialogue">« Maintenant, réalises-tu combien de fois je vous ai rencontrés au total ? »</p>
+                <p class="dialogue">« Khhg, hgh... »</p>
+                <p class="dialogue">« Quatre-vingt-huit. Tant mieux pour toi de voir comment ta part augmente toujours. Tu es censé rire. »</p>
+                <p>Dit Subaru en fixant le visage de Larry qui devient de plus en plus rouge, et qui ruisselle de salive et de larmes.</p>
+                <p>Larry n'a aucune marge de manœuvre pour dire quoi que ce soit, bien sûr. En fait, oubliez la marge de manœuvre — ayant perdu toute capacité de résistance, son corps devient mou et Subaru le jette au sol.</p>
+                <p>Après avoir regardé le trio vaincu, Subaru commence à leur piétiner le cou au cas où. Une fois qu'il sent le craquement de quelque chose qui se brise sous le talon de sa basket, il peut se détendre.</p>
+                <p>Tom a un cou tellement gros qu'il faut cinq bons coups de pied pour le faire. Subaru n'arrive tout simplement pas à choper le coup de main pour ce gars. Bien que de temps en temps, il ait de la chance et qu'il les abatte tous d'un seul coup.</p>
+                <p class="dialogue">« C'était pas malin de l'étrangler... C'est dégueulasse en plus, je ne le referai plus. »</p>
+                <p>Après avoir eu ce moment de réflexion, Subaru pille deux couteaux sur Dick. Puis il traîne leurs cadavres jusqu'au bout de la ruelle, les y laisse, et sort des rues sombres comme si de rien n'était.</p>
+                <p>Entrer dans la ruelle et rencontrer Tom, Dick et Larry s'est passé plutôt rapidement. S'occuper du trio a pris un peu de temps, mais quand même au final moins d'une minute.</p>
+            </div>
+
+            <div class="page-divider font-sans text-sm tracking-widest">PAGE 6</div>
+
+            <!-- PAGE 6 -->
+            <div id="page-6">
+                <p>Subaru descend précipitamment la rue principale à la poursuite de sa destination.</p>
+                <p>Après avoir observé la rue, il pose la main sur sa poitrine, soulagé. Il est arrivé à temps.</p>
+                <p>C'est une rue principale appelée l'Allée des Marchands, chaotique et grouillante de monde comme les autres, chargée de démontrer la santé et la prospérité de la Capitale.</p>
+                <p>Vous pouvez simplement rester debout dans cette rue à ne rien faire, et ce sera plus que suffisant pour noyer vos oreilles sous un déluge de bruits cacophoniques.</p>
+                <p>Mais un changement survient dans cette scène animée.</p>
+                <p class="dialogue">« — Attendez ! Ah ! S'il vous plaît, attendez !! »</p>
+                <p>C'est la voix enchanteresse d'une clochette d'argent qui déchire le vacarme du marché.</p>
+                <p>Bien que débordante de désespoir, la voix ne peut dissimuler la gentillesse de sa propriétaire, son destinataire étant une petite silhouette qui jaillit de la foule.</p>
+                <p class="dialogue">« Hehehee. »</p>
+                <p>Rit la fille blonde alors qu'elle se faufile à travers la foule, souriant de toutes ses dents comme un félin. Dans sa main, elle serre quelque chose de scintillant, et son attitude atteste clairement qu'elle a terminé son travail.</p>
+                <p>Visant cette fille, une lumière bleue chatoyante — une lance de glace — fend l'air de la rue.</p>
+                <p class="dialogue">« !! »</p>
+                <p>Surprise par cette attaque imprévue, la fille saute et bondit pour éviter le pic de glace.</p>
+                <p>Cette attaque magique avait été lancée dans une rue grouillante de monde. L'événement soudain crée le chaos alors que les habitants de la Capitale ouvrent instantanément un passage, levant les bras pour montrer qu'ils ne veulent pas être impliqués dans la bagarre.</p>
+                <p>C'est la réaction prédominante. Être pris dans des échauffourées est monnaie courante dans la Capitale — ce serait une sacrée affirmation, mais ce n'est peut-être pas si loin de la vérité.</p>
+                <p>Peu importe. La personne qui sprinte le long du chemin ouvert par la foule est celle que Subaru cherchait.</p>
+                <p>À l'instant où il pose les yeux sur ELLE, Subaru a l'impression que le monde entier a gelé.</p>
+                <p>Le vent, les voix des gens, même le temps échappent à sa perception alors que toute son attention est redirigée vers elle.</p>
+                <p>Ses longs cheveux argentés flottent derrière elle et ses yeux améthyste brillent d'une forte volonté. Ses bras et ses jambes minces et pâles sont vêtus d'une tenue blanche si mythique qu'elle aurait pu être conçue pour une fée —</p>
+                <p>Dans ce monde arrêté dans le temps, elle seule a la permission de bouger, alors qu'elle dépasse complètement Subaru.</p>
+                <p>Son objectif est la fille blonde qui vient de passer en courant, Felt.</p>
+                <p>Felt lui a volé quelque chose, et maintenant elle court à travers la Capitale dans le but de le récupérer. Ce qui la mènera sur la voie d'un destin funeste presque inévitable.</p>
+                <p>Mais Subaru ne laissera pas cela arriver.</p>
+                <p>Il ne laissera jamais un destin de MORT la prendre au piège.</p>
+            </div>
+
+            <div class="page-divider font-sans text-sm tracking-widest">PAGE 7</div>
+
+            <!-- PAGE 7 -->
+            <div id="page-7">
+                <p class="dialogue">« Je te sauverai, quoi qu'il arrive. »</p>
+                <p>En la regardant s'éloigner, Subaru fait son serment pour la quatre-vingt-huitième fois.</p>
+                <p>Étant donné qu'il a brisé ce serment tant de fois, on ne sait pas exactement à quel point il est persuasif.</p>
+                <p>Incertain. Mais s'il continue sans se rendre, s'il continue à se battre, s'il continue à souhaiter la sauver —</p>
+                <p class="dialogue">« Attends-moi. — Satella. »</p>
+                <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※※※※※※※※</p>
+                <p>RETOUR PAR LA MORT. Le pouvoir de remonter le temps à sa mort.</p>
+                <p>Subaru a utilisé ce pouvoir pour refaire le monde quatre-vingt-huit fois maintenant.</p>
+                <p>Il est déjà près de franchir la barre des cent tentatives, et tout cela a été consacré à sauver la fille aux cheveux argentés, Satella, de l'impasse du destin.</p>
+                <p class="dialogue">« Je veux dire, j'ai fait des essais et des erreurs sur ce coup-là... mais ça ne va pas marcher comme avec Tom, Dick et Larry. »</p>
+                <p>C'est la conclusion de Subaru concernant son plus grand adversaire dans ce destin : Elsa Granhiert.</p>
+                <p>La personne qui a chargé Felt de voler l'insigne de Satella est cette femme de l'ombre nommée Elsa. Elle est un danger qui a conduit Satella à la mort d'innombrables fois.</p>
+                <p>Subaru a essayé un nombre incalculable de fois au cours de ces quatre-vingt-sept dernières tentatives d'éliminer Elsa et d'assurer la sécurité de Satella, mais il a toujours subi la défaite face aux prouesses de combat transcendantales d'Elsa, et est mort avec le ventre tailladé plus de cinquante fois.</p>
+                <p>Cette sadique qui prend plaisir à éviscérer les gens n'est pas quelqu'un que Subaru peut battre dans un combat.</p>
+                <p>Lorsque l'adversaire est quelqu'un comme Tom, Dick et Larry, Subaru peut deviner un certain modèle dans leurs mouvements et concevoir des plans pour une victoire absolue. Mais quand ils sont aussi forts qu'Elsa, il est assez logique que Subaru se fasse trancher la tête à la seconde où il essaie de faire quoi que ce soit.</p>
+                <p>Et bien que ce ne soit pas sa tête, il a vraiment été éviscéré instantanément de nombreuses fois.</p>
+                <p>Subaru ne peut pas se battre contre elle et gagner. Felt non plus, ni Rom, ni Satella.</p>
+                <p>Ayant atteint cette conclusion, la stratégie que Subaru choisit est —</p>
+                <p class="dialogue">« Merveilleux ! Magnifique ! Bien que je serais plus heureuse si vous pouviez me laisser m'amuser encore plus ! »</p>
+                <p class="dialogue">« GhhhaaaaAAH !! »</p>
+                <p>Chaque fois que les lames fendent l'air, le sang jaillit.</p>
+                <p>Trop de corps tombés au combat jonchent les rues pour les compter sur les doigts d'une main alors qu'Elsa, couverte de sang, transcende l'extase, semblant savourer des doses régulières de ravissement.</p>
+                <p>Bien que dans une situation aussi macabre, la sensualité d'Elsa ne fait que s'accentuer à mesure qu'elle se baigne dans le sang.</p>
+                <p>Il existe des anecdotes sur des femmes qui se baignaient dans le sang de vierges pour conserver leur propre jeunesse, appelées vampires, et Elsa ressemble actuellement exactement à un VAMPIRE de ce genre.</p>
+            </div>
+
+            <div class="page-divider font-sans text-sm tracking-widest">PAGE 8</div>
+
+            <!-- PAGE 8 -->
+            <div id="page-8">
+                <p class="dialogue">« ...Encore un échec, hein. »</p>
+                <p>Soupirant, Subaru plisse les yeux alors qu'il observe la scène macabre depuis un toit.</p>
+                <p>Il se trouve dans un quartier des bidonvilles particulièrement délabré et abandonné. La scène du conflit est un espace que l'on pourrait peut-être appeler une place, où le massacre dégénère unilatéralement.</p>
+                <p>Ceux qui croisent le fer avec Elsa, et qui sont constamment abattus par ses couteaux, sont les gardes de la Capitale.</p>
+                <p>Des informations provenant d'un citoyen vertueux les ont amenés à détecter la dangereuse Elsa Granhiert, et suite à leurs tentatives de l'arrêter, leurs vies se retrouvent éparpillées et massacrées — étant donné qu'il est le citoyen vertueux en question, cette vue peine le cœur de Subaru.</p>
+                <p class="dialogue">« Je ne pensais pas qu'il y aurait un tel écart de puissance entre des gardes normaux et Elsa... »</p>
+                <p>C'était simplement présenter à Elsa des agneaux à abattre joyeusement.</p>
+                <p>Subaru s'était attendu à ce que, étant les gardes qui protègent la Capitale, ils s'imprègnent d'abord d'une sorte de magie puis se battent à armes égales avec Elsa. Mais il semble que ses espoirs étaient trop élevés.</p>
+                <p>Alors oui. Elsa est extrêmement puissante, même selon les normes de ce monde.</p>
+                <p>Le ressentiment de Subaru envers Elsa s'aggrave. Mais peu importe à quel point il est furieux, Subaru ne sera jamais assez fort pour arrêter cette femme perfide.</p>
+                <p>Il ne pense pas un seul instant que les gardes auront un coup de chance et la vaincront non plus.</p>
+                <p class="dialogue">« Inutile de continuer à regarder. »</p>
+                <p>Il se sent mal pour les gardes sacrifiés, mais Subaru va terminer cette expérience ici.</p>
+                <p>Il n'a pas l'intention de se retenir, mais si Subaru échoue finalement et perd la vie, ceux qui sont morts ici ressusciteront dans le monde réinitialisé.</p>
+                <p>Pour le moment, Subaru va ravaler ses larmes et laisser les victimes mortes. La prochaine fois, il n'attendra rien d'eux, afin qu'ils puissent retourner préserver l'harmonie de la Capitale sans soucis.</p>
+                <p>Ayant atteint cette conclusion, Subaru se met en mouvement pour quitter les lieux — quand.</p>
+                <p class="dialogue">« — Oh mon Dieu. »</p>
+                <p>Se figeant avec son kukri levé bien haut, Elsa se lèche les lèvres ensanglantées.</p>
+                <p>La joie folle et la soif de sang qui débordent d'elle prouvent mieux que tout qu'Elsa, s'étant lassée de massacrer les gardes, a trouvé une nouvelle proie. L'identité de cette malheureuse victime est —</p>
+                <p class="dialogue">« — N'allez pas plus loin. »</p>
+                <p>Une colonne de feu se tient là, hallucine Subaru.</p>
+                <p>Retenant son souffle, plissant les yeux, regardant de plus près, Subaru reconnaît enfin que ce n'est pas une flamme mais une personne qui se tient là.</p>
+                <p>Un jeune homme aux cheveux roux flamboyants et aux yeux aussi bleus qu'un ciel pur.</p>
+            </div>
+
+            <div class="page-divider font-sans text-sm tracking-widest">PAGE 9</div>
+
+            <!-- PAGE 9 -->
+            <div id="page-9">
+                <p>Il peut paraître svelte, mais son corps est musclé et souple sous ses vêtements blancs royaux. À sa taille repose une épée qui est probablement plus grande que la coutume.</p>
+                <p>Cent personnes sur cent se retourneraient pour le regarder s'il passait par là, et son apparence est si attrayante que cette œuvre divine charmerait n'importe quel observateur. Le chaos résultant d'une beauté transcendant les genres n'est pas ce qu'il produit, peut-être en raison de son allure calme.</p>
+                <p>Un seul coup d'œil suffit à l'âme de Subaru pour l'informer : cet homme est différent de la plèbe habituelle.</p>
+                <p class="dialogue">« Sir Reinhardt ! »</p>
+                <p class="dialogue">« Tout le monde, veuillez vous retirer. Cette femme est la CHASSEUSE D'ENTRAILLES. Les victimes sont déjà bien trop nombreuses. Je ne veux pas que ce nombre augmente. »</p>
+                <p>Dit Reinhardt, les yeux baissés, en réponse à la voix tremblante d'un garde survivant.</p>
+                <p>On dirait qu'il a pitié des vies qui ont été massacrées comme des rats, et qu'il est indigné par la meurtrière, Elsa, qui l'a fait.</p>
+                <p>Même Subaru, en regardant de loin, peut percevoir la nature de ce jeune homme, Reinhardt.</p>
+                <p>Son raisonnement est juste, ses conceptions sont justes, sa mentalité est juste, c'est pourquoi il est en colère.</p>
+                <p>Il a pleuré la mort, détesté le meurtre, déploré l'échec, recouvert ses remords de sa conviction.</p>
+                <p>C'était la façon d'être de cet homme, Reinhardt — de ce chevalier.</p>
+                <p class="dialogue">« Reinhardt Van Astrea. De la lignée du SAINT DE L'ÉPÉE. Merveilleux, excellent ! »</p>
+                <p class="dialogue">« Je me sens souvent écrasé par les attentes. Et vous êtes la CHASSEUSE D'ENTRAILLES ? »</p>
+                <p class="dialogue">« Oui, je le suis assurément. Oh, mon Dieu. Que dois-je faire ? J'ai besoin de faire mon travail, mais maintenant je me retrouve face à vous. »</p>
+                <p>Avec un souffle enfiévré et passionné, Elsa regarde ardemment Reinhardt.</p>
+                <p>Mais l'expression de Reinhardt est la définition même du sérieux, ses yeux remplis du sens du devoir, pas une once de frivolité en lui.</p>
+                <p>Les deux se font face avec des positions antithétiques, mais leurs cœurs les mènent à la même réponse. Ils doivent s'entretuer et atteindre leur but.</p>
+                <p class="dialogue">« Fondamentalement parlant, c'est ici que je vous conseillerais de vous rendre, mais... »</p>
+                <p class="dialogue">« Vous êtes face à ce massacre, et vous me dites cela ? C'est très aimable de votre part. Si aimable que c'en est cruel, tant pour moi que pour eux. »</p>
+                <p class="dialogue">« — Non, je partage votre opinion. Ce serait impie envers leurs morts si je me montrais indulgent avec vous. Je ne peux pas vous demander de vous rendre. »</p>
+                <p>Elsa donne joyeusement un coup de pied à l'un des cadavres à terre alors que Reinhardt secoue lentement la tête.</p>
+                <p>Il tend la main vers le garde à ses côtés et déclare promptement : <span class="dialogue">« Une épée, s'il vous plaît. »</span></p>
+                <p class="dialogue">« Je vous en prie, acceptez-la. »</p>
+                <p>Le garde présente une épée, que Reinhardt prend. Il en confirme la prise en main tandis qu'Elsa fronce les sourcils, semblant avoir des réserves à ce sujet.</p>
+            </div>
+
+            <div class="page-divider font-sans text-sm tracking-widest">PAGE 10</div>
+
+            <!-- PAGE 10 -->
+            <div id="page-10">
+                <p class="dialogue">« Vous n'utilisez pas l'épée à votre hanche ? Mais je voulais sentir la coupe de la légendaire Épée du Dragon. »</p>
+                <p class="dialogue">« Malheureusement, cette épée détermine les adversaires pour lesquels elle doit être tirée. C'est un trait de caractère assez gênant, et il ne semble pas que vous ayez gagné ses faveurs. À la place, je m'opposerai à vous avec ceci. »</p>
+                <p class="dialogue">« Hrmpf. »</p>
+                <p>Elsa soupire face à Reinhardt, qui a préparé non pas l'épée à sa taille, mais celle qu'il a acceptée.</p>
+                <p>Mais le mécontentement d'Elsa ne dure qu'un instant. Elle change immédiatement de registre et, sentant les prémices du combat et du sang, se lèche les lèvres.</p>
+                <p class="dialogue">« Elsa Granhiert, Chasseuse d'Entrailles. »</p>
+                <p class="dialogue">« Reinhardt van Astrea de la lignée du Saint de l'Épée. »</p>
+                <p>Ils se présentent, devenant tous deux du vent alors qu'ils chargent l'un vers l'autre.</p>
+                <p>Le combat se termine avec ce seul assaut.</p>
+                <p>Une entaille tout à fait banale donne naissance à un maelström de lumière, les ondes de choc détruisant cette partie des bidonvilles.</p>
+                <p>L'entaille de l'homme appelé le SAINT DE L'ÉPÉE est la définition exacte de la PUISSANCE.</p>
+                <p>Natsuki Subaru, les yeux écarquillés, observait cette scène.</p>
+                <p>Avec une larme sur la joue, les genoux tremblants, et ignorant totalement pourquoi.</p>
+                
+                <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※※※※※※※※</p>
+                
+                <p>Les choses se sont déroulées d'une manière différente de ce que Subaru avait prévu et arrangé, mais on peut dire que l'objectif principal de vaincre Elsa a été accompli.</p>
+                <p>Il n'avait pas prédit la participation de Reinhardt, mais étant donné que cela a exaucé son souhait, cela lui convient plus que parfaitement.</p>
+                <p>Maintenant, les problèmes entourant l'insigne de Satella seront résolus en toute sécurité. Et tant que Felt et Rom ne parviendront pas à retrouver leur employeuse, Elsa, il ne devrait pas être impossible de leur demander de garder l'insigne de Satella en lieu sûr. Subaru doute que Satella succombe à la rage et les tue.</p>
+                <p>Cette histoire tournant autour de la Maison du Butin sera achevée en utilisant le strict minimum de personnages.</p>
+                <p>C'est un résultat souhaitable pour Subaru également.</p>
+                <p>Et ainsi —</p>
+                <p class="dialogue">« — Pourquoi m'aidiez-vous ? »</p>
+                <p class="dialogue">« Je veux dire, tu n'as pas besoin de me faire confiance. Si ça te va d'être encerclée par les gardes et de perdre toute chance de vengeance, tue-moi et enfuis-toi. »</p>
+                
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 11</div>
+                
+                <!-- PAGE 11 -->
+                <div id="page-11">
+                    <p>Crache Subaru alors qu'il s'appuie contre un mur, s'adressant à une Elsa accroupie.</p>
+                    <p>Elle est couverte de sang, sa tenue noire déchirée par endroits et sa peau blanche exposée. Cela dit, sa chair est recouverte de blessures horribles qui ne laissent à Subaru aucune place pour ressentir la moindre gêne.</p>
+                    <p>Et Subaru n'a de toute façon aucun intérêt sexuel pour Elsa.</p>
+                    <p>Il pensait juste qu'elle pourrait être utile, et voulait capitaliser sur l'opportunité.</p>
+                    <p class="dialogue">« Les gardes ont les yeux injectés de sang à ta recherche. Je les ai induits en erreur pour qu'ils aillent ailleurs, donc il faudra un petit moment avant qu'ils ne nous remarquent. Tes blessures ? »</p>
+                    <p class="dialogue">« Me font très mal. Très, très mal, je pourrais en mourir. Huhu, c'est merveilleux. »</p>
+                    <p class="dialogue">« Voilà un sentiment que je ne comprends pas. Ça va être un problème si tu meurs, je cherche plutôt à faire quelque chose ici. »</p>
+                    <p>Subaru a fait des pieds et des mains, risquant le danger pour les induire en erreur afin qu'Elsa puisse vivre.</p>
+                    <p>S'il est abattu ici, ou s'il se retrouve mêlé aux recherches des gardes pour retrouver Elsa, cette route spontanée où Satella a survécu sera réduite en poussière.</p>
+                    <p>Bien que, si cela arrive, cela signifiera simplement plus de lancers de dés pour que ces événements se déroulent à nouveau.</p>
+                    <p class="dialogue">« Pouvez-vous frayer un chemin jusqu'à la partie sud-est des bidonvilles ? Je pourrai retrouver ma petite sœur si vous le faites. Elle soignera mes blessures et préparera une voie d'évasion. »</p>
+                    <p class="dialogue">« Une sœur ! Hah, tu as une sœur, c'est à la fois pertinent et une tragédie totale. »</p>
+                    <p>Ce n'est probablement pas qu'elle lui fait confiance, et si elle lui fait confiance, c'est toujours aussi dégoûtant, mais de toute façon les informations d'Elsa signifient que Subaru peut calculer des moyens de surmonter cette situation difficile.</p>
+                    <p>Leur fuite les a déjà menés considérablement vers le sud. Cela ne devrait pas leur prendre trop de temps de se relocaliser à cet endroit dont parle Elsa.</p>
+                    <p>En utilisant les saintes pièces d'or en possession d'Elsa, Subaru soudoie des résidents des bidonvilles pour interférer avec les recherches des gardes et les mener sur une fausse piste. Aucun problème.</p>
+                    <p class="dialogue">« Ce que je ne comprends pas, c'est votre but là-dedans. »</p>
+                    <p class="dialogue">« Je voulais juste que tu aies une dette envers moi. Ça pourrait être utile de t'avoir dans les parages un jour. »</p>
+                    <p class="dialogue">« Une dette. Comme c'est étrange. Alors que vous êtes si désireux de me tuer. »</p>
+                    <p>C'est ce que Subaru doit entendre alors qu'il prête son épaule à Elsa et l'aide à s'enfuir. Les yeux sombres d'Elsa lèvent les yeux vers Subaru, essayant de scruter ses émotions.</p>
+                    <p>Mais elle a déjà mis dans le mille et il n'y a pas besoin de scruter. La réponse qu'Elsa obtient des yeux sombres de Subaru est exactement ce qu'elle a déclaré.</p>
+                    <p>Subaru aimerait tuer Elsa en ce moment même si possible. Mais il ne parviendra même pas à battre une Elsa mourante s'il ne prend pas en compte les branches possibles, et en plus c'est une idée précipitée.</p>
+                    <p>Subaru a l'impression d'avoir été placé sur un côté du plateau hideusement déséquilibré.</p>
+                    <p>C'est une bataille qui présuppose qu'il considère toutes les méthodes possibles, qu'il procède par essais et erreurs, et qu'il fasse les mouvements optimaux.</p>
+                    <p>Pensez-y comme au shogi, où aucune quantité de mouvements aléatoires de pièces ne vous procurera la moindre victoire.</p>
+                    <p>Si possible, échangez les ennemis et les alliés. S'il y a une opportunité, n'hésitez pas à modifier vos circonstances.</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 12</div>
+
+                <!-- PAGE 12 -->
+                <div id="page-12">
+                    <p>Pour cela, il doit utiliser même ceux qu'il abhorre et qu'il préférerait assassiner.</p>
+                    <p class="dialogue">« Je veux te tuer. Et je te tuerai un jour. Mais pas maintenant. »</p>
+                    <p class="dialogue">« Je vois. »</p>
+                    <p>Ça ne vaut même pas la peine d'être caché. Subaru révèle ses véritables sentiments à Elsa.</p>
+                    <p>Si Elsa était quelqu'un de plus prudent, elle tuerait Subaru juste ici pour apaiser de futures angoisses.</p>
+                    <p>Mais Subaru est confiant qu'elle ne fera pas cela.</p>
+                    <p>C'est une confiance imbibée de sang, que Subaru a acquise à travers plus de quatre-vingt morts causées par Elsa.</p>
+                    <p class="dialogue">« Merveilleux. Toi et moi sommes liés par la haine. Un jour, oui. Vous vous donnerez raison. Et c'est très, très charmant. »</p>
+                    <p>Les lèvres ensanglantées d'Elsa se détendent, souriant comme une fille amoureuse.</p>
+                    <p>Avec son sourire juste à côté de lui, du plus profond de son cœur, Subaru pense : répugnant.</p>
+                    <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※※※※※※※※</p>
+                    <p class="dialogue">« Revoyons-nous, d'accord ? »</p>
+                    <p class="dialogue">« À plus, monsieur. Merci d'avoir aidé Elsa. »</p>
+                    <p>La fille aux cheveux bleus qu'ils retrouvent prend Elsa en charge, et Subaru pousse un soupir de soulagement.</p>
+                    <p>Cette fille qui attend dans la masure mentionnée par Elsa est très jeune, une pré-ado. Bien que son âge choque d'abord Subaru, elle s'occupe des blessures d'Elsa de manière experte, termine promptement les préparatifs pour qu'elles fuient la Capitale, et vide rapidement la cabane.</p>
+                    <p>Il parvient tout juste à obtenir un moyen de contacter Elsa, ce qui lui sert de paiement.</p>
+                    <p>Bien qu'il ne soit pas clair si ce paiement compense vraiment le danger qu'il a risqué.</p>
+                    <p class="dialogue">« Je suppose que ce qui se passera à partir de maintenant dépendra de la façon dont je bouge. »</p>
+                    <p>Subaru retire son maillot de survêtement taché de sang, le noue autour de sa taille, et se met à marcher.</p>
+                    <p>Sa trajectoire l'éloigne des bidonvilles et le dirige vers la Maison du Butin. Elsa n'avait jamais réussi à atteindre l'endroit, mais Satella avait-elle réussi à récupérer son insigne en toute sécurité ? La question le tourmentait.</p>
+                    <p>Après un certain temps, Subaru atteint la Maison du Butin. Ses yeux s'écarquillent devant ce qu'il voit.</p>
+                    <p class="dialogue">« Je ne m'attendais pas à ça. »</p>
+                    <p>Ce qui se déploie devant lui est la vue d'une Maison du Butin gelée.</p>
+                    <p>Ou plutôt, 'scellée dans la glace' est une description plus précise que 'gelée'. Qu'est-ce qui a bien pu se passer ici ? Subaru interroge rapidement un résident à proximité, et :</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 13</div>
+
+                <!-- PAGE 13 -->
+                <div id="page-13">
+                    <p class="dialogue">« Le vieux chef de la Maison du Butin et sa petite-fille se sont fait pincer par les gardes. Quelque chose à propos du fait qu'ils se seraient fait des ennemis avec une magicienne effrayante... je ne veux pas fourrer mon nez là-dedans. »</p>
+                    <p class="dialogue">« Est-ce que le vieil homme et sa petite-fille sont sains et saufs ? La magicienne ? »</p>
+                    <p class="dialogue">« Ils disent que personne n'est blessé, mais je n'ai pas bien vu aucun des deux. Écoute, ça suffit, d'accord ? »</p>
+                    <p>Peut-être déconcerté par l'intensité troublante de Subaru, l'homme repousse les bras de Subaru et s'échappe vivement dans l'obscurité d'une ruelle.</p>
+                    <p>Subaru rumine les paroles de l'homme en le regardant partir, puis pose la main sur sa poitrine, soulagé.</p>
+                    <p>Il ne sait pas à quel point les déclarations de l'homme étaient exactes, mais au moins son récit ne pouvait pas être confondu avec une situation hypothétique où des gens seraient morts.</p>
+                    <p>Le fait que les gardes aient arrêté Felt et Rom est inévitable compte tenu de ce qu'ils font dans la vie. Ils devraient profiter de la prison pendant un certain temps, et réfléchir à leurs occupations.</p>
+                    <p>Et maintenant que Subaru sait que Satella est en sécurité, comme il l'espérait-</p>
+                    <p class="dialogue">« -Bon. Qu'est-ce que je fais maintenant ? »</p>
+                    <p>Subaru se gratte la tête, conscient qu'il s'est complètement épuisé en objectifs.</p>
+                    <p>Il a été invoqué dans un monde parallèle, on lui a donné le RETOUR PAR LA MORT, il l'a utilisé, et a sauvé une adorable demi-elfe aux cheveux argentés au grand cœur.</p>
+                    <p>Bien que cela lui ait pris quatre-vingt-sept morts pour y parvenir.</p>
+                    <p class="dialogue">« Ah, merde. J'aurais peut-être mieux fait de mourir, de réinitialiser, et qu'Elsa me dise pourquoi elle essayait de voler l'insigne de Satella... ? »</p>
+                    <p>Il aurait vraiment dû poser cette question pendant qu'il transportait Elsa blessée, mais il a eu un oubli.</p>
+                    <p>Cependant, si Subaru posait des questions profondément impliquées dans les affaires d'Elsa, et que cela l'amenait à découvrir que Subaru était sentimentalement du côté de Satella, il n'aurait aucune idée de la façon dont Elsa réagirait.</p>
+                    <p>À la fin, Subaru et Satella sont tous les deux en vie maintenant. Nous supposerons que c'est la bonne solution.</p>
+                    <p class="dialogue">« Même si vraiment, j'aimerais en savoir plus sur Satella si je le pouvais... »</p>
+                    <p>D'où venait Satella ? Où allait-elle ? La reverrait-il ? Il ne le savait pas.</p>
+                    <p>Bien sûr, il pourrait toujours répéter les choses jusqu'à ce qu'il le sache.</p>
+                    <p>Mais en supposant qu'il y ait eu une autre méthode-</p>
+                    <p class="dialogue">« -Alors, pourriez-vous m'apprendre, les gars ? »</p>
+                    <p>Debout devant la maison du butin gelée, Subaru fourre ses mains dans ses poches et se retourne.</p>
+                    <p>Personne ne semble être présent. Mais les yeux de Subaru voient les nombreuses silhouettes qui se tiennent là.</p>
+                    <p>Tous des gens d'apparence mondaine, avec un mélange modéré d'âges et de sexes, un groupe incohérent.</p>
+                    <p>S'il y avait quelque chose de cohérent chez ces personnes, ce serait leurs yeux.</p>
+                    <p>Tous leurs yeux étaient morts. Parfaitement adaptés pour être imprégnés de folie, et poursuivre une extase délirante.</p>
+                    <p>Et Subaru soupçonnait que, s'il se regardait dans un miroir, ses yeux seraient les mêmes.</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 14</div>
+
+                <!-- PAGE 14 -->
+                <div id="page-14">
+                    <p>Ses joues se détendent à ce sentiment. Et il regarde le ciel.</p>
+                    <p>Une lune étrangement lustrée regarde vers le bas, vers la maison du butin gelée, et les fous.</p>
+                    <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※※<br>※<br>※※</p>
+                    <p>C'est arrivé presque deux mois plus tard que Subaru en apprit davantage sur Satella.</p>
+                    <p class="dialogue">« Dans la Sélection Royale ! Une demi-elfe aux cheveux argentés ! Soutenue par le Margrave Roswaal L. Mathers ! Pas Satella, Emilia- ! »</p>
+                    <p>S'envolant à l'afflux soudain d'informations détaillées après une période de silence radio, Subaru tape dans ses mains, l'air fou de joie.</p>
+                    <p>Cette obtention inattendue d'informations résultait d'une annonce officielle du Palais Royal, donnant des nouvelles non seulement dans la Capitale mais dans tout le pays concernant la compétition pour le trône.</p>
+                    <p>Lorsque Subaru a vu pour la première fois les bulletins affichés en ville à ce sujet, il s'en est moqué comme n'étant qu'une stupide élection de campagne - jusqu'à ce que ses yeux s'écarquillent.</p>
+                    <p>Les candidats étaient constitués de cinq femmes et l'une d'entre elles était la fille qu'il cherchait.</p>
+                    <p class="dialogue">« La Sélection Royale, la Sélection Royale... si elle est candidate au trône, cela signifie qu'elle a un pedigree. Bien sûr que oui, pensez à sa grâce quand elle se promène simplement. Emilia, elle s'appelle Emiliaaa... »</p>
+                    <p>Apprendre son vrai nom allège le cœur de Subaru, comme s'il lui avait poussé des ailes.</p>
+                    <p>Il avait compris depuis des lustres que Satella était un pseudonyme. Et il a aussi compris pourquoi elle - Emilia - s'était présentée à Subaru avec un faux nom.</p>
+                    <p>Après tout, si une demi-elfe aux cheveux argentés se présentait sous le nom de Satella-</p>
+                    <p class="dialogue">« Les gens penseraient qu'elle est impliquée avec des gars comme nous et resteraient loin d'elle. C'était une mesure désespérée pour me garder à l'abri du danger. Son visage est si adorable, ses pensées sont si adorables. »</p>
+                    <p>Tout en parlant tristement d'être une demi-elfe, et en ayant l'air effrayée d'être rejetée, elle a fait preuve de considération pour les autres et a utilisé sa lignée dans une tentative de les éloigner du danger.</p>
+                    <p>Quelle fille noble et pitoyable. C'est tellement émouvant que ça lui serre la poitrine.</p>
+                    <p>Quand,</p>
+                    <p class="dialogue">« -Natsuki Subaru ! Bien-aimé des disciples ! ÊTES-VOUS PRÉSENT !? »</p>
+                    <p>Une voix stridente comme celle d'une volaille étranglée résonne désagréablement à travers la pièce, appelant le nom de Subaru.</p>
+                    <p>Subaru grimace, pose sur son lit le bulletin qu'il a dérobé à la Capitale, ouvre la porte à contrecœur et sort de sa chambre.</p>
+                    <p>Il s'appuie contre la porte fermée, en attendant, quand un homme d'une pâleur maladive apparaît dans le couloir mal éclairé.</p>
+                    <p class="dialogue">« Je vous CHERCHAIS ! Pourquoi, pourquoi, pourquoi étiez-vous ici, À VOUS COMPLAIRE DANS LA PARESSE !? Alors que ! »</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 15</div>
+
+                <!-- PAGE 15 -->
+                <div id="page-15">
+                    <p class="dialogue">« Nous ! Devons ! Suivre les auspices de la Sorcière, et répondre à son amour avec diligenceeeeeeeeeeeee !! »</p>
+                    <p class="dialogue">« Arrêtez avec ces fausses accusations, Bete-san. Je ne fais qu'obéir aux instructions de l'Évangile. L'Évangile me dit de passer mon temps ici. »</p>
+                    <p class="dialogue">« Quoi ! L'Évangile vous a donné de telles instructions !? En cette conjoncture, à cette occasion, dans ces circonstances, quelles cogitations la Sorcière doit-elle avoir, pour ordonner à un disciple aussi dévot que vous de paresser, même la plus légère conjecture se trouve au-delà ! DE MES ! FACULTÉS ! »</p>
+                    <p>Non seulement ses cris sont bruyants, mais ses mouvements sont odieux aussi.</p>
+                    <p>C'est bel et bien un fou, ce Betelgeuse Romanée-Conti. Il faut vraiment faire un effort pour ne pas soupirer.</p>
+                    <p>C'est un lunatique antipathique, mais certainement un personnage conducteur pour Subaru.</p>
+                    <p>Après tout, chaque membre du groupe d'affiliation de Subaru est un portrait égoïste d'égocentrisme, et il est discutable de savoir si les disciples normaux ont une quelconque conscience d'eux-mêmes.</p>
+                    <p>La spéculation arbitraire de Subaru est que les émotions ternes des disciples normaux pourraient être dues à quelque chose qui opère sur leur conscience, afin que leurs affiliations ne fuitent pas pendant qu'ils font des choses de tous les jours.</p>
+                    <p>Mais qui se soucie des suppositions. L'important est ce que Betelgeuse, dans une position d'autorité très différente de celle des disciples normaux, essaie d'accomplir avec cette visite.</p>
+                    <p>Subaru fait partie de ce groupe depuis deux mois maintenant, et la vie a été globalement correcte.</p>
+                    <p>Bien que, même si la vie est correcte, en termes de mouvement et de santé mentale, c'est un cauchemar.</p>
+                    <p>Avoir des interactions fréquentes avec des fous et des fanatiques religieux est, étant donné que l'humanité de Subaru ne peut s'écarter du domaine de l'ordinaire, une véritable agonie.</p>
+                    <p>Son habitation est une grotte cachée dans les montagnes.</p>
+                    <p>C'est un endroit étonnamment vivable, et assez hospitalier pour que Subaru puisse aménager une section comme étant 'sa chambre', mais des choses comme le fait qu'il soit loin de la civilisation, qu'il ait des sols durs et des murs froids, sont des choses que Subaru, de la génération Z, doit endurer.</p>
+                    <p>Mais cela dit, il n'est pas un assez bon acteur pour réussir à cacher ses liens avec ce groupe. En guise de compromis, il vit ici, se rendant utile en apprenant et en accumulant des informations sur ce monde.</p>
+                    <p class="dialogue">« Alors, vous avez quelque affaire avec mon moi ermite ? »</p>
+                    <p class="dialogue">« N'ÊTES-VOUS PAS AU COURANT ? De l'événement insensé mené dans ce pays ! »</p>
+                    <p class="dialogue">« Des trucs qui se passent dans ce pays ce serait... vous voulez dire la Sélection Royale ? »</p>
+                    <p class="dialogue">« EN EFFET ! La Sélection ! CEPENDANT le problème NE RÉSIDE PAS LÀ ! La Sélection elle-même n'offre aucune importance, c'est celle qui y participe ! Celle-là étant, la demi-sorcière aux cheveux argentés ! »</p>
+                    <p>Afin de pouvoir faire la leçon à l'ignorant Subaru, Betelgeuse présente l'avis officiel pour la Sélection - exactement la même chose avec laquelle Subaru a décoré la pièce - et pointe son doigt dessus.</p>
+                    <p>Naturellement, sur ce prospectus se trouve le visage d'une fille si mignonne que les regards de Subaru y ont creusé des trous.</p>
+                    <p>Le doigt osseux de Betelgeuse, comme on pouvait s'y attendre, pointe vers elle.</p>
+                    <p class="dialogue">« CONTEMPLEZ ! Ce visage ! Cette lignée ! Double blasphème envers la Sorcière ! Cet être n'est pas de ceux que nous pouvons négliger ! L'heure de l'Épreuve est VENUE ! »</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 16</div>
+
+                <!-- PAGE 16 -->
+                <div id="page-16">
+                    <p class="dialogue">« L'Épreuve. »</p>
+                    <p class="dialogue">« EXACTEMENT ! »</p>
+                    <p>Poussant un cri strident, Betelgeuse claque le prospectus à plat contre le mur de la grotte avant de fracasser son poing sur la description personnelle d'Emilia, faisant gicler du sang partout.</p>
+                    <p>Ce fou adepte de l'automutilation, enivré par la douleur et le sang, a profané l'image en papier d'Emilia.</p>
+                    <p class="dialogue">« Si cela concorde, prenez-la ! Sinon, abandonnez-la ! Si elle devait être vérifiée comme un réceptacle approprié pour la Sorcière, nous l'accepterons dans NOTRE GIRON ! L'Épreuve doit commencer ! »</p>
+                    <p class="dialogue">« Et vous me demandez mon aide ? »</p>
+                    <p class="dialogue">« Oui, EXACT ! J'ai contacté d'autres personnes, mais je doute que ces non-croyants répondent ! COLÈRE seule pourrait présenter une possibilité, cependant elle est actuellement éloignée de cette nation... ainsi ! Nous seuls partirons ! »</p>
+                    <p>Le devoir au cœur et un torrent de larmes coulant sur son visage, Betelgeuse fourre son poing ensanglanté dans sa bouche, et suce ses blessures. Les coins de sa bouche se déchirent alors que ses dents mordent sa main, blessant sa peau et sa chair dans un étalage macabre et repoussant.</p>
+                    <p>Mais Subaru s'ordonne de résister à la scène avec une volonté de fer et affiche une façade cool.</p>
+                    <p class="dialogue">« Ça vous dérange si je viens avec vous, alors ? Je ne connais pas exactement les détails cependant, Cardinal. »</p>
+                    <p class="dialogue">« Alors vous nous accompagnez gentiment ! Aaah ! AaAaAa ! Comme c'est tellement tellement tellement tellement très très trèstrèstrèstrèstrèstrèstrèstrèstrèstrès... JOYEUX ! »</p>
+                    <p class="dialogue">« C'est s'enthousiasmer beaucoup trop alors que je dis juste que je viens. »</p>
+                    <p>Le sourire ironique que donne Subaru est légitime.</p>
+                    <p>Après avoir hoché la tête tant de fois que sa tête pourrait presque en tomber, Betelgeuse remet ses jambes dans une posture correcte et fait volte-face, tournant le dos à Subaru.</p>
+                    <p class="dialogue">« Nous PARTONS IMMÉDIATEMENT ! J'ai déjà donné des instructions à mes doigts pendant le voyage jusqu'ici... nous les rejoindrons, et voyagerons jusqu'au Domaine Mathers. Ensuite nous suivrons LA PISTE DE L'ÉVANGILE ! »</p>
+                    <p class="dialogue">« Reçu....Et aussi, c'est quoi l'Épreuve ? »</p>
+                    <p class="dialogue">« UNE QUESTION JUDICIEUSE. C'est un test pour s'assurer de l'adéquation du réceptacle de la Sorcière... à savoir, une épreuve pour déterminer si le récipient possède la force, la qualité, et de surcroît les qualifications pour héberger L'ÂME DE LA SORCIÈRE ! »</p>
+                    <p>Subaru répond à l'explication inutile par un hochement de tête entendu.</p>
+                    <p>Il ne connaît aucun des détails spécifiques. Mais comparé au temps qu'il a passé dans l'agonie à ne rien savoir de Satella Emilia, c'est infiniment préférable.</p>
+                    <p>Et on dirait bien que cela signifie qu'il va à nouveau pouvoir s'impliquer avec Emilia.</p>
+                    <p>Bien que cela implique aussi-</p>
+                    <p class="dialogue">« -Maintenant, maintenant maintenant ! Maintenant maintenant maintenant ! NOUS PARTONS ! NOUS TESTONS ! Si le réceptacle s'avère approprié, alors l'AVÈNEMENT DE LA SORCIÈRE est sur nous ! Une chance après ces nombreux siècles pour que nous puissions remplir tous nos sièges ! »</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 17</div>
+
+                <!-- PAGE 17 -->
+                <div id="page-17">
+                    <p class="dialogue">« Si la Sorcière Satella descend ici, est-ce que le réceptacle... ? »</p>
+                    <p class="dialogue">« SERA MARTYRISÉ ! CEPENDANT, c'est VÉNÉRABLE ! Si vénérable que j'assumerais ce rôle si c'était possible ! Si ma personne était capable d'accueillir l'esprit de Satella, j'endurerais toutes les itérations de souffrances inestimables pour mon désir de LA REVOIR ! »</p>
+                    <p class="dialogue">« Donc elle est effacée. Vraiment. »</p>
+                    <p>Murmure Subaru alors qu'il marche derrière Betelgeuse, qui s'est mis en route.</p>
+                    <p>Ça n'atteint pas les oreilles du ricanant Betelgeuse, reclus dans son propre monde comme il l'est, ce murmure faible et silencieux-</p>
+                    <p class="dialogue">« Oh, vraiment ? »</p>
+                    <p>-Le fou ne remarque pas non plus le sombre sourire de Natsuki Subaru.</p>
+                    <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※※※※※※※※</p>
+                    <p>Il enfonce l'épée dans leur corps maigre, tourne.</p>
+                    <p>Le retour provenant de la pointe de l'épée l'informe qu'il vient de sectionner quelque chose de vital.</p>
+                    <p>Et avec un souffle fin et rauque-</p>
+                    <p class="dialogue">« Tu ne vas sans doute pas me croire quand je dis ça, mais. »</p>
+                    <p class="dialogue">« Po, urquoi... ? »</p>
+                    <p class="dialogue">« Je pensais que tu étais l'un des meilleurs parmi un groupe de gens antipathiques, Bete-san. »</p>
+                    <p>Ses yeux sont écarquillés par le choc alors qu'ils fixent désespérément ceux de Subaru.</p>
+                    <p>La surprise reste avec lui alors qu'il bascule lentement en arrière, Subaru retirant l'épée de sa poitrine. L'élan fait trébucher Subaru en arrière. Il respire profondément.</p>
+                    <p>Aux pieds de Subaru gît Betelgeuse Romanée-Conti dans une mare de sang.</p>
+                    <p>Betelgeuse, mourant, son cœur détruit par l'action personnelle de Subaru.</p>
+                    <p class="dialogue">« Ça a été un véritable effort de mettre en place toute cette situation. Pour la folie avec laquelle tu agis, tu es juste un peu trop méticuleux. Sérieusement, je suis resté bloqué tellement de fois. »</p>
+                    <p class="dialogue">« Qu'est-ce que, tu... ES... EN TRAIN DE DIRE ? »</p>
+                    <p class="dialogue">« Je parle de tous les essais et erreurs qu'il m'a fallu pour arriver ici. Je veux dire, ça vaut aussi pour la planification de ma stratégie, mais obtenir ma carte maîtresse et tout le reste, c'était sérieusement risqué. Tu n'as aucune idée à quel point je suis soulagé. »</p>
+                    <p>Betelgeuse rampe, insufflant de la force dans ses membres impuissants. Mais il manque de force pour se remettre sur pied, se contentant de ramper à reculons, comme s'il fuyait la mort.</p>
+                    <p>Subaru n'a rien à faire. Betelgeuse n'a plus longtemps à vivre.</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 18</div>
+
+                <!-- PAGE 18 -->
+                <div id="page-18">
+                    <p class="dialogue">« Je ne pouvais pas voir la Main Invisible au début, j'étais paniqué à l'idée de ce qui se passait. Gérer vos doigts a causé tout un tas de problèmes aussi... en ce moment, j'ai vraiment l'impression d'avoir accompli quelque chose. »</p>
+                    <p class="dialogue">« Ghh, auhhh... »</p>
+                    <p>Le sang qui coule de Betelgeuse représente les dernières gouttes de sa vie.</p>
+                    <p>Il ne montre aucun signe d'arrêt alors qu'il augmente plutôt en intensité, Subaru le regardant se vider de son sang pendant qu'il révèle tout, à la manière d'un génie du mal.</p>
+                    <p>La Main Invisible, noire.</p>
+                    <p>Les confidents de Betelgeuse et son stock de corps de réserve, les Doigts.</p>
+                    <p>Et la capacité de migrer vers ces corps, sa Possession prolongeant la vie.</p>
+                    <p>Faisant plein usage des trois, Betelgeuse avait été la parfaite illustration de sa 'diligence' bien-aimée alors qu'il tentait de coincer Emilia. L'abattre avait vraiment été un effort éreintant.</p>
+                    <p>En fait, il a fallu plus de quatre cents tentatives et erreurs à Subaru pour arriver ici.</p>
+                    <p class="dialogue">« Ce qui fait de toi la personne à qui j'ai le plus parlé au monde. Je sais à quel point c'est follement déséquilibré, mais j'ai l'impression que tu es un peu un ami. En te regardant faire tout ce que tu pouvais pour atteindre tes objectifs, jouer toutes les cartes que tu avais, je veux dire que je dois avouer que j'ai été touché. »</p>
+                    <p class="dialogue">« Qu'est-ce que tu dis... qu'est-ce que tu dis qu'est-ce que tu dis es-tu en train de dire estuentraindedireestuentraindedire !! »</p>
+                    <p>À la toute fin de la fin, une force livide pénètre dans son corps moribond. Concentrant absolument toute cette force sur lui-même, Betelgeuse redresse sa forme mourante.</p>
+                    <p>Il crache du sang - littéralement, alors qu'il se déverse de sa bouche, ses yeux injectés de sang s'écarquillant brutalement alors qu'il se tourne vers Subaru.</p>
+                    <p class="dialogue">« Traître ! Traître qui rejette l'amour de la Sorcière ! Tu ne peux pas être, tu ne peux pas être, PARDONNÉ !! »</p>
+                    <p>Betelgeuse tend sa main ensanglantée.</p>
+                    <p>Il ne le fait pas pour activer la Main Invisible. Une main invisible n'a aucun intérêt lorsqu'elle est perceptible.</p>
+                    <p>Ce à quoi Betelgeuse s'accroche c'est-</p>
+                    <p>-Les conditions requises pour que l'esprit maléfique, Betelgeuse Romanée-Conti, pirate le corps d'un autre.</p>
+                    <p>Le processus pour lui de posséder les corps de ceux ayant des fondements en tant que spiritualistes.</p>
+                    <p>Il n'y a qu'une seule personne ici qui remplit ces qualifications-</p>
+                    <p class="dialogue">« Ton corps est !! »</p>
+                    <p>À moi ! Est ce que Betelgeuse a l'intention de dire, mais Subaru se contente de soupirer.</p>
+                    <p>Il marche tranquillement vers Betelgeuse, et lui décoche un coup de pied au visage alors qu'il est mourant. La force du coup déloge certaines des dents de Betelgeuse - abasourdi, Betelgeuse recule.</p>
+                    <p>Il n'avait pas pu se transférer dans ce corps prétendument volable.</p>
+                    <p>La réponse de Subaru ne vient pas sous forme de mots, mais sur sa main gauche levée - où là, sur ses doigts, flotte une faible lumière rouge.</p>
+                    <p>C'est une entité appelée esprit mineur.</p>
+                    <p>Qui a conclu un contrat avec Natsuki Subaru qui a des fondations en tant que spiritualiste, un outil mignon</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 19</div>
+
+                <!-- PAGE 19 -->
+                <div id="page-19">
+                    <p>pour éclairer les voies sombres.</p>
+                    <p>L'Esprit Maléfique Betelgeuse ne peut posséder que les corps de spiritualistes dépourvus de contrats.</p>
+                    <p>Qui pourrait deviner combien de morts il a fallu à Subaru avant qu'il ne découvre cela.</p>
+                    <p class="dialogue">« Ça a été les trois jours les plus longs de ma vie. Bien que de ton point de vue, nous ne nous connaissions pas depuis très longtemps du tout... »</p>
+                    <p class="dialogue">« NATSUKI SUBARUUUUUU !! »</p>
+                    <p class="dialogue">« Tu as ciblé Emilia. -Regrette-le. »</p>
+                    <p>Betelgeuse crache un cri d'inimitié, lorsque Subaru lui donne un coup de pied dans la poitrine et abat l'épée sur son visage. La lame s'enfonce dans le crâne de Betelgeuse, démolissant son cerveau et sa vie.</p>
+                    <p>Le hurlement de mort strident s'arrête. Subaru fait reposer son poids sur l'épée dans Betelgeuse, en soupirant.</p>
+                    <p>En réalité très courte, mais selon la perception de Subaru incroyablement longue, la bataille avec Betelgeuse est terminée.</p>
+                    <p>Des sentiments d'accomplissement et de découragement l'envahissent.</p>
+                    <p class="dialogue">« Hmmhmm ? On dirait que tu as déjà fini toi aussi. »</p>
+                    <p>Après une période de silence, une voix s'adresse à Subaru.</p>
+                    <p>Il se retourne pour trouver une silhouette massive se cachant à travers les buissons et les arbustes - appartenant à une bête à fourrure noire avec une tête de lion et quatre membres horribles, s'approchant de lui.</p>
+                    <p>Naturellement, ce n'est pas la bête qui s'adresse à lui. C'est la fille montée sur son dos, lançant à Subaru un regard aguicheur.</p>
+                    <p class="dialogue">« Ouais, j'ai tout fini. Merci, Mei Lee. »</p>
+                    <p class="dialogue">« Pas de soucis. Tu nous paies, et tu as pris soin d'Elsa. Mais es-tu sûr de ton coup ? Je croyais qu'ils étaient tes potes. »</p>
+                    <p class="dialogue">« Faut s'le demander. S'il n'avait pas essayé de me tuer à la fin, alors peut-être que tu aurais pu nous appeler des amis avec une différence d'âge, mais il a essayé de me tuer alors... malheureusement disqualifié en tant qu'amis, je suppose ? »</p>
+                    <p>Tout en utilisant sa manche pour essuyer le sang qui a rebondi sur lui, Subaru hausse les épaules vers la fille, Mei Lee. Elle pose son doigt sur son menton.</p>
+                    <p class="dialogue">« Hrmmm. Je n'essaie pas de te tuer, alors ça veut dire que nous sommes amis ? »</p>
+                    <p class="dialogue">« En suivant la logique, c'est le cas. Toi et moi sommes amis, Mei Lee. »</p>
+                    <p class="dialogue">« Ahh, ouais ! Maintenant, si tu comptes Petra-chan et les autres aussi, j'ai plein d'amis ! »</p>
+                    <p>Joignant les mains, Mei Lee balance joyeusement les épaules alors qu'elle est assise au sommet de la bête. Son attitude enfantine fait lever un sourcil à Subaru, et sa déclaration sur le fait d'avoir des amis l'étonne.</p>
+                    <p class="dialogue">« Huh, je suis surpris. C'est un sacré truc de dire ça, mais tu as vraiment des amis. »</p>
+                    <p class="dialogue">« Sii. Mais je les ai tous tués. »</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 20</div>
+
+                <!-- PAGE 20 -->
+                <div id="page-20">
+                    <p>Dit Mei Lee, souriant légèrement, et n'ayant pas du tout l'air coupable.</p>
+                    <p>Elle les a tués. Donc, c'était probablement des personnes avec qui elle était impliquée par le travail. Il avait pensé que Mei Lee avait certains aspects enfantins en elle, mais oui, sa morale est tordue.</p>
+                    <p>Eh bien, c'est la sœur d'Elsa, alors à quoi vous attendez-vous.</p>
+                    <p class="dialogue">« Quoi qu'il en soit, ça a été d'une grande aide que tu pallies mes lacunes. Si tu n'avais pas été là, je n'aurais jamais réussi à tuer tous les doigts par moi-même. »</p>
+                    <p class="dialogue">« Ne t'en fais pas. Mais, avais-tu vraiment besoin de te donner tant de mal pour nous embaucher ? Tu aurais pu demander à quelqu'un de plus convenable, comme les Chevaliers. »</p>
+                    <p class="dialogue">« Je ne serais pas capable de réaliser une partie de mon but si je faisais ça. »</p>
+                    <p class="dialogue">« Un but ? »</p>
+                    <p>Mei Lee incline la tête alors qu'elle tente de sonder les pensées de Subaru. Mais Subaru ne donne pas plus d'explications, se contentant d'esquisser un sourire et,</p>
+                    <p class="dialogue">« Le reste de cette discussion est pour les adultes. Les enfants tels que toi n'auraient pas besoin d'en entendre parler, Mei Lee. »</p>
+                    <p class="dialogue">« Ahh ! Mince, tu me traites comme une gamine ! Je m'en fiche de toi, monsieur, j'ai fini, je m'en ficheeeee ! »</p>
+                    <p>Dit Mei Lee avec colère, tandis que la bête grogne comme si elle était déclenchée par sa colère.</p>
+                    <p>Elle lâche son animal de compagnie sur lui. Après tous les efforts qu'il a déployés pour enfin tuer Betelgeuse, il préférerait vraiment que cette tentative ne se solde pas par un échec.</p>
+                    <p>S'efforçant de réparer l'humeur de Mei Lee, Subaru fait de son mieux en tant que lèche-bottes.</p>
+                    <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※※※※※※※※</p>
+                    <p>Quelques jours après le début de la Sélection Royale, un changement assez important est survenu dans les territoires de Lugnica.</p>
+                    <p>Le plus grand changement a été que la candidate favorite pour le titre de souverain, la duchesse Crusch Karsten, s'est retirée de la course - bien que la seule personne à comprendre toute la vérité sur la situation ait été Subaru.</p>
+                    <p>Parce que toutes les traces de cette soi-disant 'Crusch' ont été effacées du monde, éliminées avec le fait même qu'elle ait jamais existé, révisées par le monde comme n'ayant jamais été là du tout.</p>
+                    <p>Ce qui signifie que la Sélection Royale a désormais toujours été composée de quatre personnes, que les souvenirs des partisans de la duchesse Karsten ont été déformés, et qu'ils sont devenus les alliés d'autres factions.</p>
+                    <p class="dialogue">« Mec, le brouillard de la Baleine Blanche est terrifiant. Aller jusqu'à effacer les archives sur les gens. »</p>
+                    <p>C'est un mystère de savoir pourquoi c'est inefficace seulement sur Subaru. Mais, étant donné que Subaru ne ressent aucune sensation particulière lui-même, c'est juste pénible de voir comment d'étranges incohérences continuent d'apparaître lorsqu'il a des conversations avec les gens.</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 21</div>
+
+                <!-- PAGE 21 -->
+                <div id="page-21">
+                    <p>Il aimerait pouvoir simplement oublier cette stupide Crusch Karsten.</p>
+                    <p>Quelqu'un mort parce qu'il a combattu un ennemi qu'il ne pouvait espérer égaler n'aurait jamais l'opportunité de revenir.</p>
+                    <p>La seule personne au monde qui pourrait avoir cette opportunité est Natsuki Subaru.</p>
+                    <p>Et donc les vaincus ne font rien d'autre que servir de rappels : ne fais pas les choses idiotes qu'ils ont faites.</p>
+                    <p>Mais un autre changement, non pertinent pour tout le monde sauf pour Subaru, s'est également produit.</p>
+                    <p>Qui est-</p>
+                    <p class="dialogue">« Candidate à la Sélection Royale, Emilia. Celle qui a subjugué le tourmenteur pérenne du monde, le Cardinal de la Paresse du Culte de la Sorcière ! »</p>
+                    <p>Le Royaume est en ébullition avec la nouvelle, et apparemment même les nations étrangères sont au courant de l'exploit.</p>
+                    <p>Même Subaru est surpris par l'efficacité d'une telle propagande. Une victoire s'inscrivant dans 400 ans de morts, revendiquée par Natsuki Subaru — qu'il a transférée dans son intégralité à l'homme-clown louche soutenant Emilia.</p>
+                    <p>La question de savoir comment le Margrave réagirait aux négociations pour donner les exploits à Emilia était honnêtement un pari du même niveau que subjuguer Betelgeuse, mais-</p>
+                    <p class="dialogue">« Il était tellement d'accord avec ça que c'en était dégoûtant. »</p>
+                    <p>Le Margrave Roswaal L. Mathers a reçu la proposition de Subaru, y a facilement consenti, et a immédiatement annoncé que la subjugation de Betelgeuse était l'exploit d'Emilia.</p>
+                    <p>Bien qu'il trouve quelque chose de louche chez lui, Subaru n'a aucun scrupule quant aux actions de Roswaal.</p>
+                    <p>Ce monde dénigre Emilia pour des raisons stupides et absurdes. Et pourtant, Roswaal s'est annoncé comme son partisan, est devenu son mécène et a promu sa participation à la Sélection.</p>
+                    <p>C'était peut-être un simple caprice, ou plus probablement, il espérait en tirer profit si l'infime chance qu'Emilia prenne le trône venait à se concrétiser.</p>
+                    <p>La façon dont il a foncé en bavant partout en réponse au rapport de Subaru sur Betelgeuse en était une bonne preuve.</p>
+                    <p class="dialogue">« Aucun problème. Faites ce que vous voulez, Monsieur le Margrave. Tant que vous êtes du côté d'Emilia, je me mettrai de votre côté aussi. Comme vous vous y attendez, la Souveraine sera Emilia. »</p>
+                    <p>Subaru fera tout ce qu'il peut avec son pouvoir défiant la mort pour y parvenir.</p>
+                    <p>Mais s'il s'avère que Roswaal a des désirs sordides ou des pensées déplacées à propos d'Emilia, alors-</p>
+                    <p class="dialogue">« Cela signifie simplement une autre pierre tombale érigée pour le bien d'Emilia. »</p>
+                    <p>S'il va continuer à opérer dans l'ombre, à l'insu d'Emilia, alors il n'a pas d'autre choix que de confier les activités plus publiques à Roswaal.</p>
+                    <p>En échange, Subaru concrétisera le moindre plan possible derrière des portes closes.</p>
+                    <p>Et dans ce but-</p>
+                    <p class="dialogue">« Je me suis démené pour te sauver. Je vais avoir besoin de ton aide, le Bleu. »</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 22</div>
+
+                <!-- PAGE 22 -->
+                <div id="page-22">
+                    <p>Au fond de la grotte se trouve une prison à barreaux métalliques.</p>
+                    <p>Enchaîné dans cet espace froid se trouve quelqu'un portant des vêtements sales. Des oreilles de chat poussent sur la tête de ce frêle homme aux allures de fille vêtu d'un uniforme de chevalier, apparemment.</p>
+                    <p>Pendant que Subaru courait dans tous les sens pour mettre de l'ordre après la mort de Betelgeuse et le carnage de la Baleine Blanche, il a trouvé ce butin et a ramené l'outil à la maison.</p>
+                    <p>Mais pour l'instant, Subaru a eu très peu d'occasions de contempler les talents de guérisseur du légendaire Bleu.</p>
+                    <p>Bon sang, il ne soigne même pas ses propres blessures, il se contente de fixer le sol de la prison et de pleurer sans fin.</p>
+                    <p class="dialogue">« ...Quelqu'un, dites-moi. Dites-moi. Pourquoi suis-je... où est Son Altesse ? À quoi servais-je ? Il y avait quelqu'un. Il devait y avoir quelqu'un. Tout est étrange s'il n'y en avait pas. Mais... »</p>
+                    <p class="dialogue">« Mince, je suis bloqué. Ça va prendre du temps pour celui-là. »</p>
+                    <p>Subaru se gratte la tête en retirant de sa poche de poitrine une note. C'est l'avis qui informait du début de la Sélection Royale, que Subaru a gardé jalousement et infailliblement sur lui.</p>
+                    <p>L'avis ne ressemble plus à ce que Subaru connaît. Il est censé y avoir cinq candidates d'énumérées — mais maintenant il n'y en a que quatre, et les descriptions ont diminué.</p>
+                    <p>Le changement dû à l'abolition de l'existence de Crusch Karsten avait affecté l'avis.</p>
+                    <p>Mais Subaru se souvient. Il l'a peut-être complètement ignorée, mais il a relu ce truc d'innombrables fois. Le Chevalier de Crusch Karsten s'appelle Felix Argyle.</p>
+                    <p>Ce qui devrait être le même que ce guérisseur ici, le Bleu.</p>
+                    <p class="dialogue">« Ma théorie était que lorsque quelqu'un est effacé par le brouillard de la Baleine, tes souvenirs compensent en changeant d'une manière qui ne semble pas anormale, mais... regarde juste ça. »</p>
+                    <p class="dialogue">« Quelqu'un, que quelqu'un me dise... Son Altesse, Son Altesse ? Son Altesse, et, quelqu'un d'autre... ? »</p>
+                    <p class="dialogue">« Quand ils sont si importants que tu ne peux pas compenser les souvenirs manquants, j'imagine que c'est ce qui t'arrive. »</p>
+                    <p>Quand la personne disparue est une part si massive du caractère de quelqu'un, bien sûr qu'il s'effondre quand cette personne disparaît du monde.</p>
+                    <p>C'est pourquoi le Bleu a fini par marmonner encore et encore comme une poupée brisée.</p>
+                    <p>Malheureusement, pas même Subaru ne sait comment réparer l'esprit brisé du Bleu.</p>
+                    <p>Subaru n'a jamais interagi avec celle qui protégeait le cœur du Bleu. Et même à supposer qu'il remonte le temps, il n'est pas certain de l'endroit où il reviendrait.</p>
+                    <p>Et donc Subaru ne sait pas quelle histoire s'était tissée entre eux.</p>
+                    <p class="dialogue">« Mais quand même, j'ai trouvé un beau pion ici. Tout va bien. Je vais combler les fractures de ton cœur, c'est sûr. »</p>
+                    <p class="dialogue">« Quelqu'un, s'il vous plaît... dites-moi. Moi, pourquoi suis-je... »</p>
+                    <p>Le Bleu ne montre absolument aucune réaction face à Subaru.</p>
+                    <p>Cela peut paraître désespéré, mais Subaru continue sans s'alarmer. Il est prêt à prendre son temps.</p>
+                    <p>Un Chevalier guérisseur privé de son soutien. On ne trouve pas très souvent des pions aussi facilement manipulables que ça.</p>
+                    <p>Et donc, Subaru, sérieusement, de tout son cœur,</p>
+                    <p class="dialogue">« Cette fois, je vais absolument trouver comment t'empêcher de te suicider. »</p>
+                    <p>Je suis prêt à mourir n'importe quel nombre de fois pour te défier, affirme-t-il.</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 23</div>
+
+                <!-- PAGE 23 -->
+                <div id="page-23">
+                    <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※<br>※※※※※※※</p>
+                    <p>Toutes les entrées du manoir sont barricadées.</p>
+                    <p>Les portes sont clouées de l'intérieur, et des planches de bois recouvrent toutes les fenêtres. S'il avait été assez attentif pour trouver l'état de ce manoir aux rideaux tirés étrange, peut-être l'aurait-il remarqué.</p>
+                    <p>Bien que naturellement, Subaru ait organisé ces opérations avec la certitude qu'il ne le ferait pas.</p>
+                    <p>Un brasier furieux engloutit l'ensemble du manoir, le réduisant inexorablement en cendres.</p>
+                    <p>La flamme qui a déclenché cet incendie ne connaît aucune pause, brûlant de plus en plus furieusement alors qu'elle consume tout le manoir, hurlant des exigences frénétiques que tout retourne à la poussière.</p>
+                    <p>Les meubles et les ornements du manoir enflammé ne sont pas les seules choses à se carboniser.</p>
+                    <p>Les nombreuses femmes qui ont passé un long moment d'agonie dans ce manoir perdent également la vie dans l'étreinte des flammes et de la fumée, leurs formes se désintégrant en suie, indiscernables d'avoir jamais été une personne.</p>
+                    <p>Un acte macabre. Quiconque le penserait devant une telle barbarie.</p>
+                    <p>Mais c'était en fait ce que les femmes brûlées désiraient ! C'est ce que vous pourriez prétendre, mais qui vous croirait ?</p>
+                    <p class="dialogue">« Bordel, bordel, c'est quoi ces conneries !! »</p>
+                    <p>Les langues de feu gagnent en intensité, davantage repoussées par le vent. À travers ce manoir enflammé résonne le son d'un homme qui jure.</p>
+                    <p>Sa voix est si forcée que c'en est pathétique alors qu'il hurle à l'intérieur de ce bâtiment en flammes qui s'effondre.</p>
+                    <p>Il hurle dans une frénésie totale, la situation dépassant son entendement, inconscient de ce qui a bien pu se passer.</p>
+                    <p class="dialogue">« N°99 ! N°114 ! Même la n°123 ferait l'affaire ! Où êtes-vous !? Où vous êtes-vous enfuies !? Pour qui vous prenez-vous !? M'abandonner ici pendant que vous partez expirer, quel genre de femmes irresponsables et égoïstes êtes-vous !? »</p>
+                    <p>Sa voix se brise alors qu'il hurle comme un enfant faisant un caprice, ce jeune homme aux cheveux blancs.</p>
+                    <p>Des vêtements blancs habillent sa silhouette, son visage banal devenant macabre comme celui d'un démon alors qu'il délire.</p>
+                    <p>Il offre un spectacle très étrange à l'intérieur de cet incendie désastreux au manoir.</p>
+                    <p>Une personne saine d'esprit ferait tout ce qu'elle peut pour échapper au brasier.</p>
+                    <p>Mais l'homme ne montre aucune intention de le faire. En fait, c'est comme s'il n'avait pas envisagé un seul instant qu'il allait mourir, fonctionnant selon une sorte de dogme qui transcende la mortalité.</p>
+                    <p>Il est fou, ou plutôt non.</p>
+                    <p>-Non, il est incorrect de nier qu'il est fou, mais en vérité, il est profondément confiant.</p>
+                    <p>Ce feu ne peut pas le tuer, croit-il.</p>
+                    <p>Et donc les cris et les jurons de l'homme n'ont absolument rien à voir avec la peur pour sa propre vie.</p>
+                    <p>C'est dû à la rage inestimable qu'il éprouve envers ses épouses, qui ont probablement commis cet incendie criminel.</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 24</div>
+
+                <!-- PAGE 24 -->
+                <div id="page-24">
+                    <p class="dialogue">« Tous ces maudits individus, qui prennent mes biens limités et dénigr- »</p>
+                    <p class="dialogue">« -J'apprécierais que tu fermes ta bouche désagréable. »</p>
+                    <p class="dialogue">« Nuh »</p>
+                    <p>Le visage de l'homme frénétique mange un coup de pied qui vient fracasser un mur en flammes.</p>
+                    <p>Étourdi par l'angle imprévu de la frappe, et d'ailleurs par l'attaque imprévue elle-même, l'homme vole facilement le long du couloir. Même le mur en feu devient cassant, incapable de résister à la collision avec lui alors qu'il se brise.</p>
+                    <p>Il dégringole pour s'arrêter étalé sur le sol et regarde le plafond en feu avec un choc abasourdi.</p>
+                    <p class="dialogue">« Qu'est-ce, que... »</p>
+                    <p class="dialogue">« Ce feu est la lettre d'adieu de tes nombreuses épouses. Pour parler clairement, il semble que ce soit la fin de ces chaînes d'amour nées de la terreur. »</p>
+                    <p>La voix qui répond à l'homme étonné est la même que celle qu'il a entendue lorsqu'il a reçu le coup de pied.</p>
+                    <p>L'homme se redresse d'un coup, rampe à travers le mur brisé — pour voir une femme vêtue de noir entrer dans la pièce en feu.</p>
+                    <p>Son sourire est resplendissant, et sa longue tresse noire est caractéristique.</p>
+                    <p>Mais ce qui en dit le plus sur son identité est, tenu dans sa main droite, son kukri-</p>
+                    <p class="dialogue">« Cambrioleuse ! Pour qui te prends-tu !? Tes pitreries, c'est ce que tu vas... »</p>
+                    <p>Regretter, babille l'homme alors qu'il lève les bras pour tenter d'attaquer la femme.</p>
+                    <p>Mais un léger impact et la vue de ses bras, sectionnés aux coudes et volant dans les airs, le déjouent. Il baisse les yeux. Observe que ses bras ont disparu.</p>
+                    <p>Impossible. Que se passe-t-il sur terre ?</p>
+                    <p class="dialogue">« Immortel ? Invincible ? J'ai oublié ce que c'était, mais je connais le truc pour comprendre comment ça marche. Maintenant, tu n'es rien d'autre qu'un insecte de personne très désagréable. »</p>
+                    <p class="dialogue">« ! Une catin comme toi- »</p>
+                    <p>Oubliant ses bras manquants, l'homme tente d'insulter la femme. Mais elle ne le laisse pas en dire un mot.</p>
+                    <p>Elle balance sa jambe, balayant entre ses jambes alors qu'il est assis sur le sol, et procède à le frapper à l'entrejambe. Le coup est assez fort pour le projeter en l'air tandis que la femme brandit sa lame de mort.</p>
+                    <p>Elle sectionne maintenant ses bras aux épaules et découpe des morceaux de viande ronds dans ses jambes, des pieds jusqu'aux cuisses. Ses orteils, ses chevilles, ses tibias, ses genoux, ses cuisses, tous soumis à des entailles, le sang abondant alors que le corps de l'homme se transforme rapidement en quelque chose d'atroce.</p>
+                    <p class="dialogue">« -Ma »</p>
+                    <p class="dialogue">« C'est incroyable que tu essaies encore de parler dans cet état. »</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 25</div>
+
+                <!-- PAGE 25 -->
+                <div id="page-25">
+                    <p>La femme plonge son pied dans le torse de l'homme, désormais une cible considérablement plus petite, ce qui le propulse à travers la fenêtre prétendument barricadée et à l'extérieur du manoir en feu.</p>
+                    <p>Aux côtés d'éclats de verre de fenêtre brisés, il tombe, incapable de se rattraper avec ses membres manquants, sur la terre. Il est heureux qu'il ne soit tombé que du deuxième étage, ce qui lui permet d'échapper à des blessures mortelles liées à la chute.</p>
+                    <p>Bien que son absence de membres et sa perte de sang écrasante soient déjà largement mortelles.</p>
+                    <p class="dialogue">« Comme si je pouvais supporter cette idiotie abjecte....Je, je suis l'être le plus perfectionné au monde. Manquant de peu, conscient de mon adéquation, humble et sans avarice, c'est ainsi que je vis ma vie... et donc, pourquoi dois-je, de tous les gens, faire face aux chahuts d'échecs humains de ton... »</p>
+                    <p class="dialogue">« Quand on insulte les gens comme ça régulièrement, bien sûr qu'on se prend les papiers du divorce dans la figure, Regulus-san. »</p>
+                    <p class="dialogue">« Hauh !? »</p>
+                    <p>Même se retourner sur le côté est une tâche ardue pour cet homme, lorsque la vue de quelqu'un de nouveau coupe sa vision.</p>
+                    <p>Un garçon aux cheveux sombres et aux yeux sombres qui revêt une robe sombre - Natsuki Subaru.</p>
+                    <p>Il est pitoyable de voir à quel point l'homme a peu saisi la situation. Subaru soupire face à lui.</p>
+                    <p class="dialogue">« Je n'aurais jamais pensé que tout le monde collaborerait si bien pour réussir ça, Regulus-san. »</p>
+                    <p class="dialogue">« Pourquoi, es-tu ici... non, alors, tu as conçu ça ? »</p>
+                    <p class="dialogue">« Quelqu'un d'autre le pourrait-il ? »</p>
+                    <p>L'homme, Regulus, finit par comprendre ce qui se passe alors que Subaru hausse les épaules, la bouche tordue en un sourire narquois. Rabaissé, les yeux de Regulus abritent la fureur.</p>
+                    <p class="dialogue">« Sois maudit, espèce de sous-merde ! Comprends-tu ce que tu as fait !? Tu as pris mes épouses, mes épouses bien-aimées ! Et en ma présence, tu les as brûlées vives avec mon manoir ! Comprends-tu l'immoralité et la méchanceté de tes actes ! Crétin de meurtrier d'épouses ! »</p>
+                    <p class="dialogue">« Mec, cet angle est tellement inattendu que je suis trop stupéfait pour parler....Juste pour dire, tes épouses ont offert leur propre vie pour la stratégie anti-cœur. »</p>
+                    <p class="dialogue">« -Im, possible. »</p>
+                    <p>Subaru se cure l'oreille, l'air étonné alors qu'il informe Regulus de cela. Regulus reste sans voix.</p>
+                    <p>C'est cette chose où Regulus trouve cela si totalement inattendu que Subaru trouve cela incompréhensible.</p>
+                    <p>Regulus gardait de nombreuses femmes surnommées « épouses » dans son manoir, vantant la grandeur d'une vie conjugale où il menaçait de les assassiner violemment si elles lui désobéissaient jamais.</p>
+                    <p>S'il ne s'agissait que de cela, cela ressemblerait juste à un genre de harem horriblement malveillant, mais la répugnance du Cardinal ne s'arrête pas là. Le scélérat a confié son propre cœur à ses épouses, rendant son propre corps arrêté dans le temps, immortel et invincible.</p>
+                    <p>La seule façon de tuer le Cardinal de la Cupidité, Regulus Corneas, est de lui rendre son cœur.</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 26</div>
+
+                <!-- PAGE 26 -->
+                <div id="page-26">
+                    <p>Cela signifie tuer toutes ses cibles hébergeant son cœur, ses épouses, et le priver de tout endroit où se cacher.</p>
+                    <p>Même Subaru s'est torturé l'esprit avant de prendre cette décision.</p>
+                    <p>Mais ce sont les épouses emprisonnées de Regulus — non — les femmes emprisonnées qui ont résolu le conflit pour lui.</p>
+                    <p class="dialogue">« Elles étaient prêtes à mourir tant que ça leur permettait de se venger de toi. Mec, même moi je n'ai pas vraiment entendu parler d'abus verbaux assez graves pour pousser les gens à faire ça. »</p>
+                    <p class="dialogue">« Qui pourrait bien croire ça, de telles absurdités... Je, j'aimais mes épouses ! Et donc elles devraient m'aimer en retour ! Oui !? Tu ne trouves pas ça étrange sinon !? Et pourtant ! Pourquoi ces maudites femmes m'ont-elles infligé une telle souffrance, ça les indisposerait en tant qu'épouses ! »</p>
+                    <p class="dialogue">« ...Tu es sérieux. C'est ce qui est terrifiant chez vous les gars. »</p>
+                    <p>Murmure Subaru, l'air agacé alors qu'il détourne le regard de Regulus.</p>
+                    <p>Ce sur quoi son regard se pose à la place est la silhouette noire qui saute du manoir en flammes et atterrit dans le jardin. Elsa. Elle époussette la suie d'elle-même avant de remarquer le regard de Subaru.</p>
+                    <p class="dialogue">« Bonté divine, tu t'inquiétais pour moi ? Rassure-toi. Je n'ai été blessée nulle part. »</p>
+                    <p class="dialogue">« Je ne m'inquiète pas pour toi. Bref, qu'est-ce que c'est que ça. Je ne t'ai pas dit de lui faire ces conneries de mauvais goût. »</p>
+                    <p>Les lèvres de Subaru se tordent en une moue réprobatrice alors qu'il pointe du doigt Regulus, amputé de ses membres.</p>
+                    <p>Regulus avait des membres la dernière fois que Subaru l'a vu, c'est donc définitivement Elsa qui a fait ça. Elle hausse les épaules.</p>
+                    <p class="dialogue">« J'ai eu l'impression qu'il serait odieux s'il les avait... Et ne voulais-tu pas lui transmettre ce qu'elles ont dit ? »</p>
+                    <p class="dialogue">« ...Ouais. Tu as raison. »</p>
+                    <p>De manière surprenante, on dirait qu'Elsa peut être prévenante envers les gens.</p>
+                    <p>Il est mal de laisser mourir Regulus sans lui communiquer comment les femmes sacrifiées se sont résolues alors qu'elles le prenaient au piège.</p>
+                    <p>Et maintenant qu'elles ont communiqué cela,</p>
+                    <p class="dialogue">« GghaaaaAH ! »</p>
+                    <p>Elsa plante son kukri dans la poitrine de Regulus, l'utilisant pour soulever lentement son corps léger en l'air. C'est comme s'il était une sorte de nourriture sur un bâton, le sang coulant de lui alors qu'il a soif de vie sans relâche.</p>
+                    <p class="dialogue">« Instantané ? »</p>
+                    <p class="dialogue">« Non... »</p>
+                    <p>Subaru porte la main à son menton en répondant à la question d'Elsa, plongé dans ses pensées.</p>
+                    <p>Il n'est peut-être pas Elsa, mais Subaru a un cœur qui ressent de la sympathie et de l'indignation, tout comme le ferait n'importe qui. Et ce cœur exige qu'il rembourse les femmes qui ont désiré, en pleurant, la mort.</p>
+                    <p>Et donc, Subaru ordonne à Elsa :</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 27</div>
+
+                <!-- PAGE 27 -->
+                <div id="page-27">
+                    <p class="dialogue">« Jette-le dans une partie plus faible du feu. Nous allons le regarder brûler. »</p>
+                    <p class="dialogue">« Très bien, c'est compris. »</p>
+                    <p>Elsa hoche la tête face aux cruelles instructions de Subaru, sans avoir l'air le moins du monde partagée.</p>
+                    <p>Elle procède à jeter Regulus, qui maudit, sur une pile de restes de bois fumants à la lisière du manoir en flammes.</p>
+                    <p>Son corps brûlant, pour être rôti dans les flammes jusqu'à la mort, le cri de l'homme résonne dans le ciel nocturne.</p>
+                    <p>Sans que leurs expressions ne changent le moins du monde, Subaru et Elsa le regardent mourir.</p>
+                    <p class="dialogue">« Un insecte, vu à quel point son bruit est apaisant, lui serait préférable. »</p>
+                    <p>Une fois que la longue, longue plainte mortelle touche à sa fin, Elsa donne son avis.</p>
+                    <p>Et Subaru est bien d'accord.</p>
+                    <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※※※※※※※※</p>
+                    <p>-Pour Subaru, le bris de verre porte le son d'une confiance brisée.</p>
+                    <p class="dialogue">« Ceci, c'est... »</p>
+                    <p class="dialogue">« Je suis désolé. Je suis tellement désolé. Je ne voulais pas faire ça. Je ne le voulais vraiment, vraiment pas. »</p>
+                    <p>Sa voix tremblante de choc, l'homme presse son coude sur le comptoir. Mais cela ne parvient pas à le soutenir et le haut de son corps glisse du comptoir, renversant sa chaise alors qu'il s'effondre sur le sol de la boutique.</p>
+                    <p>Pris dans la chute, le verre et la bouteille sur le comptoir tombent, se brisant contre le sol et salissant l'uniforme blanc de l'homme avec une odeur d'alcool.</p>
+                    <p>Ses membres ne fonctionnent plus correctement, sa vie s'échappe lentement. Ses lèvres deviennent violettes, sa vision devient de plus en plus floue alors qu'il cligne, cligne et cligne des yeux, essayant de chasser sa mort imminente.</p>
+                    <p>Subaru observe la ruée effrénée de l'homme pour la vie depuis son siège à la table.</p>
+                    <p>Le visage de l'homme est raffiné. Son corps est souple, et tant son maintien lorsqu'il est entré dans le magasin que son élocution en s'adressant à son ami regorgeaient d'élégance. En effet, le plus chevaleresque des chevaliers.</p>
+                    <p class="dialogue">« Je suis d'accord avec le fait qu'on vous appelle l'Impeccable, Julius Euclius-san. »</p>
+                    <p class="dialogue">« Toi, cabot... »</p>
+                    <p class="dialogue">« Mais, si tu pensais davantage à ta position, tu aurais eu tout intérêt à faire un peu plus attention aux autres. Tu es le Chevalier d'une candidate à la Sélection Royale qui se trouve au sommet de sa popularité. Tu dois prendre en compte que ce n'est pas seulement ta maîtresse, tu seras aussi pris pour cible. Cependant... »</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 28</div>
+
+                <!-- PAGE 28 -->
+                <div id="page-28">
+                    <p>Subaru se lève, pontifiant devant Julius qui halète à l'agonie, et tend la main. La trajectoire de sa main se dirige vers la personne sur la chaise à côté du Julius tombé au sol.</p>
+                    <p>Oreilles de chat brun lin et traits adorables. Subaru tire doucement leurs épaules délicates plus près de lui, daigne lui tapoter la tête. Rien que par ça, les yeux du Bleu se détendent dans une extase ivre.</p>
+                    <p class="dialogue">« Fhel, est-ce... toi... »</p>
+                    <p class="dialogue">« Tu sais que ça m'a demandé pas mal d'efforts pour capitaliser sur son deuil ? Je n'aurais jamais pensé que je finirais par me donner tant de mal pour la vie de quelqu'un d'autre que la sienne. Mais ça a payé. »</p>
+                    <p class="dialogue">« Quel, stratagème es-tu... »</p>
+                    <p class="dialogue">« Ça n'a plus rien à voir avec toi. Détends-toi. Mon hypothèse est que, si tu n'es plus là, alors ta maîtresse ne subira aucun dommage et les choses iront bien pour elle. Je ne sais pas ce qui se passera si elle se rallie par contre. »</p>
+                    <p>Les yeux jaunes de Julius parcourent un mélange chaotique de confusion et de rage, de chagrin et de tourmente, de douleur et de suspicion.</p>
+                    <p>Mais aucune de ces émotions effrénées ne signifie quoi que ce soit.</p>
+                    <p class="dialogue">« Un vieil ami t'appelle pour aller boire, et à la première gorgée tu obtiens ça. La confiance est sûrement un doux poison, Monsieur l'Impeccable. Tu t'y es noyé, et tu as mal calculé. »</p>
+                    <p class="dialogue">« ...poi, son. »</p>
+                    <p class="dialogue">« C'est sûr que c'est agréable d'être quelqu'un dont tout le monde peut être fier. La vie est si facile que ça en est enviable. Tu es mort par contre. »</p>
+                    <p>Subaru s'accroupit et observe le visage de Julius. Il ne regarde même pas Subaru. Il n'est pas obsédé par l'homme qui a ordonné sa mort.</p>
+                    <p>Ce qui reste dans ses yeux, c'est son inquiétude pour son ami, contraint de commettre un meurtre contre sa volonté, et sa pénitence envers sa maîtresse absente-</p>
+                    <p class="dialogue">« Un chevalier jusqu'à la fin. J'abhorre ça. »</p>
+                    <p>Crache Subaru alors qu'il regarde le visage mort de Julius, silencieux pour toujours.</p>
+                    <p>La sensation de nausée dans sa poitrine vient probablement du fait que Subaru n'avait absolument aucune raison de devoir tuer le Chevalier Impeccable.</p>
+                    <p>C'est à peu près la première fois que Subaru ordonne une mort sans justification.</p>
+                    <p>Cela ne lui faisait pas de peine de voir mourir des cultistes ou des Cardinaux. Mais cette fois, le meurtre résulte purement du choix de Subaru de cibler le plus facile à tourmenter.</p>
+                    <p>Il est moins prudent qu'Anastasia Hoshin, toujours entourée de gardes, et plus important encore, le Bleu qu'il a cajolé jusqu'à la dépendance est utilisable sur lui.</p>
+                    <p class="dialogue">« Ai-je bien agi, Subaru-sama ? »</p>
+                    <p class="dialogue">« Tu as été génial. Désolé de t'y avoir forcé. »</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 29</div>
+
+                <!-- PAGE 29 -->
+                <div id="page-29">
+                    <p>Le Bleu s'enquiert doucement auprès de Subaru, se tenant à ses côtés alors que Subaru regarde la mort de Julius jusqu'à la fin.</p>
+                    <p>Subaru hausse les épaules vers lui et lui donne une autre tape.</p>
+                    <p>Si faire cela suffit à calmer son esprit instable, alors il le tapotera autant de fois qu'il le faudra.</p>
+                    <p class="dialogue">« C'est bon, tant que ça vous aide, Subaru-sama. Après tout, faire cela était nécessaire pour façonner l'avenir que vous-même et Son Altesse désiriez, n'est-ce pas ? N'est-ce pas ? »</p>
+                    <p class="dialogue">« Ouais, ça l'est. C'est pourquoi nous ne pouvions pas laisser ton ami en vie. »</p>
+                    <p class="dialogue">« Oui... »</p>
+                    <p>Le visage du Bleu est dépourvu d'émotion, mais la mort de son ami semble tout de même fracturer son esprit alors qu'il s'accroche à la manche de Subaru, comme pour combler le vide dans son cœur.</p>
+                    <p>L'arôme de la mort flotte lourdement dans l'air. Quand,</p>
+                    <p class="dialogue">« -Oh, êtes-vous occupé ? »</p>
+                    <p>L'entrée d'un endroit où personne ne devrait entrer s'ouvre, et un homme à l'air délicat entre dans la boutique.</p>
+                    <p>L'espace d'un instant, Subaru songe à faire taire le témoin, mais heureusement, il n'est pas nécessaire de faire taire cet homme. C'est un initié.</p>
+                    <p class="dialogue">« Tu es vraiment à l'heure. »</p>
+                    <p class="dialogue">« Je le suis. Le temps est fini, et nous, les marchands, croyons que le temps c'est de l'argent. »</p>
+                    <p class="dialogue">« Regarde-toi, à toujours t'appeler marchand, audacieux. Plutôt un marchand de mort. »</p>
+                    <p class="dialogue">« Je n'ai vraiment aucune réponse à cela. »</p>
+                    <p>C'est un homme mince aux cheveux gris qui se gratte la tête en réponse à Subaru.</p>
+                    <p>Avec son costume noir lisse et sa cravate noire, il pourrait ressembler à quelqu'un revenant de funérailles, mais une inspection plus approfondie révèle l'odeur ineffaçable de la mort sur lui.</p>
+                    <p>Ses traits sont doux, tout comme ses yeux, mais la façon dont il jette son regard sur son environnement révèle une méfiance évidente envers les autres, et signale qu'il a survécu à des massacres.</p>
+                    <p>Mais par-dessus tout, Subaru aime ses yeux ternes. C'étaient les yeux de quelqu'un qui ne trouvait aucun avantage à rester en vie, qui avait perdu de vue tout but de vivre, et qui choisissait néanmoins de continuer à vivre comme un cadavre animé. Des yeux d'une nature similaire à ceux du Bleu.</p>
+                    <p class="dialogue">« Ton nom est... je ne crois pas l'avoir jamais saisi. »</p>
+                    <p class="dialogue">« Je ne me suis jamais présenté, et je n'ai pas non plus l'intention de le faire. Naturellement, je n'ai aucune envie de vous demander votre nom non plus, cher client. De cette façon, nous pouvons tous les deux nous détendre. »</p>
+                    <p class="dialogue">« Eh bien, tu as raison. Puisque ce n'est pas comme si nous pourrions jamais être amis. »</p>
+                    <p class="dialogue">« Exactement. Nous deviendrions des ennemis à l'instant où quelque chose se produirait. Et ce que nous voyons ici n'est-il pas le résultat d'avoir appelé de telles personnes des amis ? »</p>
+                    <p>Plaisante l'homme en regardant le cadavre étendu de Julius, et le Bleu qui s'accroche à Subaru.</p>
+                    <p>Obtenir le poison tout comme le nettoyage qui s'ensuivrait sont des choses que Subaru a organisées pendant-</p>
+                </div>
+
+                <div class="page-divider font-sans text-sm tracking-widest">PAGE 30</div>
+
+                <!-- PAGE 30 -->
+                <div id="page-30">
+                    <p>sa collaboration avec cet homme. Car actuellement, Subaru marche sur des cordes raides assez dangereuses.</p>
+                    <p class="dialogue">« Dis merci à Russell pour moi. Je compte encore sur toi pour ça. Je veux dire, tu es son bras droit. »</p>
+                    <p class="dialogue">« Le bras droit de cet homme est au bout de son bras. Moi, je suis un esclave. »</p>
+                    <p>Il pense vraiment avec des rationalisations claires, songe affectueusement Subaru face à la réponse réaliste de l'homme. Tout en ressentant également quelques regrets.</p>
+                    <p>S'ils pouvaient être amis, ils seraient sûrement de bons amis.</p>
+                    <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※※※※※※※※</p>
+                    <p>Subaru répète ses opérations secrètes pour éliminer petit à petit les candidates et les Cardinaux qui se dressent sur son chemin.</p>
+                    <p>Un groupe mystérieux, un repaire de personnes dangereuses, et plus important encore, pas un endroit où l'on interfère trop les uns avec les autres.</p>
+                    <p>Le Culte de la Sorcière a été une mascarade très pratique pour Subaru.</p>
+                    <p>Une mascarade qu'il devrait finalement éteindre, certes, mais les utiliser en gardant cette condition préalable à l'esprit signifie qu'il peut les jeter avec si peu de culpabilité que c'en est rafraîchissant.</p>
+                    <p>Il ne ressentait pas la moindre trace de camaraderie, même pour les Cardinaux.</p>
+                    <p>Il les surveillait constamment pour trouver des failles, méditait sur des moyens de les tuer, testait, et si le plan semblait fructueux, il préparait le terrain. Même s'il échouait, Subaru avait le pouvoir de réinitialiser le monde et de réessayer.</p>
+                    <p>Même Subaru, dans sa situation, a réussi à nouer des relations que l'on pourrait peut-être qualifier de complices.</p>
+                    <p>Même s'il sait qu'aucun cultiste ne devrait être digne de confiance, et qu'il ne devrait pas impliquer plus de gens là-dedans.</p>
+                    <p class="dialogue">« Mais n'avons-nous pas travaillé ensemble tout le long, depuis le début ? Ça me rend heureuse quand tu me laisses t'aider avec toutes ces choses amusantes, monsieur. »</p>
+                    <p class="dialogue">« Je n'ai pas particulièrement l'intention de te soutenir inconditionnellement, mais même maintenant, tu penses à me tuer si l'occasion se présente. Pour une raison quelconque, je trouve ça vraiment agréable. »</p>
+                    <p class="dialogue">« Le rêve de Son Altesse se réalisera si vous êtes là, Subaru-sama. Et donc je resterai toujours avec vous. ...Mais, hein ? Subaru-sama, quand, où vous et Son Altesse êtes-vous devenus... »</p>
+                    <p class="dialogue">« Notre relation n'est sûrement que des requêtes pour du sale boulot. Complices ? Une idée stupide. Nous sommes tous les deux des faillis filiaux qui ne peuvent pas montrer leur visage à leur famille. Ce serait plus agréable de mourir si je le pouvais. »</p>
+                    <p class="dialogue">« Je suis allé assez loin pour qu'il ne reste plus qu'un pas, juste un seul pas avant que le souhait ne soit exaucé. Siiiiiiiiii c'est pour ça que je le fais, alors je vendrai mon âme à un démon. Un démon qui s'appelle toi, ouiiiiiiiiii. »</p>
+                    
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 31</div>
+
+                    <!-- PAGE 31 -->
+                    <div id="page-31">
+                        <p>— Subaru ne considère pas du tout ses actions comme dignes d'éloges.</p>
+                        <p>Quoi qu'il en soit, avant même de s'en rendre compte, des gens sont apparus pour approuver ses actes. Et peut-être que ce fait était sa consolation.</p>
+                        <p>Utilisant le pouvoir du Retour par la Mort, Natsuki Subaru lutte, souhaitant sauver Emilia. Il pensait que la bataille serait solitaire, combattant toujours et encore seul.</p>
+                        <p>Et peut-être que le fait qu'à un moment inconnu, cela ait cessé d'être solitaire était—</p>
+                        <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※<br>※※※※※※</p>
+                        <p>Le brasier engloutit la Capitale. Subaru halète de douleur, regardant le ciel. Il se sent très éveillé.</p>
+                        <p>La douleur pique, mais elle l'aide à dégriser son esprit plutôt qu'à le brouiller. Tout, de ce qui s'est passé à la raison pour laquelle il est ici, est vif.</p>
+                        <p>Dans ses bras, Subaru berce une Mei Lee immobile.</p>
+                        <p>Ses yeux ouverts sont dépourvus de vie, fixant un point absent dans ce monde. Son attitude effrontée, sa voix mielleuse inappropriée, son comportement colérique lorsqu'elle était traitée comme une enfant — rien de tout cela Subaru ne le reverra jamais.</p>
+                        <p>Après tout. C'est ici que Subaru est arrivé après un Retour par la Mort.</p>
+                        <p>Le point de sauvegarde du Retour par la Mort peut changer, mais Subaru n'est jamais remonté plus loin qu'un précédent point d'apparition.</p>
+                        <p>C'est ici que le point du Retour par la Mort s'est déplacé, et comme la Mei Lee dans ses bras est un cadavre, sa vie ne peut plus être sauvée.</p>
+                        <p>Conscient qu'il ne fait que réconforter son propre cœur, Subaru ferme doucement les yeux de Mei Lee. Il n'a pas le droit de prier pour le bonheur posthume des morts. Ses propres mains sont bien trop sales de sang.</p>
+                        <p>Et il en va de même pour Mei Lee. Elle a commis tant de méfaits qu'elle ne pourrait en aucun cas espérer la paix après la mort. Empilant les péchés sur les péchés, les chaînes reliant le groupe de Subaru à l'enfer ne se déferont jamais.</p>
+                        <p class="dialogue">« Mais, quand même... »</p>
+                        <p>Une rencontre avec la mort ne peut être une raison d'abandonner.</p>
+                        <p>N'est-il pas arrivé ici en mourant de multiples fois ? Plus de mille, des dizaines de milliers de fois a-t-il déjà dénigré la vie et profané des vies, avide d'exaucer son propre souhait, pour arriver ici.</p>
+                        <p>Il a frôlé la rupture sous l'agonie de la mort à maintes reprises. Mais à chaque fois, un feu lui brûlait le cœur.</p>
+                        <p>Ce tout premier brasier, le contact de ces doigts, c'est ce qui a permis à Subaru d'atteindre ce stade.</p>
+                        <p>Il n'est plus qu'à un pas de réaliser son désir le plus profond.</p>
+                        <p>Il a fait des victimes, des sacrifices, pour enfin arriver ici.</p>
+                        <p>Et pourtant—</p>
+                    </div>
+
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 32</div>
+
+                    <!-- PAGE 32 -->
+                    <div id="page-32">
+                        <p class="dialogue">« — N'allez pas plus loin. »</p>
+                        <p>La voix descend, féroce, d'en haut.</p>
+                        <p>'Le feu engloutit la Capitale' n'était pas une expression figurée. Le visage qui apparaît au sommet de cette colline, comme s'il amassait le brasier furieux en lui-même, a l'air éblouissant.</p>
+                        <p class="dialogue">« Reinhardt, van, Astreaaaa... »</p>
+                        <p class="dialogue">« Il semble que je n'ai pas besoin de me présenter. Je n'ai pas grand-chose à te dire, non plus. »</p>
+                        <p>Les yeux bleus de Reinhardt transpercent Subaru, agenouillé.</p>
+                        <p>La lueur dans ses yeux diffère de celle que Subaru avait vue il y a longtemps, chargés d'émotions comme ils le sont. Cet homme, qui était resté calme face à une bouchère, était, envers Subaru—</p>
+                        <p>—l'émotion si intense qu'elle en est presque indescriptible, le fixant avec haine.</p>
+                        <p class="dialogue">« Alors tu étais capable de haïr les gens après tout, Saint de l'Épée ! »</p>
+                        <p class="dialogue">« Cela me surprend également. Je ne pensais pas que ces sentiments étaient en moi. »</p>
+                        <p class="dialogue">« Alors tu as trouvé un nouveau toi. Félicitations. Joyeux anniversaire, Reinhardt. »</p>
+                        <p class="dialogue">« Malheureusement, aujourd'hui n'est pas le jour de ma naissance. Mais ce sera le jour de ta mort. »</p>
+                        <p>Subaru peut balbutier des phrases affectées tant qu'il veut. Un homme du calibre de Reinhardt ne se laissera pas décontenancer.</p>
+                        <p>Frappé par la sentence de mort propre à Reinhardt, un sourire naît sur le visage de Subaru.</p>
+                        <p>Avoir détruit ce visage imperturbable, et fait ressortir les émotions qui y étaient enfouies. Subaru sait que c'est totalement inutile, mais c'est la seule chose dont il peut se vanter d'avoir triomphé.</p>
+                        <p class="dialogue">« Ne me fais pas rire, Reinhardt ! Saint de l'Épée ! Épée du Royaume ! Tu es un chevalier qui protège le Royaume de Lugnica !? As-tu protégé un quelconque royaume, ne serait-ce qu'un peu !? Et si tu me disais ça ! »</p>
+                        <p>Crie Subaru, les bras grands ouverts, crachant presque ses mots.</p>
+                        <p>Les deux se font face devant les portes du palais. Tout ce qui est visible de la Capitale depuis ce point de vue est englouti par les flammes — ou non, ce n'est pas seulement la Capitale.</p>
+                        <p>Ce brasier fait rage sur tout le territoire du Royaume de Lugnica.</p>
+                        <p>Peu importe la force de Reinhardt ou à quel point il est un chevalier superbe, que peut-il faire tout seul ? Il ne peut rien faire. Telle est la conclusion de Subaru.</p>
+                        <p class="dialogue">« C'est mon cadeau pour toi ! Un piège que j'ai tendu pour te tuer ! »</p>
+                        <p class="dialogue">« Pour me tuer... ? »</p>
+                        <p class="dialogue">« Combien de fois ! Penses-tu que j'ai essayé de te tuer !? Combien de fois, des dizaines, des centaines et des—</p>
+                    </div>
+
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 33</div>
+
+                    <!-- PAGE 33 -->
+                    <div id="page-33">
+                        <p class="dialogue">— milliers de fois, penses-tu que je t'ai affronté !? »</p>
+                        <p>Les hurlements incompréhensibles de Subaru font se raidir les joues de Reinhardt de confusion.</p>
+                        <p>Il ne comprendrait pas. Personne à part Subaru ne comprendrait jamais.</p>
+                        <p>Subaru a déjà traversé toutes les formes concevables d'essais et d'erreurs pour tuer Reinhardt.</p>
+                        <p>Il a étudié Reinhardt van Astrea, a fait des recherches approfondies sur lui, a testé chaque idée qu'il pouvait concevoir, a manipulé ses plans, a utilisé chaque piste possible qu'il pouvait imaginer dans ses tentatives pour tuer Reinhardt.</p>
+                        <p>Mais peu importe les méthodes utilisées par Subaru, Reinhardt l'a vaincu. Comme si le cerveau hideusement faible de Natsuki Subaru, comme si sa présence même, ne pouvait l'affecter le moins du monde.</p>
+                        <p>Subaru a sacrifié Elsa, sacrifié Mei Lee, sacrifié le Bleu, sacrifié l'homme qui aurait peut-être pu être son ami, sacrifié le clown qui se proclamait être son co-conspirateur, sacrifié le Culte de la Sorcière, sacrifié les Cardinaux, a commis tous les crimes, injustices et iniquités concevables, et n'a toujours pas pu tuer Reinhardt.</p>
+                        <p>Et donc. N'ayant aucun moyen de rompre la ligne de vie de Reinhardt, Subaru a pris une décision.</p>
+                        <p class="dialogue">« Je tue ce que tu es en tant que chevalier. Je fais tomber ton nom ostentatoire de Saint de l'Épée à terre, je le piétine, je crache et bave dessus ! »</p>
+                        <p class="dialogue">« Tout ça, seulement pour ça. »</p>
+                        <p class="dialogue">« Seulement pour ça ! Ouais, je l'ai fait, seulement pour ça ! Seulement pour ça, j'ai utilisé la vie de tous ceux qui existaient, pour te faire tomber à terre ! »</p>
+                        <p>Subaru dépose le corps de Mei Lee sur le sol. Pointera son doigt vers Reinhardt.</p>
+                        <p>Reinhardt ne peut cacher qu'il est ébranlé. C'est agréable.</p>
+                        <p class="dialogue">« Tu es un héros, Reinhardt. Il m'est impossible de te tuer. Mais je peux tuer un héros. C'est comme ça qu'on te tue, Reinhardt. »</p>
+                        <p>Se vante Subaru, la voix désaxée, face au Reinhardt réduit au silence.</p>
+                        <p>Il a travaillé de son mieux, a essayé tant de plans, a sacrifié des gens, a versé du sang, a accumulé des morts, et enfin.</p>
+                        <p>Avec Mei Lee qui l'a protégé et a prolongé sa survie, enfin, Subaru a réussi à affronter Reinhardt ainsi.</p>
+                        <p>Après avoir empilé tant de sacrifices, enfin, il a réussi à se tenir sur la même scène que Reinhardt.</p>
+                        <p class="dialogue">« ...Pourquoi ? »</p>
+                        <p>La brise chaude balaie l'élan précédent de Subaru. Sa voix lorsqu'il parle est frêle.</p>
+                        <p class="dialogue">« Pourquoi es-tu si fort ? Pourquoi es-tu si fort, au point que j'ai dû les laisser mourir, pour être à ta hauteur ? »</p>
+                        <p>Une voix tremblante, entremêlée de sanglots. L'entendre fait se raidir le visage de Reinhardt.</p>
+                        <p>Il n'a sûrement aucune idée de ce que Subaru a en tête. Bien sûr que non. Subaru n'en a même—</p>
+                    </div>
+
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 34</div>
+
+                    <!-- PAGE 34 -->
+                    <div id="page-34">
+                        <p>—plus aucune idée lui-même.</p>
+                        <p>Il ne sait pas pourquoi il pleure. Depuis combien de temps n'a-t-il même pas versé de larmes ?</p>
+                        <p>Sûrement. Ce jour-là, quand il a été amené dans ce monde, c'était la dernière fois.</p>
+                        <p>Les larmes du jour qui a amené Natsuki Subaru à cette vision de flammes étaient les dernières.</p>
+                        <p class="dialogue">« J'aurais aimé être comme toi. J'aurais aimé être honnête comme toi, être assez fort pour sauver tout le monde comme toi. Je pense que tu es enviable. Je pense que tu es méprisable. »</p>
+                        <p class="dialogue">« Tu... »</p>
+                        <p>S'écoulant aux côtés de ses larmes, viennent les véritables sentiments de Natsuki Subaru.</p>
+                        <p>Lors de cette toute première boucle dans la Capitale, quand Natsuki Subaru a été témoin de l'homme qui l'a libéré d'un cycle sans fin.</p>
+                        <p>—À l'époque, Subaru était jaloux de Reinhardt.</p>
+                        <p>Éviscéré maintes et maintes fois, ayant souffert la mort, mais toujours incapable de changer quoi que ce soit, le cœur de Subaru s'est rapidement usé, sa peau extérieure s'est écaillée, et puis, pratiquement par coïncidence, comme s'il donnait un coup de pied dans un caillou sur la route, il a altéré ce destin si facilement.</p>
+                        <p>Subaru aspirait à avoir cette force, l'enviait, lui en voulait, la détestait.</p>
+                        <p class="dialogue">« — Je voulais être toi, Reinhardt. »</p>
+                        <p class="dialogue">« Je ne te comprends pas. »</p>
+                        <p>Reinhardt rejette l'honnêteté de Subaru comme des balivernes sans valeur.</p>
+                        <p>Et il a raison. Reinhardt, espèce de héros, tu as juste toujours, toujours raison.</p>
+                        <p>—Où s'est produite l'erreur ? À quel moment Natsuki Subaru a-t-il fauté ?</p>
+                        <p>Il ne le sait pas. Bien qu'en réalité, il le sache. Mais personne ne serait capable de le comprendre.</p>
+                        <p>C'est pourquoi. C'est exactement pour cela.</p>
+                        <p>Natsuki Subaru est, depuis un long moment maintenant, un fou sans empathie.</p>
+                        <p>Reinhardt plisse les yeux et se penche en avant. Il ne tend pas la main vers une épée. Ce qui signifie que même lui ne pense pas qu'une arme soit nécessaire pour vaincre Subaru.</p>
+                        <p>Il a raison, il a absolument raison. Une seule de ses attaques désintégrera le corps frêle de Subaru.</p>
+                        <p>Alors à tout le moins, et de manière la plus absolue—</p>
+                        <p class="dialogue">« — Tu ne penses pas qu'il est trop tôt pour abandonner ? »</p>
+                        <p class="dialogue">« Toi ! »</p>
+                        <p>À l'instant où Reinhardt commence sa charge, une silhouette noire s'abat de côté. Un bruit discordant retentit alors que Reinhardt pare l'attaque de la silhouette avec sa main, tenue plate et ouverte comme une lame.</p>
+                    </div>
+
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 35</div>
+
+                    <!-- PAGE 35 -->
+                    <div id="page-35">
+                        <p>C'est stupide. Comment peut-il parer un couteau balancé avec autant d'élan avec sa main ? Le couteau hurle, se brisant en morceaux. C'est stupide. Pourquoi est-ce le couteau qui se brise ?</p>
+                        <p class="dialogue">« Tu es vraiment hors norme, n'est-ce pas. »</p>
+                        <p>Elsa, couverte de sang, tournoie dans les airs avant d'atterrir sur ses mains et ses pieds.</p>
+                        <p>Subaru pensait qu'elle était morte. Il pensait l'avoir utilisée comme pièce d'échecs pour créer cette situation, croyait que sa vie s'était consumée à néant, et avait agi en considération de cela. Et pourtant.</p>
+                        <p class="dialogue">« Apparemment je ne suis pas morte. Bien que dans cette situation, on dirait que je suis arrivée pour visiter la mort à nouveau. »</p>
+                        <p class="dialogue">« Elsa... »</p>
+                        <p class="dialogue">« Alors Mei Lee est morte. La pauvre enfant. »</p>
+                        <p>Remarquant Mei Lee reposant sur le sol, Elsa murmure avec une pointe de tristesse.</p>
+                        <p>Mais elle change de registre en un clin d'œil, se tournant pour faire face à Reinhardt correctement.</p>
+                        <p class="dialogue">« Il semble que vous soyez aussi l'ennemi de ma sœur. Voulons-nous danser ? »</p>
+                        <p class="dialogue">« Tu as déjà perdu ton arme. Et comprends-tu qui exactement tu protèges ? »</p>
+                        <p class="dialogue">« Les sujets difficiles ne sont pas mes préférés. Je fais les choses que je veux faire. Cet homme derrière moi me laisse faire ce que je veux faire. Cela fait de lui un client de choix. »</p>
+                        <p>Se léchant les lèvres, Elsa donne une réponse basée sur une logique que seuls les meurtriers comprendraient.</p>
+                        <p>Reinhardt ravale son souffle, et se prépare à prendre Elsa comme adversaire.</p>
+                        <p class="dialogue">« Ce sera la dernière chance pour cela. Je me suis bien amusée. C'était merveilleux. »</p>
+                        <p class="dialogue">« Elsa ! Je... ! »</p>
+                        <p class="dialogue">« Adieu. »</p>
+                        <p>Toujours fidèle à elle-même, les adieux se passent en douceur et sans aucune considération pour les idées de Subaru.</p>
+                        <p>Immédiatement après, Elsa bondit avec une dextérité animale dans une danse vers Reinhardt, le héros et la bouchère s'engageant dans un combat furieux.</p>
+                        <p>Un combat qui se conclura en peu de temps, le dernier repas de sang d'Elsa Granhiert.</p>
+                        <p class="dialogue">« — Putain ! »</p>
+                        <p>Subaru ne peut pas mourir ici.</p>
+                        <p>Détournant le regard de la bataille d'Elsa et du cadavre de Mei Lee, il se met à courir le long de la colline.</p>
+                        <p>Les bruits de la bataille résonnent derrière lui, lointains.</p>
+                        <p>Les bâtiments s'effondrent les uns après les autres dans toute la Capitale en flammes, les hurlements et les gémissements résonnant à travers cet enfer. Des enfants appelant leurs parents, des parents appelant leurs enfants, des hommes appelant des femmes, des femmes appelant des hommes dans le pandémonium hurlant de cet enfer.</p>
+                        <p>Oui. C'est l'enfer que Subaru a créé.</p>
+                        <p>A créé cet enfer, détruit la fausse image de Reinhardt, et atteint son but.</p>
+                    </div>
+
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 36</div>
+
+                    <!-- PAGE 36 -->
+                    <div id="page-36">
+                        <p>Tout ce qu'il reste c'est—</p>
+                        <p class="dialogue">« T-tu es.... »</p>
+                        <p class="dialogue">« — Gggggg »</p>
+                        <p>Subaru trébuche, manque de tomber — lorsqu'une bête massive l'attrape dans sa gueule et le jette sur son dos. Subaru s'accroche désespérément alors que son pelage noir surgit dans son champ de vision, avec la vue de son féroce visage léonin alors qu'il court.</p>
+                        <p class="dialogue">« Tu es... mais Mei Lee est, déjà morte... »</p>
+                        <p>C'est l'une des bêtes démoniaques que Mei Lee contrôlait, portant Subaru dans cette course folle à travers la Capitale en feu.</p>
+                        <p>Le féroce Guiltilaw sprinte avec Natsuki Subaru sur son dos. Il n'a plus de maître, et n'a aucune obligation de lui obéir — mais quand même, Guiltilaw porte Natsuki Subaru, de tout son cœur.</p>
+                        <p class="dialogue">« S'il te plaît, trouve-la. Elle doit, être quelque part... »</p>
+                        <p>Prie Subaru, souhaitant que Guiltilaw accomplisse un miracle.</p>
+                        <p>Comment appeler ce sentiment dans son cœur ? Du soulagement ? De la résignation ? Constreint par des émotions cryptiques, l'esprit de Natsuki Subaru oscille entre conscience et inconscience.</p>
+                        <p>Mais ce qui lui fait vraiment atteindre sa limite, c'est ce qui se passe ensuite.</p>
+                        <p class="dialogue">« — Ça suffit. »</p>
+                        <p>Le projectile de glace tranchant empale Guiltilaw en plein sprint sur le flanc.</p>
+                        <p>Guiltilaw hurle, trébuchant sur ses propres pattes avant de s'écraser au sol. Pris dans la chute de la bête, Subaru s'écrase également contre la route pavée.</p>
+                        <p class="dialogue">« Ghau... qu'est-ce, qui... »</p>
+                        <p>Sa vision se trouble de douleur alors qu'il force les yeux ouverts, regardant autour de lui pour voir ce qui s'est passé.</p>
+                        <p>Il découvre que Guiltilaw s'est redressé, d'innombrables lances de glace enfoncées dans son flanc gauche alors qu'il fait face à une silhouette nimbée dans une faible lumière, sur le point de commencer à charger.</p>
+                        <p>Guiltilaw lève sa patte féroce en rugissant. Peut-être était-ce sa dignité de bête démoniaque, ou sa fierté en tant que dernier animal ayant obéi à la jeune Mei Lee jusqu'à la fin.</p>
+                        <p>Son coup est plus que suffisant pour réduire un être humain en charpie s'il touchait.</p>
+                        <p>Cependant, avant que le coup ne puisse atterrir, un seul pic de glace tranchant tombe en piqué—</p>
+                        <p>—pour s'engouffrer dans la gueule ouverte de Guiltilaw, lui transperçant la gorge avant d'entrer à nouveau par sa poitrine, ressortant par son derrière, le transformant en une bête démoniaque sur une broche.</p>
+                        <p>Immédiatement après l'attaque désastreuse mais non mortelle, l'air résonne, crépitant alors qu'un givre blanc se répand sur tout le corps de Guiltilaw, le transformant en une sculpture de glace.</p>
+                        <p>Ayant assisté à la fin de Guiltilaw, Subaru se lève lentement.</p>
+                        <p>Il ne peut pas lever son bras gauche. Il l'a peut-être disloqué dans la chute. Il devrait ressentir une douleur assez intense pour fondre en larmes, mais son cerveau ne la sent pas.</p>
+                        <p>Après tout. Si Subaru se met à brailler maintenant, ici, cela ruinera tout.</p>
+                    </div>
+
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 37</div>
+
+                    <!-- PAGE 37 -->
+                    <div id="page-37">
+                        <p class="dialogue">« — Ça suffit, monstre. »</p>
+                        <p>Les deux se font face, le paysage urbain en feu de chaque côté, une bête démoniaque gelée entre eux.</p>
+                        <p>Des yeux améthyste brûlant de devoir et d'indignation rencontrent des yeux sombres pleins d'une joie irrépressible.</p>
+                        <p>Des cheveux argentés à la teinte lunaire, des yeux de la plus fine améthyste. Sa contenance céleste électrise le cœur de Subaru sans fin, et le carillon argenté de sa voix résonne pour lui comme le chant d'une fée.</p>
+                        <p>Ce qu'il a poursuivi, cherché, désiré, n'a jamais cessé d'aimer, son visage, est ici.</p>
+                        <p class="dialogue">« — Emilia. »</p>
+                        <p class="dialogue">« Tu me connais ? »</p>
+                        <p>Les sourcils d'Emilia se haussent de surprise. La voir fait rire Subaru.</p>
+                        <p>Exactement en phase avec ce qu'il s'imaginait — non. Exactement en phase avec l'impression qu'elle lui avait laissée lors de leur première rencontre, lorsqu'ils s'étaient aventurés ensemble dans la Capitale.</p>
+                        <p>Elle n'a pas la moindre idée de l'attention nationale qui se concentre sur elle, en tant que candidate à la Sélection Royale. Ce n'est pas qu'elle manque de conscience d'elle-même, c'est qu'elle a une faible estime d'elle-même.</p>
+                        <p>Bien qu'elle soit connue dans le monde entier comme le héros qui a abattu les Cardinaux de la Paresse, de l'Avarice, de la Gourmandise, de la Colère et de la Luxure du Culte de la Sorcière, des maux qui ont tourmenté les gens pendant des ères, et les a exterminés.</p>
+                        <p>Et son palmarès allait, ce jour-là, à cet instant, atteindre son accomplissement.</p>
+                        <p class="dialogue">« Y a-t-il quelque chose de drôle ? »</p>
+                        <p class="dialogue">« Non, je suis désolé. C'est juste, comment dire, je suis heureux. C'est ce truc, où tu es, eh bien. Tu n'as pas changé d'un poil, donc j'ai l'impression d'avoir été récompensé. »</p>
+                        <p class="dialogue">« Que veux-tu dire ? Quand est-ce que toi et moi avons jamais... »</p>
+                        <p>Emilia tente une recherche frénétique dans ses souvenirs.</p>
+                        <p>Mais Natsuki Subaru n'existe nulle part dans ses mémoires.</p>
+                        <p>Bien sûr que non. Leur rencontre momentanée ne reste qu'en Subaru. Et cette rencontre momentanée à elle seule, cette ultime promesse de pénitence à elle seule, est ce qui a amené Natsuki Subaru ici.</p>
+                        <p class="dialogue">« Tu es... »</p>
+                        <p class="dialogue">« Lia, c'est inutile. Ne prends rien de ce qu'il dit au sérieux. »</p>
+                        <p class="dialogue">« — Puck, hein. »</p>
+                        <p>Emilia cherche un indice dans ses souvenirs. Mais elle est interrompue par le chat gris qui apparaît sur son épaule — un esprit, dont Subaru se souvient très bien.</p>
+                        <p>Ses souvenirs de ce jour-là sont lointains. Mais c'est exactement pourquoi il a passé encore plus de temps à penser sans fin à cette journée qu'à se la remémorer individuellement.</p>
+                        <p>Il est inconcevable qu'il oublie quelqu'un qui occupait une partie de ce souvenir.</p>
+                        <p class="dialogue">« Comme c'est gentil de ta part d'appeler mon nom avec autant de désinvolture. Avec des crimes aussi flamboyants que les tiens, comment comptes-tu payer une compensation suffisante pour les régler ? »</p>
+                    </div>
+
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 38</div>
+
+                    <!-- PAGE 38 -->
+                    <div id="page-38">
+                        <p class="dialogue">« Je paierai la compensation. Exactement ce que tu veux. Il n'y a de toute façon aucun moyen pour moi de m'échapper. »</p>
+                        <p class="dialogue">« ? C'est plutôt beau joueur de ta part. Suspect. »</p>
+                        <p>Subaru dézippe son maillot de survêtement et écarte grand les bras, montrant sa non-résistance.</p>
+                        <p>Le survêtement. Oui, le survêtement. Il a repris ce survêtement qu'il avait, jusqu'à ce jour même, gardé scellé, et le porte maintenant. Il s'était mis en tête que s'il devait avoir des retrouvailles avec Emilia, ce serait le mieux.</p>
+                        <p>Tout en aspirant au jour où il porterait cette tenue, et se tiendrait à nouveau devant elle.</p>
+                        <p class="dialogue">« Tout ce que je vais te dire, ce sont les divagations d'un fou. S'il te plaît, ne t'en souviens pas. »</p>
+                        <p class="dialogue">« — Hein ? »</p>
+                        <p class="dialogue">« C'est moi qui ai mis le feu à la Capitale. Et ce n'est pas seulement la Capitale, ce feu est censé brûler tout le pays. Personne ne pourrait s'en prémunir. C'est la nation, et les chevaliers qui protègent cette nation, qui gèrent mal la situation. »</p>
+                        <p>Le discours haché de Subaru trouble grandement Emilia. Puck a l'air perdu quant à l'idée d'interrompre le discours de Subaru, mais annule son attaque après avoir vu la situation d'Emilia.</p>
+                        <p>Reconnaissant pour cela, Subaru continue.</p>
+                        <p class="dialogue">« Le prestige de Reinhardt en tant que Saint de l'Épée est tombé à terre. Comme on ne sait pas ce qui a déclenché l'alliance censée protéger le Royaume du Dragon de Lugnica, le Dragon ne vient pas à la rescousse non plus. C'est quelque chose que j'ai testé des tas de fois, donc c'est tout à fait juste. Au final, Reinhardt et le Dragon sont à égalité. »</p>
+                        <p class="dialogue">« Brûler le pays ? Tu brûles le pays ? Pour essayer de détruire cette nation ? »</p>
+                        <p class="dialogue">« Non, faux. Je fais ça pour faire de toi la Souveraine. C'est la seule et unique façon. »</p>
+                        <p>Un sourire naît sur le visage de Subaru, tandis que les yeux d'Emilia s'écarquillent, profondément ébranlée.</p>
+                        <p>Il n'y a aucune chance que ce que Subaru dit ait un sens pour elle.</p>
+                        <p>Étant donné qu'il a prévenu que ce serait des divagations, il s'en fiche si ce n'est pas communiqué correctement.</p>
+                        <p>Il s'agit du souhait le plus profond de Subaru, s'il produit des résultats.</p>
+                        <p class="dialogue">« Des flammes de mort conduisant la nation à sa destruction... celui qui terrassera le coupable derrière cela ne sera pas Reinhardt, ne sera pas le Dragon, ce sera toi. Aucun des candidats à la Sélection restants ne peut accomplir quoi que ce soit pour surpasser cela. Le héros qui a brisé quatre siècles d'immobilité et a sauvé le monde, c'est toi ! »</p>
+                        <p class="dialogue">« Ce, n'est pas... qu'est-ce que tu racontes à la fin !? Arrête, je ne comprends pas ! Je ne comprends rien à ce que tu dis !! »</p>
+                        <p>Emilia se prend la tête, se bouche les oreilles, essayant de bloquer les mots de Subaru. Des larmes perlent dans ses yeux, et alors qu'il en voit une couler le long de sa joue pâle, un doux choc frappe la poitrine de Subaru.</p>
+                        <p>Une partie vient de la culpabilité de la faire pleurer. Une autre partie vient du fait de voir que ses actions ont ébranlé son cœur, et de la sombre allégresse qui en découle.</p>
+                    </div>
+
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 39</div>
+
+                    <!-- PAGE 39 -->
+                    <div id="page-39">
+                        <p class="dialogue">« Tu n'as pas besoin de comprendre. Ce n'est pas grave que tu ne comprennes pas. Tout ce qui viendra ensuite sera réglé quand les autres te propulseront de leur propre gré. Ensuite, tu auras juste à exaucer ton souhait. C'est la seule raison pour laquelle j'ai mis le feu au pays. Tout ça, c'était pour toi. »</p>
+                        <p class="dialogue">« Menteur, menteur, menteur ! Je veux dire, je... toi, comment se fait-il, que tu... »</p>
+                        <p>Emilia gémit face à cette dévotion qu'elle n'avait jamais anticipée, et aux offrandes qu'elle n'avait jamais désirées.</p>
+                        <p>Il est inévitable qu'elle soit triste. Il est inévitable qu'elle ne puisse pas comprendre.</p>
+                        <p>Subaru sait qu'il fait erreur.</p>
+                        <p>Subaru sait qu'il a tort.</p>
+                        <p>Subaru sait que ses méthodes n'apporteront pas de joie à Emilia.</p>
+                        <p>Mais c'était la seule méthode qu'il avait.</p>
+                        <p>Exaucer le souhait d'Emilia, faire d'Emilia la Souveraine, et lui démontrer ses sentiments.</p>
+                        <p>Avec ces choses en tête, et sachant depuis le tout début qu'il avait tort, Subaru est arrivé ici.</p>
+                        <p>Et ainsi, Natsuki Subaru rit. Ricane. Sourit narquoisement.</p>
+                        <p class="dialogue">« — Regarde-moi, Emilia. Vois-moi, déteste-moi, souviens-toi de moi. »</p>
+                        <p class="dialogue">« Qui, es-tu ? Qui au monde, es-tu... ? »</p>
+                        <p>Demande Emilia, la voix tremblante, alors que Subaru s'approche lentement d'elle les bras grands ouverts.</p>
+                        <p>Subaru ferme les yeux.</p>
+                        <p>Il a l'impression d'avoir langui après cela depuis toujours.</p>
+                        <p>Languir de répondre à cette question en présence d'Emilia, pour toujours—.</p>
+                        <p class="dialogue">« — Je m'appelle Natsuki Subaru. »</p>
+                        <p class="dialogue">« Su, baru... »</p>
+                        <p>Rien que d'entendre ce faible appel de son nom suffit pour qu'un flot d'émotion le submerge.</p>
+                        <p>Une émotion si grande que, rien que par cela, Subaru est pleinement satisfait d'être venu ici.</p>
+                        <p>Avec ces sentiments dans le cœur, et priant pour qu'il termine cette phrase sans que sa voix ne tremble à cause d'eux—</p>
+                        <p class="dialogue">« — Cardinal du Péché du Culte de la Sorcière, Évêque de l'ORGUEIL, Natsuki Subaru ! »</p>
+                        <p class="dialogue">« Cardinal... ! »</p>
+                        <p>Faisant la plus grande présentation possible, Subaru met toute sa force dans ses jambes et décolle du sol.</p>
+                        <p>Natsuki Subaru concentre toute sa force dispersée en un seul point de son corps pour le dernier sprint de sa vie.</p>
+                        <p>A sacrifié de nombreuses personnes, a maltraité ceux qui auraient peut-être pu être ses complices, a trouvé du réconfort chez ceux avec qui il avait peut-être tissé des liens, pour enfin arriver devant cette fille chérie—</p>
+                    </div>
+
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 40</div>
+
+                    <!-- PAGE 40 -->
+                    <div id="page-40">
+                        <p class="dialogue">« Je suis l'homme qui a brûlé le monde, secoué le pays, tué le héros, et— »</p>
+                        <p class="dialogue">« — que tu vas tuer. »</p>
+                        <p>Sentant l'impact lui transpercer la poitrine, Subaru sourit.</p>
+                        <p>Il tombe à genoux, incapable de se soutenir avant de s'effondrer, dégringolant.</p>
+                        <p>Il n'atteint jamais Emilia alors que son corps s'étale sans grâce sur la pierre.</p>
+                        <p class="dialogue">« Pourquoi ? »</p>
+                        <p>Subaru ferme les yeux, prêt à accepter la fin, quand quelque chose le pousse à soulever ses paupières.</p>
+                        <p>Emilia se tient juste à ses côtés, le regardant de haut. Une des larmes coulant de ses yeux atterrit sur la joue de Subaru, le forçant à ouvrir les yeux.</p>
+                        <p class="dialogue">« Pourquoi ? »</p>
+                        <p>Des questions répétées, superposées.</p>
+                        <p>Qu'est-ce que ce 'pourquoi' pouvait bien signifier, se demande Subaru.</p>
+                        <p>Pourquoi as-tu fait ça ?</p>
+                        <p>Pourquoi cela devait-il se passer ainsi ?</p>
+                        <p>Pourquoi es-tu venu ici mourir par ma main ?</p>
+                        <p>Il y a assurément de nombreux 'pourquoi' dans cette question.</p>
+                        <p>Et il aimerait répondre à chacun d'entre eux, mais il ne reste à Subaru que le plus infime des temps.</p>
+                        <p>Alors il laisse son dernier souffle porter sa réponse.</p>
+                        <p class="dialogue text-xl">« — Je t'aime. » <sup>[1]</sup></p>
+                        
+                        <p class="text-center tracking-widest my-8 text-slate-500">*<br>※※※※※※※※※※</p>
+                        
+                        <p>La mort approche. La vieille et familière mort.</p>
+                        <p>Chaque fois que Subaru rencontre la mort, il est emmené dans un endroit sombre, solitaire et inconnu.</p>
+                        <p>Et c'est vraiment, vraiment un endroit solitaire, un endroit insupportable où l'on est livré à soi-même.</p>
+                        <p>Chaque fois que Subaru rencontrait la mort, il était renvoyé de cet endroit.</p>
+                        <p>Dans ce monde de sang et d'angoisse, de larmes et de malheur, et d'une très légère présence d'amour.</p>
+                        <p>Mais tout va bien maintenant.</p>
+                        <p>Il est satisfait.</p>
+                        <p>Subaru a le sentiment que quelqu'un dans ce monde sombre lui a chuchoté quelque chose.</p>
+                    </div>
+
+                    <div class="page-divider font-sans text-sm tracking-widest">PAGE 41 & 42</div>
+
+                    <!-- PAGE 41 & 42 -->
+                    <div id="page-41" class="pb-16">
+                        <p>C'est réconfortant, c'est encourageant, c'est une confirmation, c'est une confession.</p>
+                        <p>Mais pourquoi ? Ce n'est pas l'amante que Subaru cherchait.</p>
+                        <p>Son amante est ailleurs, quelque part où il n'est pas, avec son rêve qui se réalise et ses efforts qui sont récompensés.</p>
+                        <p>Subaru a sacrifié de nombreuses personnes, et finalement lui-même, dans ce but.</p>
+                        <p>Et donc, c'est très bien. Il n'a pas besoin d'être sauvé. Le réconfort et le salut, il les a déjà obtenus, au tout début.</p>
+                        <p>L'appelant définitivement.</p>
+                        <p>Appelant son nom avec gentillesse, avec miséricorde, avec amour.</p>
+                        <p>Et ainsi, Subaru se sépare de la spirale de la mort, tout en acceptant cette présence lointaine.</p>
+                        <p>Tout en l'acceptant, il répond à ces mots.</p>
+                        <p class="dialogue font-serif italic text-lg mt-8 text-center text-slate-200">« — Même si tu me rejettes, je ne t'oublierai jamais. »</p>
+                        
+                        <!-- Translator Note Box -->
+                        <div class="mt-16 p-6 bg-slate-800/80 rounded-xl border border-slate-700 text-sm text-slate-400">
+                            <h4 class="text-slate-300 font-bold mb-2">Note du Traducteur</h4>
+                            <p class="mb-2"><sup>[1]</sup> <strong>Je t'aime (Aishiteru) :</strong> C'est le grand format des "Je t'aime", très fort en japonais (littéralement un amour profond et inconditionnel). Quelques points que les lecteurs japonais auraient remarqués :</p>
+                            <ol class="list-decimal pl-5 space-y-1">
+                                <li>Subaru n'a jusqu'à présent utilisé <em>aishiteru</em> que pour Beatrice. C'est une limite très claire à franchir. Cela se perd un peu en français (ou en anglais) car les autres "Je t'aime" (suki) plus légers sont traduits pareil, mais à la lecture, l'impact est colossal ("wooooaaah le voilà").</li>
+                                <li>C'est ce "Je t'aime" que la Sorcière de l'Envie / Satella a pour habitude de prononcer sans arrêt.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+        </article>
+    </main>
+
+    <script>
+        // Adjust Font Size
+        let currentSize = 1.125; // 1.125rem = 18px base
+        function changeFontSize(direction) {
+            const container = document.getElementById('story-container');
+            if (direction > 0 && currentSize < 1.5) currentSize += 0.05;
+            if (direction < 0 && currentSize > 0.9) currentSize -= 0.05;
+            container.style.fontSize = currentSize + 'rem';
+        }
+
+        // Reading Progress Bar
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+        });
+        
+        // Highlight active nav item
+        const observerOptions = { root: null, rootMargin: '0px', threshold: 0.5 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    document.querySelectorAll('nav a').forEach(link => {
+                        link.classList.remove('bg-slate-800', 'text-white');
+                        if(link.getAttribute('href') === '#' + id) {
+                            link.classList.add('bg-slate-800', 'text-white');
+                        }
+                    });
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('main > article > div[id^="page-"]').forEach(page => {
+            observer.observe(page);
+        });
+    </script>
+</body>
+</html>

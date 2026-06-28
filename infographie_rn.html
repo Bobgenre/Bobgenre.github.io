@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infographie : Bilan Législatif du Rassemblement National (2017-2024)</title>
+    <!-- Chargement de Tailwind CSS pour le style -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chargement de FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Police Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .vote-contre { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+        .vote-pour { background-color: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+        .vote-divise { background-color: #f3f4f6; color: #374151; border: 1px solid #9ca3af; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased selection:bg-blue-200">
+
+    <header class="bg-slate-900 text-white py-12 px-4 shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 right-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
+            <i class="fa-solid fa-landmark text-[20rem]"></i>
+        </div>
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="inline-block bg-blue-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
+                Synthèse Politique
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+                Le Rassemblement National à l'Assemblée
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-300 max-w-3xl font-light">
+                Analyse des votes et des propositions de loi (PPL) sous les mandats d'Emmanuel Macron (2017-2026), au regard des critiques de la société civile.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-12">
+        
+        <section class="mb-16">
+            <div class="flex items-center gap-3 mb-8">
+                <i class="fa-solid fa-check-to-slot text-3xl text-blue-600"></i>
+                <h2 class="text-3xl font-bold text-slate-900">Les Votes Clés par Thématique</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Carte 1 : Précarité -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-coins"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Précarité & Social</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">Rétablissement de l'ISF</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-contre">CONTRE</span>
+                            </div>
+                        </li>
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">Taxe super-profits</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-contre">CONTRE / ABST.</span>
+                            </div>
+                        </li>
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">Augmentation du SMIC</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-contre">CONTRE</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <p class="text-sm text-slate-500 mt-4 italic"><i class="fa-solid fa-circle-info mr-1"></i> Critiques : "Défense des ultra-riches", "Anti-pauvres". Privilégie les baisses de cotisations.</p>
+                </div>
+
+                <!-- Carte 2 : Droits des Femmes -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+                        <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-venus"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Droits des Femmes</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">PMA pour toutes</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-contre">CONTRE</span>
+                            </div>
+                        </li>
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">IVG dans la Constitution</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-divise">DIVISÉ</span>
+                            </div>
+                        </li>
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">Transparence salariale (UE)</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-contre">CONTRE</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <p class="text-sm text-slate-500 mt-4 italic"><i class="fa-solid fa-circle-info mr-1"></i> Critiques : "Sexisme", vision conservatrice de la famille.</p>
+                </div>
+
+                <!-- Carte 3 : LGBTQIA+ -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+                        <div class="w-12 h-12 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-transgender"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Droits LGBTQIA+</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">Interdiction transitions mineurs</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-pour">POUR (LA LOI LR)</span>
+                            </div>
+                        </li>
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">Reconnaissance 2 mères (PMA)</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-contre">CONTRE</span>
+                            </div>
+                        </li>
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">Interdiction thérapies de conversion</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-pour">POUR</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <p class="text-sm text-slate-500 mt-4 italic"><i class="fa-solid fa-circle-info mr-1"></i> Critiques : "Homophobie", "Transphobie". Soutien unanime rare sur les thérapies de conversion.</p>
+                </div>
+
+                <!-- Carte 4 : Racisme & Discriminations -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+                        <div class="w-12 h-12 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-scale-unbalanced"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Racisme & Discriminations</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">Loi Immigration 2023 (Durcie)</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-pour">POUR</span>
+                            </div>
+                        </li>
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">Actions de groupe (discriminations)</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-contre">CONTRE</span>
+                            </div>
+                        </li>
+                        <li class="flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-semibold text-slate-700">Déconjugalisation AAH (Handicap)</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold vote-pour">POUR</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <p class="text-sm text-slate-500 mt-4 italic"><i class="fa-solid fa-circle-info mr-1"></i> Critiques : La "préférence nationale" est vue comme systémiquement discriminatoire. À noter : pas de vote majeur antisémite ou validiste récent.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <div class="flex items-center gap-3 mb-8">
+                <i class="fa-solid fa-file-signature text-3xl text-indigo-600"></i>
+                <h2 class="text-3xl font-bold text-slate-900">Les Propositions de Loi (PPL) déposées par le RN</h2>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                <div class="relative border-l-4 border-indigo-100 ml-4 md:ml-6 space-y-10 py-2">
+                    
+                    <!-- PPL 1 -->
+                    <div class="relative pl-6 md:pl-10">
+                        <div class="absolute -left-[14px] md:-left-[18px] top-1 w-6 h-6 md:w-8 md:h-8 rounded-full bg-indigo-500 border-4 border-white flex items-center justify-center shadow">
+                            <i class="fa-solid fa-flag text-white text-xs"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-900 uppercase tracking-wide">Souveraineté & Priorité Nationale</h4>
+                        <div class="mt-3 bg-slate-50 p-4 rounded-lg border border-slate-100">
+                            <p class="font-semibold text-slate-800">📌 Interdiction des "idéologies islamistes" & Priorité nationale au logement</p>
+                            <div class="mt-2 text-sm text-slate-600 flex items-center gap-2">
+                                <span class="bg-red-100 text-red-700 px-2 py-1 rounded font-bold text-xs"><i class="fa-solid fa-xmark mr-1"></i> REJETÉ</span>
+                                <span>Jugé anticonstitutionnel et liberticide par les oppositions.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PPL 2 -->
+                    <div class="relative pl-6 md:pl-10">
+                        <div class="absolute -left-[14px] md:-left-[18px] top-1 w-6 h-6 md:w-8 md:h-8 rounded-full bg-slate-700 border-4 border-white flex items-center justify-center shadow">
+                            <i class="fa-solid fa-shield-halved text-white text-xs"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-900 uppercase tracking-wide">Sécurité & Justice</h4>
+                        <div class="mt-3 bg-slate-50 p-4 rounded-lg border border-slate-100">
+                            <p class="font-semibold text-slate-800">📌 Présomption de légitime défense pour les forces de l'ordre & Peines planchers</p>
+                            <div class="mt-2 text-sm text-slate-600 flex items-center gap-2">
+                                <span class="bg-red-100 text-red-700 px-2 py-1 rounded font-bold text-xs"><i class="fa-solid fa-xmark mr-1"></i> REJETÉ</span>
+                                <span>Accusé de créer un "permis de tuer" et de rogner l'indépendance des juges.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PPL 3 -->
+                    <div class="relative pl-6 md:pl-10">
+                        <div class="absolute -left-[14px] md:-left-[18px] top-1 w-6 h-6 md:w-8 md:h-8 rounded-full bg-emerald-500 border-4 border-white flex items-center justify-center shadow">
+                            <i class="fa-solid fa-euro-sign text-white text-xs"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-900 uppercase tracking-wide">Pouvoir d'Achat</h4>
+                        <div class="mt-3 bg-slate-50 p-4 rounded-lg border border-slate-100">
+                            <p class="font-semibold text-slate-800">📌 Suppression de la TVA sur les produits de première nécessité</p>
+                            <div class="mt-2 text-sm text-slate-600 flex items-center gap-2">
+                                <span class="bg-red-100 text-red-700 px-2 py-1 rounded font-bold text-xs"><i class="fa-solid fa-xmark mr-1"></i> REJETÉ</span>
+                                <span>Qualifié de "démagogique" et intenable pour les finances publiques.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="flex items-center gap-3 mb-8">
+                <i class="fa-solid fa-comments text-3xl text-teal-600"></i>
+                <h2 class="text-3xl font-bold text-slate-900">Réception et Stratégie Parlementaire</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-teal-50 border-t-4 border-teal-500 p-6 rounded-b-xl shadow-sm">
+                    <h3 class="text-xl font-bold text-teal-900 mb-2">Le "Barrage"</h3>
+                    <p class="text-slate-700 text-sm">
+                        La majorité des textes du RN sont rejetés ou vidés de leur substance dès leur examen en commission par une alliance des autres partis (le "cordon sanitaire").
+                    </p>
+                </div>
+                <div class="bg-rose-50 border-t-4 border-rose-500 p-6 rounded-b-xl shadow-sm">
+                    <h3 class="text-xl font-bold text-rose-900 mb-2">Fragilité Juridique</h3>
+                    <p class="text-slate-700 text-sm">
+                        Les constitutionnalistes pointent souvent un amateurisme technique. De nombreux textes sont incompatibles avec la Constitution ou le droit européen.
+                    </p>
+                </div>
+                <div class="bg-amber-50 border-t-4 border-amber-500 p-6 rounded-b-xl shadow-sm">
+                    <h3 class="text-xl font-bold text-amber-900 mb-2">Le Vote Partagé</h3>
+                    <p class="text-slate-700 text-sm">
+                        Le RN dépose parfois des textes consensuels pour piéger ses adversaires, les forçant à choisir entre voter "avec l'extrême droite" ou rejeter une mesure populaire.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-8 text-center mt-12">
+        <p class="text-sm">
+            <i class="fa-solid fa-database mr-2"></i> Basé sur l'analyse des scrutins publics de l'Assemblée nationale sous Emmanuel Macron.<br>
+            Les qualifications (racisme, sexisme, etc.) relèvent de l'analyse politique et des associations de la société civile.
+        </p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+Sujet 1 2023
+Problème 1
+
+1) 
+def fibonacci(n):
+    lst = []
+    for i in range(n):
+        if i == 0:
+            lst.append(0)
+        elif i == 1:
+            lst.append(1)
+        else:
+            lst.append(lst[i-1]+lst[i-2])
+    return lst
+
+2)
+def indice_min(li):
+    i_min = 0
+    min = li[0]
+    for i in range(len(li)):
+        if li[i] < min:
+            min = li[i]
+            i_min = i
+    return i_min
+
+3) Avec mon programme, indice_min([1,0,2,0]) renverra 1.
+
+4) 
+def zero_sur_lignes(mat):
+    zero = False
+    for i in range(len(mat)):
+        j = 0
+        while j < len(mat[i]) and zero == False: 
+            if mat[i][j] == 0:
+                zero = True
+            j += 1
+        if zero == False:
+            return False
+        zero = False
+    return True
+
+5) 
+def lettre_majoritaire(ch):
+    dico = {}
+    val_max = 0
+    c_max = ""
+    for c in ch:
+        if c in dico:
+            dico[c] += 1
+        else :
+            dico[c] = 1
+
+    for k,v in dico.items():
+        if v > max:
+            c_max = k
+            val_max = v
+    return c_max

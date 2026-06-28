@@ -1,0 +1,33 @@
+Sujet CAPES 2024
+
+1) Arbres Binaires de Recherche
+
+Question 1)
+def recherche(root, k):
+    if root is None:
+        return False
+
+    if root.clef == k:
+       return True
+
+    if root.clef < k :
+        return recherche(root.gauche, k)
+    
+    else 
+        return recherche(root.droite, k)
+
+Question 2)
+Dans cette algorithme on doit parcourir dans le pire des cas tous les noeuds pour trouver le bon (si par exemple l'arbre est filiforme) donc en O(n), 
+sinon, on ne doit parcourir qu'une partie de l'arbre, en enlevant la moitié a chaque étape (donc en O(logn)).
+
+Question 3)
+#Parcours infixe
+
+def collecte(l, root):
+    if root is None :
+        return []
+
+    return collecte(l, root.gauche) + [root.clef] + collecte(l, root.droite)
+
+Question 4)
+Dans le cas ou quand on arrive a droite temp est False, puis que delf.droite est inférieur a val et que c'est le cas tout le temps après, temp sera a True

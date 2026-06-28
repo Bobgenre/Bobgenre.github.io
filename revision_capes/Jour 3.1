@@ -1,0 +1,25 @@
+1) 
+from maths import sqrt
+
+def distance(i, j):
+    return sqrt((coords_x[j] - coords_x[i])**2 + (coords_y[j] - coords_y[i])**2)
+
+2)
+En mémoire, les flottants sont stocké avec la norme IEEE soit sur 32 bits soit sur 64 avec 1 bit de signe, 8 ou 11 bits d'exposant et le reste pour la mantice.
+Il peut y avoir des problèmes liés au fait que certains nombres flottant s'écrive en bouclant à l'infinie en binaire, ce qui fait des approximation (par exemple 0.1 et 0.2)
+
+3)
+def plus_proche():
+    dist_min = distance(0, 1)
+    ind_i = 0
+    ind_j = 1
+    for i in range(len(coords_x)):
+        for j in range(i+1, len(coords_y)):
+            if distance(i, j) < dist_min:
+                dist_min = distance(i, j)
+                ind_i = i
+                ind_j = j
+    return (ind_i, ind_j)
+
+4) 
+La complexité est en O(n^2) car on parcours 1 fois la liste de coordonées pour chaque coordonée

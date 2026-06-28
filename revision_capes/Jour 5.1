@@ -1,0 +1,61 @@
+5.1) 
+Alors je peux pas le faire avec un traitement de texte, mais le coeur y est
+
+5.2)
+C'est le sommet 1 qui à le plus fort degrés (4)
+Sans la représentation graphique, c'est trop chiant à faire, mais c'est assez simple avec, donc je le passe
+
+5.3)
+def plusFortDegre(G):
+    degres_max = 0
+    sommet = 1
+    for k, v in G.items():
+        if len(v) > degres_max:
+            degres_max = len(v)
+            sommet = k
+    return sommet
+
+5.4)
+Il est utile car il va nous faire parcourir tous les sommet une fois, ce qui va nous permettre de faire les calculs nécessaires
+
+5.5)
+def Dist(G, s):
+    f = deque([s])
+    vue = set([s])
+    d = {s: 0}
+
+    while f:
+        x = f.popleft()
+
+        for y in G[x]:
+            if y not in vue:
+                vue.add(y)
+                f.append(y)
+                d[y] = d[x] + 1
+
+    return d
+
+5.6)
+def SommetProxMax(G):
+    max_centralite = -1
+    sommet_max = -1
+
+    for k,v in G.items():
+        d = Dist(G, k)
+        somme_dist = 0
+
+        for v in d.values():
+            somme_dist += v
+
+        if somme_dist > 0:
+            centralite = 1 / somme_dist
+            if centralite > max_centralite:
+                max_centralite = centralite
+                sommet_max = k
+      
+    
+    return sommet_max
+
+5.7)
+Le degrés permet de savoir avec combien de personne on à été en contact durant l'épidémie.
+La centralité de proximité permet de repérer quels individus sont les plus cruciaux dans la propagation car c'est ceux qui se retrouve au centre des contacts entre individus
