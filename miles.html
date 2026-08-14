@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miles Morales | Navigateur Chronologique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700;800&display=swap');
+
+        :root {
+            --spider-red: #e11d48;
+            --spider-dark-red: #9f1239;
+            --bg-deep: #020617;
+            --card-surface: #0f172a;
+            --card-hover: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: var(--bg-deep); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--spider-red); }
+
+        /* Block Styles */
+        .timeline-block {
+            background: linear-gradient(145deg, var(--card-surface), #0b1120);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1.5rem;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .timeline-block::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #334155;
+            transition: background 0.3s ease;
+        }
+
+        .timeline-block.is-event::before {
+            background: var(--spider-red);
+        }
+
+        .timeline-block:hover {
+            border-color: rgba(225, 29, 72, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Header Styles */
+        .block-header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .block-header:hover .block-title {
+            color: var(--spider-red);
+        }
+
+        .block-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            transition: color 0.2s ease;
+        }
+
+        .block-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            margin-top: 0.25rem;
+        }
+
+        /* Content Area */
+        .block-content {
+            padding: 0 2rem;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .timeline-block.open .block-content {
+            padding-bottom: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            max-height: 5000px; /* High enough to fit content */
+            opacity: 1;
+        }
+        
+        .timeline-block.is-event .block-header {
+            background: rgba(225, 29, 72, 0.05);
+        }
+        
+        .timeline-block.is-event.open .block-header {
+             border-bottom: 1px solid rgba(225, 29, 72, 0.2);
+        }
+
+        /* Issue Item */
+        .issue-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0.75rem;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .issue-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .issue-marker {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #475569;
+            margin-right: 1rem;
+            transition: background 0.2s;
+        }
+        
+        .timeline-block.is-event .issue-marker {
+            background: var(--spider-dark-red);
+        }
+
+        .issue-item:hover .issue-marker {
+            background: var(--spider-red);
+            box-shadow: 0 0 10px var(--spider-red);
+        }
+
+        .issue-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+        
+        .issue-context {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: auto;
+            font-style: italic;
+        }
+
+        /* Expand Icon */
+        .expand-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-block.open .expand-icon {
+            transform: rotate(180deg);
+            background: var(--spider-red);
+            color: white;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .badge-event { background: rgba(225, 29, 72, 0.2); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.5); }
+        .badge-standard { background: rgba(51, 65, 85, 0.5); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Layout */
+        .timeline-container {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, rgba(225, 29, 72, 0.3) 10%, rgba(225, 29, 72, 0.3) 90%, transparent);
+        }
+
+    </style>
+</head>
+<body class="antialiased custom-scrollbar">
+
+    <nav class="border-b border-white/5 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center font-black text-white italic transform -rotate-12 shadow-[0_0_15px_rgba(225,29,72,0.5)]">M</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tighter uppercase leading-none">Spider-Archives</h1>
+                    <span class="text-red-500 text-[10px] font-bold tracking-[0.2em] uppercase">Navigateur Chronologique</span>
+                </div>
+            </div>
+            <div class="text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">
+                Terre-1610 <span class="mx-2 text-red-500">→</span> Terre-616
+            </div>
+        </div>
+    </nav>
+
+    <header class="py-20 px-6 relative overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="max-w-5xl mx-auto relative z-10 text-center">
+            <h2 class="text-4xl md:text-6xl font-black mb-6 tracking-tighter">L'Épopée de <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-800">Miles Morales</span></h2>
+            <p class="text-slate-400 text-lg font-light leading-relaxed max-w-2xl mx-auto">
+                Basé sur l'ordre de lecture exhaustif. Cliquez sur n'importe quel bloc pour déployer la liste complète des chapitres liés à cette période classique ou à cet événement majeur.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 pb-40">
+        <div class="timeline-container" id="timeline-root">
+            <!-- Timeline blocks will be injected here via JavaScript -->
+        </div>
+    </main>
+
+    <footer class="py-12 border-t border-white/5 text-center bg-slate-950">
+        <p class="text-[10px] tracking-[0.4em] uppercase text-slate-600 font-bold">Base de données synchronisée</p>
+    </footer>
+
+    <script>
+        // Structural Data based on comicbookreadingorders.com and our conversation
+        const readingOrderData = [
+            {
+                id: "block-1",
+                type: "standard",
+                title: "Les Origines (Terre-1610)",
+                subtitle: "La naissance d'un nouveau Spider-Man après la mort de Peter Parker.",
+                issues: [
+                    "Ultimate Fallout #4 (Première apparition)",
+                    "Ultimate Comics Spider-Man (2011) #1-12"
+                ]
+            },
+            {
+                id: "event-1",
+                type: "event",
+                title: "Événement : Spider-Men",
+                subtitle: "La première rencontre entre Miles Morales et le Peter Parker de la Terre-616.",
+                issues: [
+                    "Spider-Men #1-5"
+                ]
+            },
+            {
+                id: "event-2",
+                type: "event",
+                title: "Événement : Divided We Fall / United We Stand",
+                subtitle: "Guerre Civile dans l'univers Ultimate. Miles prouve sa valeur aux Ultimates.",
+                issues: [
+                    "Ultimate Comics Ultimates #13-14",
+                    "Ultimate Comics Spider-Man (2011) #13-14",
+                    "Ultimate Comics Ultimates #15",
+                    "Ultimate Comics Spider-Man (2011) #15-16",
+                    "Ultimate Comics Ultimates #16",
+                    "Ultimate Comics Spider-Man (2011) #17",
+                    "Ultimate Comics Ultimates #17-18",
+                    "Ultimate Comics Spider-Man (2011) #18",
+                    "Ultimate Comics Ultimates #18.1",
+                    "Ultimate Comics Spider-Man (2011) #16.1"
+                ]
+            },
+            {
+                id: "block-2",
+                type: "standard",
+                title: "Tragédie & Culpabilité",
+                subtitle: "Miles fait face à Venom et décide d'abandonner le costume (Spider-Man No More).",
+                issues: [
+                    "Ultimate Comics Spider-Man (2011) #19-28"
+                ]
+            },
+            {
+                id: "event-3",
+                type: "event",
+                title: "Événement : Cataclysm",
+                subtitle: "Le Galactus de la Terre-616 arrive pour dévorer l'univers Ultimate.",
+                issues: [
+                    "Hunger #1-4 (Prélude Galactus)",
+                    "Cataclysm #0.1",
+                    "Cataclysm: Ultimate Spider-Man #1",
+                    "Cataclysm: Ultimates' Last Stand #1",
+                    "Cataclysm: Ultimates #1",
+                    "Cataclysm: Ultimates' Last Stand #2",
+                    "Cataclysm: Ultimates #2-3",
+                    "Cataclysm: Ultimate Spider-Man #2-3",
+                    "Cataclysm: Ultimates' Last Stand #3-5",
+                    "Survive #1"
+                ]
+            },
+            {
+                id: "block-3",
+                type: "standard",
+                title: "Héritage & Nouveaux Ultimates",
+                subtitle: "Une nouvelle équipe se forme et Miles fait face au retour de Norman Osborn.",
+                issues: [
+                    "Ultimate Spider-Man #200 (Épilogue commémoratif)",
+                    "All-New Ultimates #1-3",
+                    "Miles Morales: Ultimate Spider-Man #1-9",
+                    "All-New Ultimates #4-12",
+                    "Miles Morales: Ultimate Spider-Man #10-12"
+                ]
+            },
+            {
+                id: "event-4",
+                type: "event",
+                title: "Événement : Secret Wars (2015)",
+                subtitle: "La fin du Multivers. Miles gagne sa place dans le nouvel univers Marvel.",
+                issues: [
+                    "Secret Wars #0-2",
+                    "Ultimate End #1-5 (Adieux à l'Univers 1610)",
+                    "Secret Wars #3-9"
+                ]
+            },
+            {
+                id: "block-4",
+                type: "standard",
+                title: "Nouveau Départ (Terre-616)",
+                subtitle: "Miles intègre l'univers Marvel principal et rejoint les Avengers.",
+                issues: [
+                    "Spider-Man Vol. 2 (2016) #1-2",
+                    "All-New, All-Different Avengers #1-3",
+                    "All-New, All-Different Avengers FCBD 2015 #1",
+                    "All-New, All-Different Avengers #4-6",
+                    "Spider-Man Vol. 2 (2016) #3-5",
+                    "All-New, All-Different Avengers #9-12",
+                    "All-New, All-Different Avengers Annual #1"
+                ]
+            },
+            {
+                id: "event-5",
+                type: "event",
+                title: "Événement : Civil War II",
+                subtitle: "Une vision tragique place Miles au centre d'un conflit super-héroïque mondial.",
+                issues: [
+                    "Civil War II #1-8 (Série Principale)",
+                    "Spider-Man Vol. 2 (2016) #6-10 (Tie-in)"
+                ]
+            },
+             {
+                id: "block-5",
+                type: "standard",
+                title: "Création des Champions & Rencontre avec Spider-Gwen",
+                subtitle: "Miles quitte les Avengers pour fonder sa propre équipe.",
+                issues: [
+                    "Spider-Man Vol. 2 (2016) #11",
+                    "Champions Vol. 2 (2016) #1-5",
+                    "Monsters Unleashed (Event mineur)",
+                    "Champions Vol. 2 #6-9",
+                    "Spider-Man Vol. 2 #12 (Arc Sitting in a Tree)",
+                    "Spider-Gwen Vol. 2 #16",
+                    "Spider-Man Vol. 2 #13",
+                    "Spider-Gwen Vol. 2 #17",
+                    "Spider-Man Vol. 2 #14",
+                    "Spider-Gwen Vol. 2 #18",
+                    "Spider-Man Vol. 2 #15-19"
+                ]
+            },
+            {
+                id: "event-6",
+                type: "event",
+                title: "Événement : Secret Empire & Generations",
+                subtitle: "Hydra prend le contrôle des USA. Miles cherche sa propre identité héroïque.",
+                issues: [
+                    "Secret Empire #1-10 (Série Principale)",
+                    "Champions Vol. 2 #12",
+                    "Generations: Miles Morales Spider-Man & Peter Parker Spider-Man #1",
+                    "Spider-Man Vol. 2 #20-21"
+                ]
+            },
+            {
+                id: "block-6",
+                type: "standard",
+                title: "Champions (Suite) & Fin de l'Ère Bendis",
+                subtitle: "Crossover avec les Avengers et l'arc Sinister Six Reborn.",
+                issues: [
+                    "Avengers #672",
+                    "Champions Vol. 2 #13",
+                    "Avengers #673",
+                    "Champions Vol. 2 #14",
+                    "Avengers #674",
+                    "Champions Vol. 2 #15-18",
+                    "Spider-Man #234-240 (Legacy Numbering)",
+                    "Champions Vol. 2 #19-27",
+                    "Champions Vol. 2 Annual #1"
+                ]
+            },
+            {
+                id: "block-7",
+                type: "standard",
+                title: "L'Ère Saladin Ahmed (Début)",
+                subtitle: "Focus sur Brooklyn, de nouveaux ennemis et une nouvelle ère pour les Champions.",
+                issues: [
+                    "Miles Morales: Spider-Man (2019) #1-6",
+                    "Champions Vol. 3 (2019) #1-10"
+                ]
+            },
+            {
+                id: "event-7",
+                type: "event",
+                title: "Événement : Absolute Carnage",
+                subtitle: "Miles est capturé et corrompu par le symbiote de Cletus Kasady.",
+                issues: [
+                    "Absolute Carnage #1-5 (Série Principale)",
+                    "Absolute Carnage: Miles Morales #1-3"
+                ]
+            },
+            {
+                id: "block-8",
+                type: "standard",
+                title: "Traumatisme & Ultimatum",
+                subtitle: "Les conséquences de Carnage et l'arrivée du Miles Morales maléfique (Ultimatum).",
+                issues: [
+                    "Miles Morales: Spider-Man #7-13",
+                    "Incoming! #1",
+                    "Miles Morales: Spider-Man #14-16",
+                    "Outlawed #1 (Loi anti-jeunes héros)",
+                    "Miles Morales: Spider-Man #17-19",
+                    "Champions Vol. 4 (2020) #1-5"
+                ]
+            },
+            {
+                id: "block-9",
+                type: "standard",
+                title: "La Saga du Clone & Nouveau Costume",
+                subtitle: "Miles affronte ses propres clones et adopte un nouveau look.",
+                issues: [
+                    "Miles Morales: Spider-Man #20-29 (Clone Saga)",
+                    "Champions Vol. 4 #6-10",
+                    "Miles Morales: Spider-Man Annual #1 (2021)",
+                    "Miles Morales: Spider-Man #30-36 (Arc Beyond inclus)",
+                    "Miles Morales: Spider-Man #37-42 (Empire of the Spider)"
+                ]
+            },
+            {
+                id: "block-10",
+                type: "standard",
+                title: "L'Ère Cody Ziglar",
+                subtitle: "Un ton plus brutal, de nouvelles capacités et l'arrivée de Rabble.",
+                issues: [
+                    "Miles Morales: Spider-Man Vol. 2 (2023) #1-5"
+                ]
+            },
+            {
+                id: "event-8",
+                type: "event",
+                title: "Événement : Carnage Reigns",
+                subtitle: "Miles fait équipe avec Iron Man contre un Carnage divin.",
+                issues: [
+                    "Carnage Reigns Alpha #1",
+                    "Miles Morales: Spider-Man Vol. 2 #6",
+                    "Carnage Vol. 3 #13",
+                    "Red Goblin #5",
+                    "Carnage Vol. 3 #14",
+                    "Miles Morales: Spider-Man Vol. 2 #7",
+                    "Carnage Reigns Omega #1"
+                ]
+            },
+            {
+                id: "block-11",
+                type: "standard",
+                title: "Gang War & Les Araignées Spectaculaires",
+                subtitle: "Guerre de territoires à New York et équipe permanente avec Peter.",
+                issues: [
+                    "Miles Morales: Spider-Man Vol. 2 #8-19 (Inclut Gang War)",
+                    "Spectacular Spider-Men #1-15 (Série duo avec Peter Parker)",
+                    "Miles Morales: Spider-Man Vol. 2 #20"
+                ]
+            },
+             {
+                id: "event-9",
+                type: "event",
+                title: "Événement : Blood Hunt",
+                subtitle: "Les vampires envahissent la Terre. Miles est mordu et transformé.",
+                issues: [
+                    "Blood Hunt #1-3 (Série Principale)",
+                    "Miles Morales: Spider-Man Vol. 2 #21-22",
+                    "Blood Hunt #4-5",
+                    "Blood Hunters Vol. 2 #1-5"
+                ]
+            },
+            {
+                id: "block-12",
+                type: "standard",
+                title: "Vampirisme & Conséquences",
+                subtitle: "Miles lutte contre sa nouvelle nature de vampire.",
+                issues: [
+                    "Miles Morales: Spider-Man Vol. 2 #23-29",
+                    "Miles Morales: Spider-Man Vol. 2 Annual #1 (2024)",
+                    "Deadpool Vol. 9 #11",
+                    "Miles Morales: Spider-Man Vol. 2 #30",
+                    "Deadpool Vol. 9 #12",
+                    "Miles Morales: Spider-Man Vol. 2 #31-42 (En cours)"
+                ]
+            }
+        ];
+
+        function renderTimeline() {
+            const root = document.getElementById('timeline-root');
+            
+            readingOrderData.forEach(block => {
+                const isEvent = block.type === 'event';
+                const isStandard = block.type === 'standard';
+                
+                const blockEl = document.createElement('div');
+                blockEl.className = `timeline-block ${isEvent ? 'is-event' : 'is-standard'}`;
+                blockEl.id = block.id;
+
+                // Create Issues HTML
+                let issuesHtml = '';
+                block.issues.forEach(issue => {
+                    issuesHtml += `
+                        <div class="issue-item">
+                            <div class="issue-marker"></div>
+                            <span class="issue-title">${issue}</span>
+                        </div>
+                    `;
+                });
+
+                blockEl.innerHTML = `
+                    <div class="block-header" onclick="toggleBlock('${block.id}')">
+                        <div>
+                            <span class="badge ${isEvent ? 'badge-event' : 'badge-standard'} mb-2 inline-block">
+                                ${isEvent ? 'Crossover / Event' : 'Lecture Classique'}
+                            </span>
+                            <h3 class="block-title">${block.title}</h3>
+                            <p class="block-subtitle">${block.subtitle}</p>
+                        </div>
+                        <div class="expand-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="block-content">
+                        <div class="pt-2">
+                            ${issuesHtml}
+                        </div>
+                    </div>
+                `;
+                
+                root.appendChild(blockEl);
+            });
+        }
+
+        function toggleBlock(id) {
+            const block = document.getElementById(id);
+            if (block.classList.contains('open')) {
+                block.classList.remove('open');
+            } else {
+                block.classList.add('open');
+                // Optional: scroll into view smoothly
+                setTimeout(() => {
+                    block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        }
+
+        // Initialize
+        window.onload = () => {
+            renderTimeline();
+        };
+    </script>
+</body>
+</html>
