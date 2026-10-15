@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Meal Preps Risotto</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            900: '#7c2d12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .recipe-enter { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom Checkbox */
+        .ingredient-checkbox:checked + label { text-decoration: line-through; color: #94a3b8; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+    </style>
+</head>
+<body class="text-slate-800 h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-white shadow-sm flex items-center justify-between p-4 z-20 relative">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-bowl-rice text-brand-500 text-xl"></i>
+            <h1 class="font-bold text-lg text-slate-800">Mes Meal Preps</h1>
+        </div>
+        <button id="mobileMenuBtn" class="text-slate-500 hover:text-slate-800 focus:outline-none p-2">
+            <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar / Navigation -->
+    <aside id="sidebar" class="bg-white w-full md:w-80 h-full flex flex-col shadow-xl z-10 absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="p-6 hidden md:flex items-center gap-3 border-b border-slate-100">
+            <div class="bg-brand-100 p-3 rounded-xl text-brand-600">
+                <i class="fa-solid fa-fire-burner text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-xl text-slate-900 leading-tight">Mes<br>Meal Preps</h1>
+            </div>
+        </div>
+        <div class="p-4 border-b border-slate-100 bg-slate-50">
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Objectif par tupperware</p>
+            <div class="flex justify-between items-center text-sm font-medium text-slate-700">
+                <span>Portions : <span class="bg-white px-2 py-1 rounded shadow-sm">x5</span></span>
+                <span>Max : <span class="bg-white px-2 py-1 rounded shadow-sm">850 kcal</span></span>
+            </div>
+        </div>
+        <nav class="flex-1 overflow-y-auto custom-scrollbar p-3 gap-2 flex flex-col" id="recipeNavList">
+            <!-- List populated by JS -->
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 bg-slate-50 h-full overflow-y-auto custom-scrollbar relative">
+        <div id="welcomeScreen" class="h-full flex flex-col items-center justify-center text-center p-6">
+            <img src="https://placehold.co/200x200/ffedd5/ea580c?text=Risotto" class="rounded-full shadow-lg mb-6 shadow-brand-100" alt="Plat icon">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Prêt pour le Meal Prep ?</h2>
+            <p class="text-slate-500 max-w-md">Sélectionnez une recette dans le menu pour afficher la liste de courses et les étapes de préparation (5 portions d'environ 800 kcal).</p>
+        </div>
+        
+        <div id="recipeContainer" class="hidden max-w-4xl mx-auto p-4 md:p-8 pb-24 recipe-enter">
+            <!-- Recipe Content populated by JS -->
+        </div>
+    </main>
+
+    <script>
+        // Data base of validated recipes
+        const recipes = [
+            {
+                id: 'poulet-champignon',
+                title: 'Risotto Poulet & Champignons',
+                icon: 'fa-drumstick-bite',
+                color: 'from-orange-400 to-brand-600',
+                stats: { kcal: 810, prot: 33, glu: 82, lip: 35 },
+                ingredients: [
+                    "650 g de chair de hauts de cuisse de poulet (sans peau/os)",
+                    "500 g de champignons frais",
+                    "1 gros oignon jaune",
+                    "2 gousses d'ail",
+                    "500 g de riz à risotto (Arborio/Carnaroli)",
+                    "15 cl de vin blanc sec",
+                    "1,5 à 2 L de bouillon de volaille",
+                    "90 à 100 g de margarine classique (70-80% MG)",
+                    "75 g de parmesan fraîchement râpé",
+                    "Sel, poivre, persil frais"
+                ],
+                instructions: [
+                    "Faire dorer la volaille en morceaux dans une partie de la margarine, avec l'oignon émincé et l'ail.",
+                    "Ajouter les champignons coupés et faire revenir le tout.",
+                    "Verser le riz et le faire nacrer (il doit devenir un peu translucide).",
+                    "Déglacer avec le vin blanc et laisser évaporer.",
+                    "Baisser le feu et ajouter le bouillon louche par louche, en attendant que le liquide soit absorbé à chaque fois (environ 18-20 min).",
+                    "Hors du feu, lier le risotto en ajoutant le reste de margarine et le parmesan. Mélanger vigoureusement pour obtenir le côté crémeux."
+                ]
+            },
+            {
+                id: 'chorizo-haricots',
+                title: 'Risotto Chorizo & Haricots Rouges',
+                icon: 'fa-pepper-hot',
+                color: 'from-red-500 to-rose-700',
+                stats: { kcal: 770, prot: 28, glu: 103, lip: 21 },
+                ingredients: [
+                    "225 g de chorizo (doux ou fort)",
+                    "1 grosse boîte de haricots rouges (500-530g égouttés)",
+                    "2 à 3 oignons jaunes",
+                    "2 poivrons (rouges/jaunes)",
+                    "2 gousses d'ail",
+                    "500 g de riz à risotto",
+                    "400 à 500 g de coulis de tomate (passata)",
+                    "1 L de bouillon de volaille",
+                    "15 cl de vin blanc sec",
+                    "20 g de margarine",
+                    "75 g de parmesan"
+                ],
+                instructions: [
+                    "Faire revenir le chorizo coupé en dés avec la margarine, les oignons et les poivrons émincés.",
+                    "Ajouter l'ail et le riz, faire nacrer quelques minutes dans le gras parfumé.",
+                    "Déglacer au vin blanc.",
+                    "Verser le coulis de tomate, puis ajouter progressivement le bouillon chaud louche par louche.",
+                    "En toute fin de cuisson, ajouter les haricots rouges bien rincés et égouttés pour les réchauffer.",
+                    "Hors du feu, lier avec le parmesan."
+                ]
+            },
+            {
+                id: 'lardons-petitspois',
+                title: 'Risotto Lardons & Petits Pois',
+                icon: 'fa-bacon',
+                color: 'from-amber-400 to-amber-600',
+                stats: { kcal: 820, prot: 26, glu: 93, lip: 36 },
+                ingredients: [
+                    "400 g de lardons (fumés ou natures)",
+                    "1 grande boîte de petits pois (bien rincés)",
+                    "2 gros oignons jaunes",
+                    "500 g de riz à risotto",
+                    "1 à 1,5 L de bouillon de volaille",
+                    "15 cl de vin blanc sec",
+                    "200 g de crème fleurette à 12 %",
+                    "75 g de parmesan"
+                ],
+                instructions: [
+                    "Faire revenir les lardons à sec dans une grande sauteuse. Une fois qu'ils ont rendu leur gras et dorent, ajouter les oignons émincés.",
+                    "Une fois les oignons fondus, ajouter le riz pour le nacrer directement dans cette graisse.",
+                    "Déglacer au vin blanc, puis cuire le riz en ajoutant le bouillon louche par louche.",
+                    "En fin de cuisson (hors du feu), incorporer la crème fleurette (laisser réduire 1 min si besoin pour épaissir), les petits pois en boîte pour les réchauffer, et le parmesan."
+                ]
+            },
+            {
+                id: 'asiatique-porc',
+                title: 'Risotto Asiatique (Porc & Épinards)',
+                icon: 'fa-leaf',
+                color: 'from-emerald-500 to-teal-700',
+                stats: { kcal: 730, prot: 32, glu: 88, lip: 24 },
+                ingredients: [
+                    "600 g de chair à saucisses (Férial)",
+                    "500 g de champignons de Paris frais",
+                    "400 g d'épinards (surgelés ou frais)",
+                    "2 oignons jaunes et 2 gousses d'ail",
+                    "500 g de riz à risotto",
+                    "1 à 1,5 L de bouillon de volaille (Non salé !)",
+                    "4 c.à.s de sauce soja sucrée",
+                    "2 c.à.s de sauce huître"
+                ],
+                instructions: [
+                    "Faire dorer la chair à saucisse émiettée à sec avec les oignons à feu vif (son gras naturel suffit).",
+                    "Ajouter l'ail, les champignons coupés, la sauce soja sucrée et la sauce huître pour laquer la viande.",
+                    "Verser le riz cru et mélanger pour le nacrer dans les sucs caramélisés.",
+                    "Procéder à la cuisson avec le bouillon (sans ajouter de sel).",
+                    "Ajouter les épinards surgelés 5 à 7 min avant la fin (ou à la toute dernière minute s'ils sont frais). Ils vont fondre et créer une liaison crémeuse avec la sauce huître."
+                ]
+            },
+            {
+                id: 'gyudon-boeuf',
+                title: 'Risotto Bœuf façon Gyudon',
+                icon: 'fa-cow',
+                color: 'from-stone-600 to-stone-800',
+                stats: { kcal: 780, prot: 33, glu: 85, lip: 28 },
+                ingredients: [
+                    "500 g de bœuf haché",
+                    "4 gros oignons jaunes",
+                    "500 g de champignons de Paris",
+                    "500 g de riz à risotto",
+                    "1 à 1,5 L de bouillon de bœuf ou volaille",
+                    "4 c.à.s de sauce soja sucrée",
+                    "2 c.à.s de sauce huître",
+                    "75 g de parmesan (pour la liaison du meal prep)",
+                    "1 jaune d'œuf extra-frais par portion (à ajouter le jour J dans l'assiette)"
+                ],
+                instructions: [
+                    "Faire revenir le bœuf haché à sec à feu vif avec les oignons émincés.",
+                    "Baisser le feu, ajouter les champignons, la sauce soja et la sauce huître. Bien mélanger pour laquer.",
+                    "Ajouter le riz pour le nacrer dans les sucs.",
+                    "Cuire avec le bouillon chaud, louche par louche.",
+                    "Hors du feu, incorporer le parmesan pour lier le plat avant de remplir les tupperwares.",
+                    "Astuce pour le jour J : Faire réchauffer la portion, creuser un puits et y déposer le jaune d'œuf cru. Mélanger avant de manger !"
+                ]
+            },
+            {
+                id: 'spaghetti-fajita',
+                title: 'Spaghettis façon Fajitas',
+                icon: 'fa-pepper-hot',
+                color: 'from-red-500 to-yellow-500',
+                stats: { kcal: 820, prot: 38, glu: 98, lip: 29 },
+                ingredients: [
+                    "500 g de spaghettis (un paquet standard)",
+                    "500 g de bœuf haché (à 15% de MG, pour le budget et le goût, ou de la chair à saucisses !)",
+                    "3 poivrons (mix de couleurs pour le visuel)",
+                    "2 gros oignons jaunes et 2 gousses d'ail",
+                    "1 petite boîte de maïs doux (environ 285g égoutté)",
+                    "400 g de coulis de tomate (passata)",
+                    "3 c.à.s d'épices mexicaines (Mélange Fajitas/Tacos, ou un mix cumin/paprika/piment doux)",
+                    "100 g de fromage à tartiner (type St Môret ou Philadelphia)",
+                    "100 g de cheddar râpé"
+                ],
+                instructions: [
+                    "Faire cuire les spaghettis dans un grand volume d'eau salée. ⚠️ Astuce Meal Prep : enlevez 2 minutes au temps indiqué sur le paquet. Elles finiront de cuire au micro-ondes. Prélevez une demi-tasse d'eau de cuisson avant d'égoutter.",
+                    "Dans une très grande sauteuse, faire revenir le bœuf haché à sec à feu vif. Une fois qu'il a rendu son gras, ajouter les oignons et les poivrons émincés en lamelles. Faire suer le tout 5 à 8 minutes.",
+                    "Ajouter l'ail écrasé et les épices mexicaines. Bien mélanger pendant 1 minute pour torréfier les épices et libérer leurs arômes.",
+                    "Verser le coulis de tomate et le maïs préalablement rincé et égoutté. Laisser mijoter 5 minutes à feu moyen.",
+                    "Baisser le feu au minimum, incorporer le fromage à tartiner et le petit filet d'eau de cuisson des pâtes. Mélanger doucement : la sauce va devenir opaque, épaisse et ultra-crémeuse.",
+                    "Ajouter les spaghettis égouttés directement dans la sauteuse. Remuer vigoureusement pour que la sauce enrobe parfaitement chaque pâte.",
+                    "Répartir dans vos 5 tupperwares et saupoudrer les 100g de cheddar râpé sur le dessus (il fondra à la perfection lors du passage au micro-ondes au boulot)."
+                ]
+            }
+        ];
+
+        let activeRecipeId = null;
+
+        function initApp() {
+            const navList = document.getElementById('recipeNavList');
+            const mobileBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            
+            // Build Navigation
+            recipes.forEach(recipe => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-3 rounded-xl transition-all duration-200 flex items-center gap-3 border border-transparent hover:bg-slate-100 recipe-nav-btn';
+                btn.id = `nav-${recipe.id}`;
+                btn.onclick = () => {
+                    selectRecipe(recipe.id);
+                    // Close sidebar on mobile after selection
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                };
+                
+                btn.innerHTML = `
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br ${recipe.color} text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <i class="fa-solid ${recipe.icon}"></i>
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <div class="font-semibold text-sm text-slate-800 truncate">${recipe.title}</div>
+                        <div class="text-xs text-slate-500">${recipe.stats.kcal} kcal / rep</div>
+                    </div>
+                `;
+                navList.appendChild(btn);
+            });
+
+            // Mobile Menu Toggle
+            mobileBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+        }
+
+        function selectRecipe(id) {
+            activeRecipeId = id;
+            const recipe = recipes.find(r => r.id === id);
+            
+            // Update Active State in Nav
+            document.querySelectorAll('.recipe-nav-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-50', 'border-brand-200', 'shadow-sm');
+                if (btn.id === `nav-${id}`) {
+                    btn.classList.add('bg-brand-50', 'border-brand-200', 'shadow-sm');
+                }
+            });
+
+            // Hide Welcome, Show Content
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            const container = document.getElementById('recipeContainer');
+            container.classList.remove('hidden');
+            
+            // Force animation reflow
+            container.classList.remove('recipe-enter');
+            void container.offsetWidth; 
+            container.classList.add('recipe-enter');
+
+            // Build Ingredients List
+            const ingredientsHTML = recipe.ingredients.map((ing, idx) => `
+                <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-100 shadow-sm hover:border-brand-300 transition-colors">
+                    <div class="pt-1">
+                        <input type="checkbox" id="ing-${idx}" class="ingredient-checkbox w-5 h-5 text-brand-600 rounded border-gray-300 focus:ring-brand-500 cursor-pointer">
+                    </div>
+                    <label for="ing-${idx}" class="text-sm text-slate-700 cursor-pointer select-none flex-1">${ing}</label>
+                </div>
+            `).join('');
+
+            // Build Instructions List
+            const instructionsHTML = recipe.instructions.map((inst, idx) => `
+                <div class="flex gap-4">
+                    <div class="flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center shrink-0 border-2 border-white shadow-sm">${idx + 1}</div>
+                        ${idx !== recipe.instructions.length - 1 ? '<div class="w-px h-full bg-slate-200 mt-2"></div>' : ''}
+                    </div>
+                    <div class="pb-6 pt-1 text-slate-700 text-sm leading-relaxed">${inst}</div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <!-- Header -->
+                <div class="mb-8">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br ${recipe.color} text-white flex items-center justify-center shadow-lg mb-4 text-2xl">
+                        <i class="fa-solid ${recipe.icon}"></i>
+                    </div>
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight mb-4">${recipe.title}</h2>
+                    
+                    <!-- Macros Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center items-center">
+                            <span class="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Calories</span>
+                            <span class="text-lg font-extrabold text-slate-800">~${recipe.stats.kcal}</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center items-center">
+                            <span class="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Protéines</span>
+                            <span class="text-lg font-extrabold text-blue-600">${recipe.stats.prot}g</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center items-center">
+                            <span class="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Glucides</span>
+                            <span class="text-lg font-extrabold text-orange-500">${recipe.stats.glu}g</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center items-center">
+                            <span class="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Lipides</span>
+                            <span class="text-lg font-extrabold text-yellow-500">${recipe.stats.lip}g</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Ingredients -->
+                    <div>
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="fa-solid fa-basket-shopping text-brand-500"></i>
+                            <h3 class="font-bold text-lg text-slate-800">Liste de courses (5 repas)</h3>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            ${ingredientsHTML}
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div>
+                        <div class="flex items-center gap-2 mb-6">
+                            <i class="fa-solid fa-fire text-brand-500"></i>
+                            <h3 class="font-bold text-lg text-slate-800">Préparation</h3>
+                        </div>
+                        <div class="flex flex-col">
+                            ${instructionsHTML}
+                        </div>
+                        
+                        <!-- Tip Box -->
+                        <div class="mt-6 bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3">
+                            <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+                            <p class="text-sm text-blue-800 leading-relaxed">
+                                <strong>Astuce Meal Prep :</strong> Laissez bien refroidir le risotto avant de fermer vos tupperwares pour éviter la condensation. Il se conservera parfaitement 4 à 5 jours au réfrigérateur.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize App on load
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
