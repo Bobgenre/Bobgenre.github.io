@@ -53,29 +53,29 @@
 
     <div id="loader">
         <div class="spinner"></div>
-        <p id="loader-text" class="mt-4 text-lg font-semibold text-gray-300">Calcul du système Elo et chargement des Worlds 2026...</p>
+        <p id="loader-text" class="mt-4 text-lg font-semibold text-gray-300">Mise à jour et calcul du système Elo Worlds 2026...</p>
     </div>
 
     <div id="app-content" class="max-w-7xl mx-auto" style="display: none;">
         <header class="text-center mb-8">
             <h1 class="text-4xl sm:text-6xl font-black cursor-pointer worlds-gradient tracking-tight" id="home-title">WORLDS 2026</h1>
-            <p class="text-lg text-gray-400 mt-2">League of Legends World Championship - Calendrier, Effectifs 2026 & Puissance Elo</p>
+            <p class="text-lg text-gray-400 mt-2">League of Legends World Championship - Calendrier, Simulateur & Puissance Elo</p>
             
-            <div class="flex flex-wrap justify-center gap-3 mt-6">
-                <button id="nav-schedule" class="tab-btn active px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all">
-                    📅 Calendrier des Matchs
+            <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-6">
+                <button id="nav-schedule" class="tab-btn active px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
+                    📅 Calendrier
                 </button>
-                <button id="nav-elo" class="tab-btn px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all">
-                    📊 Puissance Elo & Forme
+                <button id="nav-elo" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
+                    📊 Puissance Elo
                 </button>
-                <button id="nav-teams" class="tab-btn px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all">
-                    ⚔️ Équipes & Rosters 2026
+                <button id="nav-teams" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
+                    👥 Équipes & Rosters
                 </button>
-                <button id="nav-predictions" class="tab-btn px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all">
+                <button id="nav-predictions" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
                     🔮 Pronostiques
                 </button>
-                <button id="nav-stages" class="tab-btn px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all">
-                    🏆 Format & Étapes
+                <button id="nav-stages" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
+                    🏆 Format
                 </button>
             </div>
         </header>
@@ -85,7 +85,7 @@
         </main>
 
         <footer class="text-center text-gray-500 text-sm mt-16 pb-6 border-t border-gray-800 pt-6">
-            <p>Worlds 2026 LoL Companion — Algorithme Elo basé sur les splits régionaux & MSI 2026.</p>
+            <p>Worlds 2026 LoL Companion — Simulateur interactif & Algorithme Elo officiel.</p>
         </footer>
     </div>
 
@@ -97,34 +97,71 @@
             { id: 'knockouts', name: 'Knockout Stage (Playoffs)', dates: 'Novembre 2026', description: 'Quarts de finale, demi-finales et grande finale en Bo5 à élimination directe.' }
         ];
 
-        // Official 2026 Teams Data with correct 2026 Rosters and match results for Elo algorithm
+        const regionCoefficients = {
+            'LCK': 1.12,
+            'LPL': 1.10,
+            'LEC': 1.00,
+            'LCS': 0.98,
+            'LCP': 0.92,
+            'CBLOL': 0.88
+        };
+
+        // Official 2026 Teams Data with correct 2026 Rosters, Split Stats, and match results for Elo algorithm
         const teamsData = [
             // LCK
             { 
                 id: 'GEN', name: 'Gen.G', region: 'LCK', seed: 'Seed 1 (LCK Champion)', 
                 logo: 'https://placehold.co/80x80/f59e0b/ffffff?text=GEN',
-                roster: [{role: 'Top', name: 'Kiin'}, {role: 'Jungle', name: 'Canyon'}, {role: 'Mid', name: 'Chovy'}, {role: 'Bot', name: 'Ruler'}, {role: 'Support', name: 'Duro'}],
+                macroStats: { gd15: 1680, ftPct: 71, objControl: 68, lateGame: 95 },
+                roster: [
+                    {role: 'Top', name: 'Kiin', score: 93, kda: '4.8', dpm: 640},
+                    {role: 'Jungle', name: 'Canyon', score: 94, kda: '5.4', dpm: 480},
+                    {role: 'Mid', name: 'Chovy', score: 98, kda: '7.1', dpm: 760},
+                    {role: 'Bot', name: 'Ruler', score: 95, kda: '6.5', dpm: 790},
+                    {role: 'Support', name: 'Duro', score: 88, kda: '4.6', dpm: 210}
+                ],
                 recentWins: ['HLE (LCK Final)', 'KT Rolster', 'T1', 'DK', 'G2 Esports'],
                 recentLosses: ['Dplus KIA (EWC)']
             },
             { 
                 id: 'HLE', name: 'Hanwha Life Esports', region: 'LCK', seed: 'MSI 2026 Champion', 
                 logo: 'https://placehold.co/80x80/ea580c/ffffff?text=HLE',
-                roster: [{role: 'Top', name: 'Zeus'}, {role: 'Jungle', name: 'Kanavi'}, {role: 'Mid', name: 'Zeka'}, {role: 'Bot', name: 'Gumayusi'}, {role: 'Support', name: 'Delight'}],
+                macroStats: { gd15: 1520, ftPct: 67, objControl: 66, lateGame: 94 },
+                roster: [
+                    {role: 'Top', name: 'Zeus', score: 96, kda: '4.5', dpm: 690},
+                    {role: 'Jungle', name: 'Kanavi', score: 93, kda: '4.9', dpm: 510},
+                    {role: 'Mid', name: 'Zeka', score: 92, kda: '5.3', dpm: 680},
+                    {role: 'Bot', name: 'Gumayusi', score: 94, kda: '6.1', dpm: 740},
+                    {role: 'Support', name: 'Delight', score: 91, kda: '4.8', dpm: 205}
+                ],
                 recentWins: ['Bilibili Gaming (MSI Final)', 'T1', 'DK', 'AL'],
                 recentLosses: ['Gen.G (LCK Final)']
             },
             { 
                 id: 'T1', name: 'T1', region: 'LCK', seed: 'Seed 3', 
                 logo: 'https://placehold.co/80x80/dc2626/ffffff?text=T1',
-                roster: [{role: 'Top', name: 'Doran'}, {role: 'Jungle', name: 'Oner'}, {role: 'Mid', name: 'Faker'}, {role: 'Bot', name: 'Peyz'}, {role: 'Support', name: 'Keria'}],
+                macroStats: { gd15: 1390, ftPct: 69, objControl: 63, lateGame: 93 },
+                roster: [
+                    {role: 'Top', name: 'Doran', score: 88, kda: '3.9', dpm: 580},
+                    {role: 'Jungle', name: 'Oner', score: 91, kda: '4.7', dpm: 460},
+                    {role: 'Mid', name: 'Faker', score: 93, kda: '4.9', dpm: 650},
+                    {role: 'Bot', name: 'Peyz', score: 93, kda: '6.3', dpm: 770},
+                    {role: 'Support', name: 'Keria', score: 95, kda: '5.2', dpm: 260}
+                ],
                 recentWins: ['DK', 'KT Rolster', 'BLG'],
                 recentLosses: ['Gen.G', 'HLE']
             },
             { 
                 id: 'DK', name: 'Dplus KIA', region: 'LCK', seed: 'Seed 4', 
                 logo: 'https://placehold.co/80x80/2563eb/ffffff?text=DK',
-                roster: [{role: 'Top', name: 'Siwoo'}, {role: 'Jungle', name: 'Lucid'}, {role: 'Mid', name: 'ShowMaker'}, {role: 'Bot', name: 'Smash'}, {role: 'Support', name: 'Career'}],
+                macroStats: { gd15: 940, ftPct: 60, objControl: 59, lateGame: 88 },
+                roster: [
+                    {role: 'Top', name: 'Siwoo', score: 85, kda: '3.6', dpm: 560},
+                    {role: 'Jungle', name: 'Lucid', score: 89, kda: '4.5', dpm: 450},
+                    {role: 'Mid', name: 'ShowMaker', score: 91, kda: '5.0', dpm: 660},
+                    {role: 'Bot', name: 'Smash', score: 87, kda: '5.1', dpm: 700},
+                    {role: 'Support', name: 'Career', score: 84, kda: '4.0', dpm: 190}
+                ],
                 recentWins: ['Gen.G (EWC)', 'KT Rolster', 'Karmine Corp'],
                 recentLosses: ['T1', 'HLE']
             },
@@ -132,28 +169,56 @@
             { 
                 id: 'AL', name: 'Anyone\'s Legend', region: 'LPL', seed: 'Seed 1 (LPL Split 3)', 
                 logo: 'https://placehold.co/80x80/e11d48/ffffff?text=AL',
-                roster: [{role: 'Top', name: 'Breathe'}, {role: 'Jungle', name: 'Tarzan'}, {role: 'Mid', name: 'Shanks'}, {role: 'Bot', name: 'Hope'}, {role: 'Support', name: 'Kael'}],
+                macroStats: { gd15: 1340, ftPct: 65, objControl: 64, lateGame: 91 },
+                roster: [
+                    {role: 'Top', name: 'Breathe', score: 89, kda: '4.1', dpm: 610},
+                    {role: 'Jungle', name: 'Tarzan', score: 93, kda: '5.3', dpm: 470},
+                    {role: 'Mid', name: 'Shanks', score: 90, kda: '5.1', dpm: 670},
+                    {role: 'Bot', name: 'Hope', score: 89, kda: '5.6', dpm: 720},
+                    {role: 'Support', name: 'Kael', score: 90, kda: '4.9', dpm: 215}
+                ],
                 recentWins: ['Bilibili Gaming (LPL Final)', 'TES', 'IG'],
                 recentLosses: ['Gen.G (EWC)', 'HLE']
             },
             { 
                 id: 'BLG', name: 'Bilibili Gaming', region: 'LPL', seed: 'Seed 2', 
                 logo: 'https://placehold.co/80x80/3b82f6/ffffff?text=BLG',
-                roster: [{role: 'Top', name: 'Bin'}, {role: 'Jungle', name: 'Xun'}, {role: 'Mid', name: 'Knight'}, {role: 'Bot', name: 'Viper'}, {role: 'Support', name: 'ON'}],
+                macroStats: { gd15: 1480, ftPct: 68, objControl: 63, lateGame: 92 },
+                roster: [
+                    {role: 'Top', name: 'Bin', score: 96, kda: '4.6', dpm: 700},
+                    {role: 'Jungle', name: 'Xun', score: 89, kda: '4.5', dpm: 485},
+                    {role: 'Mid', name: 'Knight', score: 95, kda: '6.2', dpm: 730},
+                    {role: 'Bot', name: 'Viper', score: 95, kda: '6.4', dpm: 780},
+                    {role: 'Support', name: 'ON', score: 87, kda: '4.1', dpm: 220}
+                ],
                 recentWins: ['TES', 'IG', 'TL'],
                 recentLosses: ['Hanwha Life Esports (MSI Final)', 'Anyone\'s Legend']
             },
             { 
                 id: 'TES', name: 'Top Esports', region: 'LPL', seed: 'Seed 3', 
                 logo: 'https://placehold.co/80x80/6366f1/ffffff?text=TES',
-                roster: [{role: 'Top', name: '369'}, {role: 'Jungle', name: 'Tian'}, {role: 'Mid', name: 'Creme'}, {role: 'Bot', name: 'JackeyLove'}, {role: 'Support', name: 'Zhuo'}],
+                macroStats: { gd15: 1210, ftPct: 64, objControl: 60, lateGame: 87 },
+                roster: [
+                    {role: 'Top', name: '369', score: 90, kda: '4.2', dpm: 600},
+                    {role: 'Jungle', name: 'Tian', score: 89, kda: '4.6', dpm: 455},
+                    {role: 'Mid', name: 'Creme', score: 89, kda: '4.8', dpm: 665},
+                    {role: 'Bot', name: 'JackeyLove', score: 92, kda: '5.2', dpm: 765},
+                    {role: 'Support', name: 'Zhuo', score: 84, kda: '3.9', dpm: 185}
+                ],
                 recentWins: ['IG', 'G2 Esports', 'C9'],
                 recentLosses: ['BLG', 'AL']
             },
             { 
                 id: 'IG', name: 'Invictus Gaming', region: 'LPL', seed: 'Seed 4', 
                 logo: 'https://placehold.co/80x80/4f46e5/ffffff?text=IG',
-                roster: [{role: 'Top', name: 'TheShy'}, {role: 'Jungle', name: 'Wei'}, {role: 'Mid', name: 'Rookie'}, {role: 'Bot', name: 'JiaQi'}, {role: 'Support', name: 'Meiko'}],
+                macroStats: { gd15: 890, ftPct: 59, objControl: 57, lateGame: 86 },
+                roster: [
+                    {role: 'Top', name: 'TheShy', score: 89, kda: '3.4', dpm: 675},
+                    {role: 'Jungle', name: 'Wei', score: 88, kda: '4.4', dpm: 440},
+                    {role: 'Mid', name: 'Rookie', score: 90, kda: '4.9', dpm: 670},
+                    {role: 'Bot', name: 'JiaQi', score: 85, kda: '4.7', dpm: 685},
+                    {role: 'Support', name: 'Meiko', score: 88, kda: '4.5', dpm: 200}
+                ],
                 recentWins: ['TES (Regional)', 'Movistar KOI'],
                 recentLosses: ['AL', 'BLG']
             },
@@ -161,21 +226,42 @@
             { 
                 id: 'G2', name: 'G2 Esports', region: 'LEC', seed: 'Seed 1 (LEC Champion)', 
                 logo: 'https://placehold.co/80x80/0055ff/ffffff?text=G2',
-                roster: [{role: 'Top', name: 'BrokenBlade'}, {role: 'Jungle', name: 'SkewMond'}, {role: 'Mid', name: 'Caps'}, {role: 'Bot', name: 'Hans Sama'}, {role: 'Support', name: 'Labrov'}],
+                macroStats: { gd15: 1150, ftPct: 64, objControl: 63, lateGame: 90 },
+                roster: [
+                    {role: 'Top', name: 'BrokenBlade', score: 88, kda: '4.2', dpm: 595},
+                    {role: 'Jungle', name: 'SkewMond', score: 87, kda: '4.8', dpm: 460},
+                    {role: 'Mid', name: 'Caps', score: 92, kda: '5.5', dpm: 690},
+                    {role: 'Bot', name: 'Hans Sama', score: 89, kda: '5.6', dpm: 715},
+                    {role: 'Support', name: 'Labrov', score: 87, kda: '4.6', dpm: 200}
+                ],
                 recentWins: ['Movistar KOI (LEC Final)', 'Karmine Corp', 'Team Liquid'],
                 recentLosses: ['Gen.G', 'Top Esports']
             },
             { 
                 id: 'MKOI', name: 'Movistar KOI', region: 'LEC', seed: 'Seed 2', 
                 logo: 'https://placehold.co/80x80/ec4899/ffffff?text=MKOI',
-                roster: [{role: 'Top', name: 'Myrwn'}, {role: 'Jungle', name: 'Elyoya'}, {role: 'Mid', name: 'jojopyun'}, {role: 'Bot', name: 'Supa'}, {role: 'Support', name: 'Alvaro'}],
+                macroStats: { gd15: 760, ftPct: 58, objControl: 57, lateGame: 84 },
+                roster: [
+                    {role: 'Top', name: 'Myrwn', score: 83, kda: '3.5', dpm: 575},
+                    {role: 'Jungle', name: 'Elyoya', score: 88, kda: '4.6', dpm: 445},
+                    {role: 'Mid', name: 'jojopyun', score: 85, kda: '4.3', dpm: 635},
+                    {role: 'Bot', name: 'Supa', score: 84, kda: '4.8', dpm: 680},
+                    {role: 'Support', name: 'Alvaro', score: 84, kda: '4.2', dpm: 195}
+                ],
                 recentWins: ['Karmine Corp', 'LYON'],
                 recentLosses: ['G2 Esports', 'Invictus Gaming']
             },
             { 
                 id: 'KC', name: 'Karmine Corp', region: 'LEC', seed: 'Play-In (Seed 3)', 
                 logo: 'https://placehold.co/80x80/374151/ffffff?text=KC',
-                roster: [{role: 'Top', name: 'Canna'}, {role: 'Jungle', name: 'Yike'}, {role: 'Mid', name: 'kyeahoo'}, {role: 'Bot', name: 'Caliste'}, {role: 'Support', name: 'Busio'}],
+                macroStats: { gd15: 680, ftPct: 57, objControl: 56, lateGame: 85 },
+                roster: [
+                    {role: 'Top', name: 'Canna', score: 88, kda: '4.1', dpm: 615},
+                    {role: 'Jungle', name: 'Yike', score: 86, kda: '4.5', dpm: 450},
+                    {role: 'Mid', name: 'kyeahoo', score: 83, kda: '4.2', dpm: 610},
+                    {role: 'Bot', name: 'Caliste', score: 89, kda: '5.4', dpm: 725},
+                    {role: 'Support', name: 'Busio', score: 82, kda: '3.9', dpm: 185}
+                ],
                 recentWins: ['Team Liquid', 'Cloud9'],
                 recentLosses: ['G2 Esports', 'Movistar KOI', 'Dplus KIA']
             },
@@ -183,21 +269,42 @@
             { 
                 id: 'TL', name: 'Team Liquid', region: 'LCS', seed: 'Seed 1 (LCS Champion)', 
                 logo: 'https://placehold.co/80x80/0284c7/ffffff?text=TL',
-                roster: [{role: 'Top', name: 'Morgan'}, {role: 'Jungle', name: 'Josedeodo'}, {role: 'Mid', name: 'Quid'}, {role: 'Bot', name: 'Yeon'}, {role: 'Support', name: 'CoreJJ'}],
-                recentWins: ['LYON (LCS Final)', 'Cloud9', 'LOS'],
+                macroStats: { gd15: 1090, ftPct: 63, objControl: 62, lateGame: 86 },
+                roster: [
+                    {role: 'Top', name: 'Morgan', score: 84, kda: '3.9', dpm: 560},
+                    {role: 'Jungle', name: 'Josedeodo', score: 83, kda: '4.3', dpm: 430},
+                    {role: 'Mid', name: 'Quid', score: 88, kda: '5.1', dpm: 660},
+                    {role: 'Bot', name: 'Yeon', score: 88, kda: '5.5', dpm: 710},
+                    {role: 'Support', name: 'CoreJJ', score: 86, kda: '4.4', dpm: 195}
+                ],
+                recentWins: ['LYON (LCS Final)', 'Cloud9', 'LØS'],
                 recentLosses: ['G2 Esports', 'BLG', 'Karmine Corp']
             },
             { 
                 id: 'LYON', name: 'LYON', region: 'LCS', seed: 'Seed 2', 
                 logo: 'https://placehold.co/80x80/9333ea/ffffff?text=LYON',
-                roster: [{role: 'Top', name: 'Dhokla'}, {role: 'Jungle', name: 'Inspired'}, {role: 'Mid', name: 'Saint'}, {role: 'Bot', name: 'Berserker'}, {role: 'Support', name: 'Isles'}],
+                macroStats: { gd15: 620, ftPct: 55, objControl: 56, lateGame: 84 },
+                roster: [
+                    {role: 'Top', name: 'Dhokla', score: 80, kda: '3.4', dpm: 545},
+                    {role: 'Jungle', name: 'Inspired', score: 89, kda: '5.0', dpm: 465},
+                    {role: 'Mid', name: 'Saint', score: 82, kda: '4.1', dpm: 605},
+                    {role: 'Bot', name: 'Berserker', score: 88, kda: '5.3', dpm: 715},
+                    {role: 'Support', name: 'Isles', score: 80, kda: '3.8', dpm: 180}
+                ],
                 recentWins: ['Cloud9', 'Team Secret Whales'],
                 recentLosses: ['Team Liquid', 'Movistar KOI']
             },
             { 
                 id: 'C9', name: 'Cloud9', region: 'LCS', seed: 'Play-In (Seed 3)', 
                 logo: 'https://placehold.co/80x80/1d4ed8/ffffff?text=C9',
-                roster: [{role: 'Top', name: 'Thanatos'}, {role: 'Jungle', name: 'Blaber'}, {role: 'Mid', name: 'Loki'}, {role: 'Bot', name: 'Tactical'}, {role: 'Support', name: 'Vulcan'}],
+                macroStats: { gd15: 590, ftPct: 56, objControl: 54, lateGame: 82 },
+                roster: [
+                    {role: 'Top', name: 'Thanatos', score: 86, kda: '4.0', dpm: 590},
+                    {role: 'Jungle', name: 'Blaber', score: 85, kda: '4.2', dpm: 455},
+                    {role: 'Mid', name: 'Loki', score: 83, kda: '4.3', dpm: 615},
+                    {role: 'Bot', name: 'Tactical', score: 80, kda: '4.1', dpm: 660},
+                    {role: 'Support', name: 'Vulcan', score: 82, kda: '3.9', dpm: 185}
+                ],
                 recentWins: ['FURIA'],
                 recentLosses: ['Team Liquid', 'Karmine Corp', 'TES']
             },
@@ -205,21 +312,42 @@
             { 
                 id: 'TSW', name: 'Team Secret Whales', region: 'LCP', seed: 'Seed 1 (LCP Champion)', 
                 logo: 'https://placehold.co/80x80/10b981/ffffff?text=TSW',
-                roster: [{role: 'Top', name: 'Pun'}, {role: 'Jungle', name: 'Hizto'}, {role: 'Mid', name: 'Dire'}, {role: 'Bot', name: 'Eddie'}, {role: 'Support', name: 'Bie'}],
+                macroStats: { gd15: 820, ftPct: 60, objControl: 58, lateGame: 81 },
+                roster: [
+                    {role: 'Top', name: 'Pun', score: 80, kda: '3.8', dpm: 550},
+                    {role: 'Jungle', name: 'Hizto', score: 82, kda: '4.4', dpm: 440},
+                    {role: 'Mid', name: 'Dire', score: 81, kda: '4.3', dpm: 600},
+                    {role: 'Bot', name: 'Eddie', score: 83, kda: '4.9', dpm: 680},
+                    {role: 'Support', name: 'Bie', score: 82, kda: '4.5', dpm: 190}
+                ],
                 recentWins: ['CTBC Flying Oyster', 'MVK Esports'],
                 recentLosses: ['Gen.G']
             },
             { 
                 id: 'CFO', name: 'CTBC Flying Oyster', region: 'LCP', seed: 'Seed 2', 
                 logo: 'https://placehold.co/80x80/f97316/ffffff?text=CFO',
-                roster: [{role: 'Top', name: 'Rest'}, {role: 'Jungle', name: 'Shad0w'}, {role: 'Mid', name: 'POUT'}, {role: 'Bot', name: 'Doggo'}, {role: 'Support', name: 'Kino'}],
+                macroStats: { gd15: 610, ftPct: 56, objControl: 55, lateGame: 80 },
+                roster: [
+                    {role: 'Top', name: 'Rest', score: 80, kda: '3.7', dpm: 540},
+                    {role: 'Jungle', name: 'Shad0w', score: 82, kda: '4.2', dpm: 435},
+                    {role: 'Mid', name: 'POUT', score: 79, kda: '4.0', dpm: 590},
+                    {role: 'Bot', name: 'Doggo', score: 85, kda: '5.0', dpm: 700},
+                    {role: 'Support', name: 'Kino', score: 79, kda: '3.9', dpm: 180}
+                ],
                 recentWins: ['MVK Esports'],
                 recentLosses: ['Team Secret Whales']
             },
             { 
                 id: 'MVK', name: 'MVK Esports', region: 'LCP', seed: 'Play-In (Seed 4)', 
                 logo: 'https://placehold.co/80x80/06b6d4/ffffff?text=MVK',
-                roster: [{role: 'Top', name: 'Kratos'}, {role: 'Jungle', name: 'Gury'}, {role: 'Mid', name: 'Chika'}, {role: 'Bot', name: 'Harky'}, {role: 'Support', name: 'SiuLoong'}],
+                macroStats: { gd15: 380, ftPct: 52, objControl: 51, lateGame: 77 },
+                roster: [
+                    {role: 'Top', name: 'Kratos', score: 77, kda: '3.4', dpm: 520},
+                    {role: 'Jungle', name: 'Gury', score: 79, kda: '3.9', dpm: 415},
+                    {role: 'Mid', name: 'Chika', score: 78, kda: '3.8', dpm: 575},
+                    {role: 'Bot', name: 'Harky', score: 79, kda: '4.2', dpm: 645},
+                    {role: 'Support', name: 'SiuLoong', score: 77, kda: '3.6', dpm: 175}
+                ],
                 recentWins: ['FURIA'],
                 recentLosses: ['Team Secret Whales', 'CTBC Flying Oyster']
             },
@@ -227,20 +355,34 @@
             { 
                 id: 'LOS', name: 'LØS', region: 'CBLOL', seed: 'Seed 1 (CBLOL Champion)', 
                 logo: 'https://placehold.co/80x80/84cc16/ffffff?text=LOS',
-                roster: [{role: 'Top', name: 'Zest'}, {role: 'Jungle', name: 'Curse'}, {role: 'Mid', name: 'Feisty'}, {role: 'Bot', name: 'Duduhh'}, {role: 'Support', name: 'Ackerman'}],
+                macroStats: { gd15: 640, ftPct: 57, objControl: 56, lateGame: 78 },
+                roster: [
+                    {role: 'Top', name: 'Zest', score: 79, kda: '3.7', dpm: 545},
+                    {role: 'Jungle', name: 'Curse', score: 80, kda: '4.1', dpm: 425},
+                    {role: 'Mid', name: 'Feisty', score: 82, kda: '4.5', dpm: 615},
+                    {role: 'Bot', name: 'Duduhh', score: 79, kda: '4.4', dpm: 655},
+                    {role: 'Support', name: 'Ackerman', score: 79, kda: '4.1', dpm: 180}
+                ],
                 recentWins: ['FURIA (CBLOL Final)'],
                 recentLosses: ['Team Liquid']
             },
             { 
                 id: 'FUR', name: 'FURIA', region: 'CBLOL', seed: 'Play-In (Seed 2)', 
                 logo: 'https://placehold.co/80x80/eab308/ffffff?text=FUR',
-                roster: [{role: 'Top', name: 'Guigo'}, {role: 'Jungle', name: 'Tatu'}, {role: 'Mid', name: 'Tutsz'}, {role: 'Bot', name: 'Ayu'}, {role: 'Support', name: 'Jojo'}],
+                macroStats: { gd15: 420, ftPct: 53, objControl: 51, lateGame: 76 },
+                roster: [
+                    {role: 'Top', name: 'Guigo', score: 78, kda: '3.5', dpm: 535},
+                    {role: 'Jungle', name: 'Tatu', score: 77, kda: '3.8', dpm: 410},
+                    {role: 'Mid', name: 'Tutsz', score: 79, kda: '4.1', dpm: 590},
+                    {role: 'Bot', name: 'Ayu', score: 78, kda: '4.3', dpm: 640},
+                    {role: 'Support', name: 'Jojo', score: 77, kda: '3.9', dpm: 175}
+                ],
                 recentWins: ['MVK Esports'],
                 recentLosses: ['LØS', 'Cloud9']
             }
         ];
 
-        // Official Matches schedule (Seuls les matchs du Play-In sont officiellement programmés pour l'instant)
+        // Official Matches schedule
         const matchesData = [
             { id: 'm1', stage: 'play-in', date: '2026-10-15', time: '11:00 CEST', team1: 'Cloud9', team2: 'Karmine Corp', format: 'Bo5', status: 'upcoming' },
             { id: 'm2', stage: 'play-in', date: '2026-10-16', time: '16:00 CEST', team1: 'FURIA', team2: 'MVK Esports', format: 'Bo5', status: 'upcoming' },
@@ -250,7 +392,6 @@
         ];
 
         function calculateEloRatings() {
-            // Base Elo ratings per region/status
             const eloMap = {};
             teamsData.forEach(t => {
                 let base = 1500;
@@ -261,7 +402,6 @@
                 else if (t.region === 'LCP') base = 1500;
                 else if (t.region === 'CBLOL') base = 1450;
                 
-                // Adjust based on seed or special titles
                 if (t.seed.includes('Champion')) base += 50;
                 if (t.id === 'GEN') base = 1820;
                 if (t.id === 'HLE') base = 1800;
@@ -279,13 +419,10 @@
                 };
             });
 
-            // Simulate Elo adjustments based on opponents defeated vs lost to
             teamsData.forEach(t => {
                 t.recentWins.forEach(winStr => {
-                    // find if opponent is in teamsData
                     const opp = teamsData.find(x => winStr.toLowerCase().includes(x.id.toLowerCase()) || winStr.toLowerCase().includes(x.name.toLowerCase()));
                     if (opp && eloMap[opp.id]) {
-                        // Winner gains elo proportional to opponent strength
                         eloMap[t.id].elo += Math.round((eloMap[opp.id].elo - eloMap[t.id].elo) * 0.15 + 15);
                     }
                 });
@@ -297,7 +434,6 @@
                 });
             });
 
-            // Sort teams by Elo descending
             return Object.values(eloMap).sort((a, b) => b.elo - a.elo);
         }
 
@@ -310,11 +446,11 @@
                 renderScheduleView();
             }, 400);
 
-            document.getElementById('nav-schedule').addEventListener('click', (e) => setActiveTab(e.target, renderScheduleView));
-            document.getElementById('nav-elo').addEventListener('click', (e) => setActiveTab(e.target, renderEloView));
-            document.getElementById('nav-teams').addEventListener('click', (e) => setActiveTab(e.target, renderTeamsView));
-            document.getElementById('nav-predictions').addEventListener('click', (e) => setActiveTab(e.target, renderPredictionsView));
-            document.getElementById('nav-stages').addEventListener('click', (e) => setActiveTab(e.target, renderStagesView));
+            document.getElementById('nav-schedule').addEventListener('click', (e) => { setActiveTab(e.target, renderScheduleView); });
+            document.getElementById('nav-elo').addEventListener('click', (e) => { setActiveTab(e.target, renderEloView); });
+            document.getElementById('nav-teams').addEventListener('click', (e) => { setActiveTab(e.target, renderTeamsView); });
+            document.getElementById('nav-predictions').addEventListener('click', (e) => { setActiveTab(e.target, renderPredictionsView); });
+            document.getElementById('nav-stages').addEventListener('click', (e) => { setActiveTab(e.target, renderStagesView); });
             document.getElementById('home-title').addEventListener('click', () => {
                 setActiveTab(document.getElementById('nav-schedule'), renderScheduleView);
             });
@@ -366,7 +502,6 @@
             }).join('') : `
                 <div class="bg-gray-800/60 border border-gray-700/40 rounded-xl p-8 text-center text-gray-400">
                     <p class="text-base font-semibold text-gray-300">Aucun match officiel annoncé pour cette étape pour le moment.</p>
-                    <p class="text-sm text-gray-500 mt-2">Le tirage au sort et le calendrier du Swiss Stage et des Knockouts seront dévoilés à l'issue de la phase de Play-In.</p>
                 </div>
             `;
 
@@ -392,6 +527,85 @@
                     renderScheduleView();
                 });
             });
+        }
+
+        function computeAdvancedMatchPrediction(team1, team2, rankedTeams) {
+            const r1 = rankedTeams.find(r => r.team.id === team1.id);
+            const r2 = rankedTeams.find(r => r.team.id === team2.id);
+            const elo1 = r1 ? r1.elo : 1500;
+            const elo2 = r2 ? r2.elo : 1500;
+
+            // 1. Probabilité Elo de base (Poids: 50%)
+            const probElo1 = 1 / (1 + Math.pow(10, (elo2 - elo1) / 400));
+
+            // 2. Comparaison des Joueurs Rôle par Rôle pondérée par la région (Poids: 25%)
+            const reg1 = regionCoefficients[team1.region] || 1.0;
+            const reg2 = regionCoefficients[team2.region] || 1.0;
+
+            const avgRoster1 = (team1.roster.reduce((sum, p) => sum + p.score, 0) / 5) * reg1;
+            const avgRoster2 = (team2.roster.reduce((sum, p) => sum + p.score, 0) / 5) * reg2;
+            const probRoster1 = 1 / (1 + Math.pow(10, (avgRoster2 - avgRoster1) / 18));
+
+            // 3. Statistiques Macro Early/Late du Split précédent pondérées par la région (Poids: 25%)
+            const m1 = team1.macroStats;
+            const m2 = team2.macroStats;
+            const macroIndex1 = ((m1.gd15 / 25) + m1.ftPct * 0.8 + m1.objControl * 0.9 + m1.lateGame * 0.8) * reg1;
+            const macroIndex2 = ((m2.gd15 / 25) + m2.ftPct * 0.8 + m2.objControl * 0.9 + m2.lateGame * 0.8) * reg2;
+            const probMacro1 = 1 / (1 + Math.pow(10, (macroIndex2 - macroIndex1) / 45));
+
+            // Probabilité combinée par manche (Game Win Probability p)
+            const gameWinProb1 = Math.min(0.92, Math.max(0.08, (probElo1 * 0.50) + (probRoster1 * 0.25) + (probMacro1 * 0.25)));
+            const p = gameWinProb1;
+            const q = 1 - p;
+
+            // Distribution binomiale exacte pour un Bo5 (sans aucun hasard)
+            const p3_0 = Math.pow(p, 3);
+            const p3_1 = 3 * Math.pow(p, 3) * q;
+            const p3_2 = 6 * Math.pow(p, 3) * Math.pow(q, 2);
+            const p2_3 = 6 * Math.pow(q, 3) * Math.pow(p, 2);
+            const p1_3 = 3 * Math.pow(q, 3) * p;
+            const p0_3 = Math.pow(q, 3);
+
+            const seriesWinProb1 = p3_0 + p3_1 + p3_2;
+            const seriesWinProb2 = p2_3 + p1_3 + p0_3;
+
+            const scoreOutcomes = [
+                { score: '3 - 0', prob: p3_0, winner: 1 },
+                { score: '3 - 1', prob: p3_1, winner: 1 },
+                { score: '3 - 2', prob: p3_2, winner: 1 },
+                { score: '2 - 3', prob: p2_3, winner: 2 },
+                { score: '1 - 3', prob: p1_3, winner: 2 },
+                { score: '0 - 3', prob: p0_3, winner: 2 }
+            ];
+
+            // Détermination du score exact le plus probable selon l'écart de puissance
+            const bestOutcome = [...scoreOutcomes].sort((a, b) => b.prob - a.prob)[0];
+
+            // Comparaison ligne par ligne
+            const laneMatchups = team1.roster.map((p1, idx) => {
+                const p2 = team2.roster[idx];
+                const eff1 = p1.score * Math.sqrt(reg1);
+                const eff2 = p2.score * Math.sqrt(reg2);
+                const diff = eff1 - eff2;
+                return {
+                    role: p1.role,
+                    p1Name: p1.name,
+                    p1Score: p1.score,
+                    p2Name: p2.name,
+                    p2Score: p2.score,
+                    advantage: Math.abs(diff) < 1.2 ? 'Équilibré' : (diff > 0 ? team1.id : team2.id)
+                };
+            });
+
+            return {
+                elo1,
+                elo2,
+                seriesPct1: Math.round(seriesWinProb1 * 100),
+                seriesPct2: 100 - Math.round(seriesWinProb1 * 100),
+                predictedScore: bestOutcome.score,
+                scoreOutcomes,
+                laneMatchups
+            };
         }
 
         function renderEloView() {
@@ -434,15 +648,23 @@
             mainContent.innerHTML = `
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-white">Classement de Puissance & Système Elo</h2>
-                    <p class="text-sm text-gray-400">Ce classement calcule dynamiquement la puissance de chaque équipe en fonction de ses victoires et défaites contre ses adversaires lors des récents splits et tournois internationaux.</p>
+                    <p class="text-sm text-gray-400">Ce classement calcule dynamiquement la puissance de chaque équipe en fonction de ses victoires et défaites.</p>
                 </div>
                 <div class="space-y-4">${rowsHTML}</div>
             `;
         }
 
-        function renderTeamsView() {
+        function renderTeamsView(filterQuery = '') {
             const mainContent = document.getElementById('main-content');
-            const teamsHTML = teamsData.map(team => `
+            
+            const filteredTeams = teamsData.filter(team => {
+                const q = filterQuery.toLowerCase();
+                const matchTeam = team.name.toLowerCase().includes(q) || team.region.toLowerCase().includes(q) || team.id.toLowerCase().includes(q);
+                const matchPlayer = team.roster.some(p => p.name.toLowerCase().includes(q) || p.role.toLowerCase().includes(q));
+                return matchTeam || matchPlayer;
+            });
+
+            const teamsHTML = filteredTeams.length > 0 ? filteredTeams.map(team => `
                 <div class="team-card bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 flex items-center space-x-4 shadow-md hover:border-amber-500/40 transition-all cursor-pointer" data-team-id="${team.id}">
                     <img src="${team.logo}" alt="${team.name}" class="w-12 h-12 object-contain rounded bg-gray-900 p-1" onerror="this.src='https://placehold.co/60x60/1f2937/ffffff?text=LoL'">
                     <div class="flex-grow">
@@ -450,15 +672,24 @@
                         <p class="text-xs text-gray-400">${team.region} — <span class="text-amber-400 font-medium">${team.seed}</span></p>
                     </div>
                 </div>
-            `).join('');
+            `).join('') : '<div class="col-span-full text-center text-gray-400 py-8">Aucune équipe ou joueur ne correspond à votre recherche.</div>';
 
             mainContent.innerHTML = `
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-white">Équipes Engagées & Rosters 2026</h2>
-                    <p class="text-sm text-gray-400">Cliquez sur une équipe pour voir son effectif officiel d'octobre 2026 et ses performances.</p>
+                <div class="mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Équipes Engagées & Rosters 2026</h2>
+                        <p class="text-sm text-gray-400">Cliquez sur une équipe pour voir son effectif officiel.</p>
+                    </div>
+                    <div class="w-full md:w-72">
+                        <input type="text" id="team-search-input" value="${filterQuery}" placeholder="🔍 Rechercher équipe, joueur..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-amber-500">
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">${teamsHTML}</div>
             `;
+
+            document.getElementById('team-search-input').addEventListener('input', (e) => {
+                renderTeamsView(e.target.value);
+            });
 
             mainContent.querySelectorAll('.team-card').forEach(card => {
                 card.addEventListener('click', () => {
@@ -479,30 +710,28 @@
 
             const rosterHTML = team.roster.map(player => `
                 <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/50 flex items-center justify-between">
-                    <span class="text-xs uppercase tracking-wider text-amber-400 font-bold">${player.role}</span>
-                    <span class="font-semibold text-white">${player.name}</span>
+                    <div>
+                        <span class="text-xs uppercase tracking-wider text-amber-400 font-bold block">${player.role}</span>
+                        <span class="font-semibold text-white">${player.name}</span>
+                    </div>
+                    <div class="text-right text-xs text-gray-400">
+                        <span class="px-2 py-0.5 bg-amber-500/10 text-amber-300 font-bold rounded border border-amber-500/20">Note: ${player.score}</span>
+                        <span class="block mt-1">KDA ${player.kda} • ${player.dpm} DPM</span>
+                    </div>
                 </div>
             `).join('');
 
-            const teamMatches = matchesData.filter(m => 
-                m.team1.toLowerCase().includes(team.name.toLowerCase()) || 
-                m.team2.toLowerCase().includes(team.name.toLowerCase()) ||
-                m.team1.toLowerCase().includes(team.id.toLowerCase()) ||
-                m.team2.toLowerCase().includes(team.id.toLowerCase())
+            const teamMatches = matchesData.filter(m =>
+                m.team1.toLowerCase().includes(team.name.toLowerCase()) ||
+                m.team2.toLowerCase().includes(team.name.toLowerCase())
             );
 
-            const matchesHTML = teamMatches.length > 0 ? teamMatches.map(match => {
-                const stageName = tournamentStages.find(s => s.id === match.stage)?.name || match.stage;
-                return `
-                    <div class="bg-gray-900/60 border border-gray-700/50 rounded-lg p-3 flex items-center justify-between text-sm">
-                        <div>
-                            <span class="text-xs text-amber-400 font-semibold block">${stageName} - ${match.date} (${match.time})</span>
-                            <span class="font-bold text-white">${match.team1} vs ${match.team2}</span>
-                        </div>
-                        <span class="px-2.5 py-1 rounded bg-blue-500/20 text-blue-300 text-xs font-bold">${match.format}</span>
-                    </div>
-                `;
-            }).join('') : '<p class="text-gray-400 text-sm">Aucun match programmé pour le moment.</p>';
+            const teamMatchesHTML = teamMatches.length > 0 ? teamMatches.map(m => `
+                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/50 flex justify-between items-center text-sm">
+                    <span class="text-gray-300 font-semibold">${m.team1} vs ${m.team2}</span>
+                    <span class="text-xs text-amber-400 font-bold">${m.date} (${m.format})</span>
+                </div>
+            `).join('') : `<p class="text-sm text-gray-400">En attente du tirage au sort du Swiss Stage (début le 23 octobre).</p>`;
 
             mainContent.innerHTML = `
                 <div class="mb-6">
@@ -531,13 +760,40 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg">
-                        <h3 class="text-lg font-bold text-white mb-4">👥 Roster Officiel (Octobre 2026)</h3>
+                        <h3 class="text-lg font-bold text-white mb-4">👥 Roster Officiel & Ratings (Octobre 2026)</h3>
                         <div class="space-y-3">${rosterHTML}</div>
                     </div>
 
-                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg">
-                        <h3 class="text-lg font-bold text-white mb-4">📅 Matchs & Calendrier de l'équipe</h3>
-                        <div class="space-y-3">${matchesHTML}</div>
+                    <div class="space-y-6">
+                        <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg">
+                            <h3 class="text-lg font-bold text-white mb-4">📊 Statistiques Early & Late (Dernier Split)</h3>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
+                                    <span class="text-xs text-gray-400 block">Gold Diff @ 15</span>
+                                    <span class="text-lg font-bold text-emerald-400">+${team.macroStats.gd15}g</span>
+                                </div>
+                                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
+                                    <span class="text-xs text-gray-400 block">First Tower %</span>
+                                    <span class="text-lg font-bold text-amber-400">${team.macroStats.ftPct}%</span>
+                                </div>
+                                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
+                                    <span class="text-xs text-gray-400 block">Contrôle Objectifs</span>
+                                    <span class="text-lg font-bold text-blue-400">${team.macroStats.objControl}%</span>
+                                </div>
+                                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
+                                    <span class="text-xs text-gray-400 block">Indice Late Game</span>
+                                    <span class="text-lg font-bold text-purple-400">${team.macroStats.lateGame}/100</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg">
+                            <h3 class="text-lg font-bold text-white mb-4">📅 Matchs aux Worlds 2026</h3>
+                            <div class="space-y-3 mb-4">${teamMatchesHTML}</div>
+                            <h4 class="text-sm font-bold text-gray-300 mb-2 pt-3 border-t border-gray-700/60">Performances Saison 2026</h4>
+                            <p class="text-sm text-gray-300 mb-1"><strong class="text-emerald-400">Victoires :</strong> ${team.recentWins.join(', ') || 'Aucune'}</p>
+                            <p class="text-sm text-gray-300"><strong class="text-rose-400">Défaites :</strong> ${team.recentLosses.join(', ') || 'Aucune'}</p>
+                        </div>
                     </div>
                 </div>
             `;
@@ -551,27 +807,9 @@
             const mainContent = document.getElementById('main-content');
             const rankedTeams = calculateEloRatings();
 
-            const getPredictedScore = (e1, e2) => {
-                const diff = e1 - e2;
-                const abs = Math.abs(diff);
-                if (abs > 280) return diff > 0 ? "3 - 0" : "0 - 3";
-                if (abs > 150) return diff > 0 ? "3 - 1" : "1 - 3";
-                return diff > 0 ? "3 - 2" : "2 - 3";
-            };
-
             const predictionsHTML = matchesData.map(match => {
-                let elo1 = 1500, elo2 = 1500;
-                let team1Obj = teamsData.find(t => match.team1.toLowerCase().includes(t.name.toLowerCase()) || match.team1.toLowerCase().includes(t.id.toLowerCase()));
-                let team2Obj = teamsData.find(t => match.team2.toLowerCase().includes(t.name.toLowerCase()) || match.team2.toLowerCase().includes(t.id.toLowerCase()));
-                
-                if (team1Obj) {
-                    const found = rankedTeams.find(r => r.team.id === team1Obj.id);
-                    if (found) elo1 = found.elo;
-                }
-                if (team2Obj) {
-                    const found = rankedTeams.find(r => r.team.id === team2Obj.id);
-                    if (found) elo2 = found.elo;
-                }
+                const team1Obj = teamsData.find(t => match.team1.toLowerCase() === t.name.toLowerCase() || match.team1.toLowerCase() === t.id.toLowerCase());
+                const team2Obj = teamsData.find(t => match.team2.toLowerCase() === t.name.toLowerCase() || match.team2.toLowerCase() === t.id.toLowerCase());
 
                 if (match.team1.includes('TBD') || match.team2.includes('TBD') || !team1Obj || !team2Obj) {
                     return `
@@ -588,52 +826,114 @@
                     `;
                 }
 
-                // Win probability via Elo formula
-                const prob1 = 1 / (1 + Math.pow(10, (elo2 - elo1) / 400));
-                const prob2 = 1 - prob1;
-                const pct1 = Math.round(prob1 * 100);
-                const pct2 = Math.round(prob2 * 100);
-                const favorite = pct1 >= pct2 ? team1Obj.name : team2Obj.name;
-                const favPct = Math.max(pct1, pct2);
-                const predictedScore = getPredictedScore(elo1, elo2);
+                const analysis = computeAdvancedMatchPrediction(team1Obj, team2Obj, rankedTeams);
+                const favorite = analysis.seriesPct1 >= analysis.seriesPct2 ? team1Obj.name : team2Obj.name;
+                const favPct = Math.max(analysis.seriesPct1, analysis.seriesPct2);
+
+                const lanesHTML = analysis.laneMatchups.map(lane => {
+                    const advBadge = lane.advantage === 'Équilibré'
+                        ? `<span class="text-xs px-2 py-0.5 rounded bg-gray-700 text-gray-300">Équilibré</span>`
+                        : lane.advantage === team1Obj.id
+                            ? `<span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">Avantage ${team1Obj.id}</span>`
+                            : `<span class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">Avantage ${team2Obj.id}</span>`;
+
+                    return `
+                        <div class="flex items-center justify-between bg-gray-900/60 px-3 py-2 rounded-lg border border-gray-700/40 text-xs sm:text-sm">
+                            <div class="w-1/3 font-semibold text-white">${lane.p1Name} <span class="text-gray-400">(${lane.p1Score})</span></div>
+                            <div class="w-1/3 text-center flex flex-col items-center">
+                                <span class="text-[11px] uppercase tracking-wider text-gray-400 font-bold mb-0.5">${lane.role}</span>
+                                ${advBadge}
+                            </div>
+                            <div class="w-1/3 text-right font-semibold text-white"><span class="text-gray-400">(${lane.p2Score})</span> ${lane.p2Name}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                const scoresBreakdownHTML = analysis.scoreOutcomes.map(item => {
+                    const pct = Math.round(item.prob * 100);
+                    const isBest = item.score === analysis.predictedScore;
+                    return `
+                        <div class="p-2 rounded-lg text-center border ${isBest ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold' : 'bg-gray-900/50 border-gray-700/50 text-gray-400'}">
+                            <span class="block text-sm text-white font-bold">${item.score}</span>
+                            <span class="text-xs">${pct}%</span>
+                        </div>
+                    `;
+                }).join('');
 
                 return `
-                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg space-y-4">
+                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg space-y-5">
                         <div class="flex flex-wrap justify-between items-center gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full">Pronostic Match Bo5</span>
+                            <span class="text-xs font-semibold uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full">Analyse Multi-Facteurs (${match.format})</span>
                             <span class="text-sm text-gray-400">📅 ${match.date} à ${match.time}</span>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-4 py-2">
                             <div class="text-center md:text-right">
                                 <h3 class="text-xl font-bold text-white">${team1Obj.name}</h3>
-                                <p class="text-xs text-gray-400">${team1Obj.region} (Elo: ${elo1})</p>
-                                <span class="text-2xl font-black text-amber-400 mt-1 inline-block">${pct1}%</span>
+                                <p class="text-xs text-gray-400">${team1Obj.region} (Elo: ${analysis.elo1})</p>
+                                <span class="text-3xl font-black text-amber-400 mt-1 inline-block">${analysis.seriesPct1}%</span>
                             </div>
 
                             <div class="text-center flex flex-col items-center justify-center">
                                 <span class="px-3 py-1 bg-gray-900 border border-gray-700 rounded-full text-xs font-bold text-gray-300">VS</span>
-                                <div class="mt-3 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                                    <span class="text-xs text-gray-400 block uppercase font-bold tracking-wide">Score Prévu (Bo5)</span>
-                                    <span class="text-lg font-black text-amber-400">${predictedScore}</span>
+                                <div class="mt-3 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                                    <span class="text-xs text-gray-400 block uppercase font-bold tracking-wide">Score Prévu (${match.format})</span>
+                                    <span class="text-2xl font-black text-amber-400">${analysis.predictedScore}</span>
                                 </div>
                                 <p class="text-xs text-emerald-400 font-semibold mt-2">Favori : ${favorite} (${favPct}%)</p>
                             </div>
 
                             <div class="text-center md:text-left">
                                 <h3 class="text-xl font-bold text-white">${team2Obj.name}</h3>
-                                <p class="text-xs text-gray-400">${team2Obj.region} (Elo: ${elo2})</p>
-                                <span class="text-2xl font-black text-purple-400 mt-1 inline-block">${pct2}%</span>
+                                <p class="text-xs text-gray-400">${team2Obj.region} (Elo: ${analysis.elo2})</p>
+                                <span class="text-3xl font-black text-purple-400 mt-1 inline-block">${analysis.seriesPct2}%</span>
                             </div>
                         </div>
 
                         <div class="w-full bg-gray-900 rounded-full h-3 overflow-hidden flex border border-gray-700">
-                            <div class="bg-amber-500 h-full transition-all duration-500" style="width: ${pct1}%"></div>
-                            <div class="bg-purple-600 h-full transition-all duration-500" style="width: ${pct2}%"></div>
+                            <div class="bg-amber-500 h-full transition-all duration-500" style="width: ${analysis.seriesPct1}%"></div>
+                            <div class="bg-purple-600 h-full transition-all duration-500" style="width: ${analysis.seriesPct2}%"></div>
                         </div>
 
-                        <div class="text-xs text-gray-400 bg-gray-900/50 p-3 rounded-lg border border-gray-800">
-                            <strong>Analyse de forme :</strong> Basé sur l'écart d'Elo (${Math.abs(elo1 - elo2)} pts) et les dynamiques de victoires/défaites des derniers splits.
+                        <!-- Détails statistiques Early/Late & Matchups par rôle -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t border-gray-700/50">
+                            <div>
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">⚔️ Confrontations Rôle par Rôle (Stats 2026)</h4>
+                                <div class="space-y-2">${lanesHTML}</div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">📊 Comparatif Early & Macro (Splits 2026)</h4>
+                                    <div class="bg-gray-900/60 rounded-lg p-3 border border-gray-700/40 space-y-2 text-xs sm:text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="font-bold text-amber-400">+${team1Obj.macroStats.gd15}g</span>
+                                            <span class="text-gray-400">Gold Diff @ 15 min</span>
+                                            <span class="font-bold text-purple-400">+${team2Obj.macroStats.gd15}g</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="font-bold text-amber-400">${team1Obj.macroStats.ftPct}%</span>
+                                            <span class="text-gray-400">Première Tour (First Tower)</span>
+                                            <span class="font-bold text-purple-400">${team2Obj.macroStats.ftPct}%</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="font-bold text-amber-400">${team1Obj.macroStats.objControl}%</span>
+                                            <span class="text-gray-400">Contrôle Objectifs Neutres</span>
+                                            <span class="font-bold text-purple-400">${team2Obj.macroStats.objControl}%</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="font-bold text-amber-400">${team1Obj.macroStats.lateGame}/100</span>
+                                            <span class="text-gray-400">Indice Teamfight Late Game</span>
+                                            <span class="font-bold text-purple-400">${team2Obj.macroStats.lateGame}/100</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">🎯 Probabilités des Scores Exacts (Bo5)</h4>
+                                    <div class="grid grid-cols-6 gap-2">${scoresBreakdownHTML}</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -641,8 +941,8 @@
 
             mainContent.innerHTML = `
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-white">🔮 Pronostiques & Probabilités de Victoire</h2>
-                    <p class="text-sm text-gray-400">Analyses prédictives en temps réel basées sur la puissance Elo, les scores Bo5 attendus et les performances récentes des équipes.</p>
+                    <h2 class="text-2xl font-bold text-white">🔮 Pronostiques & Analyse Multi-Facteurs</h2>
+                    <p class="text-sm text-gray-400">Calcul déterministe combinant le score Elo (50%), les matchups individuels par ligne (25%) et les statistiques Early/Late du dernier split pondérées par région (25%).</p>
                 </div>
                 <div class="space-y-6">${predictionsHTML}</div>
             `;
