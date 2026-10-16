@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Worlds 2026 LoL - Calendrier, Effectifs & Elo</title>
+    <title>Worlds 2026 LoL - Calendrier, Effectifs, Elo & Pronostics gol.gg</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,17 +53,17 @@
 
     <div id="loader">
         <div class="spinner"></div>
-        <p id="loader-text" class="mt-4 text-lg font-semibold text-gray-300">Mise à jour et calcul du système Elo Worlds 2026...</p>
+        <p id="loader-text" class="mt-4 text-lg font-semibold text-gray-300">Chargement des statistiques gol.gg & calcul Elo Worlds 2026...</p>
     </div>
 
     <div id="app-content" class="max-w-7xl mx-auto" style="display: none;">
         <header class="text-center mb-8">
             <h1 class="text-4xl sm:text-6xl font-black cursor-pointer worlds-gradient tracking-tight" id="home-title">WORLDS 2026</h1>
-            <p class="text-lg text-gray-400 mt-2">League of Legends World Championship - Calendrier, Simulateur & Puissance Elo</p>
+            <p class="text-lg text-gray-400 mt-2">League of Legends World Championship - Calendrier, Statistiques gol.gg & Puissance Elo</p>
             
             <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-6">
                 <button id="nav-schedule" class="tab-btn active px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
-                    📅 Calendrier
+                    📅 Calendrier & Matchs
                 </button>
                 <button id="nav-elo" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
                     📊 Puissance Elo
@@ -72,7 +72,7 @@
                     👥 Équipes & Rosters
                 </button>
                 <button id="nav-predictions" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
-                    🔮 Pronostiques
+                    🔮 Pronostiques gol.gg
                 </button>
                 <button id="nav-stages" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
                     🏆 Format
@@ -85,12 +85,11 @@
         </main>
 
         <footer class="text-center text-gray-500 text-sm mt-16 pb-6 border-t border-gray-800 pt-6">
-            <p>Worlds 2026 LoL Companion — Simulateur interactif & Algorithme Elo officiel.</p>
+            <p>Worlds 2026 LoL Companion — Statistiques officielles gol.gg & Simulateur Elo déterministe.</p>
         </footer>
     </div>
 
     <script>
-        // Official Tournament Stages data for Worlds 2026
         const tournamentStages = [
             { id: 'play-in', name: 'Play-In Stage', dates: '15 - 18 Octobre 2026', description: 'Phase éliminatoire préliminaire à double élimination (Bo5) entre C9, Karmine Corp, FURIA et MVK Esports.' },
             { id: 'swiss', name: 'Swiss Stage', dates: '23 Octobre - Novembre 2026', description: '16 équipes s\'affrontent en format suisse (3 victoires pour se qualifier, 3 défaites pour être éliminé).' },
@@ -98,435 +97,554 @@
         ];
 
         const regionCoefficients = {
-            'LCK': 1.12,
-            'LPL': 1.10,
-            'LEC': 1.00,
-            'LCS': 0.98,
-            'LCP': 0.92,
-            'CBLOL': 0.88
+            'LCK': 1.12, 'LPL': 1.10, 'LEC': 1.00, 'LCS': 0.98, 'LCP': 0.92, 'CBLOL': 0.88
         };
 
-        // Official 2026 Teams Data with correct 2026 Rosters, Split Stats, and match results for Elo algorithm
         const teamsData = [
             // LCK
             { 
                 id: 'GEN', name: 'Gen.G', region: 'LCK', seed: 'Seed 1 (LCK Champion)', 
                 logo: 'https://placehold.co/80x80/f59e0b/ffffff?text=GEN',
-                macroStats: { gd15: 1680, ftPct: 71, objControl: 68, lateGame: 95 },
+                golStats: { 
+                    winRate: '61% (33W - 21L)', avgDuration: '32:16',
+                    gpm: 1995, gdpm: 87, gd15: -6, wrAhead: 78.6,
+                    cspm: 36.3, csd15: '+6.7', td15: '-0.09', avgTd: '+1.1', ftPct: 55.6,
+                    dpm: 2679, fbPct: 33.3, kills: 15.6, deaths: 14.1, kd: 1.7, assistsKill: 2.3,
+                    plates: '30.5', dragons: '60.3%', dragons15: 0.95, voidgrubs: 1.45, herald: '55%', nashors: '68.0%',
+                    vspm: 10.6, wpm: 3.9, vwpm: 1.6, wcpm: 1.8, wardsCleared: 46.2, clearedPct: '45%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Kiin', score: 93, kda: '4.8', dpm: 640},
-                    {role: 'Jungle', name: 'Canyon', score: 94, kda: '5.4', dpm: 480},
-                    {role: 'Mid', name: 'Chovy', score: 98, kda: '7.1', dpm: 760},
-                    {role: 'Bot', name: 'Ruler', score: 95, kda: '6.5', dpm: 790},
-                    {role: 'Support', name: 'Duro', score: 88, kda: '4.6', dpm: 210}
+                    {role: 'Top', name: 'Kiin', kda: '4.8', kp: '68%', dmg: '22.5%', score: 93},
+                    {role: 'Jungle', name: 'Canyon', kda: '5.4', kp: '76%', dmg: '17.0%', score: 94},
+                    {role: 'Mid', name: 'Chovy', kda: '7.1', kp: '72%', dmg: '27.5%', score: 98},
+                    {role: 'Bot', name: 'Ruler', kda: '6.5', kp: '70%', dmg: '28.0%', score: 95},
+                    {role: 'Support', name: 'Duro', kda: '4.6', kp: '78%', dmg: '5.0%', score: 88}
                 ],
-                recentWins: ['HLE (LCK Final)', 'KT Rolster', 'T1', 'DK', 'G2 Esports'],
-                recentLosses: ['Dplus KIA (EWC)']
+                recentWins: ['HLE (LCK Final)', 'KT Rolster', 'T1', 'DK'],
+                recentLosses: ['Dplus KIA']
             },
             { 
                 id: 'HLE', name: 'Hanwha Life Esports', region: 'LCK', seed: 'MSI 2026 Champion', 
                 logo: 'https://placehold.co/80x80/ea580c/ffffff?text=HLE',
-                macroStats: { gd15: 1520, ftPct: 67, objControl: 66, lateGame: 94 },
+                golStats: { 
+                    winRate: '52% (30W - 28L)', avgDuration: '31:50',
+                    gpm: 1991, gdpm: 21, gd15: 438, wrAhead: 78.1,
+                    cspm: 35.5, csd15: '+10.8', td15: '+0.12', avgTd: '+0.4', ftPct: 53.4,
+                    dpm: 2829, fbPct: 60.3, kills: 17.0, deaths: 16.9, kd: 1.7, assistsKill: 2.3,
+                    plates: '28.67', dragons: '52.1%', dragons15: 0.91, voidgrubs: 1.59, herald: '50%', nashors: '49.4%',
+                    vspm: 10.2, wpm: 3.7, vwpm: 1.6, wcpm: 1.7, wardsCleared: 44.7, clearedPct: '44.7%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Zeus', score: 96, kda: '4.5', dpm: 690},
-                    {role: 'Jungle', name: 'Kanavi', score: 93, kda: '4.9', dpm: 510},
-                    {role: 'Mid', name: 'Zeka', score: 92, kda: '5.3', dpm: 680},
-                    {role: 'Bot', name: 'Gumayusi', score: 94, kda: '6.1', dpm: 740},
-                    {role: 'Support', name: 'Delight', score: 91, kda: '4.8', dpm: 205}
+                    {role: 'Top', name: 'Zeus', kda: '4.5', kp: '65%', dmg: '24.0%', score: 96},
+                    {role: 'Jungle', name: 'Kanavi', kda: '4.9', kp: '74%', dmg: '18.0%', score: 93},
+                    {role: 'Mid', name: 'Zeka', kda: '5.3', kp: '70%', dmg: '26.0%', score: 92},
+                    {role: 'Bot', name: 'Gumayusi', kda: '6.1', kp: '73%', dmg: '27.5%', score: 94},
+                    {role: 'Support', name: 'Delight', kda: '4.8', kp: '79%', dmg: '4.5%', score: 91}
                 ],
-                recentWins: ['Bilibili Gaming (MSI Final)', 'T1', 'DK', 'AL'],
-                recentLosses: ['Gen.G (LCK Final)']
+                recentWins: ['Bilibili Gaming (MSI Final)', 'T1'],
+                recentLosses: ['Gen.G']
             },
             { 
                 id: 'T1', name: 'T1', region: 'LCK', seed: 'Seed 3', 
                 logo: 'https://placehold.co/80x80/dc2626/ffffff?text=T1',
-                macroStats: { gd15: 1390, ftPct: 69, objControl: 63, lateGame: 93 },
+                golStats: { 
+                    winRate: '50% (32W - 32L)', avgDuration: '32:26',
+                    gpm: 1983, gdpm: 23, gd15: 538, wrAhead: 64.9,
+                    cspm: 35.6, csd15: '-5.3', td15: '+0.25', avgTd: '+0.6', ftPct: 64.1,
+                    dpm: 2788, fbPct: 40.6, kills: 17.2, deaths: 15.8, kd: 1.6, assistsKill: 2.1,
+                    plates: '29.81', dragons: '49.7%', dragons15: 0.94, voidgrubs: 1.13, herald: '57.8%', nashors: '49.7%',
+                    vspm: 10.2, wpm: 4.0, vwpm: 1.8, wcpm: 1.6, wardsCleared: 42.6, clearedPct: '42.6%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Doran', score: 88, kda: '3.9', dpm: 580},
-                    {role: 'Jungle', name: 'Oner', score: 91, kda: '4.7', dpm: 460},
-                    {role: 'Mid', name: 'Faker', score: 93, kda: '4.9', dpm: 650},
-                    {role: 'Bot', name: 'Peyz', score: 93, kda: '6.3', dpm: 770},
-                    {role: 'Support', name: 'Keria', score: 95, kda: '5.2', dpm: 260}
+                    {role: 'Top', name: 'Doran', kda: '3.9', kp: '64%', dmg: '21.0%', score: 88},
+                    {role: 'Jungle', name: 'Oner', kda: '4.7', kp: '73%', dmg: '17.5%', score: 91},
+                    {role: 'Mid', name: 'Faker', kda: '4.9', kp: '71%', dmg: '25.0%', score: 93},
+                    {role: 'Bot', name: 'Peyz', kda: '6.3', kp: '74%', dmg: '28.5%', score: 93},
+                    {role: 'Support', name: 'Keria', kda: '5.2', kp: '81%', dmg: '8.0%', score: 95}
                 ],
-                recentWins: ['DK', 'KT Rolster', 'BLG'],
+                recentWins: ['DK', 'KT Rolster'],
                 recentLosses: ['Gen.G', 'HLE']
             },
             { 
                 id: 'DK', name: 'Dplus KIA', region: 'LCK', seed: 'Seed 4', 
                 logo: 'https://placehold.co/80x80/2563eb/ffffff?text=DK',
-                macroStats: { gd15: 940, ftPct: 60, objControl: 59, lateGame: 88 },
+                golStats: { 
+                    winRate: '53% (29W - 26L)', avgDuration: '33:54',
+                    gpm: 1970, gdpm: 46, gd15: 225, wrAhead: 69.0,
+                    cspm: 37.2, csd15: '+18.2', td15: '+0.02', avgTd: '+0.9', ftPct: 45.5,
+                    dpm: 2619, fbPct: 47.3, kills: 14.6, deaths: 14.5, kd: 1.6, assistsKill: 2.2,
+                    plates: '30.59', dragons: '53.3%', dragons15: 0.98, voidgrubs: 1.29, herald: '47.2%', nashors: '51.3%',
+                    vspm: 10.4, wpm: 3.8, vwpm: 1.7, wcpm: 1.7, wardsCleared: 44.8, clearedPct: '44.8%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Siwoo', score: 85, kda: '3.6', dpm: 560},
-                    {role: 'Jungle', name: 'Lucid', score: 89, kda: '4.5', dpm: 450},
-                    {role: 'Mid', name: 'ShowMaker', score: 91, kda: '5.0', dpm: 660},
-                    {role: 'Bot', name: 'Smash', score: 87, kda: '5.1', dpm: 700},
-                    {role: 'Support', name: 'Career', score: 84, kda: '4.0', dpm: 190}
+                    {role: 'Top', name: 'Siwoo', kda: '3.6', kp: '63%', dmg: '22.0%', score: 85},
+                    {role: 'Jungle', name: 'Lucid', kda: '4.5', kp: '72%', dmg: '18.0%', score: 89},
+                    {role: 'Mid', name: 'ShowMaker', kda: '5.0', kp: '69%', dmg: '26.5%', score: 91},
+                    {role: 'Bot', name: 'Smash', kda: '5.1', kp: '71%', dmg: '27.0%', score: 87},
+                    {role: 'Support', name: 'Career', kda: '4.0', kp: '75%', dmg: '4.5%', score: 84}
                 ],
-                recentWins: ['Gen.G (EWC)', 'KT Rolster', 'Karmine Corp'],
+                recentWins: ['Gen.G', 'KT Rolster'],
                 recentLosses: ['T1', 'HLE']
             },
             // LPL
             { 
                 id: 'AL', name: 'Anyone\'s Legend', region: 'LPL', seed: 'Seed 1 (LPL Split 3)', 
                 logo: 'https://placehold.co/80x80/e11d48/ffffff?text=AL',
-                macroStats: { gd15: 1340, ftPct: 65, objControl: 64, lateGame: 91 },
+                golStats: { 
+                    winRate: '59% (33W - 23L)', avgDuration: '33:21',
+                    gpm: 1969, gdpm: 79, gd15: 453, wrAhead: 86.7,
+                    cspm: 36.0, csd15: '-23.3', td15: '-0.25', avgTd: '+1.1', ftPct: 50.0,
+                    dpm: 2687, fbPct: 67.9, kills: 16.3, deaths: 12.2, kd: 2.4, assistsKill: 2.4,
+                    plates: '21', dragons: '54.8%', dragons15: 0.75, voidgrubs: 1.71, herald: '59.3%', nashors: '57.1%',
+                    vspm: 10.5, wpm: 4.0, vwpm: 1.5, wcpm: 1.7, wardsCleared: 44.0, clearedPct: '44%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Breathe', score: 89, kda: '4.1', dpm: 610},
-                    {role: 'Jungle', name: 'Tarzan', score: 93, kda: '5.3', dpm: 470},
-                    {role: 'Mid', name: 'Shanks', score: 90, kda: '5.1', dpm: 670},
-                    {role: 'Bot', name: 'Hope', score: 89, kda: '5.6', dpm: 720},
-                    {role: 'Support', name: 'Kael', score: 90, kda: '4.9', dpm: 215}
+                    {role: 'Top', name: 'Flandre', kda: '4.1', kp: '65%', dmg: '22.5%', score: 89},
+                    {role: 'Jungle', name: 'Tarzan', kda: '5.3', kp: '75%', dmg: '17.5%', score: 93},
+                    {role: 'Mid', name: 'Shanks', kda: '5.1', kp: '70%', dmg: '26.0%', score: 90},
+                    {role: 'Bot', name: 'Hope', kda: '5.6', kp: '73%', dmg: '28.0%', score: 89},
+                    {role: 'Support', name: 'Kael', kda: '4.9', kp: '77%', dmg: '6.0%', score: 90}
                 ],
-                recentWins: ['Bilibili Gaming (LPL Final)', 'TES', 'IG'],
-                recentLosses: ['Gen.G (EWC)', 'HLE']
+                recentWins: ['BLG', 'TES'],
+                recentLosses: ['Gen.G']
             },
             { 
                 id: 'BLG', name: 'Bilibili Gaming', region: 'LPL', seed: 'Seed 2', 
                 logo: 'https://placehold.co/80x80/3b82f6/ffffff?text=BLG',
-                macroStats: { gd15: 1480, ftPct: 68, objControl: 63, lateGame: 92 },
+                golStats: { 
+                    winRate: '69% (35W - 16L)', avgDuration: '32:24',
+                    gpm: 2043, gdpm: 181, gd15: 1265, wrAhead: 88.6,
+                    cspm: 35.9, csd15: '-8.2', td15: '+0.4', avgTd: '+3.8', ftPct: 64.7,
+                    dpm: 2801, fbPct: 37.3, kills: 18.6, deaths: 13.7, kd: 2.0, assistsKill: 2.3,
+                    plates: '34', dragons: '60.6%', dragons15: 1.0, voidgrubs: 1.18, herald: '64.7%', nashors: '73.7%',
+                    vspm: 10.3, wpm: 3.8, vwpm: 1.5, wcpm: 1.7, wardsCleared: 43.0, clearedPct: '43%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Bin', score: 96, kda: '4.6', dpm: 700},
-                    {role: 'Jungle', name: 'Xun', score: 89, kda: '4.5', dpm: 485},
-                    {role: 'Mid', name: 'Knight', score: 95, kda: '6.2', dpm: 730},
-                    {role: 'Bot', name: 'Viper', score: 95, kda: '6.4', dpm: 780},
-                    {role: 'Support', name: 'ON', score: 87, kda: '4.1', dpm: 220}
+                    {role: 'Top', name: 'Bin', kda: '4.6', kp: '67%', dmg: '24.5%', score: 96},
+                    {role: 'Jungle', name: 'Xun', kda: '4.5', kp: '73%', dmg: '18.0%', score: 89},
+                    {role: 'Mid', name: 'Knight', kda: '6.2', kp: '74%', dmg: '27.0%', score: 95},
+                    {role: 'Bot', name: 'Viper', kda: '6.4', kp: '72%', dmg: '28.5%', score: 95},
+                    {role: 'Support', name: 'ON', kda: '4.1', kp: '78%', dmg: '5.5%', score: 87}
                 ],
-                recentWins: ['TES', 'IG', 'TL'],
-                recentLosses: ['Hanwha Life Esports (MSI Final)', 'Anyone\'s Legend']
+                recentWins: ['TES', 'IG'],
+                recentLosses: ['HLE', 'AL']
             },
             { 
                 id: 'TES', name: 'Top Esports', region: 'LPL', seed: 'Seed 3', 
                 logo: 'https://placehold.co/80x80/6366f1/ffffff?text=TES',
-                macroStats: { gd15: 1210, ftPct: 64, objControl: 60, lateGame: 87 },
+                golStats: { 
+                    winRate: '56% (25W - 20L)', avgDuration: '32:46',
+                    gpm: 1939, gdpm: 10, gd15: -255, wrAhead: 68.0,
+                    cspm: 34.7, csd15: '-', td15: '-', avgTd: '+0.7', ftPct: 48.9,
+                    dpm: 2907, fbPct: 48.9, kills: 16.5, deaths: 15.6, kd: 1.4, assistsKill: 2.3,
+                    plates: '-', dragons: '56.7%', dragons15: '-', voidgrubs: 1.84, herald: '54.5%', nashors: '53.2%',
+                    vspm: 10.2, wpm: 3.6, vwpm: 1.2, wcpm: 1.6, wardsCleared: 41.7, clearedPct: '41.7%'
+                },
                 roster: [
-                    {role: 'Top', name: '369', score: 90, kda: '4.2', dpm: 600},
-                    {role: 'Jungle', name: 'Tian', score: 89, kda: '4.6', dpm: 455},
-                    {role: 'Mid', name: 'Creme', score: 89, kda: '4.8', dpm: 665},
-                    {role: 'Bot', name: 'JackeyLove', score: 92, kda: '5.2', dpm: 765},
-                    {role: 'Support', name: 'Zhuo', score: 84, kda: '3.9', dpm: 185}
+                    {role: 'Top', name: '369', kda: '4.2', kp: '66%', dmg: '22.0%', score: 90},
+                    {role: 'Jungle', name: 'Tian', kda: '4.6', kp: '74%', dmg: '17.5%', score: 89},
+                    {role: 'Mid', name: 'Creme', kda: '4.8', kp: '69%', dmg: '26.0%', score: 89},
+                    {role: 'Bot', name: 'JackeyLove', kda: '5.2', kp: '73%', dmg: '29.0%', score: 92},
+                    {role: 'Support', name: 'Zhuo', kda: '3.9', kp: '76%', dmg: '5.5%', score: 84}
                 ],
-                recentWins: ['IG', 'G2 Esports', 'C9'],
+                recentWins: ['IG'],
                 recentLosses: ['BLG', 'AL']
             },
             { 
                 id: 'IG', name: 'Invictus Gaming', region: 'LPL', seed: 'Seed 4', 
                 logo: 'https://placehold.co/80x80/4f46e5/ffffff?text=IG',
-                macroStats: { gd15: 890, ftPct: 59, objControl: 57, lateGame: 86 },
+                golStats: { 
+                    winRate: '63% (27W - 16L)', avgDuration: '31:38',
+                    gpm: 2000, gdpm: 134, gd15: 691, wrAhead: 76.2,
+                    cspm: 34.4, csd15: '-', td15: '-', avgTd: '+2.8', ftPct: 55.8,
+                    dpm: 2978, fbPct: 48.8, kills: 16.6, deaths: 14.7, kd: 1.6, assistsKill: 2.3,
+                    plates: '-', dragons: '59.0%', dragons15: '-', voidgrubs: 1.58, herald: '51.2%', nashors: '68.8%',
+                    vspm: 10.0, wpm: 3.5, vwpm: 1.2, wcpm: 1.7, wardsCleared: 44.1, clearedPct: '44.1%'
+                },
                 roster: [
-                    {role: 'Top', name: 'TheShy', score: 89, kda: '3.4', dpm: 675},
-                    {role: 'Jungle', name: 'Wei', score: 88, kda: '4.4', dpm: 440},
-                    {role: 'Mid', name: 'Rookie', score: 90, kda: '4.9', dpm: 670},
-                    {role: 'Bot', name: 'JiaQi', score: 85, kda: '4.7', dpm: 685},
-                    {role: 'Support', name: 'Meiko', score: 88, kda: '4.5', dpm: 200}
+                    {role: 'Top', name: 'TheShy', kda: '3.4', kp: '68%', dmg: '25.0%', score: 89},
+                    {role: 'Jungle', name: 'Wei', kda: '4.4', kp: '71%', dmg: '17.0%', score: 88},
+                    {role: 'Mid', name: 'Rookie', kda: '4.9', kp: '70%', dmg: '26.5%', score: 90},
+                    {role: 'Bot', name: 'JiaQi', kda: '4.7', kp: '70%', dmg: '27.0%', score: 85},
+                    {role: 'Support', name: 'Meiko', kda: '4.5', kp: '77%', dmg: '5.0%', score: 88}
                 ],
-                recentWins: ['TES (Regional)', 'Movistar KOI'],
-                recentLosses: ['AL', 'BLG']
+                recentWins: ['TES'],
+                recentLosses: ['BLG']
             },
             // LEC
             { 
                 id: 'G2', name: 'G2 Esports', region: 'LEC', seed: 'Seed 1 (LEC Champion)', 
                 logo: 'https://placehold.co/80x80/0055ff/ffffff?text=G2',
-                macroStats: { gd15: 1150, ftPct: 64, objControl: 63, lateGame: 90 },
+                golStats: { 
+                    winRate: '69% (24W - 11L)', avgDuration: '33:33',
+                    gpm: 1997, gdpm: 138, gd15: 497, wrAhead: 78.9,
+                    cspm: 36.2, csd15: '+16.3', td15: '+0.09', avgTd: '+3.1', ftPct: 77.1,
+                    dpm: 2597, fbPct: 45.7, kills: 16.0, deaths: 12.8, kd: 1.8, assistsKill: 2.0,
+                    plates: '34.03', dragons: '55.4%', dragons15: 0.89, voidgrubs: 1.46, herald: '50%', nashors: '73.3%',
+                    vspm: 10.5, wpm: 3.6, vwpm: 1.5, wcpm: 1.8, wardsCleared: 46.1, clearedPct: '46.1%'
+                },
                 roster: [
-                    {role: 'Top', name: 'BrokenBlade', score: 88, kda: '4.2', dpm: 595},
-                    {role: 'Jungle', name: 'SkewMond', score: 87, kda: '4.8', dpm: 460},
-                    {role: 'Mid', name: 'Caps', score: 92, kda: '5.5', dpm: 690},
-                    {role: 'Bot', name: 'Hans Sama', score: 89, kda: '5.6', dpm: 715},
-                    {role: 'Support', name: 'Labrov', score: 87, kda: '4.6', dpm: 200}
+                    {role: 'Top', name: 'BrokenBlade', kda: '4.2', kp: '65%', dmg: '22.0%', score: 88},
+                    {role: 'Jungle', name: 'SkewMond', kda: '4.8', kp: '74%', dmg: '17.5%', score: 87},
+                    {role: 'Mid', name: 'Caps', kda: '5.5', kp: '73%', dmg: '27.0%', score: 92},
+                    {role: 'Bot', name: 'Hans Sama', kda: '5.6', kp: '72%', dmg: '28.0%', score: 89},
+                    {role: 'Support', name: 'Labrov', kda: '4.6', kp: '78%', dmg: '5.5%', score: 87}
                 ],
-                recentWins: ['Movistar KOI (LEC Final)', 'Karmine Corp', 'Team Liquid'],
-                recentLosses: ['Gen.G', 'Top Esports']
-            },
-            { 
-                id: 'MKOI', name: 'Movistar KOI', region: 'LEC', seed: 'Seed 2', 
-                logo: 'https://placehold.co/80x80/ec4899/ffffff?text=MKOI',
-                macroStats: { gd15: 760, ftPct: 58, objControl: 57, lateGame: 84 },
-                roster: [
-                    {role: 'Top', name: 'Myrwn', score: 83, kda: '3.5', dpm: 575},
-                    {role: 'Jungle', name: 'Elyoya', score: 88, kda: '4.6', dpm: 445},
-                    {role: 'Mid', name: 'jojopyun', score: 85, kda: '4.3', dpm: 635},
-                    {role: 'Bot', name: 'Supa', score: 84, kda: '4.8', dpm: 680},
-                    {role: 'Support', name: 'Alvaro', score: 84, kda: '4.2', dpm: 195}
-                ],
-                recentWins: ['Karmine Corp', 'LYON'],
-                recentLosses: ['G2 Esports', 'Invictus Gaming']
+                recentWins: ['MKOI'],
+                recentLosses: ['IG']
             },
             { 
                 id: 'KC', name: 'Karmine Corp', region: 'LEC', seed: 'Play-In (Seed 3)', 
-                logo: 'https://placehold.co/80x80/374151/ffffff?text=KC',
-                macroStats: { gd15: 680, ftPct: 57, objControl: 56, lateGame: 85 },
+                logo: 'https://placehold.co/80x80/0ea5e9/ffffff?text=KC',
+                golStats: { 
+                    winRate: '66% (33W - 17L)', avgDuration: '33:35',
+                    gpm: 2009, gdpm: 106, gd15: 652, wrAhead: 86.7,
+                    cspm: 36.5, csd15: '+10.4', td15: '+0.02', avgTd: '+1.4', ftPct: 56.0,
+                    dpm: 2730, fbPct: 54.0, kills: 15.6, deaths: 13.6, kd: 2.0, assistsKill: 2.2,
+                    plates: '31.08', dragons: '54.0%', dragons15: 0.8, voidgrubs: 1.48, herald: '48%', nashors: '50.0%',
+                    vspm: 10.4, wpm: 3.9, vwpm: 1.5, wcpm: 1.7, wardsCleared: 43.7, clearedPct: '43.7%'
+                },
+                worldsStats: {
+                    played: true,
+                    seriesRecord: '1W - 0L',
+                    winRate: '60% (3W - 2L)', avgDuration: '35:30',
+                    gpm: 1907, gdpm: -30, gd15: 588, wrAhead: 100.0,
+                    cspm: 36.6, csd15: '+22.6', td15: '0', avgTd: '-0.4', ftPct: 60.0,
+                    dpm: 2556, fbPct: 20.0, kills: 10.4, deaths: 14.4, kd: 1.2, assistsKill: 2.5,
+                    totalKills: 52, totalTowers: 31, totalDragons: 11, totalNashors: 3,
+                    dragons: '38.7%', nashors: '40.0%',
+                    vspm: 10.5, wpm: 4.2, wardsCleared: 45.5, clearedPct: '45.5%',
+                    players: [
+                        { role: 'Top', name: 'Canna', kda: '9/13/20 (2.2)', csm: 8.8, dpm: 540, wpm: 0.51 },
+                        { role: 'Jungle', name: 'Yike', kda: '8/13/30 (2.9)', csm: 7.3, dpm: 418, wpm: 0.39 },
+                        { role: 'Mid', name: 'kyeahoo', kda: '13/18/19 (1.8)', csm: 9.0, dpm: 644, wpm: 0.46 },
+                        { role: 'Bot', name: 'Caliste', kda: '20/12/23 (3.6)', csm: 10.6, dpm: 752, wpm: 0.54 },
+                        { role: 'Support', name: 'Busio', kda: '2/16/35 (2.3)', csm: 0.9, dpm: 202, wpm: 2.28 }
+                    ],
+                    gamesLog: [
+                        { vs: 'Cloud9', score: '3 - 2', result: 'WIN', details: 'G1: 35:02 (-18.6k) | G2: 35:10 (+2.6k) | G3: 37:49 (-14k) | G4: 38:09 (+13.9k) | G5: 31:21 (+9.9k)' }
+                    ]
+                },
                 roster: [
-                    {role: 'Top', name: 'Canna', score: 88, kda: '4.1', dpm: 615},
-                    {role: 'Jungle', name: 'Yike', score: 86, kda: '4.5', dpm: 450},
-                    {role: 'Mid', name: 'kyeahoo', score: 83, kda: '4.2', dpm: 610},
-                    {role: 'Bot', name: 'Caliste', score: 89, kda: '5.4', dpm: 725},
-                    {role: 'Support', name: 'Busio', score: 82, kda: '3.9', dpm: 185}
+                    {role: 'Top', name: 'Canna', kda: '4.1', kp: '64%', dmg: '22.0%', score: 88},
+                    {role: 'Jungle', name: 'Yike', kda: '4.5', kp: '72%', dmg: '17.5%', score: 86},
+                    {role: 'Mid', name: 'kyeahoo', kda: '4.2', kp: '68%', dmg: '25.5%', score: 83},
+                    {role: 'Bot', name: 'Caliste', kda: '5.4', kp: '74%', dmg: '29.0%', score: 89},
+                    {role: 'Support', name: 'Busio', kda: '3.9', kp: '75%', dmg: '5.0%', score: 82}
                 ],
-                recentWins: ['Team Liquid', 'Cloud9'],
-                recentLosses: ['G2 Esports', 'Movistar KOI', 'Dplus KIA']
+                recentWins: ['Cloud9 (3-2 Play-In)'],
+                recentLosses: []
+            },
+            { 
+                id: 'MKOI', name: 'Movistar KOI', region: 'LEC', seed: 'Seed 2', 
+                logo: 'https://placehold.co/80x80/0284c7/ffffff?text=MKOI',
+                golStats: { 
+                    winRate: '49% (20W - 21L)', avgDuration: '32:49',
+                    gpm: 1961, gdpm: 41, gd15: 641, wrAhead: 64.0,
+                    cspm: 35.8, csd15: '+6.7', td15: '+0.12', avgTd: '+0.2', ftPct: 56.1,
+                    dpm: 2651, fbPct: 46.3, kills: 15.0, deaths: 14.3, kd: 2.0, assistsKill: 2.3,
+                    plates: '29', dragons: '56.2%', dragons15: 0.88, voidgrubs: 1.63, herald: '58.5%', nashors: '56.7%',
+                    vspm: 10.4, wpm: 3.8, vwpm: 1.5, wcpm: 1.7, wardsCleared: 45.0, clearedPct: '45%'
+                },
+                roster: [
+                    {role: 'Top', name: 'Szygenda', kda: '3.5', kp: '63%', dmg: '21.0%', score: 82},
+                    {role: 'Jungle', name: 'Elyoya', kda: '4.8', kp: '75%', dmg: '17.0%', score: 88},
+                    {role: 'Mid', name: 'Jojopyun', kda: '5.2', kp: '72%', dmg: '27.0%', score: 90},
+                    {role: 'Bot', name: 'Supa', kda: '5.0', kp: '71%', dmg: '28.0%', score: 87},
+                    {role: 'Support', name: 'Alvaro', kda: '4.3', kp: '76%', dmg: '5.0%', score: 84}
+                ],
+                recentWins: ['G2'],
+                recentLosses: ['IG']
             },
             // LCS
             { 
                 id: 'TL', name: 'Team Liquid', region: 'LCS', seed: 'Seed 1 (LCS Champion)', 
                 logo: 'https://placehold.co/80x80/0284c7/ffffff?text=TL',
-                macroStats: { gd15: 1090, ftPct: 63, objControl: 62, lateGame: 86 },
+                golStats: { 
+                    winRate: '81% (21W - 5L)', avgDuration: '31:26',
+                    gpm: 2053, gdpm: 255, gd15: 1205, wrAhead: 100.0,
+                    cspm: 36.2, csd15: '+13.7', td15: '+0.19', avgTd: '+4.7', ftPct: 80.8,
+                    dpm: 2657, fbPct: 53.8, kills: 16.6, deaths: 9.0, kd: 3.6, assistsKill: 2.4,
+                    plates: '34.69', dragons: '58.9%', dragons15: 0.92, voidgrubs: 1.12, herald: '69.2%', nashors: '78.8%',
+                    vspm: 9.8, wpm: 3.4, vwpm: 1.4, wcpm: 1.6, wardsCleared: 46.6, clearedPct: '46.6%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Morgan', score: 84, kda: '3.9', dpm: 560},
-                    {role: 'Jungle', name: 'Josedeodo', score: 83, kda: '4.3', dpm: 430},
-                    {role: 'Mid', name: 'Quid', score: 88, kda: '5.1', dpm: 660},
-                    {role: 'Bot', name: 'Yeon', score: 88, kda: '5.5', dpm: 710},
-                    {role: 'Support', name: 'CoreJJ', score: 86, kda: '4.4', dpm: 195}
+                    {role: 'Top', name: 'Morgan', kda: '3.9', kp: '64%', dmg: '21.5%', score: 84},
+                    {role: 'Jungle', name: 'Josedeodo', kda: '4.3', kp: '71%', dmg: '17.0%', score: 83},
+                    {role: 'Mid', name: 'Quid', kda: '5.1', kp: '70%', dmg: '26.0%', score: 88},
+                    {role: 'Bot', name: 'Yeon', kda: '5.5', kp: '72%', dmg: '28.0%', score: 88},
+                    {role: 'Support', name: 'CoreJJ', kda: '4.4', kp: '77%', dmg: '5.5%', score: 86}
                 ],
-                recentWins: ['LYON (LCS Final)', 'Cloud9', 'LØS'],
-                recentLosses: ['G2 Esports', 'BLG', 'Karmine Corp']
+                recentWins: ['LYON'],
+                recentLosses: ['BLG']
             },
             { 
                 id: 'LYON', name: 'LYON', region: 'LCS', seed: 'Seed 2', 
                 logo: 'https://placehold.co/80x80/9333ea/ffffff?text=LYON',
-                macroStats: { gd15: 620, ftPct: 55, objControl: 56, lateGame: 84 },
+                golStats: { 
+                    winRate: '62% (21W - 13L)', avgDuration: '33:17',
+                    gpm: 1952, gdpm: 89, gd15: 753, wrAhead: 82.4,
+                    cspm: 35.5, csd15: '+13.6', td15: '+0.09', avgTd: '+1.4', ftPct: 70.6,
+                    dpm: 2506, fbPct: 52.9, kills: 14.8, deaths: 12.1, kd: 1.9, assistsKill: 2.1,
+                    plates: '30.79', dragons: '52.1%', dragons15: 0.88, voidgrubs: 1.94, herald: '58.8%', nashors: '53.6%',
+                    vspm: 9.7, wpm: 3.6, vwpm: 1.4, wcpm: 1.5, wardsCleared: 43.3, clearedPct: '43.3%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Dhokla', score: 80, kda: '3.4', dpm: 545},
-                    {role: 'Jungle', name: 'Inspired', score: 89, kda: '5.0', dpm: 465},
-                    {role: 'Mid', name: 'Saint', score: 82, kda: '4.1', dpm: 605},
-                    {role: 'Bot', name: 'Berserker', score: 88, kda: '5.3', dpm: 715},
-                    {role: 'Support', name: 'Isles', score: 80, kda: '3.8', dpm: 180}
+                    {role: 'Top', name: 'Dhokla', kda: '3.4', kp: '62%', dmg: '21.0%', score: 80},
+                    {role: 'Jungle', name: 'Inspired', kda: '5.0', kp: '73%', dmg: '17.5%', score: 89},
+                    {role: 'Mid', name: 'Saint', kda: '4.1', kp: '67%', dmg: '25.0%', score: 82},
+                    {role: 'Bot', name: 'Berserker', kda: '5.3', kp: '72%', dmg: '28.5%', score: 88},
+                    {role: 'Support', name: 'Isles', kda: '3.8', kp: '74%', dmg: '5.0%', score: 80}
                 ],
-                recentWins: ['Cloud9', 'Team Secret Whales'],
-                recentLosses: ['Team Liquid', 'Movistar KOI']
+                recentWins: ['C9'],
+                recentLosses: ['TL']
             },
             { 
                 id: 'C9', name: 'Cloud9', region: 'LCS', seed: 'Play-In (Seed 3)', 
                 logo: 'https://placehold.co/80x80/1d4ed8/ffffff?text=C9',
-                macroStats: { gd15: 590, ftPct: 56, objControl: 54, lateGame: 82 },
+                golStats: { 
+                    winRate: '54% (20W - 17L)', avgDuration: '34:41',
+                    gpm: 1961, gdpm: 92, gd15: 525, wrAhead: 73.9,
+                    cspm: 36.4, csd15: '+5.9', td15: '+0.22', avgTd: '+1', ftPct: 51.4,
+                    dpm: 2538, fbPct: 62.2, kills: 14.7, deaths: 11.5, kd: 2.2, assistsKill: 2.3,
+                    plates: '30.68', dragons: '61.3%', dragons15: 1.32, voidgrubs: 1.32, herald: '62.2%', nashors: '59.0%',
+                    vspm: 10.2, wpm: 3.5, vwpm: 1.4, wcpm: 1.6, wardsCleared: 44.1, clearedPct: '44.1%'
+                },
+                worldsStats: {
+                    played: true,
+                    seriesRecord: '0W - 1L',
+                    winRate: '40% (2W - 3L)', avgDuration: '35:30',
+                    gpm: 1937, gdpm: 30, gd15: -588, wrAhead: 66.7,
+                    cspm: 35.6, csd15: '-22.6', td15: '0', avgTd: '+0.4', ftPct: 40.0,
+                    dpm: 2422, fbPct: 80.0, kills: 14.4, deaths: 10.4, kd: 5.3, assistsKill: 2.3,
+                    totalKills: 72, totalTowers: 33, totalDragons: 16, totalNashors: 5,
+                    dragons: '61.3%', nashors: '60.0%',
+                    vspm: 10.7, wpm: 3.6, wardsCleared: 45.7, clearedPct: '45.7%',
+                    players: [
+                        { role: 'Top', name: 'Thanatos', kda: '16/9/16 (3.6)', csm: 8.5, dpm: 496, wpm: 0.52 },
+                        { role: 'Jungle', name: 'Blaber', kda: '12/10/42 (5.4)', csm: 7.6, dpm: 490, wpm: 0.31 },
+                        { role: 'Mid', name: 'Loki', kda: '18/13/25 (3.3)', csm: 8.0, dpm: 546, wpm: 0.32 },
+                        { role: 'Bot', name: 'Tactical', kda: '22/9/25 (5.2)', csm: 10.4, dpm: 760, wpm: 0.51 },
+                        { role: 'Support', name: 'Vulcan', kda: '4/11/51 (5.0)', csm: 1.1, dpm: 130, wpm: 1.89 }
+                    ],
+                    gamesLog: [
+                        { vs: 'Karmine Corp', score: '2 - 3', result: 'LOSS', details: 'G1: 35:02 (+18.6k) | G2: 35:10 (-2.6k) | G3: 37:49 (+14k) | G4: 38:09 (-13.9k) | G5: 31:21 (-9.9k)' }
+                    ]
+                },
                 roster: [
-                    {role: 'Top', name: 'Thanatos', score: 86, kda: '4.0', dpm: 590},
-                    {role: 'Jungle', name: 'Blaber', score: 85, kda: '4.2', dpm: 455},
-                    {role: 'Mid', name: 'Loki', score: 83, kda: '4.3', dpm: 615},
-                    {role: 'Bot', name: 'Tactical', score: 80, kda: '4.1', dpm: 660},
-                    {role: 'Support', name: 'Vulcan', score: 82, kda: '3.9', dpm: 185}
+                    {role: 'Top', name: 'Thanatos', kda: '4.0', kp: '64%', dmg: '22.0%', score: 86},
+                    {role: 'Jungle', name: 'Blaber', kda: '4.2', kp: '72%', dmg: '18.0%', score: 85},
+                    {role: 'Mid', name: 'Loki', kda: '4.3', kp: '68%', dmg: '25.5%', score: 83},
+                    {role: 'Bot', name: 'Tactical', kda: '4.1', kp: '70%', dmg: '27.0%', score: 80},
+                    {role: 'Support', name: 'Vulcan', kda: '3.9', kp: '75%', dmg: '5.0%', score: 82}
                 ],
-                recentWins: ['FURIA'],
-                recentLosses: ['Team Liquid', 'Karmine Corp', 'TES']
+                recentWins: [],
+                recentLosses: ['Karmine Corp (2-3 Play-In)']
             },
             // LCP
             { 
                 id: 'TSW', name: 'Team Secret Whales', region: 'LCP', seed: 'Seed 1 (LCP Champion)', 
                 logo: 'https://placehold.co/80x80/10b981/ffffff?text=TSW',
-                macroStats: { gd15: 820, ftPct: 60, objControl: 58, lateGame: 81 },
+                golStats: { 
+                    winRate: '73% (19W - 7L)', avgDuration: '31:18',
+                    gpm: 2068, gdpm: 229, gd15: 1515, wrAhead: 84.2,
+                    cspm: 36.2, csd15: '+17.7', td15: '+0.46', avgTd: '+3.7', ftPct: 76.9,
+                    dpm: 2900, fbPct: 65.4, kills: 18.2, deaths: 12.5, kd: 2.8, assistsKill: 2.3,
+                    plates: '33.85', dragons: '59.2%', dragons15: 0.96, voidgrubs: 1.96, herald: '65.4%', nashors: '77.3%',
+                    vspm: 10.8, wpm: 4.1, vwpm: 1.7, wcpm: 1.7, wardsCleared: 42.6, clearedPct: '42.6%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Pun', score: 80, kda: '3.8', dpm: 550},
-                    {role: 'Jungle', name: 'Hizto', score: 82, kda: '4.4', dpm: 440},
-                    {role: 'Mid', name: 'Dire', score: 81, kda: '4.3', dpm: 600},
-                    {role: 'Bot', name: 'Eddie', score: 83, kda: '4.9', dpm: 680},
-                    {role: 'Support', name: 'Bie', score: 82, kda: '4.5', dpm: 190}
+                    {role: 'Top', name: 'Pun', kda: '3.8', kp: '63%', dmg: '21.5%', score: 80},
+                    {role: 'Jungle', name: 'Hizto', kda: '4.4', kp: '71%', dmg: '17.5%', score: 82},
+                    {role: 'Mid', name: 'Dire', kda: '4.3', kp: '68%', dmg: '25.5%', score: 81},
+                    {role: 'Bot', name: 'Eddie', kda: '4.9', kp: '72%', dmg: '27.5%', score: 83},
+                    {role: 'Support', name: 'Bie', kda: '4.5', kp: '76%', dmg: '5.0%', score: 82}
                 ],
-                recentWins: ['CTBC Flying Oyster', 'MVK Esports'],
-                recentLosses: ['Gen.G']
+                recentWins: ['CFO'],
+                recentLosses: []
             },
             { 
                 id: 'CFO', name: 'CTBC Flying Oyster', region: 'LCP', seed: 'Seed 2', 
                 logo: 'https://placehold.co/80x80/f97316/ffffff?text=CFO',
-                macroStats: { gd15: 610, ftPct: 56, objControl: 55, lateGame: 80 },
+                golStats: { 
+                    winRate: '54% (19W - 16L)', avgDuration: '31:33',
+                    gpm: 1970, gdpm: 37, gd15: 187, wrAhead: 70.0,
+                    cspm: 34.4, csd15: '-3.6', td15: '-0.14', avgTd: '+0.7', ftPct: 45.7,
+                    dpm: 2754, fbPct: 51.4, kills: 17.3, deaths: 15.3, kd: 1.7, assistsKill: 2.2,
+                    plates: '29.14', dragons: '54.6%', dragons15: 0.91, voidgrubs: 1.63, herald: '54.3%', nashors: '47.1%',
+                    vspm: 10.2, wpm: 3.8, vwpm: 1.7, wcpm: 1.6, wardsCleared: 41.6, clearedPct: '41.6%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Rest', score: 80, kda: '3.7', dpm: 540},
-                    {role: 'Jungle', name: 'Shad0w', score: 82, kda: '4.2', dpm: 435},
-                    {role: 'Mid', name: 'POUT', score: 79, kda: '4.0', dpm: 590},
-                    {role: 'Bot', name: 'Doggo', score: 85, kda: '5.0', dpm: 700},
-                    {role: 'Support', name: 'Kino', score: 79, kda: '3.9', dpm: 180}
+                    {role: 'Top', name: 'Rest', kda: '3.7', kp: '62%', dmg: '21.0%', score: 80},
+                    {role: 'Jungle', name: 'Shad0w', kda: '4.2', kp: '70%', dmg: '17.0%', score: 82},
+                    {role: 'Mid', name: 'POUT', kda: '4.0', kp: '67%', dmg: '25.0%', score: 79},
+                    {role: 'Bot', name: 'Doggo', kda: '5.0', kp: '73%', dmg: '28.0%', score: 85},
+                    {role: 'Support', name: 'Kino', kda: '3.9', kp: '74%', dmg: '4.5%', score: 79}
                 ],
-                recentWins: ['MVK Esports'],
-                recentLosses: ['Team Secret Whales']
+                recentWins: [],
+                recentLosses: ['TSW']
             },
             { 
                 id: 'MVK', name: 'MVK Esports', region: 'LCP', seed: 'Play-In (Seed 4)', 
                 logo: 'https://placehold.co/80x80/06b6d4/ffffff?text=MVK',
-                macroStats: { gd15: 380, ftPct: 52, objControl: 51, lateGame: 77 },
+                golStats: { 
+                    winRate: '52% (16W - 15L)', avgDuration: '32:33',
+                    gpm: 1915, gdpm: -59, gd15: -351, wrAhead: 73.3,
+                    cspm: 34.8, csd15: '-0.4', td15: '0', avgTd: '-0.5', ftPct: 48.4,
+                    dpm: 2565, fbPct: 38.7, kills: 13.8, deaths: 16.2, kd: 1.2, assistsKill: 2.3,
+                    plates: '27.39', dragons: '50.3%', dragons15: 0.94, voidgrubs: 1.19, herald: '33.3%', nashors: '47.2%',
+                    vspm: 10.2, wpm: 3.8, vwpm: 1.5, wcpm: 1.6, wardsCleared: 40.4, clearedPct: '40.4%'
+                },
+                worldsStats: {
+                    played: true,
+                    seriesRecord: '1W - 0L',
+                    winRate: '100% (3W - 0L)', avgDuration: '32:27',
+                    gpm: 2114, gdpm: 319, gd15: 2214, wrAhead: 100.0,
+                    cspm: 35.6, csd15: '+38', td15: '+0.67', avgTd: '+7', ftPct: 66.7,
+                    dpm: 3293, fbPct: 66.7, kills: 20.0, deaths: 10.3, kd: 2.0, assistsKill: 2.1,
+                    totalKills: 60, totalTowers: 28, totalDragons: 7, totalNashors: 4,
+                    dragons: '51.7%', nashors: '83.3%',
+                    vspm: 10.7, wpm: 4.0, wardsCleared: 46.7, clearedPct: '46.7%',
+                    players: [
+                        { role: 'Top', name: 'Kratos', kda: '12/5/21 (6.6)', csm: 8.2, dpm: 787, wpm: 0.62 },
+                        { role: 'Jungle', name: 'Gury', kda: '15/7/23 (5.4)', csm: 7.5, dpm: 450, wpm: 0.52 },
+                        { role: 'Mid', name: 'Chika', kda: '17/7/23 (5.7)', csm: 8.8, dpm: 1012, wpm: 0.35 },
+                        { role: 'Bot', name: 'Harky', kda: '11/5/29 (8.0)', csm: 10.3, dpm: 831, wpm: 0.45 },
+                        { role: 'Support', name: 'SiuLoong', kda: '5/7/33 (5.4)', csm: 0.9, dpm: 212, wpm: 2.10 }
+                    ],
+                    gamesLog: [
+                        { vs: 'FURIA', score: '3 - 0', result: 'WIN', details: 'G1: 35:24 (+4.8k) | G2: 34:56 (+11.6k) | G3: 27:02 (+13.2k)' }
+                    ]
+                },
                 roster: [
-                    {role: 'Top', name: 'Kratos', score: 77, kda: '3.4', dpm: 520},
-                    {role: 'Jungle', name: 'Gury', score: 79, kda: '3.9', dpm: 415},
-                    {role: 'Mid', name: 'Chika', score: 78, kda: '3.8', dpm: 575},
-                    {role: 'Bot', name: 'Harky', score: 79, kda: '4.2', dpm: 645},
-                    {role: 'Support', name: 'SiuLoong', score: 77, kda: '3.6', dpm: 175}
+                    {role: 'Top', name: 'Kratos', kda: '3.8', kp: '64%', dmg: '21.5%', score: 81},
+                    {role: 'Jungle', name: 'Gury', kda: '4.6', kp: '73%', dmg: '17.5%', score: 83},
+                    {role: 'Mid', name: 'Chika', kda: '4.5', kp: '70%', dmg: '25.5%', score: 82},
+                    {role: 'Bot', name: 'Harky', kda: '5.2', kp: '74%', dmg: '28.0%', score: 84},
+                    {role: 'Support', name: 'SiuLoong', kda: '4.3', kp: '77%', dmg: '5.0%', score: 81}
                 ],
-                recentWins: ['FURIA'],
-                recentLosses: ['Team Secret Whales', 'CTBC Flying Oyster']
+                recentWins: ['FURIA (3-0 Play-In)'],
+                recentLosses: []
             },
             // CBLOL
             { 
-                id: 'LOS', name: 'LØS', region: 'CBLOL', seed: 'Seed 1 (CBLOL Champion)', 
+                id: 'LOS', name: 'Los Grandes', region: 'CBLOL', seed: 'Seed 1 (CBLOL Champion)', 
                 logo: 'https://placehold.co/80x80/84cc16/ffffff?text=LOS',
-                macroStats: { gd15: 640, ftPct: 57, objControl: 56, lateGame: 78 },
+                golStats: { 
+                    winRate: '68% (23W - 11L)', avgDuration: '31:44',
+                    gpm: 1986, gdpm: 130, gd15: 1210, wrAhead: 87.0,
+                    cspm: 35.6, csd15: '+25.6', td15: '+0.24', avgTd: '+2.5', ftPct: 64.7,
+                    dpm: 2683, fbPct: 44.1, kills: 16.2, deaths: 12.5, kd: 2.2, assistsKill: 2.3,
+                    plates: '31.35', dragons: '49.5%', dragons15: 0.56, voidgrubs: 1.29, herald: '33.3%', nashors: '69.3%',
+                    vspm: 9.8, wpm: 3.4, vwpm: 1.6, wcpm: 1.6, wardsCleared: 42.5, clearedPct: '42.5%'
+                },
                 roster: [
-                    {role: 'Top', name: 'Zest', score: 79, kda: '3.7', dpm: 545},
-                    {role: 'Jungle', name: 'Curse', score: 80, kda: '4.1', dpm: 425},
-                    {role: 'Mid', name: 'Feisty', score: 82, kda: '4.5', dpm: 615},
-                    {role: 'Bot', name: 'Duduhh', score: 79, kda: '4.4', dpm: 655},
-                    {role: 'Support', name: 'Ackerman', score: 79, kda: '4.1', dpm: 180}
+                    {role: 'Top', name: 'Zest', kda: '3.7', kp: '62%', dmg: '21.0%', score: 79},
+                    {role: 'Jungle', name: 'Curse', kda: '4.1', kp: '70%', dmg: '17.0%', score: 80},
+                    {role: 'Mid', name: 'Feisty', kda: '4.5', kp: '69%', dmg: '25.5%', score: 82},
+                    {role: 'Bot', name: 'Duduhh', kda: '4.4', kp: '71%', dmg: '27.5%', score: 79},
+                    {role: 'Support', name: 'Ackerman', kda: '4.1', kp: '75%', dmg: '4.5%', score: 79}
                 ],
-                recentWins: ['FURIA (CBLOL Final)'],
-                recentLosses: ['Team Liquid']
+                recentWins: [],
+                recentLosses: []
             },
             { 
                 id: 'FUR', name: 'FURIA', region: 'CBLOL', seed: 'Play-In (Seed 2)', 
                 logo: 'https://placehold.co/80x80/eab308/ffffff?text=FUR',
-                macroStats: { gd15: 420, ftPct: 53, objControl: 51, lateGame: 76 },
+                golStats: { 
+                    winRate: '54% (22W - 19L)', avgDuration: '32:07',
+                    gpm: 1925, gdpm: 36, gd15: -267, wrAhead: 85.7,
+                    cspm: 35.0, csd15: '-13.6', td15: '-0.1', avgTd: '+0.3', ftPct: 58.5,
+                    dpm: 2471, fbPct: 51.2, kills: 14.0, deaths: 12.4, kd: 1.7, assistsKill: 2.2,
+                    plates: '27.63', dragons: '50.2%', dragons15: 0.85, voidgrubs: 1.73, herald: '56.1%', nashors: '59.0%',
+                    vspm: 9.9, wpm: 3.5, vwpm: 1.5, wcpm: 1.7, wardsCleared: 46.8, clearedPct: '46.8%'
+                },
+                worldsStats: {
+                    played: true,
+                    seriesRecord: '0W - 1L',
+                    winRate: '0% (0W - 3L)', avgDuration: '32:27',
+                    gpm: 1795, gdpm: -319, gd15: -2214, wrAhead: 0.0,
+                    cspm: 33.8, csd15: '-38', td15: '-0.67', avgTd: '-7', ftPct: 33.3,
+                    dpm: 1967, fbPct: 33.3, kills: 10.3, deaths: 20.3, kd: 0.6, assistsKill: 2.2,
+                    totalKills: 31, totalTowers: 7, totalDragons: 7, totalNashors: 1,
+                    dragons: '48.3%', nashors: '16.7%',
+                    vspm: 10.2, wpm: 3.4, wardsCleared: 44.4, clearedPct: '44.4%',
+                    players: [
+                        { role: 'Top', name: 'Guigo', kda: '4/19/9 (0.7)', csm: 7.6, dpm: 421, wpm: 0.41 },
+                        { role: 'Jungle', name: 'Tatu', kda: '6/10/14 (2.0)', csm: 6.6, dpm: 356, wpm: 0.31 },
+                        { role: 'Mid', name: 'Tutsz', kda: '6/8/12 (2.3)', csm: 9.2, dpm: 488, wpm: 0.35 },
+                        { role: 'Bot', name: 'Ayu', kda: '11/13/11 (1.7)', csm: 9.1, dpm: 562, wpm: 0.38 },
+                        { role: 'Support', name: 'Jojo', kda: '4/11/23 (2.5)', csm: 1.2, dpm: 140, wpm: 1.94 }
+                    ],
+                    gamesLog: [
+                        { vs: 'MVK Esports', score: '0 - 3', result: 'LOSS', details: 'G1: 35:24 (-4.8k) | G2: 34:56 (-11.6k) | G3: 27:02 (-13.2k)' }
+                    ]
+                },
                 roster: [
-                    {role: 'Top', name: 'Guigo', score: 78, kda: '3.5', dpm: 535},
-                    {role: 'Jungle', name: 'Tatu', score: 77, kda: '3.8', dpm: 410},
-                    {role: 'Mid', name: 'Tutsz', score: 79, kda: '4.1', dpm: 590},
-                    {role: 'Bot', name: 'Ayu', score: 78, kda: '4.3', dpm: 640},
-                    {role: 'Support', name: 'Jojo', score: 77, kda: '3.9', dpm: 175}
+                    {role: 'Top', name: 'Guigo', kda: '3.1', kp: '60%', dmg: '20.5%', score: 76},
+                    {role: 'Jungle', name: 'Tatu', kda: '3.2', kp: '66%', dmg: '16.5%', score: 75},
+                    {role: 'Mid', name: 'Tutsz', kda: '3.6', kp: '67%', dmg: '25.0%', score: 77},
+                    {role: 'Bot', name: 'Ayu', kda: '3.8', kp: '69%', dmg: '27.0%', score: 76},
+                    {role: 'Support', name: 'Jojo', kda: '3.4', kp: '71%', dmg: '4.5%', score: 75}
                 ],
-                recentWins: ['MVK Esports'],
-                recentLosses: ['LØS', 'Cloud9']
+                recentWins: [],
+                recentLosses: ['MVK Esports (0-3 Play-In)']
             }
         ];
 
-        // Official Matches schedule
         const matchesData = [
-            { id: 'm1', stage: 'play-in', date: '2026-10-15', time: '11:00 CEST', team1: 'Cloud9', team2: 'Karmine Corp', format: 'Bo5', status: 'upcoming' },
-            { id: 'm2', stage: 'play-in', date: '2026-10-16', time: '16:00 CEST', team1: 'FURIA', team2: 'MVK Esports', format: 'Bo5', status: 'upcoming' },
-            { id: 'm3', stage: 'play-in', date: '2026-10-17', time: '11:00 CEST', team1: 'TBD (Loser M1)', team2: 'TBD (Loser M2)', format: 'Bo5', status: 'upcoming' },
-            { id: 'm4', stage: 'play-in', date: '2026-10-17', time: '16:00 CEST', team1: 'TBD (Winner M1)', team2: 'TBD (Winner M2)', format: 'Bo5', status: 'upcoming' },
-            { id: 'm5', stage: 'play-in', date: '2026-10-18', time: '11:00 CEST', team1: 'Match Décisif Play-In', team2: 'TBD', format: 'Bo5', status: 'upcoming' }
+            { id: 'm1', stage: 'play-in', date: '2026-10-15', time: '11:00 CEST', team1: 'Cloud9', team2: 'Karmine Corp', format: 'Bo5', status: 'finished', score: '2 - 3', winner: 'Karmine Corp', summary: 'G1: 35:02 (C9 +18.6k) • G2: 35:10 (KC +2.6k) • G3: 37:49 (C9 +14k) • G4: 38:09 (KC +13.9k) • G5: 31:21 (KC +9.9k)' },
+            { id: 'm2', stage: 'play-in', date: '2026-10-16', time: '16:00 CEST', team1: 'FURIA', team2: 'MVK Esports', format: 'Bo5', status: 'finished', score: '0 - 3', winner: 'MVK Esports', summary: 'G1: 35:24 (MVK +4.8k) • G2: 34:56 (MVK +11.6k) • G3: 27:02 (MVK +13.2k)' },
+            { id: 'm3', stage: 'play-in', date: '2026-10-17', time: '11:00 CEST', team1: 'Cloud9', team2: 'FURIA', format: 'Bo5', status: 'upcoming' },
+            { id: 'm4', stage: 'play-in', date: '2026-10-18', time: '16:00 CEST', team1: 'Karmine Corp', team2: 'MVK Esports', format: 'Bo5', status: 'upcoming' }
         ];
 
         function calculateEloRatings() {
             const eloMap = {};
-            teamsData.forEach(t => {
-                let base = 1500;
-                if (t.region === 'LCK') base = 1680;
-                else if (t.region === 'LPL') base = 1650;
-                else if (t.region === 'LEC') base = 1580;
-                else if (t.region === 'LCS') base = 1550;
-                else if (t.region === 'LCP') base = 1500;
-                else if (t.region === 'CBLOL') base = 1450;
-                
-                if (t.seed.includes('Champion')) base += 50;
-                if (t.id === 'GEN') base = 1820;
-                if (t.id === 'HLE') base = 1800;
-                if (t.id === 'T1') base = 1760;
-                if (t.id === 'BLG') base = 1750;
-                if (t.id === 'AL') base = 1740;
-                if (t.id === 'G2') base = 1710;
-                if (t.id === 'DK') base = 1700;
+            const regionBaseElo = { 'LCK': 1615, 'LPL': 1595, 'LEC': 1485, 'LCS': 1465, 'LCP': 1390, 'CBLOL': 1335 };
 
-                eloMap[t.id] = {
-                    team: t,
-                    elo: base,
-                    winsCount: t.recentWins.length,
-                    lossesCount: t.recentLosses.length
-                };
+            teamsData.forEach(t => {
+                const s = t.golStats;
+                const regBase = regionBaseElo[t.region] || 1450;
+                const regCoeff = regionCoefficients[t.region] || 1.0;
+                const wrParts = t.golStats.winRate.match(/(\d+)%\s*\((\d+)W\s*-\s*(\d+)L\)/);
+                const wr = wrParts ? parseFloat(wrParts[1]) : 50;
+                const wins = wrParts ? parseInt(wrParts[2], 10) : 15;
+                const losses = wrParts ? parseInt(wrParts[3], 10) : 15;
+
+                let seedBonus = 0;
+                if (t.seed.includes('MSI')) seedBonus = 50;
+                else if (t.seed.includes('Seed 1') || t.seed.includes('Champion')) seedBonus = 40;
+                else if (t.seed.includes('Seed 2')) seedBonus = 20;
+                else if (t.seed.includes('Seed 3') && !t.seed.includes('Play-In')) seedBonus = 10;
+
+                const netWins = wins - losses;
+                const wrBonus = ((wr - 50) * 2.8 + (netWins * 2.4)) * Math.pow(regCoeff, 0.7);
+                const econScore = ((s.gdpm * 0.22) + (s.gd15 / 32) + ((s.gpm - 1960) * 0.18) + ((s.wrAhead - 72) * 1.15) + ((s.ftPct - 52) * 0.75)) * Math.pow(regCoeff, 0.5);
+                const combatScore = (((s.dpm - 2650) / 14) + ((s.kd - 1.7) * 22) + ((s.fbPct - 50) * 0.35));
+                const macroScore = (((parseFloat(s.dragons) - 53) * 0.95) + ((parseFloat(s.nashors) - 55) * 0.85) + ((s.voidgrubs - 1.45) * 12) + ((s.vspm - 10.1) * 14));
+                const avgRoster = t.roster.reduce((sum, p) => sum + p.score, 0) / 5;
+                const rosterBonus = (avgRoster - 85) * 4.8;
+
+                const rawElo = regBase + seedBonus + wrBonus + econScore + combatScore + macroScore + rosterBonus;
+                eloMap[t.id] = { team: t, elo: Math.round(rawElo), breakdown: { playInDelta: 0 } };
             });
 
-            teamsData.forEach(t => {
-                t.recentWins.forEach(winStr => {
-                    const opp = teamsData.find(x => winStr.toLowerCase().includes(x.id.toLowerCase()) || winStr.toLowerCase().includes(x.name.toLowerCase()));
-                    if (opp && eloMap[opp.id]) {
-                        eloMap[t.id].elo += Math.round((eloMap[opp.id].elo - eloMap[t.id].elo) * 0.15 + 15);
-                    }
-                });
-                t.recentLosses.forEach(lossStr => {
-                    const opp = teamsData.find(x => lossStr.toLowerCase().includes(x.id.toLowerCase()) || lossStr.toLowerCase().includes(x.name.toLowerCase()));
-                    if (opp && eloMap[opp.id]) {
-                        eloMap[t.id].elo -= Math.round((eloMap[t.id].elo - eloMap[opp.id].elo) * 0.15 + 10);
-                    }
-                });
+            matchesData.filter(m => m.status === 'finished').forEach(match => {
+                const t1 = teamsData.find(t => t.name.toLowerCase() === match.team1.toLowerCase());
+                const t2 = teamsData.find(t => t.name.toLowerCase() === match.team2.toLowerCase());
+                if (!t1 || !t2) return;
+                const entry1 = eloMap[t1.id];
+                const entry2 = eloMap[t2.id];
+                const [s1, s2] = match.score.split('-').map(s => parseInt(s.trim(), 10));
+                const expected1 = 1 / (1 + Math.pow(10, (entry2.elo - entry1.elo) / 400));
+                const actual1 = s1 > s2 ? 1 : 0;
+                const delta = Math.round(28 * (1 + (Math.abs(s1 - s2) - 1) * 0.25) * (actual1 - expected1));
+                entry1.elo += delta; entry1.breakdown.playInDelta += delta;
+                entry2.elo -= delta; entry2.breakdown.playInDelta -= delta;
             });
 
             return Object.values(eloMap).sort((a, b) => b.elo - a.elo);
-        }
-
-        let currentFilterStage = 'all';
-
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('app-content').style.display = 'block';
-                renderScheduleView();
-            }, 400);
-
-            document.getElementById('nav-schedule').addEventListener('click', (e) => { setActiveTab(e.target, renderScheduleView); });
-            document.getElementById('nav-elo').addEventListener('click', (e) => { setActiveTab(e.target, renderEloView); });
-            document.getElementById('nav-teams').addEventListener('click', (e) => { setActiveTab(e.target, renderTeamsView); });
-            document.getElementById('nav-predictions').addEventListener('click', (e) => { setActiveTab(e.target, renderPredictionsView); });
-            document.getElementById('nav-stages').addEventListener('click', (e) => { setActiveTab(e.target, renderStagesView); });
-            document.getElementById('home-title').addEventListener('click', () => {
-                setActiveTab(document.getElementById('nav-schedule'), renderScheduleView);
-            });
-        });
-
-        function setActiveTab(buttonElement, renderCallback) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active', 'bg-amber-600', 'text-white'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.add('bg-gray-800', 'text-gray-200'));
-            buttonElement.classList.add('active');
-            buttonElement.classList.remove('bg-gray-800', 'text-gray-200');
-            renderCallback();
-        }
-
-        function renderScheduleView() {
-            const mainContent = document.getElementById('main-content');
-            
-            const filteredMatches = currentFilterStage === 'all' 
-                ? matchesData 
-                : matchesData.filter(m => m.stage === currentFilterStage);
-
-            const matchesHTML = filteredMatches.length > 0 ? filteredMatches.map(match => {
-                const stageName = tournamentStages.find(s => s.id === match.stage)?.name || match.stage;
-                return `
-                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-5 hover:border-amber-500/50 transition-all shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div class="flex flex-col items-start">
-                            <span class="text-xs font-semibold uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full mb-1">${stageName}</span>
-                            <span class="text-sm text-gray-400">📅 ${match.date} à ${match.time}</span>
-                        </div>
-                        
-                        <div class="flex items-center space-x-6 my-2 md:my-0">
-                            <div class="flex items-center space-x-3 w-40 sm:w-48 justify-end">
-                                <span class="font-bold text-right text-base sm:text-lg truncate">${match.team1}</span>
-                            </div>
-                            
-                            <div class="px-4 py-2 bg-gray-900 rounded-lg text-center font-extrabold text-amber-400 text-sm tracking-widest border border-gray-800">
-                                ${match.format}
-                            </div>
-
-                            <div class="flex items-center space-x-3 w-40 sm:w-48 justify-start">
-                                <span class="font-bold text-left text-base sm:text-lg truncate">${match.team2}</span>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center space-x-2">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">À venir</span>
-                        </div>
-                    </div>
-                `;
-            }).join('') : `
-                <div class="bg-gray-800/60 border border-gray-700/40 rounded-xl p-8 text-center text-gray-400">
-                    <p class="text-base font-semibold text-gray-300">Aucun match officiel annoncé pour cette étape pour le moment.</p>
-                </div>
-            `;
-
-            mainContent.innerHTML = `
-                <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-white">Calendrier & Rencontres</h2>
-                        <p class="text-sm text-gray-400">Suivez le programme détaillé des matchs officiels des Worlds 2026.</p>
-                    </div>
-                    <div class="flex flex-wrap gap-2 text-sm">
-                        <button class="filter-stage-btn px-3 py-1.5 rounded-lg font-medium transition-colors ${currentFilterStage === 'all' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}" data-stage="all">Tous</button>
-                        <button class="filter-stage-btn px-3 py-1.5 rounded-lg font-medium transition-colors ${currentFilterStage === 'play-in' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}" data-stage="play-in">Play-In</button>
-                        <button class="filter-stage-btn px-3 py-1.5 rounded-lg font-medium transition-colors ${currentFilterStage === 'swiss' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}" data-stage="swiss">Swiss Stage</button>
-                        <button class="filter-stage-btn px-3 py-1.5 rounded-lg font-medium transition-colors ${currentFilterStage === 'knockouts' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}" data-stage="knockouts">Knockouts</button>
-                    </div>
-                </div>
-                <div class="space-y-4">${matchesHTML}</div>
-            `;
-
-            mainContent.querySelectorAll('.filter-stage-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    currentFilterStage = e.target.dataset.stage;
-                    renderScheduleView();
-                });
-            });
         }
 
         function computeAdvancedMatchPrediction(team1, team2, rankedTeams) {
@@ -534,31 +652,29 @@
             const r2 = rankedTeams.find(r => r.team.id === team2.id);
             const elo1 = r1 ? r1.elo : 1500;
             const elo2 = r2 ? r2.elo : 1500;
-
-            // 1. Probabilité Elo de base (Poids: 50%)
+            
+            // Correction de la pondération : On donne le poids principal à l'Elo et aux stats S16 (gol.gg)
             const probElo1 = 1 / (1 + Math.pow(10, (elo2 - elo1) / 400));
 
-            // 2. Comparaison des Joueurs Rôle par Rôle pondérée par la région (Poids: 25%)
-            const reg1 = regionCoefficients[team1.region] || 1.0;
-            const reg2 = regionCoefficients[team2.region] || 1.0;
+            const avgRoster1 = team1.roster.reduce((sum, p) => sum + p.score, 0) / 5;
+            const avgRoster2 = team2.roster.reduce((sum, p) => sum + p.score, 0) / 5;
+            const probRoster1 = 1 / (1 + Math.pow(10, (avgRoster2 - avgRoster1) / 25));
 
-            const avgRoster1 = (team1.roster.reduce((sum, p) => sum + p.score, 0) / 5) * reg1;
-            const avgRoster2 = (team2.roster.reduce((sum, p) => sum + p.score, 0) / 5) * reg2;
-            const probRoster1 = 1 / (1 + Math.pow(10, (avgRoster2 - avgRoster1) / 18));
+            // Stabilité globale : 70% Elo & Roster Global S16, 30% Worlds
+            let probWorlds1 = 0.5;
+            const hasWorldsStats = (team1.worldsStats && team1.worldsStats.played) || (team2.worldsStats && team2.worldsStats.played);
+            if (hasWorldsStats) {
+                const w1 = team1.worldsStats && team1.worldsStats.played ? team1.worldsStats : team1.golStats;
+                const w2 = team2.worldsStats && team2.worldsStats.played ? team2.worldsStats : team2.golStats;
+                const wIndex1 = (w1.gd15 / 30) + (w1.gdpm * 0.2) + (w1.dpm / 50) + (w1.kd * 10);
+                const wIndex2 = (w2.gd15 / 30) + (w2.gdpm * 0.2) + (w2.dpm / 50) + (w2.kd * 10);
+                probWorlds1 = 1 / (1 + Math.pow(10, (wIndex2 - wIndex1) / 80));
+            }
 
-            // 3. Statistiques Macro Early/Late du Split précédent pondérées par la région (Poids: 25%)
-            const m1 = team1.macroStats;
-            const m2 = team2.macroStats;
-            const macroIndex1 = ((m1.gd15 / 25) + m1.ftPct * 0.8 + m1.objControl * 0.9 + m1.lateGame * 0.8) * reg1;
-            const macroIndex2 = ((m2.gd15 / 25) + m2.ftPct * 0.8 + m2.objControl * 0.9 + m2.lateGame * 0.8) * reg2;
-            const probMacro1 = 1 / (1 + Math.pow(10, (macroIndex2 - macroIndex1) / 45));
-
-            // Probabilité combinée par manche (Game Win Probability p)
-            const gameWinProb1 = Math.min(0.92, Math.max(0.08, (probElo1 * 0.50) + (probRoster1 * 0.25) + (probMacro1 * 0.25)));
-            const p = gameWinProb1;
+            const combinedProb = hasWorldsStats ? (probElo1 * 0.50) + (probRoster1 * 0.25) + (probWorlds1 * 0.25) : (probElo1 * 0.65) + (probRoster1 * 0.35);
+            const p = Math.min(0.92, Math.max(0.08, combinedProb));
             const q = 1 - p;
 
-            // Distribution binomiale exacte pour un Bo5 (sans aucun hasard)
             const p3_0 = Math.pow(p, 3);
             const p3_1 = 3 * Math.pow(p, 3) * q;
             const p3_2 = 6 * Math.pow(p, 3) * Math.pow(q, 2);
@@ -567,371 +683,340 @@
             const p0_3 = Math.pow(q, 3);
 
             const seriesWinProb1 = p3_0 + p3_1 + p3_2;
-            const seriesWinProb2 = p2_3 + p1_3 + p0_3;
-
             const scoreOutcomes = [
-                { score: '3 - 0', prob: p3_0, winner: 1 },
-                { score: '3 - 1', prob: p3_1, winner: 1 },
-                { score: '3 - 2', prob: p3_2, winner: 1 },
-                { score: '2 - 3', prob: p2_3, winner: 2 },
-                { score: '1 - 3', prob: p1_3, winner: 2 },
-                { score: '0 - 3', prob: p0_3, winner: 2 }
+                { score: '3 - 0', prob: p3_0 }, { score: '3 - 1', prob: p3_1 }, { score: '3 - 2', prob: p3_2 },
+                { score: '2 - 3', prob: p2_3 }, { score: '1 - 3', prob: p1_3 }, { score: '0 - 3', prob: p0_3 }
             ];
-
-            // Détermination du score exact le plus probable selon l'écart de puissance
             const bestOutcome = [...scoreOutcomes].sort((a, b) => b.prob - a.prob)[0];
 
-            // Comparaison ligne par ligne
-            const laneMatchups = team1.roster.map((p1, idx) => {
-                const p2 = team2.roster[idx];
-                const eff1 = p1.score * Math.sqrt(reg1);
-                const eff2 = p2.score * Math.sqrt(reg2);
-                const diff = eff1 - eff2;
-                return {
-                    role: p1.role,
-                    p1Name: p1.name,
-                    p1Score: p1.score,
-                    p2Name: p2.name,
-                    p2Score: p2.score,
-                    advantage: Math.abs(diff) < 1.2 ? 'Équilibré' : (diff > 0 ? team1.id : team2.id)
-                };
-            });
-
             return {
-                elo1,
-                elo2,
+                elo1, elo2, hasWorldsStats,
                 seriesPct1: Math.round(seriesWinProb1 * 100),
                 seriesPct2: 100 - Math.round(seriesWinProb1 * 100),
                 predictedScore: bestOutcome.score,
-                scoreOutcomes,
-                laneMatchups
+                scoreOutcomes
             };
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (tabId === 'schedule') renderScheduleView();
+            else if (tabId === 'elo') renderEloView();
+            else if (tabId === 'teams') renderTeamsView();
+            else if (tabId === 'predictions') renderPredictionsView();
+            else if (tabId === 'stages') renderStagesView();
+        }
+
+        function renderScheduleView() {
+            const mainContent = document.getElementById('main-content');
+            const html = matchesData.map(m => `
+                <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-5 shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <span class="text-xs uppercase font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded">${m.stage} • ${m.format}</span>
+                        <div class="flex items-center gap-4 mt-2">
+                            <span class="text-lg font-black text-white">${m.team1}</span>
+                            <span class="text-sm font-bold text-gray-400">vs</span>
+                            <span class="text-lg font-black text-white">${m.team2}</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-400 block">📅 ${m.date} à ${m.time}</span>
+                        <span class="text-sm font-bold ${m.status === 'finished' ? 'text-emerald-400' : 'text-amber-300'}">
+                            ${m.status === 'finished' ? `Terminé (${m.score}) - Vainqueur : ${m.winner}` : 'À venir'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            mainContent.innerHTML = `<div class="space-y-4">${html}</div>`;
         }
 
         function renderEloView() {
             const mainContent = document.getElementById('main-content');
-            const rankedTeams = calculateEloRatings();
-
-            const rowsHTML = rankedTeams.map((item, index) => {
-                const rankBadge = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
-                const eloColor = item.elo >= 1750 ? 'text-amber-400' : item.elo >= 1650 ? 'text-purple-400' : item.elo >= 1550 ? 'text-blue-400' : 'text-gray-300';
-                
-                const winsList = item.team.recentWins.length > 0 ? item.team.recentWins.join(', ') : 'Aucune victoire majeure enregistrée';
-                const lossesList = item.team.recentLosses.length > 0 ? item.team.recentLosses.join(', ') : 'Aucune défaite majeure';
-
-                return `
-                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-5 hover:border-amber-500/40 transition-all shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div class="flex items-center space-x-4 w-full md:w-1/3">
-                            <span class="text-xl font-black w-8 text-center text-gray-400">${rankBadge}</span>
-                            <img src="${item.team.logo}" alt="${item.team.name}" class="w-12 h-12 object-contain rounded bg-gray-900 p-1" onerror="this.src='https://placehold.co/60x60/1f2937/ffffff?text=LoL'">
-                            <div>
-                                <h3 class="font-bold text-white text-base">${item.team.name}</h3>
-                                <p class="text-xs text-gray-400">${item.team.region} — <span class="text-amber-400">${item.team.seed}</span></p>
-                            </div>
-                        </div>
-
-                        <div class="w-full md:w-1/3 text-sm space-y-1">
-                            <p class="text-gray-300"><strong class="text-emerald-400">Victoires notables :</strong> ${winsList}</p>
-                            <p class="text-gray-400"><strong class="text-rose-400">Défaites contre :</strong> ${lossesList}</p>
-                        </div>
-
-                        <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
-                            <div class="text-right">
-                                <span class="text-xs text-gray-400 block uppercase tracking-wider font-semibold">Score Elo</span>
-                                <span class="text-2xl font-black ${eloColor}">${item.elo} pts</span>
-                            </div>
+            const ranked = calculateEloRatings();
+            const html = ranked.map((item, idx) => `
+                <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <span class="font-black text-gray-400 text-lg">#${idx + 1}</span>
+                        <img src="${item.team.logo}" class="w-10 h-10 bg-gray-900 rounded p-1">
+                        <div>
+                            <h3 class="font-bold text-white">${item.team.name}</h3>
+                            <p class="text-xs text-gray-400">${item.team.region} - ${item.team.seed}</p>
                         </div>
                     </div>
-                `;
-            }).join('');
-
-            mainContent.innerHTML = `
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-white">Classement de Puissance & Système Elo</h2>
-                    <p class="text-sm text-gray-400">Ce classement calcule dynamiquement la puissance de chaque équipe en fonction de ses victoires et défaites.</p>
+                    <div class="text-right">
+                        <span class="text-xl font-black text-amber-400">${item.elo} pts</span>
+                        ${item.breakdown.playInDelta !== 0 ? `<span class="block text-xs font-bold ${item.breakdown.playInDelta > 0 ? 'text-emerald-400' : 'text-red-400'}">Play-In: ${item.breakdown.playInDelta > 0 ? '+' : ''}${item.breakdown.playInDelta} Elo</span>` : ''}
+                    </div>
                 </div>
-                <div class="space-y-4">${rowsHTML}</div>
-            `;
+            `).join('');
+            mainContent.innerHTML = `<div class="space-y-3">${html}</div>`;
         }
 
-        function renderTeamsView(filterQuery = '') {
+        function renderTeamsView(query = '') {
             const mainContent = document.getElementById('main-content');
-            
-            const filteredTeams = teamsData.filter(team => {
-                const q = filterQuery.toLowerCase();
-                const matchTeam = team.name.toLowerCase().includes(q) || team.region.toLowerCase().includes(q) || team.id.toLowerCase().includes(q);
-                const matchPlayer = team.roster.some(p => p.name.toLowerCase().includes(q) || p.role.toLowerCase().includes(q));
-                return matchTeam || matchPlayer;
-            });
-
-            const teamsHTML = filteredTeams.length > 0 ? filteredTeams.map(team => `
-                <div class="team-card bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 flex items-center space-x-4 shadow-md hover:border-amber-500/40 transition-all cursor-pointer" data-team-id="${team.id}">
-                    <img src="${team.logo}" alt="${team.name}" class="w-12 h-12 object-contain rounded bg-gray-900 p-1" onerror="this.src='https://placehold.co/60x60/1f2937/ffffff?text=LoL'">
-                    <div class="flex-grow">
-                        <h3 class="font-bold text-white text-base">${team.name}</h3>
-                        <p class="text-xs text-gray-400">${team.region} — <span class="text-amber-400 font-medium">${team.seed}</span></p>
-                    </div>
-                </div>
-            `).join('') : '<div class="col-span-full text-center text-gray-400 py-8">Aucune équipe ou joueur ne correspond à votre recherche.</div>';
-
-            mainContent.innerHTML = `
-                <div class="mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            const filtered = teamsData.filter(t => t.name.toLowerCase().includes(query.toLowerCase()) || t.region.toLowerCase().includes(query.toLowerCase()));
+            const html = filtered.map(t => `
+                <div class="team-card bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:border-amber-500" data-id="${t.id}">
+                    <img src="${t.logo}" class="w-12 h-12 bg-gray-900 rounded p-1">
                     <div>
-                        <h2 class="text-2xl font-bold text-white">Équipes Engagées & Rosters 2026</h2>
-                        <p class="text-sm text-gray-400">Cliquez sur une équipe pour voir son effectif officiel.</p>
-                    </div>
-                    <div class="w-full md:w-72">
-                        <input type="text" id="team-search-input" value="${filterQuery}" placeholder="🔍 Rechercher équipe, joueur..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-amber-500">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">${teamsHTML}</div>
-            `;
-
-            document.getElementById('team-search-input').addEventListener('input', (e) => {
-                renderTeamsView(e.target.value);
-            });
-
-            mainContent.querySelectorAll('.team-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    renderTeamDetailView(card.dataset.teamId);
-                });
-            });
-        }
-
-        function renderTeamDetailView(teamId) {
-            const mainContent = document.getElementById('main-content');
-            const team = teamsData.find(t => t.id === teamId);
-            if (!team) return;
-
-            const rankedTeams = calculateEloRatings();
-            const teamEloInfo = rankedTeams.find(item => item.team.id === team.id);
-            const teamRank = rankedTeams.findIndex(item => item.team.id === team.id) + 1;
-            const teamEloScore = teamEloInfo ? teamEloInfo.elo : 1500;
-
-            const rosterHTML = team.roster.map(player => `
-                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/50 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs uppercase tracking-wider text-amber-400 font-bold block">${player.role}</span>
-                        <span class="font-semibold text-white">${player.name}</span>
-                    </div>
-                    <div class="text-right text-xs text-gray-400">
-                        <span class="px-2 py-0.5 bg-amber-500/10 text-amber-300 font-bold rounded border border-amber-500/20">Note: ${player.score}</span>
-                        <span class="block mt-1">KDA ${player.kda} • ${player.dpm} DPM</span>
+                        <h3 class="font-bold text-white">${t.name}</h3>
+                        <p class="text-xs text-gray-400">${t.region} - <span class="text-amber-400">${t.seed}</span></p>
                     </div>
                 </div>
             `).join('');
 
-            const teamMatches = matchesData.filter(m =>
-                m.team1.toLowerCase().includes(team.name.toLowerCase()) ||
-                m.team2.toLowerCase().includes(team.name.toLowerCase())
-            );
+            mainContent.innerHTML = `
+                <div class="mb-4"><input type="text" id="team-search" value="${query}" placeholder="Rechercher une équipe..." class="bg-gray-800 border border-gray-700 rounded px-4 py-2 text-white w-full max-w-sm"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">${html}</div>
+            `;
+            document.getElementById('team-search').addEventListener('input', e => renderTeamsView(e.target.value));
+            mainContent.querySelectorAll('.team-card').forEach(c => c.addEventListener('click', () => renderTeamDetailView(c.dataset.id)));
+        }
 
-            const teamMatchesHTML = teamMatches.length > 0 ? teamMatches.map(m => `
-                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/50 flex justify-between items-center text-sm">
-                    <span class="text-gray-300 font-semibold">${m.team1} vs ${m.team2}</span>
-                    <span class="text-xs text-amber-400 font-bold">${m.date} (${m.format})</span>
-                </div>
-            `).join('') : `<p class="text-sm text-gray-400">En attente du tirage au sort du Swiss Stage (début le 23 octobre).</p>`;
+        function renderTeamDetailView(id) {
+            const t = teamsData.find(x => x.id === id);
+            const mainContent = document.getElementById('main-content');
+            const gol = t.golStats;
+            const w = t.worldsStats;
+
+            let worldsHtml = '';
+            if (w && w.played) {
+                const playersTable = w.players.map(p => `
+                    <tr class="border-b border-gray-700/50 text-xs">
+                        <td class="py-2 px-3 font-bold text-amber-400">${p.role}</td>
+                        <td class="py-2 px-3 text-white">${p.name}</td>
+                        <td class="py-2 px-3 text-gray-300">${p.kda}</td>
+                        <td class="py-2 px-3 text-gray-300">${p.csm}</td>
+                        <td class="py-2 px-3 text-gray-300">${p.dpm}</td>
+                        <td class="py-2 px-3 text-gray-300">${p.wpm}</td>
+                    </tr>
+                `).join('');
+
+                const gamesLogHtml = w.gamesLog.map(g => `
+                    <div class="bg-gray-900/60 p-3 rounded-lg mb-2 border border-gray-700/40 text-xs flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-white">vs ${g.vs}</span>
+                            <span class="text-gray-400 block mt-1">${g.details}</span>
+                        </div>
+                        <span class="font-black px-2.5 py-1 rounded ${g.result === 'WIN' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${g.score} (${g.result})</span>
+                    </div>
+                `).join('');
+
+                worldsHtml = `
+                    <div class="bg-amber-950/20 border border-amber-500/40 rounded-xl p-6 mb-6">
+                        <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">🏆 Statistiques Worlds 2026 & Historique</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                            <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
+                                <span class="text-xs text-gray-400 block">Bilan Séries / Cartes</span>
+                                <span class="text-base font-black text-white">${w.seriesRecord} (${w.winRate})</span>
+                            </div>
+                            <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
+                                <span class="text-xs text-gray-400 block">Gold Par Minute (GPM)</span>
+                                <span class="text-base font-black text-amber-400">${w.gpm}</span>
+                            </div>
+                            <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
+                                <span class="text-xs text-gray-400 block">Gold Diff @ 15 min</span>
+                                <span class="text-base font-black text-emerald-400">${w.gd15 > 0 ? '+' + w.gd15 : w.gd15}</span>
+                            </div>
+                            <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
+                                <span class="text-xs text-gray-400 block">Dégâts / Minute (DPM)</span>
+                                <span class="text-base font-black text-purple-400">${w.dpm}</span>
+                            </div>
+                        </div>
+
+                        <h4 class="text-sm font-bold text-gray-200 mb-3">Statistiques Individuelles des Joueurs (Worlds 2026)</h4>
+                        <div class="overflow-x-auto mb-6">
+                            <table class="w-full text-left bg-gray-900/40 rounded-lg overflow-hidden">
+                                <thead class="bg-gray-900/80 text-[10px] text-gray-400 uppercase">
+                                    <tr>
+                                        <th class="py-2 px-3">Rôle</th>
+                                        <th class="py-2 px-3">Joueur</th>
+                                        <th class="py-2 px-3">KDA</th>
+                                        <th class="py-2 px-3">CSM</th>
+                                        <th class="py-2 px-3">DPM</th>
+                                        <th class="py-2 px-3">WPM</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${playersTable}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4 class="text-sm font-bold text-gray-200 mb-3">Historique des Matchs Terminés (Worlds 2026)</h4>
+                        <div>
+                            ${gamesLogHtml}
+                        </div>
+                    </div>
+                `;
+            }
 
             mainContent.innerHTML = `
-                <div class="mb-6">
-                    <button id="back-to-teams" class="inline-flex items-center space-x-2 text-sm text-amber-400 hover:text-amber-300 font-semibold mb-4 transition-colors">
-                        <span>← Retour à la liste des équipes</span>
-                    </button>
-                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
-                        <div class="flex flex-col sm:flex-row items-center gap-6">
-                            <img src="${team.logo}" alt="${team.name}" class="w-24 h-24 object-contain rounded-xl bg-gray-900 p-2 border border-gray-700" onerror="this.src='https://placehold.co/80x80/1f2937/ffffff?text=LoL'">
-                            <div class="text-center sm:text-left">
-                                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
-                                    <span class="px-3 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">${team.region}</span>
-                                    <span class="px-3 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">${team.seed}</span>
-                                </div>
-                                <h2 class="text-3xl font-black text-white">${team.name}</h2>
-                                <p class="text-sm text-gray-400 mt-1">Tag officiel : <span class="text-gray-200 font-mono font-bold">${team.id}</span></p>
-                            </div>
-                        </div>
-                        <div class="bg-gray-900/80 border border-gray-700/50 rounded-xl p-4 text-center min-w-[160px]">
-                            <span class="text-xs text-gray-400 uppercase font-semibold block">Seeding Elo</span>
-                            <span class="text-2xl font-black text-amber-400">#${teamRank}</span>
-                            <span class="text-xs text-gray-300 block mt-1">${teamEloScore} pts Elo</span>
-                        </div>
+                <button id="back-teams" class="text-amber-400 font-bold mb-4 block hover:underline">← Retour à la liste des équipes</button>
+                <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 mb-6 flex flex-col sm:flex-row items-center gap-6 shadow-xl">
+                    <img src="${t.logo}" class="w-20 h-20 bg-gray-900 rounded p-2">
+                    <div>
+                        <h2 class="text-3xl font-black text-white">${t.name}</h2>
+                        <p class="text-sm text-gray-400">Région : <span class="text-white">${t.region}</span> | Saison : <span class="text-white">S16</span> | Seed : <span class="text-amber-400">${t.seed}</span></p>
+                        <p class="text-sm text-gray-400 mt-1">Win Rate S16 : <span class="text-emerald-400 font-bold">${gol.winRate}</span> | Durée moy. : <span class="text-white">${gol.avgDuration}</span></p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg">
-                        <h3 class="text-lg font-bold text-white mb-4">👥 Roster Officiel & Ratings (Octobre 2026)</h3>
-                        <div class="space-y-3">${rosterHTML}</div>
+                ${worldsHtml}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- ECONOMY -->
+                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-5 shadow-lg">
+                        <h3 class="text-amber-400 font-bold text-sm uppercase tracking-wider mb-4 pb-2 border-b border-gray-700">💰 Économie (gol.gg)</h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Gold Per Minute</span><span class="font-bold text-white">${gol.gpm}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Gold Differential per Minute</span><span class="font-bold text-white">${gol.gdpm > 0 ? '+' + gol.gdpm : gol.gdpm}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Gold Differential at 15 min</span><span class="font-bold text-emerald-400">${gol.gd15 > 0 ? '+' + gol.gd15 : gol.gd15}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Win Rate when ahead at 15 min</span><span class="font-bold text-amber-400">${gol.wrAhead}%</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">CS Per Minute</span><span class="font-bold text-white">${gol.cspm}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">CS Differential at 15 min</span><span class="font-bold text-white">${gol.csd15}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Tower Differential at 15 min</span><span class="font-bold text-white">${gol.td15}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Avg. Tower Difference</span><span class="font-bold text-white">${gol.avgTd}</span></div>
+                            <div class="flex justify-between py-1"><span class="text-gray-400">First Tower</span><span class="font-bold text-amber-400">${gol.ftPct}%</span></div>
+                        </div>
                     </div>
 
-                    <div class="space-y-6">
-                        <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg">
-                            <h3 class="text-lg font-bold text-white mb-4">📊 Statistiques Early & Late (Dernier Split)</h3>
-                            <div class="grid grid-cols-2 gap-3 text-sm">
-                                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
-                                    <span class="text-xs text-gray-400 block">Gold Diff @ 15</span>
-                                    <span class="text-lg font-bold text-emerald-400">+${team.macroStats.gd15}g</span>
-                                </div>
-                                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
-                                    <span class="text-xs text-gray-400 block">First Tower %</span>
-                                    <span class="text-lg font-bold text-amber-400">${team.macroStats.ftPct}%</span>
-                                </div>
-                                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
-                                    <span class="text-xs text-gray-400 block">Contrôle Objectifs</span>
-                                    <span class="text-lg font-bold text-blue-400">${team.macroStats.objControl}%</span>
-                                </div>
-                                <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700/40">
-                                    <span class="text-xs text-gray-400 block">Indice Late Game</span>
-                                    <span class="text-lg font-bold text-purple-400">${team.macroStats.lateGame}/100</span>
-                                </div>
-                            </div>
+                    <!-- AGGRESSION -->
+                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-5 shadow-lg">
+                        <h3 class="text-amber-400 font-bold text-sm uppercase tracking-wider mb-4 pb-2 border-b border-gray-700">⚔️ Agression (gol.gg)</h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Damage Per Minute</span><span class="font-bold text-purple-400">${gol.dpm}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">First Blood</span><span class="font-bold text-amber-400">${gol.fbPct}%</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Kills Per Game</span><span class="font-bold text-white">${gol.kills}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Deaths Per Game</span><span class="font-bold text-white">${gol.deaths}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Average Kill / Death Ratio</span><span class="font-bold text-white">${gol.kd}</span></div>
+                            <div class="flex justify-between py-1"><span class="text-gray-400">Average Assists / Kill</span><span class="font-bold text-white">${gol.assistsKill}</span></div>
                         </div>
+                    </div>
 
-                        <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg">
-                            <h3 class="text-lg font-bold text-white mb-4">📅 Matchs aux Worlds 2026</h3>
-                            <div class="space-y-3 mb-4">${teamMatchesHTML}</div>
-                            <h4 class="text-sm font-bold text-gray-300 mb-2 pt-3 border-t border-gray-700/60">Performances Saison 2026</h4>
-                            <p class="text-sm text-gray-300 mb-1"><strong class="text-emerald-400">Victoires :</strong> ${team.recentWins.join(', ') || 'Aucune'}</p>
-                            <p class="text-sm text-gray-300"><strong class="text-rose-400">Défaites :</strong> ${team.recentLosses.join(', ') || 'Aucune'}</p>
+                    <!-- OBJECTIVES -->
+                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-5 shadow-lg">
+                        <h3 class="text-amber-400 font-bold text-sm uppercase tracking-wider mb-4 pb-2 border-b border-gray-700">🎯 Objectifs (gol.gg)</h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Plates / game</span><span class="font-bold text-white">${gol.plates}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Dragons / game</span><span class="font-bold text-white">${gol.dragons}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Dragons at 15 min</span><span class="font-bold text-white">${gol.dragons15}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Voidgrubs / game</span><span class="font-bold text-white">${gol.voidgrubs}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Herald / game</span><span class="font-bold text-white">${gol.herald}</span></div>
+                            <div class="flex justify-between py-1"><span class="text-gray-400">Nashors / game</span><span class="font-bold text-amber-400">${gol.nashors}</span></div>
+                        </div>
+                    </div>
+
+                    <!-- VISION -->
+                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-5 shadow-lg">
+                        <h3 class="text-amber-400 font-bold text-sm uppercase tracking-wider mb-4 pb-2 border-b border-gray-700">👁️ Vision (gol.gg)</h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Vision Score Per Minute</span><span class="font-bold text-white">${gol.vspm}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Wards Per Minute</span><span class="font-bold text-white">${gol.wpm}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Vision Wards Per Minute</span><span class="font-bold text-white">${gol.vwpm}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Wards Cleared Per Minute</span><span class="font-bold text-white">${gol.wcpm}</span></div>
+                            <div class="flex justify-between py-1"><span class="text-gray-400">% Wards Cleared</span><span class="font-bold text-emerald-400">${gol.clearedPct}</span></div>
                         </div>
                     </div>
                 </div>
             `;
-
-            document.getElementById('back-to-teams').addEventListener('click', () => {
-                renderTeamsView();
-            });
+            document.getElementById('back-teams').addEventListener('click', () => renderTeamsView());
         }
 
         function renderPredictionsView() {
             const mainContent = document.getElementById('main-content');
-            const rankedTeams = calculateEloRatings();
+            const ranked = calculateEloRatings();
+            const upcoming = matchesData.filter(m => m.status !== 'finished');
 
-            const predictionsHTML = matchesData.map(match => {
-                const team1Obj = teamsData.find(t => match.team1.toLowerCase() === t.name.toLowerCase() || match.team1.toLowerCase() === t.id.toLowerCase());
-                const team2Obj = teamsData.find(t => match.team2.toLowerCase() === t.name.toLowerCase() || match.team2.toLowerCase() === t.id.toLowerCase());
+            const html = upcoming.map(m => {
+                const t1 = teamsData.find(t => t.name.toLowerCase() === m.team1.toLowerCase());
+                const t2 = teamsData.find(t => t.name.toLowerCase() === m.team2.toLowerCase());
+                if (!t1 || !t2) return '';
+                const pred = computeAdvancedMatchPrediction(t1, t2, ranked);
 
-                if (match.team1.includes('TBD') || match.team2.includes('TBD') || !team1Obj || !team2Obj) {
+                const roles = ['TOP', 'JUNGE', 'MID', 'BOT', 'SUPPORT'];
+                const roleComparisons = t1.roster.map((p1, idx) => {
+                    const p2 = t2.roster[idx];
+                    const diff = p1.score - p2.score;
+                    let verdict = 'Équilibré';
+                    let badgeColor = 'bg-gray-700 text-gray-300';
+                    if (diff > 3) { verdict = `Avantage ${t1.name}`; badgeColor = 'bg-amber-500/20 text-amber-400'; }
+                    else if (diff < -3) { verdict = `Avantage ${t2.name}`; badgeColor = 'bg-purple-500/20 text-purple-400'; }
                     return `
-                        <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-5 shadow-lg">
-                            <div class="flex justify-between items-center mb-3">
-                                <span class="text-xs font-semibold uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full">Play-In Stage</span>
-                                <span class="text-sm text-gray-400">📅 ${match.date} à ${match.time}</span>
-                            </div>
-                            <div class="text-center py-4 text-gray-400 font-semibold">
-                                Match : ${match.team1} vs ${match.team2} (${match.format})
-                                <p class="text-xs text-gray-500 mt-1">Les pronostiques détaillés seront disponibles dès que les équipes seront qualifiées.</p>
-                            </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-700/30 text-xs">
+                            <span class="font-bold text-white w-1/3">${p1.name} (${p1.score})</span>
+                            <span class="text-gray-400 font-bold uppercase text-[10px] w-1/3 text-center">${p1.role}</span>
+                            <span class="font-bold text-white w-1/3 text-right">${p2.name} (${p2.score})</span>
                         </div>
-                    `;
-                }
-
-                const analysis = computeAdvancedMatchPrediction(team1Obj, team2Obj, rankedTeams);
-                const favorite = analysis.seriesPct1 >= analysis.seriesPct2 ? team1Obj.name : team2Obj.name;
-                const favPct = Math.max(analysis.seriesPct1, analysis.seriesPct2);
-
-                const lanesHTML = analysis.laneMatchups.map(lane => {
-                    const advBadge = lane.advantage === 'Équilibré'
-                        ? `<span class="text-xs px-2 py-0.5 rounded bg-gray-700 text-gray-300">Équilibré</span>`
-                        : lane.advantage === team1Obj.id
-                            ? `<span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">Avantage ${team1Obj.id}</span>`
-                            : `<span class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">Avantage ${team2Obj.id}</span>`;
-
-                    return `
-                        <div class="flex items-center justify-between bg-gray-900/60 px-3 py-2 rounded-lg border border-gray-700/40 text-xs sm:text-sm">
-                            <div class="w-1/3 font-semibold text-white">${lane.p1Name} <span class="text-gray-400">(${lane.p1Score})</span></div>
-                            <div class="w-1/3 text-center flex flex-col items-center">
-                                <span class="text-[11px] uppercase tracking-wider text-gray-400 font-bold mb-0.5">${lane.role}</span>
-                                ${advBadge}
-                            </div>
-                            <div class="w-1/3 text-right font-semibold text-white"><span class="text-gray-400">(${lane.p2Score})</span> ${lane.p2Name}</div>
-                        </div>
+                        <div class="text-center pb-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${verdict}</span></div>
                     `;
                 }).join('');
 
-                const scoresBreakdownHTML = analysis.scoreOutcomes.map(item => {
-                    const pct = Math.round(item.prob * 100);
-                    const isBest = item.score === analysis.predictedScore;
-                    return `
-                        <div class="p-2 rounded-lg text-center border ${isBest ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold' : 'bg-gray-900/50 border-gray-700/50 text-gray-400'}">
-                            <span class="block text-sm text-white font-bold">${item.score}</span>
-                            <span class="text-xs">${pct}%</span>
-                        </div>
-                    `;
-                }).join('');
+                const outcomesHtml = pred.scoreOutcomes.map(o => `
+                    <div class="bg-gray-900/60 p-2 rounded text-center border border-gray-700/40 ${o.score === pred.predictedScore ? 'border-amber-500 bg-amber-500/10' : ''}">
+                        <span class="text-xs text-gray-400 block">${o.score}</span>
+                        <span class="text-sm font-black text-white">${Math.round(o.prob * 100)}%</span>
+                    </div>
+                `).join('');
 
                 return `
-                    <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg space-y-5">
-                        <div class="flex flex-wrap justify-between items-center gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full">Analyse Multi-Facteurs (${match.format})</span>
-                            <span class="text-sm text-gray-400">📅 ${match.date} à ${match.time}</span>
+                    <div class="bg-gray-800/85 border border-gray-700/50 rounded-2xl p-6 shadow-xl space-y-6">
+                        <div class="flex justify-between items-center text-xs text-gray-400 uppercase font-bold border-b border-gray-700 pb-3">
+                            <span class="text-amber-400">${m.stage} - ${m.format}</span>
+                            <span>📅 ${m.date} à ${m.time}</span>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-4 py-2">
-                            <div class="text-center md:text-right">
-                                <h3 class="text-xl font-bold text-white">${team1Obj.name}</h3>
-                                <p class="text-xs text-gray-400">${team1Obj.region} (Elo: ${analysis.elo1})</p>
-                                <span class="text-3xl font-black text-amber-400 mt-1 inline-block">${analysis.seriesPct1}%</span>
-                            </div>
-
-                            <div class="text-center flex flex-col items-center justify-center">
-                                <span class="px-3 py-1 bg-gray-900 border border-gray-700 rounded-full text-xs font-bold text-gray-300">VS</span>
-                                <div class="mt-3 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-                                    <span class="text-xs text-gray-400 block uppercase font-bold tracking-wide">Score Prévu (${match.format})</span>
-                                    <span class="text-2xl font-black text-amber-400">${analysis.predictedScore}</span>
-                                </div>
-                                <p class="text-xs text-emerald-400 font-semibold mt-2">Favori : ${favorite} (${favPct}%)</p>
-                            </div>
-
-                            <div class="text-center md:text-left">
-                                <h3 class="text-xl font-bold text-white">${team2Obj.name}</h3>
-                                <p class="text-xs text-gray-400">${team2Obj.region} (Elo: ${analysis.elo2})</p>
-                                <span class="text-3xl font-black text-purple-400 mt-1 inline-block">${analysis.seriesPct2}%</span>
-                            </div>
-                        </div>
-
-                        <div class="w-full bg-gray-900 rounded-full h-3 overflow-hidden flex border border-gray-700">
-                            <div class="bg-amber-500 h-full transition-all duration-500" style="width: ${analysis.seriesPct1}%"></div>
-                            <div class="bg-purple-600 h-full transition-all duration-500" style="width: ${analysis.seriesPct2}%"></div>
-                        </div>
-
-                        <!-- Détails statistiques Early/Late & Matchups par rôle -->
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t border-gray-700/50">
+                        <!-- MAIN PROBABILITY BAR -->
+                        <div class="grid grid-cols-3 items-center text-center">
                             <div>
-                                <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">⚔️ Confrontations Rôle par Rôle (Stats 2026)</h4>
-                                <div class="space-y-2">${lanesHTML}</div>
+                                <h3 class="text-2xl font-black text-white">${t1.name}</h3>
+                                <p class="text-xs text-gray-400">${t1.region} (Elo: ${Math.round(pred.elo1)})</p>
+                                <span class="text-4xl font-black text-amber-400 mt-1 block">${pred.seriesPct1}%</span>
+                            </div>
+                            <div>
+                                <span class="px-3 py-1 bg-gray-900 rounded-full text-xs font-bold border border-gray-700">VS</span>
+                                <span class="block text-xl font-black text-amber-300 mt-2">Score : ${pred.predictedScore}</span>
+                                <span class="text-[10px] text-gray-400 block">Favori : ${pred.seriesPct1 >= 50 ? t1.name : t2.name} (${Math.max(pred.seriesPct1, pred.seriesPct2)}%)</span>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-black text-white">${t2.name}</h3>
+                                <p class="text-xs text-gray-400">${t2.region} (Elo: ${Math.round(pred.elo2)})</p>
+                                <span class="text-4xl font-black text-purple-400 mt-1 block">${pred.seriesPct2}%</span>
+                            </div>
+                        </div>
+
+                        <!-- PROGRESS BAR -->
+                        <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden flex border border-gray-700">
+                            <div class="bg-amber-500 h-full transition-all duration-500" style="width: ${pred.seriesPct1}%"></div>
+                            <div class="bg-purple-600 h-full transition-all duration-500" style="width: ${pred.seriesPct2}%"></div>
+                        </div>
+
+                        <!-- COMPARISON GRID -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                            <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/40">
+                                <h4 class="text-xs font-bold text-amber-400 uppercase mb-3">⚔️ Confrontations Rôle par Rôle (Stats S16)</h4>
+                                ${roleComparisons}
                             </div>
 
                             <div class="space-y-4">
-                                <div>
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">📊 Comparatif Early & Macro (Splits 2026)</h4>
-                                    <div class="bg-gray-900/60 rounded-lg p-3 border border-gray-700/40 space-y-2 text-xs sm:text-sm">
-                                        <div class="flex justify-between">
-                                            <span class="font-bold text-amber-400">+${team1Obj.macroStats.gd15}g</span>
-                                            <span class="text-gray-400">Gold Diff @ 15 min</span>
-                                            <span class="font-bold text-purple-400">+${team2Obj.macroStats.gd15}g</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="font-bold text-amber-400">${team1Obj.macroStats.ftPct}%</span>
-                                            <span class="text-gray-400">Première Tour (First Tower)</span>
-                                            <span class="font-bold text-purple-400">${team2Obj.macroStats.ftPct}%</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="font-bold text-amber-400">${team1Obj.macroStats.objControl}%</span>
-                                            <span class="text-gray-400">Contrôle Objectifs Neutres</span>
-                                            <span class="font-bold text-purple-400">${team2Obj.macroStats.objControl}%</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="font-bold text-amber-400">${team1Obj.macroStats.lateGame}/100</span>
-                                            <span class="text-gray-400">Indice Teamfight Late Game</span>
-                                            <span class="font-bold text-purple-400">${team2Obj.macroStats.lateGame}/100</span>
-                                        </div>
+                                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/40">
+                                    <h4 class="text-xs font-bold text-amber-400 uppercase mb-3">📊 Comparatif Early & Macro (gol.gg)</h4>
+                                    <div class="space-y-2 text-xs">
+                                        <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Gold Diff @ 15 min</span><span class="font-bold text-emerald-400">${t1.golStats.gd15 > 0 ? '+' + t1.golStats.gd15 : t1.golStats.gd15}g vs ${t2.golStats.gd15 > 0 ? '+' + t2.golStats.gd15 : t2.golStats.gd15}g</span></div>
+                                        <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">First Tower %</span><span class="font-bold text-white">${t1.golStats.ftPct}% vs ${t2.golStats.ftPct}%</span></div>
+                                        <div class="flex justify-between py-1 border-b border-gray-700/30"><span class="text-gray-400">Contrôle Dragons %</span><span class="font-bold text-white">${t1.golStats.dragons} vs ${t2.golStats.dragons}</span></div>
+                                        <div class="flex justify-between py-1"><span class="text-gray-400">Domination Gold (GPM / DPM)</span><span class="font-bold text-purple-400">${t1.golStats.gpm} / ${t1.golStats.dpm} vs ${t2.golStats.gpm} / ${t2.golStats.dpm}</span></div>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">🎯 Probabilités des Scores Exacts (Bo5)</h4>
-                                    <div class="grid grid-cols-6 gap-2">${scoresBreakdownHTML}</div>
+                                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/40">
+                                    <h4 class="text-xs font-bold text-amber-400 uppercase mb-3">🔮 Probabilités des Scores Exacts (Bo5)</h4>
+                                    <div class="grid grid-cols-6 gap-2">
+                                        ${outcomesHtml}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -939,40 +1024,36 @@
                 `;
             }).join('');
 
-            mainContent.innerHTML = `
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-white">🔮 Pronostiques & Analyse Multi-Facteurs</h2>
-                    <p class="text-sm text-gray-400">Calcul déterministe combinant le score Elo (50%), les matchups individuels par ligne (25%) et les statistiques Early/Late du dernier split pondérées par région (25%).</p>
-                </div>
-                <div class="space-y-6">${predictionsHTML}</div>
-            `;
+            mainContent.innerHTML = `<div class="space-y-6">${html}</div>`;
         }
 
         function renderStagesView() {
-            const mainContent = document.getElementById('main-content');
-            const stagesHTML = tournamentStages.map((stage, idx) => `
-                <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-lg border border-amber-500/30">
-                            0${idx + 1}
+            document.getElementById('main-content').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    ${tournamentStages.map((s, i) => `
+                        <div class="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                            <h3 class="text-lg font-bold text-amber-400 mb-2">0${i+1}. ${s.name}</h3>
+                            <p class="text-xs text-gray-400 mb-3">${s.dates}</p>
+                            <p class="text-sm text-gray-300">${s.description}</p>
                         </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-white">${stage.name}</h3>
-                            <p class="text-xs text-amber-400 font-semibold">${stage.dates}</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-300 text-sm leading-relaxed">${stage.description}</p>
+                    `).join('')}
                 </div>
-            `).join('');
-
-            mainContent.innerHTML = `
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-white">Format du Tournoi Worlds 2026</h2>
-                    <p class="text-sm text-gray-400">Le championnat du monde se compose de trois phases intenses.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">${stagesHTML}</div>
             `;
         }
+
+        window.onload = function() {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+
+            document.getElementById('nav-schedule').addEventListener('click', () => switchTab('schedule'));
+            document.getElementById('nav-elo').addEventListener('click', () => switchTab('elo'));
+            document.getElementById('nav-teams').addEventListener('click', () => switchTab('teams'));
+            document.getElementById('nav-predictions').addEventListener('click', () => switchTab('predictions'));
+            document.getElementById('nav-stages').addEventListener('click', () => switchTab('stages'));
+            document.getElementById('home-title').addEventListener('click', () => switchTab('schedule'));
+
+            switchTab('schedule');
+        };
     </script>
 </body>
 </html>
