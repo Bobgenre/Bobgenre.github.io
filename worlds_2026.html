@@ -97,7 +97,30 @@
         ];
 
         const regionCoefficients = {
-            'LCK': 1.12, 'LPL': 1.10, 'LEC': 1.00, 'LCS': 0.98, 'LCP': 0.92, 'CBLOL': 0.88
+            'LCK': 1.15, 'LPL': 1.12, 'LEC': 0.90, 'LCS': 0.78, 'LCP': 0.65, 'CBLOL': 0.55
+        };
+
+        // Bonus de prestige & victoires internationales (MSI, EWC, First Stand, Worlds récents vs LCK/LPL)
+        const internationalPedigree = {
+            'HLE': { bonus: 115, label: 'Champion MSI 2026 • Victoires Bo5 vs LPL/LCK' },
+            'GEN': { bonus: 110, label: 'Finaliste Intl & Domination LCK • Multiples Bo5 vs LPL' },
+            'BLG': { bonus: 105, label: 'Finaliste MSI 2026 • Référence LPL à l\'international' },
+            'T1':  { bonus: 95,  label: 'Tenant du titre Worlds & Aura Bo5 internationale' },
+            'G2':  { bonus: 90,  label: 'Top 4 MSI • Victoires en Bo5 contre LPL (TES/BLG) & LCK' },
+            'AL':  { bonus: 45,  label: 'Champion LPL Split 3 • Solide en confrontations inter-ligues' },
+            'KC':  { bonus: 40,  label: 'Finaliste First Stand • Habitué aux joutes internationales' },
+            'TES': { bonus: 25,  label: 'Régulier en tournois internationaux mais fragile en Bo5' },
+            'DK':  { bonus: 20,  label: 'Seed 4 LCK • Aucune référence internationale en 2026' },
+            'IG':  { bonus: 20,  label: 'Seed 4 LPL • Peu de victoires internationales récentes' },
+            'TL':  { bonus: -25, label: 'Domination LCS mais 0 victoire en Bo5 contre LCK/LPL' },
+            'MKOI':{ bonus: 10,  label: 'Expérience internationale LEC correcte' },
+            'C9':  { bonus: -15, label: 'Aucune victoire récente contre le top asiatique' },
+            'LYON':{ bonus: -20, label: 'Inexpérimenté face aux équipes LCK/LPL' },
+            'TSW': { bonus: -10, label: 'Domination LCP mais peu de victoires vs régions majeures' },
+            'CFO': { bonus: 5,   label: 'Accroche régulièrement les équipes occidentales à l\'inter' },
+            'MVK': { bonus: -15, label: 'Seed 4 LCP • Peu d\'expérience internationale' },
+            'LOS': { bonus: -30, label: 'Domination CBLOL sans victoire face aux régions majeures' },
+            'FUR': { bonus: -30, label: 'Difficultés historiques hors CBLOL' }
         };
 
         const teamsData = [
@@ -601,33 +624,56 @@
 
         function calculateEloRatings() {
             const eloMap = {};
-            const regionBaseElo = { 'LCK': 1615, 'LPL': 1595, 'LEC': 1485, 'LCS': 1465, 'LCP': 1390, 'CBLOL': 1335 };
+            const regionBaseElo = { 'LCK': 1590, 'LPL': 1575, 'LEC': 1515, 'LCS': 1475, 'LCP': 1410, 'CBLOL': 1360 };
 
             teamsData.forEach(t => {
                 const s = t.golStats;
                 const regBase = regionBaseElo[t.region] || 1450;
-                const regCoeff = regionCoefficients[t.region] || 1.0;
+                const regCoeff = regionCoefficients[t.region] || 0.8;
                 const wrParts = t.golStats.winRate.match(/(\d+)%\s*\((\d+)W\s*-\s*(\d+)L\)/);
                 const wr = wrParts ? parseFloat(wrParts[1]) : 50;
                 const wins = wrParts ? parseInt(wrParts[2], 10) : 15;
                 const losses = wrParts ? parseInt(wrParts[3], 10) : 15;
+                const totalGames = wins + losses;
+
+                // Facteur d'échantillon : valorise les saisons longues (50+ games en LCK/LPL/LEC) face aux splits courts (26 games en LCS)
+                const sampleFactor = Math.min(1.15, Math.max(0.68, Math.sqrt(totalGames / 42)));
 
                 let seedBonus = 0;
-                if (t.seed.includes('MSI')) seedBonus = 50;
+                if (t.seed.includes('MSI')) seedBonus = 45;
                 else if (t.seed.includes('Seed 1') || t.seed.includes('Champion')) seedBonus = 40;
                 else if (t.seed.includes('Seed 2')) seedBonus = 20;
                 else if (t.seed.includes('Seed 3') && !t.seed.includes('Play-In')) seedBonus = 10;
 
                 const netWins = wins - losses;
-                const wrBonus = ((wr - 50) * 2.8 + (netWins * 2.4)) * Math.pow(regCoeff, 0.7);
-                const econScore = ((s.gdpm * 0.22) + (s.gd15 / 32) + ((s.gpm - 1960) * 0.18) + ((s.wrAhead - 72) * 1.15) + ((s.ftPct - 52) * 0.75)) * Math.pow(regCoeff, 0.5);
-                const combatScore = (((s.dpm - 2650) / 14) + ((s.kd - 1.7) * 22) + ((s.fbPct - 50) * 0.35));
-                const macroScore = (((parseFloat(s.dragons) - 53) * 0.95) + ((parseFloat(s.nashors) - 55) * 0.85) + ((s.voidgrubs - 1.45) * 12) + ((s.vspm - 10.1) * 14));
-                const avgRoster = t.roster.reduce((sum, p) => sum + p.score, 0) / 5;
-                const rosterBonus = (avgRoster - 85) * 4.8;
+                // Pondération du Winrate domestique par la difficulté de la ligue et la taille de l'échantillon
+                const wrBonus = ((wr - 50) * 2.1 + (netWins * 1.9)) * regCoeff * sampleFactor;
 
-                const rawElo = regBase + seedBonus + wrBonus + econScore + combatScore + macroScore + rosterBonus;
-                eloMap[t.id] = { team: t, elo: Math.round(rawElo), breakdown: { playInDelta: 0 } };
+                // Plafonnement des stats d'écrasement domestique (évite qu'un +1205 GD@15 en LCS/LCP fausse tout)
+                const cappedGd15 = Math.min(900, Math.max(-900, s.gd15));
+                const cappedGdpm = Math.min(180, Math.max(-180, s.gdpm));
+
+                const econScore = ((cappedGdpm * 0.18) + (cappedGd15 / 38) + ((s.gpm - 1960) * 0.14) + ((s.wrAhead - 72) * 0.85) + ((s.ftPct - 52) * 0.65)) * regCoeff;
+                const combatScore = (((s.dpm - 2650) / 16) + ((Math.min(2.8, s.kd) - 1.7) * 18) + ((s.fbPct - 50) * 0.30)) * Math.pow(regCoeff, 0.8);
+                const macroScore = (((parseFloat(s.dragons) - 53) * 0.85) + ((parseFloat(s.nashors) - 55) * 0.75) + ((s.voidgrubs - 1.45) * 10) + ((s.vspm - 10.1) * 12)) * regCoeff;
+
+                const avgRoster = t.roster.reduce((sum, p) => sum + p.score, 0) / 5;
+                const rosterBonus = (avgRoster - 85) * 5.2;
+
+                const intlInfo = internationalPedigree[t.id] || { bonus: 0, label: 'Standard' };
+                const intlBonus = intlInfo.bonus;
+
+                const rawElo = regBase + seedBonus + wrBonus + econScore + combatScore + macroScore + rosterBonus + intlBonus;
+                eloMap[t.id] = { 
+                    team: t, 
+                    elo: Math.round(rawElo), 
+                    breakdown: { 
+                        playInDelta: 0,
+                        intlBonus: intlBonus,
+                        intlLabel: intlInfo.label,
+                        domScore: Math.round(wrBonus + econScore + combatScore + macroScore)
+                    } 
+                };
             });
 
             matchesData.filter(m => m.status === 'finished').forEach(match => {
@@ -737,22 +783,34 @@
             const mainContent = document.getElementById('main-content');
             const ranked = calculateEloRatings();
             const html = ranked.map((item, idx) => `
-                <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 flex justify-between items-center">
+                <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div class="flex items-center gap-4">
-                        <span class="font-black text-gray-400 text-lg">#${idx + 1}</span>
+                        <span class="font-black ${idx < 4 ? 'text-amber-400' : idx < 8 ? 'text-purple-400' : 'text-gray-400'} text-lg w-8">#${idx + 1}</span>
                         <img src="${item.team.logo}" class="w-10 h-10 bg-gray-900 rounded p-1">
                         <div>
-                            <h3 class="font-bold text-white">${item.team.name}</h3>
-                            <p class="text-xs text-gray-400">${item.team.region} - ${item.team.seed}</p>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-white">${item.team.name}</h3>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-gray-900 text-gray-300 border border-gray-700">${item.team.region} • ${item.team.seed}</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">🌍 ${item.breakdown.intlLabel}</p>
                         </div>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right w-full sm:w-auto flex sm:block justify-between items-center border-t sm:border-0 border-gray-700/50 pt-2 sm:pt-0">
                         <span class="text-xl font-black text-amber-400">${item.elo} pts</span>
-                        ${item.breakdown.playInDelta !== 0 ? `<span class="block text-xs font-bold ${item.breakdown.playInDelta > 0 ? 'text-emerald-400' : 'text-red-400'}">Play-In: ${item.breakdown.playInDelta > 0 ? '+' : ''}${item.breakdown.playInDelta} Elo</span>` : ''}
+                        <div class="flex sm:justify-end gap-2 mt-0.5 text-[11px]">
+                            <span class="${item.breakdown.intlBonus >= 0 ? 'text-sky-400' : 'text-orange-400'} font-semibold">Intl: ${item.breakdown.intlBonus >= 0 ? '+' : ''}${item.breakdown.intlBonus}</span>
+                            <span class="text-gray-400">Stats S16: ${item.breakdown.domScore >= 0 ? '+' : ''}${item.breakdown.domScore}</span>
+                            ${item.breakdown.playInDelta !== 0 ? `<span class="font-bold ${item.breakdown.playInDelta > 0 ? 'text-emerald-400' : 'text-red-400'}">Worlds: ${item.breakdown.playInDelta > 0 ? '+' : ''}${item.breakdown.playInDelta}</span>` : ''}
+                        </div>
                     </div>
                 </div>
             `).join('');
-            mainContent.innerHTML = `<div class="space-y-3">${html}</div>`;
+            mainContent.innerHTML = `
+                <div class="bg-gray-900/60 border border-gray-700/50 rounded-xl p-4 mb-4 text-xs text-gray-300">
+                    💡 <strong>Méthodologie Elo Worlds 2026 :</strong> Combine les statistiques officielles <code>gol.gg</code> pondérées par la densité de la ligue, le volume de parties jouées et le <strong>Pedigree International (victoires en Bo5 au MSI / EWC / Worlds face aux équipes LCK & LPL)</strong>.
+                </div>
+                <div class="space-y-3">${html}</div>
+            `;
         }
 
         function renderTeamsView(query = '') {
