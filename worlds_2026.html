@@ -100,23 +100,17 @@
     <div id="app-content" class="max-w-7xl mx-auto" style="display: none;">
         <header class="text-center mb-8">
             <h1 class="text-4xl sm:text-6xl font-black cursor-pointer worlds-gradient tracking-tight" id="home-title">WORLDS 2026</h1>
-            <p class="text-lg text-gray-400 mt-2">League of Legends World Championship - Calendrier, Statistiques gol.gg & Puissance Elo</p>
-            
-            <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-6">
             <p class="text-lg text-gray-400 mt-2">League of Legends World Championship - Arbre Officiel, Statistiques gol.gg & Puissance Elo</p>
             
             <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-6">
-                <button id="nav-schedule" class="tab-btn active px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
+                <button id="nav-schedule" class="tab-btn active px-4 py-2.5 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
                     🌐 Arbre Swiss Stage & Pronos
                 </button>
-                <button id="nav-elo" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
-                    📊 Puissance Elo
+                <button id="nav-teams" class="tab-btn px-4 py-2.5 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
+                    👥 Équipes, Rosters & Elo
                 </button>
-                <button id="nav-teams" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
-                    👥 Équipes & Rosters
-                </button>
-                <button id="nav-stages" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
-                    🏆 Format & Play-In
+                <button id="nav-players" class="tab-btn px-4 py-2.5 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
+                    ⭐ Classement Joueurs par Rôle
                 </button>
             </div>
         </header>
@@ -168,7 +162,7 @@
             // LCK
             { 
                 id: 'GEN', name: 'Gen.G', region: 'LCK', seed: 'Seed 1 (LCK Champion)', 
-                logo: 'https://placehold.co/80x80/eab308/000000?text=GEN',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/3/3b/Gen.Glogo_std.png/revision/latest?cb=20260114103020',
                 golStats: { 
                     winRate: '61% (33W - 21L)', avgDuration: '32:16',
                     gpm: 1995, gdpm: 87, gd15: -6, wrAhead: 78.6,
@@ -187,7 +181,7 @@
             },
             { 
                 id: 'HLE', name: 'Hanwha Life Esports', region: 'LCK', seed: 'Seed 2 (MSI Champion)', 
-                logo: 'https://placehold.co/80x80/f97316/ffffff?text=HLE',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/e9/Hanwha_Life_Esportslogo_std.png/revision/latest?cb=20211024145236',
                 golStats: { 
                     winRate: '52% (30W - 28L)', avgDuration: '31:50',
                     gpm: 1991, gdpm: 21, gd15: 438, wrAhead: 78.1,
@@ -206,7 +200,7 @@
             },
             { 
                 id: 'T1', name: 'T1', region: 'LCK', seed: 'Seed 3', 
-                logo: 'https://placehold.co/80x80/dc2626/ffffff?text=T1',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/f/fc/T1logo_std.png/revision/latest?cb=20230512040324',
                 golStats: { 
                     winRate: '50% (32W - 32L)', avgDuration: '32:26',
                     gpm: 1983, gdpm: 23, gd15: 538, wrAhead: 64.9,
@@ -225,7 +219,7 @@
             },
             { 
                 id: 'DK', name: 'Dplus KIA', region: 'LCK', seed: 'Seed 4', 
-                logo: 'https://placehold.co/80x80/14b8a6/ffffff?text=DK',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/5/55/Dplus_Kialogo_std.png/revision/latest?cb=20230512050615',
                 golStats: { 
                     winRate: '53% (29W - 26L)', avgDuration: '33:54',
                     gpm: 1970, gdpm: 46, gd15: 225, wrAhead: 69.0,
@@ -245,7 +239,7 @@
             // LPL
             { 
                 id: 'BLG', name: 'Bilibili Gaming', region: 'LPL', seed: 'Seed 1 (LPL Champion)', 
-                logo: 'https://placehold.co/80x80/38bdf8/ffffff?text=BLG',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/5/5b/Bilibili_Gaminglogo_std.png/revision/latest?cb=20230509103957',
                 golStats: { 
                     winRate: '69% (35W - 16L)', avgDuration: '32:24',
                     gpm: 2043, gdpm: 181, gd15: 1265, wrAhead: 88.6,
@@ -264,7 +258,7 @@
             },
             { 
                 id: 'AL', name: 'Anyone\'s Legend', region: 'LPL', seed: 'Seed 2', 
-                logo: 'https://placehold.co/80x80/ef4444/ffffff?text=AL',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/44/Anyone%27s_Legendlogo_std.png/revision/latest?cb=20260318181517',
                 golStats: { 
                     winRate: '59% (33W - 23L)', avgDuration: '33:21',
                     gpm: 1969, gdpm: 79, gd15: 453, wrAhead: 86.7,
@@ -283,7 +277,7 @@
             },
             { 
                 id: 'TES', name: 'Top Esports', region: 'LPL', seed: 'Seed 3', 
-                logo: 'https://placehold.co/80x80/f43f5e/ffffff?text=TES',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/3/3a/Top_Esportslogo_std.png/revision/latest?cb=20260109111558',
                 golStats: { 
                     winRate: '56% (25W - 20L)', avgDuration: '32:46',
                     gpm: 1939, gdpm: 10, gd15: -255, wrAhead: 68.0,
@@ -302,7 +296,7 @@
             },
             { 
                 id: 'IG', name: 'Invictus Gaming', region: 'LPL', seed: 'Seed 4', 
-                logo: 'https://placehold.co/80x80/64748b/ffffff?text=IG',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/7/72/Invictus_Gaminglogo_std.png/revision/latest?cb=20210318223733',
                 golStats: { 
                     winRate: '63% (27W - 16L)', avgDuration: '31:38',
                     gpm: 2000, gdpm: 134, gd15: 691, wrAhead: 76.2,
@@ -322,7 +316,7 @@
             // LEC
             { 
                 id: 'G2', name: 'G2 Esports', region: 'LEC', seed: 'Seed 1 (LEC Champion)', 
-                logo: 'https://placehold.co/80x80/ef4444/ffffff?text=G2',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/5/50/G2_Esportslogo_std.png/revision/latest?cb=20230426141941',
                 golStats: { 
                     winRate: '69% (24W - 11L)', avgDuration: '33:33',
                     gpm: 1997, gdpm: 138, gd15: 497, wrAhead: 78.9,
@@ -341,7 +335,7 @@
             },
             { 
                 id: 'MKOI', name: 'Movistar KOI', region: 'LEC', seed: 'Seed 2', 
-                logo: 'https://placehold.co/80x80/0ea5e9/ffffff?text=MKOI',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/b/bf/Movistar_KOIlogo_std.png/revision/latest?cb=20240528162757',
                 golStats: { 
                     winRate: '49% (20W - 21L)', avgDuration: '32:49',
                     gpm: 1961, gdpm: 41, gd15: 641, wrAhead: 64.0,
@@ -360,7 +354,7 @@
             },
             { 
                 id: 'KC', name: 'Karmine Corp', region: 'LEC', seed: 'Seed 3 (Qualifié Swiss Stage)', 
-                logo: 'https://placehold.co/80x80/0284c7/ffffff?text=KC',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/ed/Karmine_Corplogo_std.png/revision/latest?cb=20240319113946',
                 golStats: { 
                     winRate: '66% (33W - 17L)', avgDuration: '33:35',
                     gpm: 2009, gdpm: 106, gd15: 652, wrAhead: 86.7,
@@ -402,7 +396,7 @@
             // LCS / LTA North
             { 
                 id: 'TL', name: 'Team Liquid', region: 'LCS', seed: 'Seed 1 (LCS Champion)', 
-                logo: 'https://placehold.co/80x80/1d4ed8/ffffff?text=TL',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/b/bf/Team_Liquidlogo_std.png/revision/latest?cb=20251229064312',
                 golStats: { 
                     winRate: '81% (21W - 5L)', avgDuration: '31:26',
                     gpm: 2053, gdpm: 255, gd15: 1205, wrAhead: 100.0,
@@ -421,7 +415,7 @@
             },
             { 
                 id: 'LYON', name: 'LYON', region: 'LCS', seed: 'Seed 2', 
-                logo: 'https://placehold.co/80x80/f59e0b/ffffff?text=LYON',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/7/78/LYON_%282024_American_Team%29logo_std.png/revision/latest?cb=20250109184845',
                 golStats: { 
                     winRate: '62% (21W - 13L)', avgDuration: '33:17',
                     gpm: 1952, gdpm: 89, gd15: 753, wrAhead: 82.4,
@@ -440,7 +434,7 @@
             },
             { 
                 id: 'C9', name: 'Cloud9', region: 'LCS', seed: 'Play-In (Éliminé 0-2)', 
-                logo: 'https://placehold.co/80x80/3b82f6/ffffff?text=C9',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/0/09/Cloud9logo_std.png/revision/latest?cb=20230426052612',
                 golStats: { 
                     winRate: '54% (20W - 17L)', avgDuration: '34:41',
                     gpm: 1961, gdpm: 92, gd15: 525, wrAhead: 73.9,
@@ -482,7 +476,7 @@
             // LCP
             { 
                 id: 'TSW', name: 'Team Secret Whales', region: 'LCP', seed: 'Seed 1 (LCP Champion)', 
-                logo: 'https://placehold.co/80x80/a855f7/ffffff?text=TSW',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/a/ab/Team_Secret_Whaleslogo_std.png/revision/latest?cb=20260330071446',
                 golStats: { 
                     winRate: '73% (19W - 7L)', avgDuration: '31:18',
                     gpm: 2068, gdpm: 229, gd15: 1515, wrAhead: 84.2,
@@ -501,7 +495,7 @@
             },
             { 
                 id: 'CFO', name: 'CTBC Flying Oyster', region: 'LCP', seed: 'Seed 2', 
-                logo: 'https://placehold.co/80x80/0284c7/ffffff?text=CFO',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/1/15/CTBC_Flying_Oysterlogo_std.png/revision/latest?cb=20221014190546',
                 golStats: { 
                     winRate: '54% (19W - 16L)', avgDuration: '31:33',
                     gpm: 1970, gdpm: 37, gd15: 187, wrAhead: 70.0,
@@ -520,7 +514,7 @@
             },
             { 
                 id: 'MVK', name: 'MVK Esports', region: 'LCP', seed: 'Play-In (Éliminé 2-1)', 
-                logo: 'https://placehold.co/80x80/06b6d4/ffffff?text=MVK',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/0/0e/MVK_Esportslogo_std.png/revision/latest?cb=20260114112404',
                 golStats: { 
                     winRate: '52% (16W - 15L)', avgDuration: '32:33',
                     gpm: 1915, gdpm: -59, gd15: -351, wrAhead: 73.3,
@@ -563,7 +557,7 @@
             // CBLOL
             { 
                 id: 'LOS', name: 'Los Grandes', region: 'CBLOL', seed: 'Seed 1 (CBLOL Champion)', 
-                logo: 'https://placehold.co/80x80/84cc16/ffffff?text=LOS',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/3/3c/L%C3%98Slogo_std.png/revision/latest?cb=20230608222225',
                 golStats: { 
                     winRate: '68% (23W - 11L)', avgDuration: '31:44',
                     gpm: 1986, gdpm: 130, gd15: 1210, wrAhead: 87.0,
@@ -582,7 +576,7 @@
             },
             { 
                 id: 'FUR', name: 'FURIA', region: 'CBLOL', seed: 'Play-In (Éliminé 1-2)', 
-                logo: 'https://placehold.co/80x80/eab308/ffffff?text=FUR',
+                logo: 'https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/a/a0/FURIAlogo_std.png/revision/latest?cb=20200121190808',
                 golStats: { 
                     winRate: '54% (22W - 19L)', avgDuration: '32:07',
                     gpm: 1925, gdpm: 36, gd15: -267, wrAhead: 85.7,
@@ -781,20 +775,31 @@
             };
         }
 
+        let teamsFilterState = {
+            query: '',
+            region: 'ALL',
+            sortBy: 'elo-desc'
+        };
+
+        let playersFilterState = {
+            role: 'ALL',
+            region: 'ALL',
+            search: ''
+        };
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             const activeBtn = document.getElementById(`nav-${tabId}`);
             if (activeBtn) activeBtn.classList.add('active');
 
             if (tabId === 'schedule') renderScheduleView();
-            else if (tabId === 'elo') renderEloView();
             else if (tabId === 'teams') renderTeamsView();
-            else if (tabId === 'stages') renderStagesView();
+            else if (tabId === 'players') renderPlayersView();
         }
 
         const swissRound1Meta = {
             's1': { t1Code: 'GEN', t1Seed: 'LCK #1', t2Code: 'IG',   t2Seed: 'LPL #4' },
-            's2': { t1Code: 'TLAW',t1Seed: 'LCS #1', t2Code: 'CFO',  t2Seed: 'LCP #2' },
+            's2': { t1Code: 'TL',  t1Seed: 'LCS #1', t2Code: 'CFO',  t2Seed: 'LCP #2' },
             's3': { t1Code: 'AL',  t1Seed: 'LPL #1', t2Code: 'KC',   t2Seed: 'LEC #3' },
             's4': { t1Code: 'G2',  t1Seed: 'LEC #1', t2Code: 'DK',   t2Seed: 'LCK #4' },
             's5': { t1Code: 'HLE', t1Seed: 'LCK #2', t2Code: 'TES',  t2Seed: 'LPL #3' },
@@ -826,13 +831,13 @@
                                 <span class="text-[8px] font-bold text-sky-300/80 block">${meta.t1Seed}</span>
                                 <span class="text-sm font-black text-white group-hover:text-amber-300 transition-colors">${meta.t1Code}</span>
                             </div>
-                            <img src="${t1 ? t1.logo : ''}" class="w-6 h-6 rounded bg-gray-900 p-0.5 shrink-0 border border-white/10">
+                            <img src="${t1 ? t1.logo : ''}" referrerpolicy="no-referrer" class="w-6 h-6 object-contain rounded bg-gray-900 p-0.5 shrink-0 border border-white/10">
                         </div>
                         <div class="text-center px-1">
                             <span class="text-[11px] font-black text-white/90 group-hover:text-amber-400">VS</span>
                         </div>
                         <div class="flex items-center gap-2 w-[42%] justify-end">
-                            <img src="${t2 ? t2.logo : ''}" class="w-6 h-6 rounded bg-gray-900 p-0.5 shrink-0 border border-white/10">
+                            <img src="${t2 ? t2.logo : ''}" referrerpolicy="no-referrer" class="w-6 h-6 object-contain rounded bg-gray-900 p-0.5 shrink-0 border border-white/10">
                             <div class="text-left leading-none flex-1">
                                 <span class="text-[8px] font-bold text-sky-300/80 block">${meta.t2Seed}</span>
                                 <span class="text-sm font-black text-white group-hover:text-amber-300 transition-colors">${meta.t2Code}</span>
@@ -1039,59 +1044,297 @@
             document.getElementById('back-to-bracket').addEventListener('click', () => renderScheduleView());
         }
 
-        function renderEloView() {
+        function renderTeamsView() {
             const mainContent = document.getElementById('main-content');
             const ranked = calculateEloRatings();
-            const html = ranked.map((item, idx) => `
-                <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div class="flex items-center gap-4">
-                        <span class="font-black ${idx < 4 ? 'text-amber-400' : idx < 8 ? 'text-purple-400' : 'text-gray-400'} text-lg w-8">#${idx + 1}</span>
-                        <img src="${item.team.logo}" class="w-10 h-10 bg-gray-900 rounded p-1">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="font-bold text-white">${item.team.name}</h3>
-                                <span class="text-[10px] px-2 py-0.5 rounded bg-gray-900 text-gray-300 border border-gray-700">${item.team.region} • ${item.team.seed}</span>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">🌍 ${item.breakdown.intlLabel}</p>
-                        </div>
-                    </div>
-                    <div class="text-right w-full sm:w-auto flex sm:block justify-between items-center border-t sm:border-0 border-gray-700/50 pt-2 sm:pt-0">
-                        <span class="text-xl font-black text-amber-400">${item.elo} pts</span>
-                        <div class="flex sm:justify-end gap-2 mt-0.5 text-[11px]">
-                            <span class="${item.breakdown.intlBonus >= 0 ? 'text-sky-400' : 'text-orange-400'} font-semibold">Intl: ${item.breakdown.intlBonus >= 0 ? '+' : ''}${item.breakdown.intlBonus}</span>
-                            <span class="text-gray-400">Stats S16: ${item.breakdown.domScore >= 0 ? '+' : ''}${item.breakdown.domScore}</span>
-                            ${item.breakdown.playInDelta !== 0 ? `<span class="font-bold ${item.breakdown.playInDelta > 0 ? 'text-emerald-400' : 'text-red-400'}">Worlds: ${item.breakdown.playInDelta > 0 ? '+' : ''}${item.breakdown.playInDelta}</span>` : ''}
-                        </div>
-                    </div>
-                </div>
+
+            // Associer le rang Elo mondial à chaque équipe
+            const enrichedTeams = ranked.map((item, idx) => ({
+                ...item.team,
+                elo: item.elo,
+                eloRank: idx + 1,
+                breakdown: item.breakdown
+            }));
+
+            // Filtrage par recherche et par région
+            let filtered = enrichedTeams.filter(t => {
+                const matchesSearch = t.name.toLowerCase().includes(teamsFilterState.query.toLowerCase()) ||
+                                      t.region.toLowerCase().includes(teamsFilterState.query.toLowerCase()) ||
+                                      t.roster.some(p => p.name.toLowerCase().includes(teamsFilterState.query.toLowerCase()));
+                const matchesRegion = teamsFilterState.region === 'ALL' || t.region === teamsFilterState.region;
+                return matchesSearch && matchesRegion;
+            });
+
+            // Tri selon l'option choisie
+            const regionOrder = { 'LCK': 1, 'LPL': 2, 'LEC': 3, 'LCS': 4, 'LCP': 5, 'CBLOL': 6 };
+            filtered.sort((a, b) => {
+                if (teamsFilterState.sortBy === 'elo-desc') return b.elo - a.elo;
+                if (teamsFilterState.sortBy === 'elo-asc') return a.elo - b.elo;
+                if (teamsFilterState.sortBy === 'region') {
+                    const regDiff = (regionOrder[a.region] || 99) - (regionOrder[b.region] || 99);
+                    return regDiff !== 0 ? regDiff : b.elo - a.elo;
+                }
+                if (teamsFilterState.sortBy === 'name') return a.name.localeCompare(b.name);
+                return 0;
+            });
+
+            const regions = ['ALL', 'LCK', 'LPL', 'LEC', 'LCS', 'LCP', 'CBLOL'];
+            const regionButtonsHtml = regions.map(reg => `
+                <button class="reg-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${teamsFilterState.region === reg ? 'bg-amber-500 text-gray-950 shadow' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'}" data-region="${reg}">
+                    ${reg === 'ALL' ? '🌍 Toutes les régions' : reg}
+                </button>
             `).join('');
+
+            const cardsHtml = filtered.map(t => {
+                const avgRoster = (t.roster.reduce((acc, p) => acc + p.score, 0) / 5).toFixed(1);
+                const rosterPills = t.roster.map(p => `
+                    <div class="bg-gray-900/90 border border-gray-700/60 rounded px-2 py-1 flex items-center justify-between text-[11px]">
+                        <span class="text-gray-400 font-semibold">${p.role.substring(0,3)}</span>
+                        <span class="text-white font-bold truncate mx-1">${p.name}</span>
+                        <span class="text-amber-400 font-black">${p.score}</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="team-card bg-gray-800/85 border border-gray-700/60 rounded-xl p-4 flex flex-col justify-between cursor-pointer hover:border-amber-500 transition-all shadow-lg group" data-id="${t.id}">
+                        <div>
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="relative">
+                                        <img src="${t.logo}" referrerpolicy="no-referrer" class="w-12 h-12 object-contain bg-gray-900 rounded-lg p-1 border border-gray-700">
+                                        <span class="absolute -top-2 -left-2 px-1.5 py-0.5 rounded bg-gray-950 border border-amber-500/60 text-[10px] font-black ${t.eloRank <= 4 ? 'text-amber-400' : t.eloRank <= 8 ? 'text-sky-400' : 'text-gray-300'}">#${t.eloRank}</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-black text-white text-base group-hover:text-amber-400 transition-colors">${t.name}</h3>
+                                        <span class="text-[11px] px-2 py-0.5 rounded bg-gray-900 text-gray-300 border border-gray-700 inline-block mt-0.5">${t.region} • ${t.seed}</span>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="text-lg font-black text-amber-400 block leading-none">${t.elo} <span class="text-[10px] font-normal text-gray-400">Elo</span></span>
+                                    <span class="text-[10px] text-sky-400 font-semibold block mt-1">Note Roster : ${avgRoster}</span>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-gray-400 mb-3 line-clamp-1">🌍 ${t.breakdown.intlLabel}</p>
+                            <div class="grid grid-cols-5 gap-1.5 mb-3">
+                                ${rosterPills}
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-gray-700/40 text-[11px] text-gray-400">
+                            <span>WR S16 : <strong class="text-emerald-400">${t.golStats.winRate}</strong></span>
+                            <span class="text-amber-400 font-semibold group-hover:translate-x-0.5 transition-transform">Voir stats gol.gg →</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
             mainContent.innerHTML = `
-                <div class="bg-gray-900/60 border border-gray-700/50 rounded-xl p-4 mb-4 text-xs text-gray-300">
-                    💡 <strong>Méthodologie Elo Worlds 2026 :</strong> Combine les statistiques officielles <code>gol.gg</code> pondérées par la densité de la ligue, le volume de parties jouées et le <strong>Pedigree International (victoires en Bo5 au MSI / EWC / Worlds face aux équipes LCK & LPL)</strong>.
+                <div class="bg-gray-900/70 border border-gray-700/60 rounded-xl p-4 mb-6 space-y-4">
+                    <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+                        <div class="relative flex-1">
+                            <input type="text" id="team-search" value="${teamsFilterState.query}" placeholder="Rechercher une équipe, une région ou un joueur..." class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white w-full text-sm focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-gray-400 font-semibold shrink-0">Trier par :</label>
+                            <select id="team-sort" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white font-semibold focus:outline-none focus:border-amber-500">
+                                <option value="elo-desc" ${teamsFilterState.sortBy === 'elo-desc' ? 'selected' : ''}>🔥 Puissance Elo (Décroissant)</option>
+                                <option value="region" ${teamsFilterState.sortBy === 'region' ? 'selected' : ''}>🗺️ Région (LCK, LPL, LEC...) & Elo</option>
+                                <option value="elo-asc" ${teamsFilterState.sortBy === 'elo-asc' ? 'selected' : ''}>📈 Puissance Elo (Croissant)</option>
+                                <option value="name" ${teamsFilterState.sortBy === 'name' ? 'selected' : ''}>🔤 Ordre Alphabétique (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        ${regionButtonsHtml}
+                    </div>
                 </div>
-                <div class="space-y-3">${html}</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${cardsHtml}</div>
             `;
+
+            const searchInput = document.getElementById('team-search');
+            searchInput.addEventListener('input', e => {
+                teamsFilterState.query = e.target.value;
+                renderTeamsView();
+                const newInput = document.getElementById('team-search');
+                newInput.focus();
+                newInput.setSelectionRange(newInput.value.length, newInput.value.length);
+            });
+
+            document.getElementById('team-sort').addEventListener('change', e => {
+                teamsFilterState.sortBy = e.target.value;
+                renderTeamsView();
+            });
+
+            mainContent.querySelectorAll('.reg-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    teamsFilterState.region = btn.dataset.region;
+                    renderTeamsView();
+                });
+            });
+
+            mainContent.querySelectorAll('.team-card').forEach(c => c.addEventListener('click', () => renderTeamDetailView(c.dataset.id)));
         }
 
-        function renderTeamsView(query = '') {
+        function renderPlayersView() {
             const mainContent = document.getElementById('main-content');
-            const filtered = teamsData.filter(t => t.name.toLowerCase().includes(query.toLowerCase()) || t.region.toLowerCase().includes(query.toLowerCase()));
-            const html = filtered.map(t => `
-                <div class="team-card bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:border-amber-500" data-id="${t.id}">
-                    <img src="${t.logo}" class="w-12 h-12 bg-gray-900 rounded p-1">
-                    <div>
-                        <h3 class="font-bold text-white">${t.name}</h3>
-                        <p class="text-xs text-gray-400">${t.region} - <span class="text-amber-400">${t.seed}</span></p>
-                    </div>
-                </div>
+            const rankedTeams = calculateEloRatings();
+            const teamEloLookup = {};
+            rankedTeams.forEach(item => { teamEloLookup[item.team.id] = item.elo; });
+
+            const allPlayers = [];
+            teamsData.forEach(team => {
+                team.roster.forEach(player => {
+                    allPlayers.push({
+                        name: player.name,
+                        role: player.role,
+                        kda: player.kda,
+                        kp: player.kp,
+                        dmg: player.dmg,
+                        score: player.score,
+                        teamId: team.id,
+                        teamName: team.name,
+                        teamLogo: team.logo,
+                        region: team.region,
+                        teamElo: teamEloLookup[team.id] || 1500
+                    });
+                });
+            });
+
+            // Filtrage par rôle, région et recherche
+            const filteredPlayers = allPlayers.filter(p => {
+                const matchRole = playersFilterState.role === 'ALL' || p.role.toLowerCase() === playersFilterState.role.toLowerCase();
+                const matchRegion = playersFilterState.region === 'ALL' || p.region === playersFilterState.region;
+                const matchSearch = p.name.toLowerCase().includes(playersFilterState.search.toLowerCase()) ||
+                                    p.teamName.toLowerCase().includes(playersFilterState.search.toLowerCase());
+                return matchRole && matchRegion && matchSearch;
+            });
+
+            // Tri par note décroissante, puis par Elo d'équipe et KDA en cas d'égalité
+            filteredPlayers.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                if (b.teamElo !== a.teamElo) return b.teamElo - a.teamElo;
+                return parseFloat(b.kda) - parseFloat(a.kda);
+            });
+
+            const roles = [
+                { id: 'ALL', label: '🌟 Tous les Rôles' },
+                { id: 'Top', label: '🛡️ Top Lane' },
+                { id: 'Jungle', label: '🌲 Jungle' },
+                { id: 'Mid', label: '⚡ Mid Lane' },
+                { id: 'Bot', label: '🏹 Bot (ADC)' },
+                { id: 'Support', label: '❤️ Support' }
+            ];
+
+            const roleButtonsHtml = roles.map(r => `
+                <button class="role-filter-btn px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${playersFilterState.role === r.id ? 'bg-amber-500 text-gray-950 shadow-md' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'}" data-role="${r.id}">
+                    ${r.label}
+                </button>
             `).join('');
 
+            const regions = ['ALL', 'LCK', 'LPL', 'LEC', 'LCS', 'LCP', 'CBLOL'];
+            const regionOptionsHtml = regions.map(reg => `
+                <option value="${reg}" ${playersFilterState.region === reg ? 'selected' : ''}>${reg === 'ALL' ? '🌍 Toutes les régions' : reg}</option>
+            `).join('');
+
+            const rowsHtml = filteredPlayers.map((p, idx) => {
+                const rank = idx + 1;
+                let rankBadge = `<span class="text-gray-400 font-bold">#${rank}</span>`;
+                if (rank === 1) rankBadge = `<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-black">🥇 #1</span>`;
+                else if (rank === 2) rankBadge = `<span class="px-2 py-0.5 rounded bg-slate-300/20 text-slate-200 border border-slate-400/40 font-black">🥈 #2</span>`;
+                else if (rank === 3) rankBadge = `<span class="px-2 py-0.5 rounded bg-amber-700/20 text-amber-500 border border-amber-600/40 font-black">🥉 #3</span>`;
+
+                const scoreColor = p.score >= 95 ? 'text-amber-400 bg-amber-500/15 border-amber-500/40' :
+                                   p.score >= 90 ? 'text-emerald-400 bg-emerald-500/15 border-emerald-500/40' :
+                                   p.score >= 85 ? 'text-sky-400 bg-sky-500/15 border-sky-500/40' :
+                                   'text-gray-300 bg-gray-800 border-gray-700';
+
+                return `
+                    <tr class="border-b border-gray-800 hover:bg-gray-800/60 transition-colors cursor-pointer player-team-link" data-team-id="${p.teamId}">
+                        <td class="py-3 px-4 text-xs">${rankBadge}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-3">
+                                <img src="${p.teamLogo}" referrerpolicy="no-referrer" class="w-8 h-8 object-contain rounded bg-gray-900 p-0.5 border border-gray-700">
+                                <div>
+                                    <span class="font-black text-white text-sm block">${p.name}</span>
+                                    <span class="text-[11px] text-gray-400">${p.teamName} • <strong class="text-sky-400">${p.region}</strong></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2.5 py-1 rounded-md bg-gray-900 border border-gray-700 text-xs font-bold text-gray-200">${p.role}</span>
+                        </td>
+                        <td class="py-3 px-4 text-xs font-bold text-emerald-400">${p.kda}</td>
+                        <td class="py-3 px-4 text-xs text-gray-300">${p.kp}</td>
+                        <td class="py-3 px-4 text-xs text-purple-400 font-semibold">${p.dmg}</td>
+                        <td class="py-3 px-4 text-right">
+                            <span class="px-3 py-1 rounded-lg border font-black text-sm ${scoreColor}">${p.score}</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
             mainContent.innerHTML = `
-                <div class="mb-4"><input type="text" id="team-search" value="${query}" placeholder="Rechercher une équipe..." class="bg-gray-800 border border-gray-700 rounded px-4 py-2 text-white w-full max-w-sm"></div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">${html}</div>
+                <div class="bg-gray-900/70 border border-gray-700/60 rounded-xl p-4 mb-6 space-y-4">
+                    <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+                        <div class="flex flex-wrap gap-2">
+                            ${roleButtonsHtml}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="player-region-filter" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white font-semibold focus:outline-none focus:border-amber-500">
+                                ${regionOptionsHtml}
+                            </select>
+                            <input type="text" id="player-search" value="${playersFilterState.search}" placeholder="Chercher un joueur..." class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900/80 border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-950/90 text-[11px] text-gray-400 uppercase border-b border-gray-800">
+                                <tr>
+                                    <th class="py-3 px-4">Rang</th>
+                                    <th class="py-3 px-4">Joueur & Équipe</th>
+                                    <th class="py-3 px-4">Rôle</th>
+                                    <th class="py-3 px-4">KDA S16</th>
+                                    <th class="py-3 px-4">KP %</th>
+                                    <th class="py-3 px-4">Part Dégâts</th>
+                                    <th class="py-3 px-4 text-right">Note Globale</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             `;
-            document.getElementById('team-search').addEventListener('input', e => renderTeamsView(e.target.value));
-            mainContent.querySelectorAll('.team-card').forEach(c => c.addEventListener('click', () => renderTeamDetailView(c.dataset.id)));
+
+            mainContent.querySelectorAll('.role-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    playersFilterState.role = btn.dataset.role;
+                    renderPlayersView();
+                });
+            });
+
+            document.getElementById('player-region-filter').addEventListener('change', e => {
+                playersFilterState.region = e.target.value;
+                renderPlayersView();
+            });
+
+            const pSearch = document.getElementById('player-search');
+            pSearch.addEventListener('input', e => {
+                playersFilterState.search = e.target.value;
+                renderPlayersView();
+                const input = document.getElementById('player-search');
+                input.focus();
+                input.setSelectionRange(input.value.length, input.value.length);
+            });
+
+            mainContent.querySelectorAll('.player-team-link').forEach(row => {
+                row.addEventListener('click', () => {
+                    renderTeamDetailView(row.dataset.teamId);
+                });
+            });
         }
 
         function renderTeamDetailView(id) {
@@ -1175,7 +1418,7 @@
             mainContent.innerHTML = `
                 <button id="back-teams" class="text-amber-400 font-bold mb-4 block hover:underline">← Retour à la liste des équipes</button>
                 <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 mb-6 flex flex-col sm:flex-row items-center gap-6 shadow-xl">
-                    <img src="${t.logo}" class="w-20 h-20 bg-gray-900 rounded p-2">
+                    <img src="${t.logo}" referrerpolicy="no-referrer" class="w-20 h-20 object-contain bg-gray-900 rounded p-2">
                     <div>
                         <h2 class="text-3xl font-black text-white">${t.name}</h2>
                         <p class="text-sm text-gray-400">Région : <span class="text-white">${t.region}</span> | Saison : <span class="text-white">S16</span> | Seed : <span class="text-amber-400">${t.seed}</span></p>
@@ -1302,7 +1545,8 @@
 
                     <!-- MAIN PROBABILITY BAR -->
                     <div class="grid grid-cols-3 items-center text-center">
-                        <div>
+                        <div class="flex flex-col items-center">
+                            <img src="${t1.logo}" referrerpolicy="no-referrer" class="w-16 h-16 object-contain bg-gray-900 rounded-xl p-2 mb-2 border border-gray-700">
                             <h3 class="text-xl sm:text-2xl font-black text-white">${t1.name}</h3>
                             <p class="text-xs text-gray-400">${t1.region} (Elo: ${Math.round(pred.elo1)})</p>
                             <span class="text-3xl sm:text-4xl font-black text-amber-400 mt-1 block">${pct1}%</span>
@@ -1312,7 +1556,8 @@
                             <span class="block text-lg sm:text-xl font-black text-amber-300 mt-2">Prono : ${displayScore}</span>
                             <span class="text-[10px] text-gray-400 block">Favori : ${pct1 >= 50 ? t1.name : t2.name} (${Math.max(pct1, pct2)}%)</span>
                         </div>
-                        <div>
+                        <div class="flex flex-col items-center">
+                            <img src="${t2.logo}" referrerpolicy="no-referrer" class="w-16 h-16 object-contain bg-gray-900 rounded-xl p-2 mb-2 border border-gray-700">
                             <h3 class="text-xl sm:text-2xl font-black text-white">${t2.name}</h3>
                             <p class="text-xs text-gray-400">${t2.region} (Elo: ${Math.round(pred.elo2)})</p>
                             <span class="text-3xl sm:text-4xl font-black text-purple-400 mt-1 block">${pct2}%</span>
@@ -1355,49 +1600,13 @@
             `;
         }
 
-        function renderStagesView() {
-            const playInFinished = matchesData.filter(m => m.status === 'finished');
-            const playInHtml = playInFinished.map(m => `
-                <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                        <span class="text-[11px] uppercase font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">${m.stage} • ${m.format}</span>
-                        <div class="flex items-center gap-3 mt-1.5">
-                            <span class="text-base font-black text-white">${m.team1}</span>
-                            <span class="text-xs font-bold text-gray-400">vs</span>
-                            <span class="text-base font-black text-white">${m.team2}</span>
-                        </div>
-                        ${m.summary ? `<p class="text-xs text-gray-400 mt-1">${m.summary}</p>` : ''}
-                    </div>
-                    <div class="text-left sm:text-right shrink-0">
-                        <span class="text-xs text-gray-400 block">📅 ${m.date}</span>
-                        <span class="text-sm font-bold text-emerald-400">Terminé (${m.score}) - Vainqueur : ${m.winner}</span>
-                    </div>
-                </div>
-            `).join('');
-
-            document.getElementById('main-content').innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    ${tournamentStages.map((s, i) => `
-                        <div class="bg-gray-800 border border-gray-700 rounded-xl p-6">
-                            <h3 class="text-lg font-bold text-amber-400 mb-2">0${i+1}. ${s.name}</h3>
-                            <p class="text-xs text-gray-400 mb-3">${s.dates}</p>
-                            <p class="text-sm text-gray-300">${s.description}</p>
-                        </div>
-                    `).join('')}
-                </div>
-                <h3 class="text-lg font-bold text-white mb-4">📜 Archives du Play-In (Matchs terminés)</h3>
-                <div class="space-y-3">${playInHtml}</div>
-            `;
-        }
-
         window.onload = function() {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
 
             document.getElementById('nav-schedule').addEventListener('click', () => switchTab('schedule'));
-            document.getElementById('nav-elo').addEventListener('click', () => switchTab('elo'));
             document.getElementById('nav-teams').addEventListener('click', () => switchTab('teams'));
-            document.getElementById('nav-stages').addEventListener('click', () => switchTab('stages'));
+            document.getElementById('nav-players').addEventListener('click', () => switchTab('players'));
             document.getElementById('home-title').addEventListener('click', () => switchTab('schedule'));
 
             switchTab('schedule');
