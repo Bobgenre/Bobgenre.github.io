@@ -14,6 +14,47 @@
             background-color: #0b0f19;
             color: #f9fafb;
         }
+        .swiss-bg {
+            background: radial-gradient(circle at 35% 30%, #102a6b 0%, #07112b 55%, #040814 100%);
+            box-shadow: inset 0 0 80px rgba(0, 212, 255, 0.08);
+        }
+        .swiss-box {
+            background: rgba(5, 11, 26, 0.9);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+            transition: all 0.2s ease;
+        }
+        .swiss-match-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            transition: all 0.18s ease;
+        }
+        .swiss-match-row:last-child {
+            border-bottom: none;
+        }
+        .swiss-match-row.clickable:hover {
+            background: linear-gradient(90deg, rgba(14, 165, 233, 0.22), rgba(245, 158, 11, 0.22));
+            transform: scale(1.015);
+            z-index: 10;
+        }
+        .swiss-header {
+            background: rgba(15, 28, 63, 0.95);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+            font-size: 10px;
+            letter-spacing: 0.06em;
+        }
+        .swiss-advance-header {
+            background: linear-gradient(90deg, #00e5ff 0%, #00b4d8 100%);
+            color: #020617;
+            font-weight: 900;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+        }
+        .swiss-elim-header {
+            background: rgba(15, 23, 42, 0.95);
+            color: #94a3b8;
+            font-weight: 800;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+        }
         .animate-fade-in {
             animation: fadeIn 0.4s ease-in-out;
         }
@@ -62,8 +103,11 @@
             <p class="text-lg text-gray-400 mt-2">League of Legends World Championship - Calendrier, Statistiques gol.gg & Puissance Elo</p>
             
             <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-6">
+            <p class="text-lg text-gray-400 mt-2">League of Legends World Championship - Arbre Officiel, Statistiques gol.gg & Puissance Elo</p>
+            
+            <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-6">
                 <button id="nav-schedule" class="tab-btn active px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
-                    📅 Calendrier & Matchs
+                    🌐 Arbre Swiss Stage & Pronos
                 </button>
                 <button id="nav-elo" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
                     📊 Puissance Elo
@@ -71,11 +115,8 @@
                 <button id="nav-teams" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
                     👥 Équipes & Rosters
                 </button>
-                <button id="nav-predictions" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
-                    🔮 Pronostiques gol.gg
-                </button>
                 <button id="nav-stages" class="tab-btn px-3 sm:px-4 py-2 bg-gray-800 text-gray-200 font-semibold rounded-lg hover:bg-gray-700 transition-all text-sm">
-                    🏆 Format
+                    🏆 Format & Play-In
                 </button>
             </div>
         </header>
@@ -318,7 +359,7 @@
                 ]
             },
             { 
-                id: 'KC', name: 'Karmine Corp', region: 'LEC', seed: 'Seed 3 (Play-In Upper Final)', 
+                id: 'KC', name: 'Karmine Corp', region: 'LEC', seed: 'Seed 3 (Qualifié Swiss Stage)', 
                 logo: 'https://placehold.co/80x80/0284c7/ffffff?text=KC',
                 golStats: { 
                     winRate: '66% (33W - 17L)', avgDuration: '33:35',
@@ -330,22 +371,23 @@
                 },
                 worldsStats: {
                     played: true,
-                    seriesRecord: '1W - 0L (Play-In)',
-                    winRate: '60% (3W - 2L)', avgDuration: '35:30',
-                    gpm: 1907, gdpm: -30, gd15: 588, wrAhead: 100.0,
-                    cspm: 36.6, csd15: '+22.6', td15: '0', avgTd: '-0.4', ftPct: 60.0,
-                    dpm: 2556, fbPct: 20.0, kills: 10.4, deaths: 14.4, kd: 1.2, assistsKill: 2.5,
-                    totalKills: 52, totalTowers: 31, totalDragons: 11, totalNashors: 3,
-                    dragons: '38.7%', nashors: '40.0%',
-                    vspm: 10.5, wpm: 4.2, wardsCleared: 45.5, clearedPct: '45.5%',
+                    seriesRecord: '2W - 0L (Qualifié Swiss Stage)',
+                    winRate: '75% (6W - 2L)', avgDuration: '32:32',
+                    gpm: 1985, gdpm: 95, gd15: 890, wrAhead: 100.0,
+                    cspm: 36.8, csd15: '+24.0', td15: '+0.2', avgTd: '+2.3', ftPct: 75.0,
+                    dpm: 2630, fbPct: 37.5, kills: 13.4, deaths: 11.3, kd: 1.6, assistsKill: 2.4,
+                    totalKills: 107, totalTowers: 58, totalDragons: 17, totalNashors: 5,
+                    dragons: '48.6%', nashors: '62.5%',
+                    vspm: 10.5, wpm: 4.1, wardsCleared: 45.5, clearedPct: '45.5%',
                     players: [
-                        { role: 'Top', name: 'Canna', kda: '9/13/20 (2.2)', csm: 8.8, dpm: 540, wpm: 0.51 },
-                        { role: 'Jungle', name: 'Yike', kda: '8/13/30 (2.9)', csm: 7.3, dpm: 418, wpm: 0.39 },
-                        { role: 'Mid', name: 'Kyeahoo', kda: '13/18/19 (1.8)', csm: 9.0, dpm: 644, wpm: 0.46 },
-                        { role: 'Bot', name: 'Caliste', kda: '20/12/23 (3.6)', csm: 10.6, dpm: 752, wpm: 0.54 },
-                        { role: 'Support', name: 'Busio', kda: '2/16/35 (2.3)', csm: 0.9, dpm: 202, wpm: 2.28 }
+                        { role: 'Top', name: 'Canna', kda: '15/21/37 (2.5) [6/8/17 vs MVK]', csm: 8.7, dpm: 585, wpm: 0.47 },
+                        { role: 'Jungle', name: 'Yike', kda: '25/18/43 (3.8) [17/5/13 vs MVK]', csm: 7.5, dpm: 465, wpm: 0.39 },
+                        { role: 'Mid', name: 'Kyeahoo', kda: '26/20/36 (3.1) [13/2/17 vs MVK]', csm: 9.5, dpm: 662, wpm: 0.44 },
+                        { role: 'Bot', name: 'Caliste', kda: '37/14/33 (5.0) [17/2/10 vs MVK]', csm: 10.6, dpm: 715, wpm: 0.55 },
+                        { role: 'Support', name: 'Busio', kda: '4/19/60 (3.4) [2/3/25 vs MVK]', csm: 0.9, dpm: 204, wpm: 2.05 }
                     ],
                     gamesLog: [
+                        { vs: 'MVK Esports (Round 3 - Qualif.)', score: '3 - 0', result: 'WIN', details: 'G1: 28:28 (+11.4k) | G2: 27:26 (+15.6k) | G3: 26:51 (+12.4k) • 55 Kills, 27 Tours, 6 Drakes, 2 Nashors' },
                         { vs: 'Cloud9 (Round 1)', score: '3 - 2', result: 'WIN', details: 'G1: 35:02 (-18.6k) | G2: 35:10 (+2.6k) | G3: 37:49 (-14k) | G4: 38:09 (+13.9k) | G5: 31:21 (+9.9k) • 52 Kills, 31 Tours, 11 Drakes, 3 Nashors' }
                     ]
                 },
@@ -477,7 +519,7 @@
                 ]
             },
             { 
-                id: 'MVK', name: 'MVK Esports', region: 'LCP', seed: 'Play-In (2W - 1L)', 
+                id: 'MVK', name: 'MVK Esports', region: 'LCP', seed: 'Play-In (Éliminé 2-1)', 
                 logo: 'https://placehold.co/80x80/06b6d4/ffffff?text=MVK',
                 golStats: { 
                     winRate: '52% (16W - 15L)', avgDuration: '32:33',
@@ -489,24 +531,24 @@
                 },
                 worldsStats: {
                     played: true,
-                    seriesRecord: '2W - 1L (Play-In)',
-                    winRate: '60% (6W - 4L)', avgDuration: '31:57',
-                    gpm: 1982, gdpm: 88, gd15: 690, wrAhead: 100.0,
-                    cspm: 35.4, csd15: '+11.2', td15: '+0.25', avgTd: '+2.0', ftPct: 60.0,
-                    dpm: 2665, fbPct: 60.0, kills: 15.0, deaths: 11.9, kd: 1.3, assistsKill: 2.1,
-                    totalKills: 150, totalTowers: 65, totalDragons: 22, totalNashors: 8,
-                    dragons: '48.9%', nashors: '53.3%',
-                    vspm: 10.5, wpm: 3.9, wardsCleared: 45.8, clearedPct: '45.8%',
+                    seriesRecord: '2W - 1L (Éliminé Round 3)',
+                    winRate: '60% (6W - 4L)', avgDuration: '30:27',
+                    gpm: 1955, gdpm: 40, gd15: 420, wrAhead: 100.0,
+                    cspm: 35.3, csd15: '+6.0', td15: '+0.15', avgTd: '+0.9', ftPct: 60.0,
+                    dpm: 2495, fbPct: 60.0, kills: 14.6, deaths: 12.9, kd: 1.13, assistsKill: 2.1,
+                    totalKills: 146, totalTowers: 61, totalDragons: 22, totalNashors: 6,
+                    dragons: '46.8%', nashors: '50.0%',
+                    vspm: 10.3, wpm: 3.8, wardsCleared: 45.2, clearedPct: '45.2%',
                     players: [
-                        { role: 'Top', name: 'Kratos', kda: '29/20/49 (3.9) [13/8/25 vs FUR R2]', csm: 8.6, dpm: 534, wpm: 0.58 },
-                        { role: 'Jungle', name: 'Gury / SanSan', kda: '31/24/68 (4.1) [Gury 13/6/34 vs FUR R2]', csm: 7.4, dpm: 467, wpm: 0.51 },
-                        { role: 'Mid', name: 'Chika', kda: '40/28/53 (3.3) [17/8/26 vs FUR R2]', csm: 8.6, dpm: 752, wpm: 0.45 },
-                        { role: 'Bot', name: 'Harky', kda: '40/22/59 (4.5) [22/11/24 vs FUR R2]', csm: 10.5, dpm: 760, wpm: 0.42 },
-                        { role: 'Support', name: 'SiuLoong', kda: '10/25/93 (4.1) [3/11/51 vs FUR R2]', csm: 1.0, dpm: 199, wpm: 2.08 }
+                        { role: 'Top', name: 'Kratos', kda: '28/27/51 (2.9) [3/14/5 vs KC]', csm: 8.8, dpm: 590, wpm: 0.56 },
+                        { role: 'Jungle', name: 'Gury', kda: '32/23/63 (4.1) [4/10/6 vs KC]', csm: 7.4, dpm: 454, wpm: 0.50 },
+                        { role: 'Mid', name: 'Chika', kda: '38/29/51 (3.1) [4/14/2 vs KC]', csm: 8.8, dpm: 710, wpm: 0.41 },
+                        { role: 'Bot', name: 'Harky', kda: '35/25/59 (3.8) [2/9/6 vs KC]', csm: 10.1, dpm: 680, wpm: 0.41 },
+                        { role: 'Support', name: 'SiuLoong', kda: '13/26/90 (4.0) [5/8/6 vs KC]', csm: 1.0, dpm: 215, wpm: 1.97 }
                     ],
                     gamesLog: [
+                        { vs: 'Karmine Corp (Round 3)', score: '0 - 3', result: 'LOSS', details: 'G1: 28:28 (-11.4k) | G2: 27:26 (-15.6k) | G3: 26:51 (-12.4k) • 18 Kills, 5 Tours, 4 Drakes, 0 Nashor' },
                         { vs: 'FURIA (Round 2)', score: '3 - 1', result: 'WIN', details: 'G1: 31:08 (+10k) | G2: 27:24 (+13.5k) | G3: 36:15 (-10.5k) | G4: 28:09 (+11.9k) • 68 Kills, 28 Tours, 11 Drakes, 2 Nashors' },
-                        { vs: 'Karmine Corp (Round 2)', score: '0 - 3', result: 'LOSS', details: 'G1: 30:14 (-12.9k) | G2: 33:03 (-7.1k) | G3: 36:13 (-4.8k) • 22 Kills, 9 Tours, 4 Drakes, 2 Nashors' },
                         { vs: 'FURIA (Round 1)', score: '3 - 0', result: 'WIN', details: 'G1: 35:24 (+4.8k) | G2: 34:56 (+11.6k) | G3: 27:02 (+13.2k) • 60 Kills, 28 Tours, 7 Drakes, 4 Nashors' }
                     ]
                 },
@@ -585,9 +627,18 @@
         const matchesData = [
             { id: 'm1', stage: 'play-in (Round 1)', date: '2026-10-15', time: '11:00 CEST', team1: 'Cloud9', team2: 'Karmine Corp', format: 'Bo5', status: 'finished', score: '2 - 3', winner: 'Karmine Corp', summary: 'G1: 35:02 (C9 +18.6k) • G2: 35:10 (KC +2.6k) • G3: 37:49 (C9 +14k) • G4: 38:09 (KC +13.9k) • G5: 31:21 (KC +9.9k)' },
             { id: 'm2', stage: 'play-in (Round 1)', date: '2026-10-15', time: '16:00 CEST', team1: 'FURIA', team2: 'MVK Esports', format: 'Bo5', status: 'finished', score: '0 - 3', winner: 'MVK Esports', summary: 'G1: 35:24 (MVK +4.8k) • G2: 34:56 (MVK +11.6k) • G3: 27:02 (MVK +13.2k)' },
-            { id: 'm3', stage: 'play-in (Round 2)', date: '2026-10-16', time: '11:00 CEST', team1: 'FURIA', team2: 'Cloud9', format: 'Bo5', status: 'finished', score: '3 - 1', winner: 'FURIA', summary: 'G1: 39:52 (C9 +11.8k) • G2: 35:16 (FUR +4.9k) • G3: 34:09 (FUR +11.1k) • G4: 28:36 (FUR +12.7k)' },
+            { id: 'm3', stage: 'play-in (Round 1)', date: '2026-10-16', time: '11:00 CEST', team1: 'FURIA', team2: 'Cloud9', format: 'Bo5', status: 'finished', score: '3 - 1', winner: 'FURIA', summary: 'G1: 39:52 (C9 +11.8k) • G2: 35:16 (FUR +4.9k) • G3: 34:09 (FUR +11.1k) • G4: 28:36 (FUR +12.7k)' },
             { id: 'm4', stage: 'play-in (Round 2)', date: '2026-10-17', time: '16:00 CEST', team1: 'MVK Esports', team2: 'FURIA', format: 'Bo5', status: 'finished', score: '3 - 1', winner: 'MVK Esports', summary: 'G1: 31:08 (MVK +10k) • G2: 27:24 (MVK +13.5k) • G3: 36:15 (FUR +10.5k) • G4: 28:09 (MVK +11.9k)' },
-            { id: 'm5', stage: 'play-in (Match Suivant)', date: '2026-10-18', time: '16:00 CEST', team1: 'Karmine Corp', team2: 'MVK Esports', format: 'Bo5', status: 'upcoming' }
+            { id: 'm5', stage: 'play-in (Round 3)', date: '2026-10-18', time: '16:00 CEST', team1: 'Karmine Corp', team2: 'MVK Esports', format: 'Bo5', status: 'finished', score: '3 - 0', winner: 'Karmine Corp', summary: 'G1: 28:28 (KC +11.4k) • G2: 27:26 (KC +15.6k) • G3: 26:51 (KC +12.4k)' },
+            // Swiss Stage - Round 1 (Oct. 23 - Bo1)
+            { id: 's1', stage: 'Swiss Stage (Round 1)', date: '2026-10-23', time: '14:00 CEST', team1: 'Gen.G', team2: 'Invictus Gaming', format: 'Bo1', status: 'upcoming' },
+            { id: 's2', stage: 'Swiss Stage (Round 1)', date: '2026-10-23', time: '15:00 CEST', team1: 'Team Liquid', team2: 'CTBC Flying Oyster', format: 'Bo1', status: 'upcoming' },
+            { id: 's3', stage: 'Swiss Stage (Round 1)', date: '2026-10-23', time: '16:00 CEST', team1: 'Anyone\'s Legend', team2: 'Karmine Corp', format: 'Bo1', status: 'upcoming' },
+            { id: 's4', stage: 'Swiss Stage (Round 1)', date: '2026-10-23', time: '17:00 CEST', team1: 'G2 Esports', team2: 'Dplus KIA', format: 'Bo1', status: 'upcoming' },
+            { id: 's5', stage: 'Swiss Stage (Round 1)', date: '2026-10-23', time: '18:00 CEST', team1: 'Hanwha Life Esports', team2: 'Top Esports', format: 'Bo1', status: 'upcoming' },
+            { id: 's6', stage: 'Swiss Stage (Round 1)', date: '2026-10-23', time: '19:00 CEST', team1: 'Los Grandes', team2: 'T1', format: 'Bo1', status: 'upcoming' },
+            { id: 's7', stage: 'Swiss Stage (Round 1)', date: '2026-10-23', time: '20:00 CEST', team1: 'Team Secret Whales', team2: 'LYON', format: 'Bo1', status: 'upcoming' },
+            { id: 's8', stage: 'Swiss Stage (Round 1)', date: '2026-10-23', time: '21:00 CEST', team1: 'Bilibili Gaming', team2: 'Movistar KOI', format: 'Bo1', status: 'upcoming' }
         ];
 
         function calculateEloRatings() {
@@ -696,6 +747,18 @@
             const p1_3 = 3 * Math.pow(q, 3) * p;
             const p0_3 = Math.pow(q, 3);
 
+            // Calcul des probabilités en Bo3 (pour les matchs 2-0, 0-2, 2-1, 1-2, 2-2)
+            const p2_0 = Math.pow(p, 2);
+            const p2_1 = 2 * Math.pow(p, 2) * q;
+            const p1_2 = 2 * Math.pow(q, 2) * p;
+            const p0_2 = Math.pow(q, 2);
+            const bo3WinProb1 = p2_0 + p2_1;
+            const bo3Outcomes = [
+                { score: '2 - 0', prob: p2_0 }, { score: '2 - 1', prob: p2_1 },
+                { score: '1 - 2', prob: p1_2 }, { score: '0 - 2', prob: p0_2 }
+            ];
+            const bestBo3Outcome = [...bo3Outcomes].sort((a, b) => b.prob - a.prob)[0];
+
             const seriesWinProb1 = p3_0 + p3_1 + p3_2;
             const scoreOutcomes = [
                 { score: '3 - 0', prob: p3_0 }, { score: '3 - 1', prob: p3_1 }, { score: '3 - 2', prob: p3_2 },
@@ -705,6 +768,12 @@
 
             return {
                 elo1, elo2, hasWorldsStats,
+                gamePct1: Math.round(p * 100),
+                gamePct2: 100 - Math.round(p * 100),
+                bo3Pct1: Math.round(bo3WinProb1 * 100),
+                bo3Pct2: 100 - Math.round(bo3WinProb1 * 100),
+                predictedBo3Score: bestBo3Outcome.score,
+                bo3Outcomes,
                 seriesPct1: Math.round(seriesWinProb1 * 100),
                 seriesPct2: 100 - Math.round(seriesWinProb1 * 100),
                 predictedScore: bestOutcome.score,
@@ -720,32 +789,254 @@
             if (tabId === 'schedule') renderScheduleView();
             else if (tabId === 'elo') renderEloView();
             else if (tabId === 'teams') renderTeamsView();
-            else if (tabId === 'predictions') renderPredictionsView();
             else if (tabId === 'stages') renderStagesView();
+        }
+
+        const swissRound1Meta = {
+            's1': { t1Code: 'GEN', t1Seed: 'LCK #1', t2Code: 'IG',   t2Seed: 'LPL #4' },
+            's2': { t1Code: 'TLAW',t1Seed: 'LCS #1', t2Code: 'CFO',  t2Seed: 'LCP #2' },
+            's3': { t1Code: 'AL',  t1Seed: 'LPL #1', t2Code: 'KC',   t2Seed: 'LEC #3' },
+            's4': { t1Code: 'G2',  t1Seed: 'LEC #1', t2Code: 'DK',   t2Seed: 'LCK #4' },
+            's5': { t1Code: 'HLE', t1Seed: 'LCK #2', t2Code: 'TES',  t2Seed: 'LPL #3' },
+            's6': { t1Code: 'LOS', t1Seed: 'CBLOL #1', t2Code: 'T1', t2Seed: 'LCK #3' },
+            's7': { t1Code: 'TSW', t1Seed: 'LCP #1', t2Code: 'LYON', t2Seed: 'LCS #2' },
+            's8': { t1Code: 'BLG', t1Seed: 'LPL #2', t2Code: 'MKOI', t2Seed: 'LEC #2' }
+        };
+
+        function buildEmptyVsRows(count) {
+            return Array(count).fill(0).map(() => `
+                <div class="swiss-match-row h-11 flex items-center justify-center text-xs font-black text-white/80 tracking-wider select-none">
+                    VS
+                </div>
+            `).join('');
         }
 
         function renderScheduleView() {
             const mainContent = document.getElementById('main-content');
-            const html = matchesData.map(m => `
-                <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-5 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <span class="text-xs uppercase font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded">${m.stage} • ${m.format}</span>
-                        <div class="flex items-center gap-4 mt-2">
-                            <span class="text-lg font-black text-white">${m.team1}</span>
-                            <span class="text-sm font-bold text-gray-400">vs</span>
-                            <span class="text-lg font-black text-white">${m.team2}</span>
+            const round1Matches = matchesData.filter(m => m.id.startsWith('s'));
+
+            const r1RowsHtml = round1Matches.map(m => {
+                const meta = swissRound1Meta[m.id];
+                const t1 = teamsData.find(t => t.name.toLowerCase() === m.team1.toLowerCase());
+                const t2 = teamsData.find(t => t.name.toLowerCase() === m.team2.toLowerCase());
+                return `
+                    <div class="swiss-match-row clickable cursor-pointer px-2.5 py-2 flex items-center justify-between gap-1 group" data-match-id="${m.id}" title="Cliquer pour voir le pronostic détaillé : ${m.team1} vs ${m.team2}">
+                        <div class="flex items-center gap-2 w-[42%]">
+                            <div class="text-right leading-none flex-1">
+                                <span class="text-[8px] font-bold text-sky-300/80 block">${meta.t1Seed}</span>
+                                <span class="text-sm font-black text-white group-hover:text-amber-300 transition-colors">${meta.t1Code}</span>
+                            </div>
+                            <img src="${t1 ? t1.logo : ''}" class="w-6 h-6 rounded bg-gray-900 p-0.5 shrink-0 border border-white/10">
                         </div>
-                        ${m.summary ? `<p class="text-xs text-gray-400 mt-2">${m.summary}</p>` : ''}
+                        <div class="text-center px-1">
+                            <span class="text-[11px] font-black text-white/90 group-hover:text-amber-400">VS</span>
+                        </div>
+                        <div class="flex items-center gap-2 w-[42%] justify-end">
+                            <img src="${t2 ? t2.logo : ''}" class="w-6 h-6 rounded bg-gray-900 p-0.5 shrink-0 border border-white/10">
+                            <div class="text-left leading-none flex-1">
+                                <span class="text-[8px] font-bold text-sky-300/80 block">${meta.t2Seed}</span>
+                                <span class="text-sm font-black text-white group-hover:text-amber-300 transition-colors">${meta.t2Code}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-left sm:text-right shrink-0">
-                        <span class="text-xs text-gray-400 block">📅 ${m.date} à ${m.time}</span>
-                        <span class="text-sm font-bold ${m.status === 'finished' ? 'text-emerald-400' : 'text-amber-300'}">
-                            ${m.status === 'finished' ? `Terminé (${m.score}) - Vainqueur : ${m.winner}` : 'À venir'}
-                        </span>
+                `;
+            }).join('');
+
+            mainContent.innerHTML = `
+                <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-gray-900/70 border border-sky-500/30 rounded-xl px-4 py-3">
+                    <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-200">
+                        <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold uppercase text-[11px]">Interactif</span>
+                        <span>Clique sur n'importe quel affrontement de l'arbre pour ouvrir la page du <strong>Pronostic détaillé & Comparatif gol.gg</strong>.</span>
+                    </div>
+                    <span class="text-[11px] text-sky-400 font-semibold shrink-0">Play-In terminé : KC & MVK (Qualifiés)</span>
+                </div>
+
+                <!-- SWISS STAGE BRACKET CONTAINER -->
+                <div class="swiss-bg rounded-2xl border border-sky-500/30 p-4 sm:p-6 overflow-x-auto shadow-2xl">
+                    <div class="min-w-[1120px] grid grid-cols-6 gap-4 items-center relative">
+                        
+                        <!-- COLUMN 1: ROUND 1 (0-0) -->
+                        <div class="flex flex-col justify-center">
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg">
+                                <div class="swiss-header px-3 py-1.5 flex justify-between items-center text-white font-bold uppercase">
+                                    <span>OCT. 23 - BO1</span>
+                                    <span class="text-sky-400">(0-0)</span>
+                                </div>
+                                <div>
+                                    ${r1RowsHtml}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLUMN 2: ROUND 2 (1-0 & 0-1) -->
+                        <div class="flex flex-col justify-between h-full py-6 gap-16">
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg">
+                                <div class="swiss-header px-3 py-1.5 flex justify-between items-center text-white font-bold uppercase">
+                                    <span>OCT. 24 - BO1</span>
+                                    <span class="text-sky-300">(1-0)</span>
+                                </div>
+                                ${buildEmptyVsRows(4)}
+                            </div>
+
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg">
+                                <div class="swiss-header px-3 py-1.5 flex justify-between items-center text-white font-bold uppercase">
+                                    <span>OCT. 24 - BO1</span>
+                                    <span class="text-amber-300">(0-1)</span>
+                                </div>
+                                ${buildEmptyVsRows(4)}
+                            </div>
+                        </div>
+
+                        <!-- COLUMN 3: ROUND 3 (2-0 BO3, 1-1 BO1, 0-2 BO3) -->
+                        <div class="flex flex-col justify-between h-full py-2 gap-8">
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg border-sky-400/30">
+                                <div class="swiss-header px-3 py-1.5 flex justify-between items-center text-white font-bold uppercase">
+                                    <span>OCT. 25 - <strong class="text-amber-400">BO3</strong></span>
+                                    <span class="text-emerald-400">(2-0)</span>
+                                </div>
+                                ${buildEmptyVsRows(2)}
+                            </div>
+
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg">
+                                <div class="swiss-header px-3 py-1.5 flex justify-between items-center text-white font-bold uppercase">
+                                    <span>OCT. 25 & 26 - <strong class="text-sky-300">BO1</strong></span>
+                                    <span class="text-gray-200">(1-1)</span>
+                                </div>
+                                ${buildEmptyVsRows(4)}
+                            </div>
+
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg border-red-500/30">
+                                <div class="swiss-header px-3 py-1.5 flex justify-between items-center text-white font-bold uppercase">
+                                    <span>OCT. 26 - <strong class="text-amber-400">BO3</strong></span>
+                                    <span class="text-red-400">(0-2)</span>
+                                </div>
+                                ${buildEmptyVsRows(2)}
+                            </div>
+                        </div>
+
+                        <!-- COLUMN 4: ADVANCES (1ST/2ND), ROUND 4 (2-1 & 1-2), ELIMINATED -->
+                        <div class="flex flex-col justify-between h-full py-2 gap-6">
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg border-cyan-400/50">
+                                <div class="swiss-advance-header px-3 py-1.5 flex justify-between items-center uppercase">
+                                    <span>ADVANCES</span>
+                                    <span>1ST/2ND</span>
+                                </div>
+                                <div class="h-10 flex items-center justify-around text-sm font-black text-cyan-300/80">
+                                    <span>—</span><span class="text-gray-600">/</span><span>—</span>
+                                </div>
+                            </div>
+
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg">
+                                <div class="swiss-header px-3 py-1.5 flex justify-between items-center text-white font-bold uppercase">
+                                    <span>OCT. 28-30 - BO3</span>
+                                    <span class="text-emerald-300">(2-1)</span>
+                                </div>
+                                ${buildEmptyVsRows(3)}
+                            </div>
+
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg">
+                                <div class="swiss-header px-3 py-1.5 flex justify-between items-center text-white font-bold uppercase">
+                                    <span>OCT. 28-30 - BO3</span>
+                                    <span class="text-amber-300">(1-2)</span>
+                                </div>
+                                ${buildEmptyVsRows(3)}
+                            </div>
+
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg border-gray-700">
+                                <div class="swiss-elim-header px-3 py-1.5 flex justify-between items-center uppercase">
+                                    <span>ELIMINATED</span>
+                                </div>
+                                <div class="h-10 flex items-center justify-around text-sm font-black text-gray-500">
+                                    <span>—</span><span class="text-gray-700">/</span><span>—</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLUMN 5: ADVANCES (3RD/4TH/5TH), ROUND 5 (2-2), ELIMINATED -->
+                        <div class="flex flex-col justify-between h-full py-10 gap-10">
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg border-cyan-400/50">
+                                <div class="swiss-advance-header px-3 py-1.5 flex justify-between items-center uppercase">
+                                    <span>ADVANCES</span>
+                                    <span>3RD/4TH/5TH</span>
+                                </div>
+                                <div class="h-10 flex items-center justify-around text-sm font-black text-cyan-300/80">
+                                    <span>—</span><span class="text-gray-600">/</span><span>—</span><span class="text-gray-600">/</span><span>—</span>
+                                </div>
+                            </div>
+
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg">
+                                <div class="swiss-header px-3 py-1.5 flex justify-between items-center text-white font-bold uppercase">
+                                    <span>OCT. 31 - BO3</span>
+                                    <span class="text-amber-400">(2-2)</span>
+                                </div>
+                                ${buildEmptyVsRows(3)}
+                            </div>
+
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg border-gray-700">
+                                <div class="swiss-elim-header px-3 py-1.5 flex justify-between items-center uppercase">
+                                    <span>ELIMINATED</span>
+                                </div>
+                                <div class="h-10 flex items-center justify-around text-sm font-black text-gray-500">
+                                    <span>—</span><span class="text-gray-700">/</span><span>—</span><span class="text-gray-700">/</span><span>—</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLUMN 6: FINAL ADVANCES (6TH/7TH/8TH) & ELIMINATED -->
+                        <div class="flex flex-col justify-center gap-12">
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg border-cyan-400/50">
+                                <div class="swiss-advance-header px-3 py-1.5 flex justify-between items-center uppercase">
+                                    <span>ADVANCES</span>
+                                    <span>6TH/7TH/8TH</span>
+                                </div>
+                                <div class="h-10 flex items-center justify-around text-sm font-black text-cyan-300/80">
+                                    <span>—</span><span class="text-gray-600">/</span><span>—</span><span class="text-gray-600">/</span><span>—</span>
+                                </div>
+                            </div>
+
+                            <div class="swiss-box rounded-lg overflow-hidden shadow-lg border-gray-700">
+                                <div class="swiss-elim-header px-3 py-1.5 flex justify-between items-center uppercase">
+                                    <span>ELIMINATED</span>
+                                </div>
+                                <div class="h-10 flex items-center justify-around text-sm font-black text-gray-500">
+                                    <span>—</span><span class="text-gray-700">/</span><span>—</span><span class="text-gray-700">/</span><span>—</span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            `).join('');
-            mainContent.innerHTML = `<div class="space-y-4">${html}</div>`;
+            `;
+
+            mainContent.querySelectorAll('.swiss-match-row.clickable').forEach(row => {
+                row.addEventListener('click', () => {
+                    renderMatchPredictionDetailView(row.dataset.matchId);
+                });
+            });
+        }
+
+        function renderMatchPredictionDetailView(matchId) {
+            const mainContent = document.getElementById('main-content');
+            const m = matchesData.find(x => x.id === matchId);
+            if (!m) return;
+            const t1 = teamsData.find(t => t.name.toLowerCase() === m.team1.toLowerCase());
+            const t2 = teamsData.find(t => t.name.toLowerCase() === m.team2.toLowerCase());
+            if (!t1 || !t2) return;
+
+            const ranked = calculateEloRatings();
+            const cardHtml = buildMatchPredictionCardHtml(t1, t2, m.stage, `${m.date} à ${m.time}`, m.format, ranked);
+
+            mainContent.innerHTML = `
+                <div class="mb-4 flex justify-between items-center">
+                    <button id="back-to-bracket" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-amber-400 font-bold rounded-lg border border-gray-700 transition-all text-sm flex items-center gap-2">
+                        ← Retour à l'arbre du Swiss Stage
+                    </button>
+                    <span class="text-xs text-gray-400 font-semibold">Pronostic déterministe basé sur gol.gg & Elo Worlds 2026</span>
+                </div>
+                ${cardHtml}
+            `;
+
+            document.getElementById('back-to-bracket').addEventListener('click', () => renderScheduleView());
         }
 
         function renderEloView() {
@@ -955,6 +1246,10 @@
 
         function buildMatchPredictionCardHtml(t1, t2, stageLabel, dateLabel, formatLabel, ranked) {
             const pred = computeAdvancedMatchPrediction(t1, t2, ranked);
+            const isBo1 = formatLabel === 'Bo1';
+            const isBo3 = formatLabel === 'Bo3';
+            const pct1 = isBo1 ? pred.gamePct1 : isBo3 ? pred.bo3Pct1 : pred.seriesPct1;
+            const pct2 = isBo1 ? pred.gamePct2 : isBo3 ? pred.bo3Pct2 : pred.seriesPct2;
 
             const roleComparisons = t1.roster.map((p1, idx) => {
                 const p2 = t2.roster[idx];
@@ -973,16 +1268,30 @@
                 `;
             }).join('');
 
-            const outcomesHtml = pred.scoreOutcomes.map(o => `
+            const outcomesHtml = isBo1 ? `
+                <div class="col-span-3 bg-gray-900/60 p-3 rounded text-center border ${pct1 >= 50 ? 'border-amber-500 bg-amber-500/10' : 'border-gray-700/40'}">
+                    <span class="text-xs text-gray-400 block">Victoire ${t1.name} (1 - 0)</span>
+                    <span class="text-base font-black text-amber-400">${pct1}%</span>
+                </div>
+                <div class="col-span-3 bg-gray-900/60 p-3 rounded text-center border ${pct2 > 50 ? 'border-purple-500 bg-purple-500/10' : 'border-gray-700/40'}">
+                    <span class="text-xs text-gray-400 block">Victoire ${t2.name} (0 - 1)</span>
+                    <span class="text-base font-black text-purple-400">${pct2}%</span>
+                </div>
+            ` : isBo3 ? pred.bo3Outcomes.map(o => `
+                <div class="bg-gray-900/60 p-2 rounded text-center border border-gray-700/40 ${o.score === pred.predictedBo3Score ? 'border-amber-500 bg-amber-500/10' : ''}">
+                    <span class="text-xs text-gray-400 block">${o.score}</span>
+                    <span class="text-sm font-black text-white">${Math.round(o.prob * 100)}%</span>
+                </div>
+            `).join('') : pred.scoreOutcomes.map(o => `
                 <div class="bg-gray-900/60 p-2 rounded text-center border border-gray-700/40 ${o.score === pred.predictedScore ? 'border-amber-500 bg-amber-500/10' : ''}">
                     <span class="text-xs text-gray-400 block">${o.score}</span>
                     <span class="text-sm font-black text-white">${Math.round(o.prob * 100)}%</span>
                 </div>
             `).join('');
 
-            const displayScore = formatLabel === 'Bo1'
-                ? (pred.seriesPct1 >= 50 ? '1 - 0' : '0 - 1')
-                : pred.predictedScore;
+            const displayScore = isBo1
+                ? (pct1 >= 50 ? '1 - 0' : '0 - 1')
+                : isBo3 ? pred.predictedBo3Score : pred.predictedScore;
 
             return `
                 <div class="bg-gray-800/85 border border-gray-700/50 rounded-2xl p-6 shadow-xl space-y-6">
@@ -996,24 +1305,24 @@
                         <div>
                             <h3 class="text-xl sm:text-2xl font-black text-white">${t1.name}</h3>
                             <p class="text-xs text-gray-400">${t1.region} (Elo: ${Math.round(pred.elo1)})</p>
-                            <span class="text-3xl sm:text-4xl font-black text-amber-400 mt-1 block">${pred.seriesPct1}%</span>
+                            <span class="text-3xl sm:text-4xl font-black text-amber-400 mt-1 block">${pct1}%</span>
                         </div>
                         <div>
                             <span class="px-3 py-1 bg-gray-900 rounded-full text-xs font-bold border border-gray-700">VS</span>
                             <span class="block text-lg sm:text-xl font-black text-amber-300 mt-2">Prono : ${displayScore}</span>
-                            <span class="text-[10px] text-gray-400 block">Favori : ${pred.seriesPct1 >= 50 ? t1.name : t2.name} (${Math.max(pred.seriesPct1, pred.seriesPct2)}%)</span>
+                            <span class="text-[10px] text-gray-400 block">Favori : ${pct1 >= 50 ? t1.name : t2.name} (${Math.max(pct1, pct2)}%)</span>
                         </div>
                         <div>
                             <h3 class="text-xl sm:text-2xl font-black text-white">${t2.name}</h3>
                             <p class="text-xs text-gray-400">${t2.region} (Elo: ${Math.round(pred.elo2)})</p>
-                            <span class="text-3xl sm:text-4xl font-black text-purple-400 mt-1 block">${pred.seriesPct2}%</span>
+                            <span class="text-3xl sm:text-4xl font-black text-purple-400 mt-1 block">${pct2}%</span>
                         </div>
                     </div>
 
                     <!-- PROGRESS BAR -->
                     <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden flex border border-gray-700">
-                        <div class="bg-amber-500 h-full transition-all duration-500" style="width: ${pred.seriesPct1}%"></div>
-                        <div class="bg-purple-600 h-full transition-all duration-500" style="width: ${pred.seriesPct2}%"></div>
+                        <div class="bg-amber-500 h-full transition-all duration-500" style="width: ${pct1}%"></div>
+                        <div class="bg-purple-600 h-full transition-all duration-500" style="width: ${pct2}%"></div>
                     </div>
 
                     <!-- COMPARISON GRID -->
@@ -1035,8 +1344,8 @@
                             </div>
 
                             <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/40">
-                                <h4 class="text-xs font-bold text-amber-400 uppercase mb-3">🔮 Distribution des Scores en Série (Bo5)</h4>
-                                <div class="grid grid-cols-6 gap-2">
+                                <h4 class="text-xs font-bold text-amber-400 uppercase mb-3">🔮 Distribution des Probabilités (${formatLabel})</h4>
+                                <div class="grid ${isBo3 ? 'grid-cols-4' : 'grid-cols-6'} gap-2">
                                     ${outcomesHtml}
                                 </div>
                             </div>
@@ -1046,24 +1355,28 @@
             `;
         }
 
-        function renderPredictionsView() {
-            const mainContent = document.getElementById('main-content');
-            const ranked = calculateEloRatings();
-            const upcoming = matchesData.filter(m => m.status !== 'finished');
-
-            const html = upcoming.map(m => {
-                const t1 = teamsData.find(t => t.name.toLowerCase() === m.team1.toLowerCase());
-                const t2 = teamsData.find(t => t.name.toLowerCase() === m.team2.toLowerCase());
-                if (!t1 || !t2) return '';
-                return buildMatchPredictionCardHtml(t1, t2, m.stage, `${m.date} à ${m.time}`, m.format, ranked);
-            }).join('');
-
-            mainContent.innerHTML = `<div class="space-y-6">${html}</div>`;
-        }
-
         function renderStagesView() {
+            const playInFinished = matchesData.filter(m => m.status === 'finished');
+            const playInHtml = playInFinished.map(m => `
+                <div class="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <span class="text-[11px] uppercase font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">${m.stage} • ${m.format}</span>
+                        <div class="flex items-center gap-3 mt-1.5">
+                            <span class="text-base font-black text-white">${m.team1}</span>
+                            <span class="text-xs font-bold text-gray-400">vs</span>
+                            <span class="text-base font-black text-white">${m.team2}</span>
+                        </div>
+                        ${m.summary ? `<p class="text-xs text-gray-400 mt-1">${m.summary}</p>` : ''}
+                    </div>
+                    <div class="text-left sm:text-right shrink-0">
+                        <span class="text-xs text-gray-400 block">📅 ${m.date}</span>
+                        <span class="text-sm font-bold text-emerald-400">Terminé (${m.score}) - Vainqueur : ${m.winner}</span>
+                    </div>
+                </div>
+            `).join('');
+
             document.getElementById('main-content').innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     ${tournamentStages.map((s, i) => `
                         <div class="bg-gray-800 border border-gray-700 rounded-xl p-6">
                             <h3 class="text-lg font-bold text-amber-400 mb-2">0${i+1}. ${s.name}</h3>
@@ -1072,6 +1385,8 @@
                         </div>
                     `).join('')}
                 </div>
+                <h3 class="text-lg font-bold text-white mb-4">📜 Archives du Play-In (Matchs terminés)</h3>
+                <div class="space-y-3">${playInHtml}</div>
             `;
         }
 
@@ -1082,7 +1397,6 @@
             document.getElementById('nav-schedule').addEventListener('click', () => switchTab('schedule'));
             document.getElementById('nav-elo').addEventListener('click', () => switchTab('elo'));
             document.getElementById('nav-teams').addEventListener('click', () => switchTab('teams'));
-            document.getElementById('nav-predictions').addEventListener('click', () => switchTab('predictions'));
             document.getElementById('nav-stages').addEventListener('click', () => switchTab('stages'));
             document.getElementById('home-title').addEventListener('click', () => switchTab('schedule'));
 
