@@ -1166,23 +1166,24 @@
             if (isFinished) {
                 const t1Won = m.winner && t1 && m.winner.toLowerCase() === t1.name.toLowerCase();
                 const t2Won = m.winner && t2 && m.winner.toLowerCase() === t2.name.toLowerCase();
+                const compactScore = m.score.replace(/\s+/g, '');
                 return `
-                    <div class="swiss-match-row px-2.5 py-2 flex items-center justify-between gap-1 bg-gray-950/40 select-none" title="Match terminé : ${m.team1} ${m.score} ${m.team2} (${m.summary || ''})">
-                        <div class="flex items-center gap-2 w-[42%] ${t1Won ? '' : 'opacity-40 grayscale'}">
-                            <div class="text-right leading-none flex-1">
-                                <span class="text-[8px] font-bold ${t1Won ? 'text-emerald-400' : 'text-gray-500'} block">${meta.t1Seed}</span>
-                                <span class="text-sm font-black ${t1Won ? 'text-white' : 'text-gray-400'}">${meta.t1Code}</span>
+                    <div class="swiss-match-row px-2 py-2 flex items-center justify-between gap-1 bg-gray-950/40 select-none" title="Match terminé : ${m.team1} ${m.score} ${m.team2} (${m.summary || ''})">
+                        <div class="flex items-center gap-1.5 flex-1 min-w-0 ${t1Won ? '' : 'opacity-40 grayscale'}">
+                            <div class="text-right leading-none flex-1 min-w-0">
+                                <span class="text-[8px] font-bold ${t1Won ? 'text-emerald-400' : 'text-gray-500'} block whitespace-nowrap">${meta.t1Seed}</span>
+                                <span class="text-xs font-black ${t1Won ? 'text-white' : 'text-gray-400'} block truncate">${meta.t1Code}</span>
                             </div>
                             <img src="${t1 ? t1.logo : ''}" referrerpolicy="no-referrer" class="w-6 h-6 object-contain rounded bg-gray-900 p-0.5 shrink-0 border ${t1Won ? 'border-emerald-500/60' : 'border-white/5'}">
                         </div>
-                        <div class="text-center px-1">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-gray-900 text-gray-300 border border-gray-700/60">${m.score}</span>
+                        <div class="text-center shrink-0 mx-0.5">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-gray-900 text-gray-200 border border-gray-700/60 whitespace-nowrap inline-block">${compactScore}</span>
                         </div>
-                        <div class="flex items-center gap-2 w-[42%] justify-end ${t2Won ? '' : 'opacity-40 grayscale'}">
+                        <div class="flex items-center gap-1.5 flex-1 min-w-0 justify-end ${t2Won ? '' : 'opacity-40 grayscale'}">
                             <img src="${t2 ? t2.logo : ''}" referrerpolicy="no-referrer" class="w-6 h-6 object-contain rounded bg-gray-900 p-0.5 shrink-0 border ${t2Won ? 'border-emerald-500/60' : 'border-white/5'}">
-                            <div class="text-left leading-none flex-1">
-                                <span class="text-[8px] font-bold ${t2Won ? 'text-emerald-400' : 'text-gray-500'} block">${meta.t2Seed}</span>
-                                <span class="text-sm font-black ${t2Won ? 'text-white' : 'text-gray-400'}">${meta.t2Code}</span>
+                            <div class="text-left leading-none flex-1 min-w-0">
+                                <span class="text-[8px] font-bold ${t2Won ? 'text-emerald-400' : 'text-gray-500'} block whitespace-nowrap">${meta.t2Seed}</span>
+                                <span class="text-xs font-black ${t2Won ? 'text-white' : 'text-gray-400'} block truncate">${meta.t2Code}</span>
                             </div>
                         </div>
                     </div>
@@ -1190,22 +1191,22 @@
             }
 
             return `
-                <div class="swiss-match-row clickable cursor-pointer px-2.5 py-2 flex items-center justify-between gap-1 group" data-match-id="${m.id}" title="Cliquer pour voir le pronostic détaillé : ${m.team1} vs ${m.team2}">
-                    <div class="flex items-center gap-2 w-[42%]">
-                        <div class="text-right leading-none flex-1">
-                            <span class="text-[8px] font-bold text-sky-300/80 block">${meta.t1Seed}</span>
-                            <span class="text-sm font-black text-white group-hover:text-amber-300 transition-colors">${meta.t1Code}</span>
+                <div class="swiss-match-row clickable cursor-pointer px-2 py-2 flex items-center justify-between gap-1 group" data-match-id="${m.id}" title="Cliquer pour voir le pronostic détaillé : ${m.team1} vs ${m.team2}">
+                    <div class="flex items-center gap-1.5 flex-1 min-w-0">
+                        <div class="text-right leading-none flex-1 min-w-0">
+                            <span class="text-[8px] font-bold text-sky-300/80 block whitespace-nowrap">${meta.t1Seed}</span>
+                            <span class="text-xs font-black text-white group-hover:text-amber-300 transition-colors block truncate">${meta.t1Code}</span>
                         </div>
                         <img src="${t1 ? t1.logo : ''}" referrerpolicy="no-referrer" class="w-6 h-6 object-contain rounded bg-gray-900 p-0.5 shrink-0 border border-white/10">
                     </div>
-                    <div class="text-center px-1">
-                        <span class="text-[11px] font-black text-white/90 group-hover:text-amber-400">VS</span>
+                    <div class="text-center shrink-0 mx-1">
+                        <span class="text-[10px] font-black text-white/90 group-hover:text-amber-400 whitespace-nowrap">VS</span>
                     </div>
-                    <div class="flex items-center gap-2 w-[42%] justify-end">
+                    <div class="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
                         <img src="${t2 ? t2.logo : ''}" referrerpolicy="no-referrer" class="w-6 h-6 object-contain rounded bg-gray-900 p-0.5 shrink-0 border border-white/10">
-                        <div class="text-left leading-none flex-1">
-                            <span class="text-[8px] font-bold text-sky-300/80 block">${meta.t2Seed}</span>
-                            <span class="text-sm font-black text-white group-hover:text-amber-300 transition-colors">${meta.t2Code}</span>
+                        <div class="text-left leading-none flex-1 min-w-0">
+                            <span class="text-[8px] font-bold text-sky-300/80 block whitespace-nowrap">${meta.t2Seed}</span>
+                            <span class="text-xs font-black text-white group-hover:text-amber-300 transition-colors block truncate">${meta.t2Code}</span>
                         </div>
                     </div>
                 </div>
